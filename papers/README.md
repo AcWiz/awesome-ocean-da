@@ -1,37 +1,39 @@
-# 论文索引
+# 海洋数据同化、预报论文索引
 
-本文档按年份索引所有收录的论文。
+按年份索引所有收录的 AI + 海洋数据同化、预报论文。
 
-## 2025 年
+## 2025 年 (5 篇)
 
-| 论文 | 作者 | 关键词 | 状态 |
-|------|------|--------|------|
-| [Tensor-Var](./2025/Tensor-Var/) | Yiming Yang et al. | 4D-Var, Kernel CME | ✅ 已收录 |
-| [Stratified PINN DA](./2025/Stratified_PINN_DA/) | Vadim Limousin et al. | PINN, 深海 | ✅ 已收录 |
-| [AI GCS DA](./2025/AI_GCS_DA/) | G. S. Seabra et al. | 地质碳存储 | ✅ 已收录 |
+| 论文 | 关键词 | 状态 |
+|------|--------|------|
+| [Tensor-Var](./2025/Tensor-Var/) | 4D-Var, Kernel CME | ✅ |
+| [Neural Ocean Forecasting](./2025/Neural_Ocean_Forecasting/) | 神经海洋预报 | ✅ |
+| [Subregional Ocean Forecasting](./2025/Subregional_Ocean_Forecasting/) | 区域海洋预报 | ✅ |
+| [Stratified PINN DA](./2025/Stratified_PINN_DA/) | PINN, 深海 | ✅ |
+| [AI GCS DA](./2025/AI_GCS_DA/) | 地质碳存储 | ⚠️ |
 
-## 2024 年
+## 2024 年 (5 篇)
 
-| 论文 | 作者 | 关键词 | 状态 |
-|------|------|--------|------|
-| [TorchDA](./2024/TorchDA/) | Sibo Cheng et al. | Python, PyTorch | ✅ 已收录 |
-| [FuXi-DA](./2024/FuXi-DA/) | Xiaoze Xu et al. | 卫星观测 | ✅ 已收录 |
-| [CG-EnKF](./2024/CG-EnKF/) | Zachariah Malik et al. | EnKF, 非线性 | ✅ 已收录 |
-| [Randomized PINNs](./2024/Randomized_PINNs_Bayes_DA/) | Yifei Zong et al. | PINN, 贝叶斯 | ✅ 已收录 |
-| [Ensemble DA Diagnosis](./2024/Ensemble_DA_Diagnosis/) | Shunji Kotsuki et al. | AI气象诊断 | ✅ 已收录 |
+| 论文 | 关键词 | 状态 |
+|------|--------|------|
+| [CGKN](./2024/CGKN/) | Koopman, 数据同化 | ✅ |
+| [Semilinear Neural Operators](./2024/Semilinear_Neural_Operators/) | 神经算子 | ✅ |
+| [Tropical Pacific Ocean DA](./2024/Tropical_Pacific_Ocean_DA/) | 太平洋, 上层海洋 | ✅ |
+| [FuXi-DA](./2024/FuXi-DA/) | 卫星观测 | ✅ |
 
-## 2022 年
+## 2023 年 (2 篇)
 
-| 论文 | 作者 | 关键词 | 状态 |
-|------|------|--------|------|
-| [Learning 4DVAR](./2022/Learning_4DVAR/) | Arthur Filoche et al. | 4D-Var, 深度学习 | ✅ 已收录 |
-| [DL Enhanced EnKF](./2022/DL_Enhanced_EnKF/) | Ashesh Chattopadhyay et al. | EnKF, 高维系统 | ✅ 已收录 |
+| 论文 | 关键词 | 状态 |
+|------|--------|------|
+| [Graph SST Forecast](./2023/Graph_SST_Forecast/) | 图神经网络, SST | ✅ |
+| [Echo-State DA](./2023/Echo_State_DA/) | 回声状态网络 | ✅ |
 
-## 2021 年
+## 2022 年 (2 篇)
 
-| 论文 | 作者 | 关键词 | 状态 |
-|------|------|--------|------|
-| [Deep Data Assimilation](./2021/Deep_Data_Assimilation/) | Rossella Arcucci et al. | 综述, 框架 | ✅ 已收录 |
+| 论文 | 关键词 | 状态 |
+|------|--------|------|
+| [4D-SRDA](./2022/4D-SRDA/) | 时空超分辨率 | ✅ |
+| [Ocean Observations Expansion](./2022/Ocean_Observations_Expansion/) | 海洋观测扩展 | ✅ |
 
 ---
 
