@@ -13,6 +13,7 @@
 | [AI GCS DA](./2025/AI_GCS_DA/) | 2501.XXXXX | 地质碳存储 |
 | [Generalizable Neural-Network Parameterization](./2025/Generalizable_Neural_Network_Parameterization/) | 2505.08900 | 物理约束神经网络参数化 |
 | [Deep Learning Subregional Ocean Forecasting](./2025/deep-learning-subregional-ocean-forecasting-canary-current/) | 2505.24429 | 图神经网络, 亚区域海洋预报, 加那利洋流 |
+| [Stratified PINN Deep Ocean DA](./2025/stratified-physics-informed-neural-network-data-assimilation/) | 2503.19160 | PINN, 深海数据同化, 海洋流重建 |
 
 ## 2024 年 (14 篇)
 
