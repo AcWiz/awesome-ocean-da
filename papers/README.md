@@ -31,6 +31,7 @@
 | [Machine Learning Inverse Problems DA](./2024/Machine_Learning_Inverse_Problems_DA/) | 2402.XXXXX | 逆问题 |
 | [OceanCastNet Wave Forecasting](./2024/OceanCastNet_Wave_Forecasting/) | 2406.03848 | 海浪预报深度学习 |
 | [Semilinear Neural Operators](./2024/Semilinear_Neural_Operators/) | 2401.XXXXX | 神经算子 |
+| [CG-EnKF Data Assimilation](./2024/conditional-gaussian-ensemble-kalman-filtering/) | 2409.14300 | 条件高斯 EnKF, 非线性数据同化 |
 | [Tropical Pacific Ocean DA](./2024/Tropical_Pacific_Ocean_DA/) | 2402.XXXXX | 太平洋, 上层海洋 |
 | [Validating DL Weather Forecast](./2024/validating-deep-learning-weather-forecast-models/) | 2404.17652 | 深度学习天气预报验证 |
 
