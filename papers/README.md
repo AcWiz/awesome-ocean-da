@@ -12,6 +12,7 @@
 | [Stratified PINN DA](./2025/Stratified_PINN_DA/) | 2501.XXXXX | PINN, 深海 |
 | [AI GCS DA](./2025/AI_GCS_DA/) | 2501.XXXXX | 地质碳存储 |
 | [Generalizable Neural-Network Parameterization](./2025/Generalizable_Neural_Network_Parameterization/) | 2505.08900 | 物理约束神经网络参数化 |
+| [Deep Learning Subregional Ocean Forecasting](./2025/deep-learning-subregional-ocean-forecasting-canary-current/) | 2505.24429 | 图神经网络, 亚区域海洋预报, 加那利洋流 |
 
 ## 2024 年 (14 篇)
 
