@@ -21,7 +21,9 @@
 
 | 论文 | 作者 | 关键词 | 链接 |
 |------|------|--------|------|
-| Tensor-Var: Efficient 4D-Var | Yiming Yang et al. | 4D-Var, Kernel CME | [arXiv:2501.13312](https://arxiv.org/abs/2501.13312) |
+| ORCAst: Operational High-Resolution Current Forecasts | Garcia et al. | 海洋表面流预报, 多分支网络 | [arXiv:2501.12054](https://arxiv.org/abs/2501.12054) |
+| NeuralOM: Neural Ocean Model for S2S Simulation | Gao et al. | 神经算子, 渐进残差修正 | [arXiv:2505.21020](https://arxiv.org/abs/2505.21020) |
+| Tensor-Var: Efficient 4D-Var | Yang et al. | 4D-Var, Kernel CME | [arXiv:2501.13312](https://arxiv.org/abs/2501.13312) |
 | Neural Ocean Forecasting | - | 神经海洋预报, 卫星观测 | [arXiv:2512.22152](https://arxiv.org/abs/2512.22152) |
 | Subregional Ocean Forecasting | Cuervo-Londono et al. | 区域海洋预报 | [arXiv:2505.24429](https://arxiv.org/abs/2505.24429) |
 | Deep learning in the abyss | Limousin et al. | PINN, 深海, 海洋 | [arXiv:2503.19160](https://arxiv.org/abs/2503.19160) |
@@ -68,6 +70,8 @@ ai-data-assimilation-papers/
 │   └── 2025/
 │       ├── AI_GCS_DA/
 │       ├── Neural_Ocean_Forecasting/
+│       ├── NeuralOM/
+│       ├── ORCAst/
 │       ├── Stratified_PINN_DA/
 │       ├── Subregional_Ocean_Forecasting/
 │       └── Tensor-Var/
