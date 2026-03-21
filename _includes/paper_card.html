@@ -1,0 +1,35 @@
+<!-- Paper Card Component -->
+<div class="paper-card" data-methods="{{ include.paper.method_tags | join: ',' }}"
+                       data-applications="{{ include.paper.application_tags | join: ',' }}"
+                       data-title="{{ include.paper.title | downcase }}"
+                       data-authors="{{ include.paper.authors | join: ' ' | downcase }}"
+                       data-year="{{ include.paper.year }}">
+
+  <div class="paper-header">
+    <h3 class="paper-title">{{ include.paper.title }}</h3>
+    <span class="paper-year">{{ include.paper.year }}</span>
+  </div>
+
+  <div class="paper-authors">
+    {{ include.paper.authors | slice: 0, 3 | join: ', ' }}
+    {% if include.paper.authors.size > 3 %}
+      et al.
+    {% endif %}
+  </div>
+
+  <div class="paper-tags">
+    {% for tag in include.paper.method_tags %}
+      <span class="tag method-tag">{{ tag }}</span>
+    {% endfor %}
+    {% for tag in include.paper.application_tags %}
+      <span class="tag application-tag">{{ tag }}</span>
+    {% endfor %}
+  </div>
+
+  <div class="paper-actions">
+    {% if include.paper.paper_url %}
+      <a href="{{ include.paper.paper_url }}" target="_blank" class="btn btn-primary">arXiv</a>
+    {% endif %}
+    <a href="{{ include.paper.path }}/" class="btn btn-secondary">详情</a>
+  </div>
+</div>

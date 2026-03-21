@@ -1,3 +1,16 @@
+---
+title: Deep Koopman Learning from Noisy Data
+arXiv: '2405.16649'
+authors: []
+year: 2024
+source: arXiv
+method_tags:
+- Koopman
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Deep Koopman Learning using Noisy Data
 
 ## 基本信息

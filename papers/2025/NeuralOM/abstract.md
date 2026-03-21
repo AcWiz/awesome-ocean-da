@@ -1,3 +1,18 @@
+---
+title: 'NeuralOM: Neural Ocean Model for S2S Simulation'
+arXiv: '2505.21020'
+authors:
+- Gao
+- et al.
+year: 2025
+source: arXiv
+method_tags:
+- Neural-Operator
+application_tags:
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # NeuralOM: Neural Ocean Model for Subseasonal-to-Seasonal Simulation
 
 ## 基本信息

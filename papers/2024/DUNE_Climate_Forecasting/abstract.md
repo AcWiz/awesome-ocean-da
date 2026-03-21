@@ -1,3 +1,16 @@
+---
+title: 'DUNE: Deep Unstructured Neural Environment for Climate Forecasting'
+authors: []
+year: 2024
+source: other
+method_tags:
+- Deep-Learning
+application_tags:
+- Climate
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # DUNE: A Machine Learning Deep UNet++ based Ensemble Approach to Monthly, Seasonal and Annual Climate Forecasting
 
 ## 基本信息

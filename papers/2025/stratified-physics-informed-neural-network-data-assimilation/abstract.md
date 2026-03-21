@@ -1,3 +1,17 @@
+---
+title: Stratified Physics-Informed Neural Network Data Assimilation
+arXiv: '2503.19160'
+authors: []
+year: 2025
+source: arXiv
+method_tags:
+- PINN
+application_tags:
+- Deep-Ocean
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation
 
 ## 基本信息

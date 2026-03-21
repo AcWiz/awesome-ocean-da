@@ -1,3 +1,24 @@
+---
+title: 'FuXi-DA: A Generalized Deep Learning Data Assimilation Framework'
+arXiv: '2404.08522'
+authors:
+- Xiaoze Xu
+- Xiuyu Sun
+- Wei Han
+- Xiaohui Zhong
+- Lei Chen
+- Hao Li
+year: 2024
+source: arXiv
+method_tags:
+- Deep-Learning
+- Transformer
+application_tags:
+- Ocean-DA
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # FuXi-DA: A Generalized Deep Learning Data Assimilation Framework
 
 ## 基本信息

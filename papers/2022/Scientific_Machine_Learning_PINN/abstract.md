@@ -1,3 +1,15 @@
+---
+title: Scientific Machine Learning and PINN
+authors: []
+year: 2022
+source: other
+method_tags:
+- PINN
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Scientific Machine Learning through Physics-Informed Neural Networks: Where we are and What's next
 
 ## 基本信息

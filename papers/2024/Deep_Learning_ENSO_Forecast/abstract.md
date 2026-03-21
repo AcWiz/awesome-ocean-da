@@ -1,3 +1,15 @@
+---
+title: Deep Learning for ENSO Forecast
+authors: []
+year: 2024
+source: other
+method_tags:
+- Deep-Learning
+application_tags:
+- ENSO
+date_collected: '2026-03-21'
+---
+
 # Using Deep Learning to Identify Initial Error Sensitivity for Interpretable ENSO Forecasts
 
 ## 基本信息

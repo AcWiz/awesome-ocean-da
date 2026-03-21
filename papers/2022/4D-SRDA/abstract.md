@@ -1,3 +1,19 @@
+---
+title: '4D-SRDA: Spatio-Temporal Super-Resolution Data Assimilation'
+arXiv: '2212.03656'
+authors:
+- Yasuda
+- et al.
+year: 2022
+source: arXiv
+method_tags:
+- 4D-Var
+application_tags:
+- Ocean-DA
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # Spatio-Temporal Super-Resolution Data Assimilation (SRDA)
 
 ## 基本信息

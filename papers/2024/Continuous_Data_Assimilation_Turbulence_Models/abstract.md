@@ -1,3 +1,16 @@
+---
+title: Continuous Data Assimilation for Turbulence Models
+authors: []
+year: 2024
+source: other
+method_tags:
+- Deep-Learning
+application_tags:
+- Submesoscale
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Parameter Analysis in Continuous Data Assimilation for Various Turbulence Models
 
 ## 基本信息

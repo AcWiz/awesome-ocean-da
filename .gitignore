@@ -1,1 +1,23 @@
 *.pdf
+
+# Collected IDs (auto-generated)
+.collected_ids
+
+# Jekyll build output
+_site/
+.sass-cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp

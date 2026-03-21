@@ -1,3 +1,16 @@
+---
+title: Physics-Informed Deep Neural Operator Networks
+authors: []
+year: 2022
+source: other
+method_tags:
+- PINN
+- Neural-Operator
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Physics-Informed Deep Neural Operator Networks
 
 ## 基本信息

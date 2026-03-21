@@ -1,0 +1,6 @@
+# AI+海洋数据同化论文搜集脚本依赖
+
+arxiv>=1.4.8
+pyyaml>=6.0
+requests>=2.28.0
+beautifulsoup4>=4.12.0

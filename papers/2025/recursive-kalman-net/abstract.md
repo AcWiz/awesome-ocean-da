@@ -1,3 +1,16 @@
+---
+title: Recursive Kalman Net
+authors: []
+year: 2025
+source: other
+method_tags:
+- EnKF
+- Deep-Learning
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Recursive KalmanNet: Deep Learning-Augmented Kalman Filtering for State Estimation with Consistent Uncertainty Quantification
 
 ## 基本信息

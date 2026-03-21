@@ -1,3 +1,20 @@
+---
+title: 'Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation'
+arXiv: '2501.13312'
+authors:
+- Yiming Yang
+- et al.
+year: 2025
+source: arXiv
+method_tags:
+- 4D-Var
+- Neural-Operator
+application_tags:
+- Ocean-DA
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation
 
 ## 基本信息

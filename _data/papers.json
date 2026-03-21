@@ -1,0 +1,2158 @@
+{
+  "papers": [
+    {
+      "path": "papers/2026/advanced_global_wildfire_activity_modeling_with_hi",
+      "year": 2026,
+      "title": "Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE",
+      "arxiv": "2601.01501v1",
+      "authors": [
+        "Fan Xu",
+        "Wei Gong",
+        "Hao Wu",
+        "Lilan Peng",
+        "Nan Wang",
+        "Qingsong Wen",
+        "Xian Wu",
+        "Kun Wang",
+        "Xibin Zhao"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "GNN"
+      ],
+      "application_tags": [],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE\n\n 基本信息\n\n- **arXiv**: [2601.01501v1](http://arxiv.org/abs/2601.01501v1)\n- **作者**: Fan Xu, Wei Gong, Hao Wu, Lilan Peng, Nan Wang e"
+    },
+    {
+      "path": "papers/2026/benchmarking_artificial_intelligence_models_for_da",
+      "year": 2026,
+      "title": "Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting",
+      "arxiv": "2602.05178v1",
+      "authors": [
+        "Magesh Rajasekaran",
+        "Md Saiful Sajol",
+        "Chris Alvin",
+        "Supratik Mukhopadhyay",
+        "Yanda Ou",
+        "Z. George Xue"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Transformer",
+        "LSTM",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Regional-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting\n\n 基本信息\n\n- **arXiv**: [2602.05178v1](http://arxiv.org/abs/2602.05178v1)\n- **作者**: Magesh Rajasekaran, Md Saiful Sajol, "
+    },
+    {
+      "path": "papers/2026/cnn-based_forecasting_of_early_winter_nao_using_se",
+      "year": 2026,
+      "title": "CNN-based forecasting of early winter NAO using sea surface temperature",
+      "arxiv": "2603.16312v1",
+      "authors": [
+        "Elena Provenzano",
+        "Guillaume Gastineau",
+        "Carlos Mejia",
+        "Didier Swingedouw",
+        "Sylvie Thiria"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "SST",
+        "ENSO",
+        "Climate",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "CNN-based forecasting of early winter NAO using sea surface temperature\n\n 基本信息\n\n- **arXiv**: [2603.16312v1](http://arxiv.org/abs/2603.16312v1)\n- **作者**: Elena Provenzano, Guillaume Gastineau, Carlos M"
+    },
+    {
+      "path": "papers/2026/data_driven_air_entrainment_velocity_parameterizat",
+      "year": 2026,
+      "title": "Data Driven Air Entrainment Velocity Parameterization by Breaking Waves",
+      "arxiv": "2602.04067v1",
+      "authors": [
+        "Xiaohui Zhou",
+        "Anton S. Darmenov",
+        "Kianoosh Yousefi"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Wave"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Data Driven Air Entrainment Velocity Parameterization by Breaking Waves\n\n 基本信息\n\n- **arXiv**: [2602.04067v1](http://arxiv.org/abs/2602.04067v1)\n- **作者**: Xiaohui Zhou, Anton S. Darmenov, Kianoosh Youse"
+    },
+    {
+      "path": "papers/2026/eddy-resolving_global_ocean_forecasting_with_multi",
+      "year": 2026,
+      "title": "Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks",
+      "arxiv": "2601.12775v1",
+      "authors": [
+        "Yuta Hirabayashi",
+        "Daisuke Matusoka",
+        "Konobu Kimura"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "GNN",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Submesoscale"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks\n\n 基本信息\n\n- **arXiv**: [2601.12775v1](http://arxiv.org/abs/2601.12775v1)\n- **作者**: Yuta Hirabayashi, Daisuke Matusoka, Kono"
+    },
+    {
+      "path": "papers/2026/ensemble_graph_neural_networks_for_probabilistic_s",
+      "year": 2026,
+      "title": "Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations",
+      "arxiv": "2603.06153v1",
+      "authors": [
+        "Alejandro J. González-Santana",
+        "Giovanny A. Cuervo-Londoño",
+        "Javier Sánchez"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "GNN"
+      ],
+      "application_tags": [
+        "Regional-Forecast",
+        "SST"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations\n\n 基本信息\n\n- **arXiv**: [2603.06153v1](http://arxiv.org/abs/2603.06153v1)\n- **作者**: Alejandro "
+    },
+    {
+      "path": "papers/2026/explore_the_ideology_of_deep_learning_in_enso_fore",
+      "year": 2026,
+      "title": "Explore the Ideology of Deep Learning in ENSO Forecasts",
+      "arxiv": "2601.02050v1",
+      "authors": [
+        "Yanhai Gan",
+        "Yipeng Chen",
+        "Ning Li",
+        "Xingguo Liu",
+        "Junyu Dong",
+        "Xianyao Chen"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "ENSO",
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Explore the Ideology of Deep Learning in ENSO Forecasts\n\n 基本信息\n\n- **arXiv**: [2601.02050v1](http://arxiv.org/abs/2601.02050v1)\n- **作者**: Yanhai Gan, Yipeng Chen, Ning Li, Xingguo Liu, Junyu Dong et al"
+    },
+    {
+      "path": "papers/2026/function-space_decoupled_diffusion_for_forward_and",
+      "year": 2026,
+      "title": "Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon Capture and Storage",
+      "arxiv": "2602.12274v2",
+      "authors": [
+        "Xin Ju",
+        "Jiachen Yao",
+        "Anima Anandkumar",
+        "Sally M. Benson",
+        "Gege Wen"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Neural-Operator",
+        "4D-Var",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Deep-Ocean",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon Capture and Storage\n\n 基本信息\n\n- **arXiv**: [2602.12274v2](http://arxiv.org/abs/2602.12274v2)\n- **作者**: Xin Ju, Jiachen Yao, "
+    },
+    {
+      "path": "papers/2026/hybridom_hybrid_physics-based_and_data-driven_glob",
+      "year": 2026,
+      "title": "HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling",
+      "arxiv": "2602.00598v1",
+      "authors": [
+        "Ruiqi Shu",
+        "Xiaohui Zhong",
+        "Qiusheng Huang",
+        "Ruijian Gou",
+        "Tianrun Gao",
+        "Hao Li",
+        "Xiaomeng Huang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling\n\n 基本信息\n\n- **arXiv**: [2602.00598v1](http://arxiv.org/abs/2602.00598v1)\n- **作者**: Ruiqi Shu, Xiao"
+    },
+    {
+      "path": "papers/2026/lagrangian_conditional_gaussian_koopman_network_fo",
+      "year": 2026,
+      "title": "A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction",
+      "arxiv": "2603.14115v1",
+      "authors": [
+        "Zhongrui Wang",
+        "Chuanqi Chen",
+        "Jin-Long Wu",
+        "Nan Chen"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman",
+        "Neural-Operator",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction\n\n 基本信息\n\n- **arXiv**: [2603.14115v1](http://arxiv.org/abs/2603.14115v1)\n- **作者**: Zhongrui Wang, Chuanqi Chen, Jin"
+    },
+    {
+      "path": "papers/2026/large-ensemble_simulations_reveal_links_between_at",
+      "year": 2026,
+      "title": "Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability",
+      "arxiv": "2602.05083v1",
+      "authors": [
+        "Zilu Meng",
+        "Gregory J. Hakim",
+        "Wenchang Yang",
+        "Gabriel A. Vecchi"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "SST",
+        "ENSO",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability\n\n 基本信息\n\n- **arXiv**: [2602.05083v1](http://arxiv.org/abs/2602.05083v1)\n- **作者**: "
+    },
+    {
+      "path": "papers/2026/machine_learning_enhanced_data_assimilation_framew",
+      "year": 2026,
+      "title": "Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization",
+      "arxiv": "2602.06989v1",
+      "authors": [
+        "Zhenkai Bo",
+        "Ahmed H. Elsheikh",
+        "Hannah P. Menke",
+        "Julien Maes",
+        "Sebastian Geiger",
+        "Muhammad Z. Kashim",
+        "Zainol A. A. Bakar",
+        "Kamaljit Singh"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Deep-Ocean",
+        "Carbon-Storage",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization\n\n 基本信息\n\n- **arXiv**: [2602.06989v1](http://arxiv.org/abs/2602.06989v1)\n- **作者**: Zhenkai Bo, Ahmed "
+    },
+    {
+      "path": "papers/2026/probabilistic_reconstruction_of_global_sea_surface",
+      "year": 2026,
+      "title": "Probabilistic reconstruction of global sea surface temperature using generative diffusion models",
+      "arxiv": "2603.16272v1",
+      "authors": [
+        "Haijie Li",
+        "Ya Wang",
+        "Kai Yang",
+        "Gang Huang",
+        "Xiangao Xia",
+        "Ziming Chen",
+        "Weichen Tao",
+        "Chenglin Lu",
+        "Lin Chen",
+        "Miao Zhang",
+        "Kaiming Hu",
+        "Hainan Gong",
+        "Disong Fu",
+        "Lin Wang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "Global-Forecast",
+        "SST",
+        "ENSO",
+        "Climate",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Probabilistic reconstruction of global sea surface temperature using generative diffusion models\n\n 基本信息\n\n- **arXiv**: [2603.16272v1](http://arxiv.org/abs/2603.16272v1)\n- **作者**: Haijie Li, Ya Wang, Ka"
+    },
+    {
+      "path": "papers/2026/reduced-order_surrogates_for_forced_flexible_mesh_",
+      "year": 2026,
+      "title": "Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models",
+      "arxiv": "2602.05416v1",
+      "authors": [
+        "Freja Høgholm Petersen",
+        "Jesper Sandvig Mariegaard",
+        "Rocco Palmitessa",
+        "Allan P. Engsig-Karup"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman"
+      ],
+      "application_tags": [
+        "Regional-Forecast",
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models\n\n 基本信息\n\n- **arXiv**: [2602.05416v1](http://arxiv.org/abs/2602.05416v1)\n- **作者**: Freja Høgholm Petersen, Jesper Sandvig Mariegaar"
+    },
+    {
+      "path": "papers/2026/spatio-temporal_modeling_and_forecasting_with_four",
+      "year": 2026,
+      "title": "Spatio-temporal modeling and forecasting with Fourier neural operators",
+      "arxiv": "2601.01813v1",
+      "authors": [
+        "Pratik Nag",
+        "Andrew Zammit-Mangion",
+        "Sumeetpal Singh",
+        "Noel Cressie"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "SST"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Spatio-temporal modeling and forecasting with Fourier neural operators\n\n 基本信息\n\n- **arXiv**: [2601.01813v1](http://arxiv.org/abs/2601.01813v1)\n- **作者**: Pratik Nag, Andrew Zammit-Mangion, Sumeetpal Sin"
+    },
+    {
+      "path": "papers/2026/towards_efficient_and_stable_ocean_state_forecasti",
+      "year": 2026,
+      "title": "Towards Efficient and Stable Ocean State Forecasting: A Continuous-Time Koopman Approach",
+      "arxiv": "2603.05560v2",
+      "authors": [
+        "Rares Grozavescu",
+        "Pengyu Zhang",
+        "Mark Girolami",
+        "Etienne Meunier"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman",
+        "Transformer",
+        "Surrogate"
+      ],
+      "application_tags": [
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Towards Efficient and Stable Ocean State Forecasting: A Continuous-Time Koopman Approach\n\n 基本信息\n\n- **arXiv**: [2603.05560v2](http://arxiv.org/abs/2603.05560v2)\n- **作者**: Rares Grozavescu, Pengyu Zhang"
+    },
+    {
+      "path": "papers/2026/turning_time_series_into_algebraic_equations_symbo",
+      "year": 2026,
+      "title": "Turning Time Series into Algebraic Equations: Symbolic Machine Learning for Interpretable Modeling of Chaotic Time Series",
+      "arxiv": "2603.07261v1",
+      "authors": [
+        "Madhurima Panja",
+        "Grace Younes",
+        "Tanujit Chakraborty"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "SST"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Turning Time Series into Algebraic Equations: Symbolic Machine Learning for Interpretable Modeling of Chaotic Time Series\n\n 基本信息\n\n- **arXiv**: [2603.07261v1](http://arxiv.org/abs/2603.07261v1)\n- **作者*"
+    },
+    {
+      "path": "papers/2026/two_localization_strategies_for_sequential_mcmc_da",
+      "year": 2026,
+      "title": "Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models",
+      "arxiv": "2603.05817v1",
+      "authors": [
+        "Hamza Ruzayqat",
+        "Hristo G. Chipilski",
+        "Omar Knio"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models\n\n 基本信息\n\n- **arXiv**: [2603.05817v1](http://arxiv.org/abs/2603.05817v1)\n"
+    },
+    {
+      "path": "papers/2026/versatile_laboratory_approach_to_reproduce_and_ana",
+      "year": 2026,
+      "title": "A Versatile Laboratory Approach to Reproduce and Analyze Internal Ocean Wave Dynamics",
+      "arxiv": "2603.13512v1",
+      "authors": [
+        "Vohn Jacquez",
+        "Zachary Phan",
+        "Zachary Taebel",
+        "Dylan Brunei",
+        "Pierre-Yves Passaggia",
+        "Alberto Scotti"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "Deep-Ocean",
+        "Wave",
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A Versatile Laboratory Approach to Reproduce and Analyze Internal Ocean Wave Dynamics\n\n 基本信息\n\n- **arXiv**: [2603.13512v1](http://arxiv.org/abs/2603.13512v1)\n- **作者**: Vohn Jacquez, Zachary Phan, Zacha"
+    },
+    {
+      "path": "papers/2025/AI_GCS_DA",
+      "year": 2025,
+      "title": "AI for Geological Carbon Storage Data Assimilation",
+      "arxiv": "",
+      "authors": [
+        "Seabra",
+        "et al."
+      ],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Carbon-Storage"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "AI enhanced data assimilation and uncertainty quantification applied to Geological Carbon Storage\n\n 基本信息\n\n- **来源**: arXiv (通过 X-MOL 索引)\n- **作者**: G. S. Seabra, N. T. Mücke, V. L. S. Silva, D. Voskov, "
+    },
+    {
+      "path": "papers/2025/CTP_Hybrid_Ocean_Front_Forecasting",
+      "year": 2025,
+      "title": "CTP Hybrid Ocean Front Forecasting",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Regional-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "CTP: A hybrid CNN-Transformer-PINN model for ocean front forecasting\n\n 基本信息\n- **arXiv**: [2505.10894](https://arxiv.org/abs/2505.10894)\n- **作者**: Yishuo Wang, Feng Zhou, Muping Zhou, Qicheng Meng, Zhi"
+    },
+    {
+      "path": "papers/2025/Deep_Learning_Weather_Models_Subregional_Ocean_Forecasting",
+      "year": 2025,
+      "title": "Deep Learning Weather Models Subregional Ocean Forecasting",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep Learning Weather Models for Subregional Ocean Forecasting: A Case Study on the Canary Current Upwelling System\n\n 基本信息\n- **arXiv**: [2505.24429](https://arxiv.org/abs/2505.24429)\n- **作者**: Giovann"
+    },
+    {
+      "path": "papers/2025/Enhanced_State_Estimation_Turbulent_Flows_DA_ML",
+      "year": 2025,
+      "title": "Enhanced State Estimation for Turbulent Flows with DA and ML",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "EnKF"
+      ],
+      "application_tags": [
+        "Submesoscale",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Enhanced State Estimation for turbulent flows combining Ensemble Data Assimilation and Machine Learning\n\n 基本信息\n- **arXiv**: [2501.18262](https://arxiv.org/abs/2501.18262)\n- **作者**: Miguel M. Valero, M"
+    },
+    {
+      "path": "papers/2025/NeuralOM",
+      "year": 2025,
+      "title": "NeuralOM: Neural Ocean Model for S2S Simulation",
+      "arxiv": "2505.21020",
+      "authors": [
+        "Gao",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "NeuralOM: Neural Ocean Model for Subseasonal-to-Seasonal Simulation\n\n 基本信息\n- **arXiv**: [2505.21020](https://arxiv.org/abs/2505.21020)\n- **作者**: Yuan Gao, Hao Wu, Fan Xu, Yanfei Xiang, Ruijian Gou, Ru"
+    },
+    {
+      "path": "papers/2025/Neural_Network_Mesoscale_Eddies_Parameterization",
+      "year": 2025,
+      "title": "Neural Network for Mesoscale Eddies Parameterization",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Neural-Network"
+      ],
+      "application_tags": [
+        "Submesoscale"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Generalizable Neural-Network Parameterization of Mesoscale Eddies\n\n 基本信息\n- **arXiv**: [2505.08900](https://arxiv.org/abs/2505.08900)\n- **作者**: Pavel Perezhogin, Alistair Adcroft, Laure Zanna\n- **年份**:"
+    },
+    {
+      "path": "papers/2025/Neural_Ocean_Forecasting",
+      "year": 2025,
+      "title": "Neural Ocean Forecasting",
+      "arxiv": "2512.22152",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Neural Ocean Forecasting from Sparse Satellite Observations\n\n 基本信息\n- **arXiv**: [2512.22152](https://arxiv.org/abs/2512.22152)\n- **作者**: Daria Botvynko, Pierre Haslee, Lucile Gaultier, Bertrand Chapro"
+    },
+    {
+      "path": "papers/2025/ORCAst",
+      "year": 2025,
+      "title": "ORCAst: Operational High-Resolution Current Forecasts",
+      "arxiv": "2501.12054",
+      "authors": [
+        "Garcia",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "ORCAst: Operational High-Resolution Current Forecasts\n\n 基本信息\n- **arXiv**: [2501.12054](https://arxiv.org/abs/2501.12054)\n- **作者**: Pierre Garcia, Inès Larroche, Amélie Pesnec, Hannah Bull, Théo Archam"
+    },
+    {
+      "path": "papers/2025/SamudrACE_Coupled_Climate_Modeling",
+      "year": 2025,
+      "title": "SamudrACE: Coupled Climate Modeling",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Climate",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "SamudrACE: Fast and Accurate Coupled Climate Modeling with 3D Ocean and Atmosphere Emulators\n\n 基本信息\n- **arXiv**: [2509.12490](https://arxiv.org/abs/2509.12490)\n- **作者**: James P. C. Duncan, Elynn Wu, "
+    },
+    {
+      "path": "papers/2025/Stratified_PINN_DA",
+      "year": 2025,
+      "title": "Stratified PINN for Deep Ocean Data Assimilation",
+      "arxiv": "2503.19160",
+      "authors": [
+        "Limousin",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN"
+      ],
+      "application_tags": [
+        "Deep-Ocean"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep learning in the abyss: A stratified Physics Informed Neural Network for data assimilation\n\n 基本信息\n\n- **arXiv**: [2503.19160](https://arxiv.org/abs/2503.19160)\n- **作者**: Vadim Limousin et al.\n- **年"
+    },
+    {
+      "path": "papers/2025/Subregional_Ocean_Forecasting",
+      "year": 2025,
+      "title": "Subregional Ocean Forecasting with Deep Learning",
+      "arxiv": "2505.24429",
+      "authors": [
+        "Cuervo-Londono",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "GNN"
+      ],
+      "application_tags": [
+        "Regional-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep Learning Weather Models for Subregional Ocean Forecasting\n\n 基本信息\n\n- **arXiv**: [2505.24429](https://arxiv.org/abs/2505.24429)\n- **作者**: Giovanny A. Cuervo-Londono et al.\n- **年份**: 2025\n\n 中文总结\n\n**"
+    },
+    {
+      "path": "papers/2025/Tensor-Var",
+      "year": 2025,
+      "title": "Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation",
+      "arxiv": "2501.13312",
+      "authors": [
+        "Yiming Yang",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var",
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Ocean-DA",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation\n\n 基本信息\n\n- **arXiv**: [2501.13312](https://arxiv.org/abs/2501.13312)\n- **作者**: Yiming Yang et al.\n- **年份**: 2025\n\n 中文总结\n\n**核心贡献**：提出"
+    },
+    {
+      "path": "papers/2025/advancing_ocean_state_estimation_with_efficient_an",
+      "year": 2025,
+      "title": "Advancing Ocean State Estimation with efficient and scalable AI",
+      "arxiv": "2511.06041v1",
+      "authors": [
+        "Yanfei Xiang",
+        "Yuan Gao",
+        "Hao Wu",
+        "Quan Zhang",
+        "Ruiqi Shu",
+        "Xiao Zhou",
+        "Xi Wu",
+        "Xiaomeng Huang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Submesoscale",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Advancing Ocean State Estimation with efficient and scalable AI\n\n 基本信息\n\n- **arXiv**: [2511.06041v1](http://arxiv.org/abs/2511.06041v1)\n- **作者**: Yanfei Xiang, Yuan Gao, Hao Wu, Quan Zhang, Ruiqi Shu e"
+    },
+    {
+      "path": "papers/2025/assimilation_of_swot_altimetry_data_for_riverine_f",
+      "year": 2025,
+      "title": "Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic to Real Data",
+      "arxiv": "2504.21670v1",
+      "authors": [
+        "Quentin Bonassies",
+        "Thanh Huy Nguyen",
+        "Ludovic Cassan",
+        "Andrea Piacentini",
+        "Sophie Ricci",
+        "Charlotte Emery",
+        "Christophe Fatras",
+        "Santiago Peña Luque",
+        "Raquel Rodriguez Suquet"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic to Real Data\n\n 基本信息\n\n- **arXiv**: [2504.21670v1](http://arxiv.org/abs/2504.21670v1)\n- **作者**: Quentin Bonassies, Thanh"
+    },
+    {
+      "path": "papers/2025/causal_operator_discovery_in_partial_differential_",
+      "year": 2025,
+      "title": "Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks",
+      "arxiv": "2506.20181v1",
+      "authors": [
+        "Ronald Katende"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks\n\n 基本信息\n\n- **arXiv**: [2506.20181v1](http://arxiv.org/abs/2506.20181v1)\n- **作者**: Ronald "
+    },
+    {
+      "path": "papers/2025/data-driven_reconstruction_of_significant_wave_hei",
+      "year": 2025,
+      "title": "Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations",
+      "arxiv": "2509.19384v1",
+      "authors": [
+        "Hongyuan Shi",
+        "Yilin Zhai",
+        "Ping Dong",
+        "Zaijin You",
+        "Chao Zhan",
+        "Qing Wang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Transformer",
+        "U-Net",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Wave",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations\n\n 基本信息\n\n- **arXiv**: [2509.19384v1](http://arxiv.org/abs/2509.19384v1)\n- **作者**: Hongyuan Shi, Yilin Zhai, Ping Dong, Za"
+    },
+    {
+      "path": "papers/2025/deep-learning-subregional-ocean-forecasting-canary-current",
+      "year": 2025,
+      "title": "Deep Learning Subregional Ocean Forecasting: Canary Current",
+      "arxiv": "2505.24429",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "GNN"
+      ],
+      "application_tags": [
+        "Regional-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep Learning Weather Models for Subregional Ocean Forecasting: A Case Study on the Canary Current Upwelling System\n\n 基本信息\n- **arXiv**: [2505.24429](https://arxiv.org/abs/2505.24429)\n- **作者**: Giovann"
+    },
+    {
+      "path": "papers/2025/deep_learning_in_the_abyss_a_stratified_physics_in",
+      "year": 2025,
+      "title": "Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation",
+      "arxiv": "2503.19160v1",
+      "authors": [
+        "Vadim Limousin",
+        "Nelly Pustelnik",
+        "Bruno Deremble",
+        "Antoine Venaille"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN"
+      ],
+      "application_tags": [
+        "SSH",
+        "Deep-Ocean",
+        "Wave",
+        "Submesoscale",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation\n\n 基本信息\n\n- **arXiv**: [2503.19160v1](http://arxiv.org/abs/2503.19160v1)\n- **作者**: Vadim Limousin, Nelly Pu"
+    },
+    {
+      "path": "papers/2025/digestible_pieces_comparing_three_options_for_part",
+      "year": 2025,
+      "title": "Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction",
+      "arxiv": "2510.18133v1",
+      "authors": [
+        "Laura Thapa",
+        "Marybeth Arcodia",
+        "Elizabeth A. Barnes"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "Regional-Forecast",
+        "SSH",
+        "Tidal"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction\n\n 基本信息\n\n- **arXiv**: [2510.18133v1](http://arxiv.org/abs/2510.18133v1)\n- *"
+    },
+    {
+      "path": "papers/2025/extratropical_atmospheric_circulation_response_to_",
+      "year": 2025,
+      "title": "Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments",
+      "arxiv": "2511.20899v1",
+      "authors": [
+        "Zhanxiang Hua",
+        "Christina Karamperidou",
+        "Zilu Meng"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Surrogate",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "ENSO",
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments\n\n 基本信息\n\n- **arXiv**: [2511.20899v1](http://arxiv.org/abs/2511.20899v1)\n- **作者**: Zhanxiang Hua, Ch"
+    },
+    {
+      "path": "papers/2025/gtsforecaster_a_novel_deep_learning_based_geodetic",
+      "year": 2025,
+      "title": "GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python",
+      "arxiv": "2509.10560v1",
+      "authors": [
+        "Xuechen Liang",
+        "Xiaoxing He",
+        "Shengdao Wang",
+        "Jean-Philippe Montillet",
+        "Zhengkai Huang",
+        "Gaël Kermarrec",
+        "Shunqiang Hu",
+        "Yu Zhou",
+        "Jiahui Huang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "GNN",
+        "Transformer"
+      ],
+      "application_tags": [
+        "Regional-Forecast",
+        "SSH",
+        "Tidal"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python\n\n 基本信息\n\n- **arXiv**: [2509.10560v1](http://arxiv.org/abs/2509.10560v1)\n- **作者**: Xuechen Liang, Xiaoxin"
+    },
+    {
+      "path": "papers/2025/integrating_score-based_diffusion_models_with_mach",
+      "year": 2025,
+      "title": "Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization for Advanced Data Assimilation in Geological Carbon Storage",
+      "arxiv": "2511.05266v1",
+      "authors": [
+        "Gabriel Serrão Seabra",
+        "Nikolaj T. Mücke",
+        "Vinicius Luiz Santos Silva",
+        "Alexandre A. Emerick",
+        "Denis Voskov",
+        "Femke Vossepoel"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "Deep-Ocean",
+        "Carbon-Storage",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization for Advanced Data Assimilation in Geological Carbon Storage\n\n 基本信息\n\n- **arXiv**: [2511.05266v1](http://arxiv.org/ab"
+    },
+    {
+      "path": "papers/2025/leveraging_an_atmospheric_foundational_model_for_s",
+      "year": 2025,
+      "title": "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting",
+      "arxiv": "2510.25563v1",
+      "authors": [
+        "Víctor Medina",
+        "Giovanny A. Cuervo-Londoño",
+        "Javier Sánchez"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Regional-Forecast",
+        "SST",
+        "Climate",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting\n\n 基本信息\n\n- **arXiv**: [2510.25563v1](http://arxiv.org/abs/2510.25563v1)\n- **作者**: Víctor Medina, Giovann"
+    },
+    {
+      "path": "papers/2025/meta-learning_fourier_neural_operators_for_hessian",
+      "year": 2025,
+      "title": "Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation",
+      "arxiv": "2509.22949v1",
+      "authors": [
+        "Hamidreza Moazzami",
+        "Asma Jamali",
+        "Nicholas Kevlahan",
+        "Rodrigo A. Vargas-Hernández"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Neural-Operator",
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation\n\n 基本信息\n\n- **arXiv**: [2509.22949v1](http://arxiv.org/abs/2509.22949v1)\n- **作者**: Hamidreza Moazz"
+    },
+    {
+      "path": "papers/2025/modeling_partially_observed_nonlinear_dynamical_sy",
+      "year": 2025,
+      "title": "Modeling Partially Observed Nonlinear Dynamical Systems and Efficient Data Assimilation via Discrete-Time Conditional Gaussian Koopman Network",
+      "arxiv": "2507.08749v1",
+      "authors": [
+        "Chuanqi Chen",
+        "Zhongrui Wang",
+        "Nan Chen",
+        "Jin-Long Wu"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman",
+        "Neural-Operator",
+        "4D-Var",
+        "Surrogate"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Modeling Partially Observed Nonlinear Dynamical Systems and Efficient Data Assimilation via Discrete-Time Conditional Gaussian Koopman Network\n\n 基本信息\n\n- **arXiv**: [2507.08749v1](http://arxiv.org/abs/"
+    },
+    {
+      "path": "papers/2025/neural_ocean_forecasting_from_sparse_satellite-der",
+      "year": 2025,
+      "title": "Neural ocean forecasting from sparse satellite-derived observations: a case-study for SSH dynamics and altimetry data",
+      "arxiv": "2512.22152v1",
+      "authors": [
+        "Daria Botvynko",
+        "Pierre Haslée",
+        "Lucile Gaultier",
+        "Bertrand Chapron",
+        "Clement de Boyer Montégut",
+        "Anass El Aouni",
+        "Julien Le Sommer",
+        "Ronan Fablet"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "U-Net",
+        "4D-Var"
+      ],
+      "application_tags": [
+        "SSH",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Neural ocean forecasting from sparse satellite-derived observations: a case-study for SSH dynamics and altimetry data\n\n 基本信息\n\n- **arXiv**: [2512.22152v1](http://arxiv.org/abs/2512.22152v1)\n- **作者**: D"
+    },
+    {
+      "path": "papers/2025/observation-only_learning_of_neural_mapping_scheme",
+      "year": 2025,
+      "title": "Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters",
+      "arxiv": "2503.11532v1",
+      "authors": [
+        "Clément Dorffer",
+        "Frédéric Jourdin",
+        "Thi Thuy Nga Nguyen",
+        "Rodolphe Devillers",
+        "David Mouillot",
+        "Ronan Fablet"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Regional-Forecast",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters\n\n 基本信息\n\n- **arXiv**: [2503.11532v1](http://arxiv.org/abs/2503.11532v1)\n- **作者**: Clément Dorffer"
+    },
+    {
+      "path": "papers/2025/oceanforecastbench_a_benchmark_dataset_for_data-dr",
+      "year": 2025,
+      "title": "OceanForecastBench: A Benchmark Dataset for Data-Driven Global Ocean Forecasting",
+      "arxiv": "2511.18732v2",
+      "authors": [
+        "Haoming Jia",
+        "Yi Han",
+        "Xiang Wang",
+        "Huizan Wang",
+        "Wei Wu",
+        "Jianming Zheng",
+        "Peikun Xiao"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "OceanForecastBench: A Benchmark Dataset for Data-Driven Global Ocean Forecasting\n\n 基本信息\n\n- **arXiv**: [2511.18732v2](http://arxiv.org/abs/2511.18732v2)\n- **作者**: Haoming Jia, Yi Han, Xiang Wang, Huiza"
+    },
+    {
+      "path": "papers/2025/optimizing_auv_speed_dynamics_with_a_data-driven_k",
+      "year": 2025,
+      "title": "Optimizing AUV speed dynamics with a data-driven Koopman operator approach",
+      "arxiv": "2503.09628v1",
+      "authors": [
+        "Zhiliang Liu",
+        "Xin Zhao",
+        "Peng Cai",
+        "Bing Cong"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman",
+        "Hybrid"
+      ],
+      "application_tags": [],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Optimizing AUV speed dynamics with a data-driven Koopman operator approach\n\n 基本信息\n\n- **arXiv**: [2503.09628v1](http://arxiv.org/abs/2503.09628v1)\n- **作者**: Zhiliang Liu, Xin Zhao, Peng Cai, Bing Cong\n"
+    },
+    {
+      "path": "papers/2025/physical_informed_neural_networks_for_modeling_oce",
+      "year": 2025,
+      "title": "Physical Informed Neural Networks for modeling ocean pollutant",
+      "arxiv": "2507.08834v1",
+      "authors": [
+        "Karishma Battina",
+        "Prathamesh Dinesh Joshi",
+        "Raj Abhijit Dandekar",
+        "Rajat Dandekar",
+        "Sreedath Panat"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "Hybrid"
+      ],
+      "application_tags": [],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Physical Informed Neural Networks for modeling ocean pollutant\n\n 基本信息\n\n- **arXiv**: [2507.08834v1](http://arxiv.org/abs/2507.08834v1)\n- **作者**: Karishma Battina, Prathamesh Dinesh Joshi, Raj Abhijit D"
+    },
+    {
+      "path": "papers/2025/prediction_of_sea_ice_velocity_and_concentration_i",
+      "year": 2025,
+      "title": "Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network",
+      "arxiv": "2510.17756v1",
+      "authors": [
+        "Younghyun Koo",
+        "Maryam Rahnemoonfar"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "U-Net",
+        "Hybrid"
+      ],
+      "application_tags": [],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network\n\n 基本信息\n\n- **arXiv**: [2510.17756v1](http://arxiv.org/abs/2510.17756v1)\n- **作者**: Younghyun Ko"
+    },
+    {
+      "path": "papers/2025/principled_operator_learning_in_ocean_dynamics_the",
+      "year": 2025,
+      "title": "Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure",
+      "arxiv": "2510.09792v1",
+      "authors": [
+        "Vahidreza Jahanmard",
+        "Ali Ramezani-Kebrya",
+        "Robinson Hordoir"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Wave"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure\n\n 基本信息\n\n- **arXiv**: [2510.09792v1](http://arxiv.org/abs/2510.09792v1)\n- **作者**: Vahidreza Jahanmard, Ali Ramezani-Kebrya"
+    },
+    {
+      "path": "papers/2025/recursive-kalman-net",
+      "year": 2025,
+      "title": "Recursive Kalman Net",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "EnKF",
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Recursive KalmanNet: Deep Learning-Augmented Kalman Filtering for State Estimation with Consistent Uncertainty Quantification\n\n 基本信息\n- **arXiv**: [2506.11639](https://arxiv.org/abs/2506.11639)\n- **作者*"
+    },
+    {
+      "path": "papers/2025/small_ensemble-based_data_assimilation_a_machine_l",
+      "year": 2025,
+      "title": "Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size",
+      "arxiv": "2510.15284v1",
+      "authors": [
+        "Zhilin Li",
+        "Zhou Yao",
+        "Xianglong Li",
+        "Zeng Liu",
+        "Zhaokuan Lu",
+        "Shanlin Xu",
+        "Seungnam Kim",
+        "Guangyao Wang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "Wave",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size\n\n 基本信息\n\n- **arXiv**: [2510.15284v1](http://arxiv.org/abs/2510.15284v1)\n- **作者**:"
+    },
+    {
+      "path": "papers/2025/sstode_ocean-atmosphere_physics-informed_neural_od",
+      "year": 2025,
+      "title": "SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction",
+      "arxiv": "2511.05629v1",
+      "authors": [
+        "Zheng Jiang",
+        "Wei Wang",
+        "Gaowei Zhang",
+        "Yi Wang"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "4D-Var",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Regional-Forecast",
+        "SST"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction\n\n 基本信息\n\n- **arXiv**: [2511.05629v1](http://arxiv.org/abs/2511.05629v1)\n- **作者**: Zheng Jiang, Wei Wang, Gao"
+    },
+    {
+      "path": "papers/2025/stratified-physics-informed-neural-network-data-assimilation",
+      "year": 2025,
+      "title": "Stratified Physics-Informed Neural Network Data Assimilation",
+      "arxiv": "2503.19160",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN"
+      ],
+      "application_tags": [
+        "Deep-Ocean",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation\n\n 基本信息\n- **arXiv**: [2503.19160](https://arxiv.org/abs/2503.19160)\n- **作者**: Vadim Limousin, Nelly Pustel"
+    },
+    {
+      "path": "papers/2025/swr-viz_ai-assisted_interactive_visual_analytics_f",
+      "year": 2025,
+      "title": "SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing",
+      "arxiv": "2511.15182v1",
+      "authors": [
+        "Subhashis Hazarika",
+        "Leonard Lupin-Jimenez",
+        "Rohit Vuppala",
+        "Ashesh Chattopadhyay",
+        "Hon Yung Wong"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Wave",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing\n\n 基本信息\n\n- **arXiv**: [2511.15182v1](http://arxiv.org/abs/2511.15182v1)\n- **作者**: Subhashis Hazarika, Leonard Lupin-"
+    },
+    {
+      "path": "papers/2024/CGKN",
+      "year": 2024,
+      "title": "CGKN: Conditional Gaussian Koopman Network",
+      "arxiv": "2410.20072",
+      "authors": [
+        "Chuanqi Chen",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman",
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "CGKN: Conditional Gaussian Koopman Network\n\n 基本信息\n\n- **arXiv**: [2410.20072](https://arxiv.org/abs/2410.20072)\n- **作者**: Chuanqi Chen et al.\n- **年份**: 2024\n\n 中文总结\n\n**核心贡献**：提出 CGKN 框架，将非线性系统转换为非线性神经微分"
+    },
+    {
+      "path": "papers/2024/Continuous_Data_Assimilation_Turbulence_Models",
+      "year": 2024,
+      "title": "Continuous Data Assimilation for Turbulence Models",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Submesoscale",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Parameter Analysis in Continuous Data Assimilation for Various Turbulence Models\n\n 基本信息\n- **arXiv**: [2409.03042](https://arxiv.org/abs/2409.03042)\n- **作者**: Debora A. F. Albanez, Maicon Jose Benvenut"
+    },
+    {
+      "path": "papers/2024/DUNE_Climate_Forecasting",
+      "year": 2024,
+      "title": "DUNE: Deep Unstructured Neural Environment for Climate Forecasting",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Climate",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "DUNE: A Machine Learning Deep UNet++ based Ensemble Approach to Monthly, Seasonal and Annual Climate Forecasting\n\n 基本信息\n- **arXiv**: [2408.06262](https://arxiv.org/abs/2408.06262)\n- **作者**: Pratik Shu"
+    },
+    {
+      "path": "papers/2024/Deep_Koopman_Learning_Noisy_Data",
+      "year": 2024,
+      "title": "Deep Koopman Learning from Noisy Data",
+      "arxiv": "2405.16649",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep Koopman Learning using Noisy Data\n\n 基本信息\n- **arXiv**: [2405.16649](https://arxiv.org/abs/2405.16649)\n- **作者**: Wenjian Hao, Devesh Upadhyay, Shaoshuai Mou\n- **年份**: 2024\n\n 中文总结\n**核心贡献**：提出基于深度学习的"
+    },
+    {
+      "path": "papers/2024/Deep_Learning_ENSO_Forecast",
+      "year": 2024,
+      "title": "Deep Learning for ENSO Forecast",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "ENSO"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Using Deep Learning to Identify Initial Error Sensitivity for Interpretable ENSO Forecasts\n\n 基本信息\n- **arXiv**: [2404.15419](https://arxiv.org/abs/2404.15419)\n- **作者**: Kinya Toride, Matthew Newman, An"
+    },
+    {
+      "path": "papers/2024/Deep_Learning_Model_Correction_Dynamical_Systems",
+      "year": 2024,
+      "title": "Deep Learning Model Correction for Dynamical Systems",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Surrogate"
+      ],
+      "application_tags": [
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep Learning for Model Correction of Dynamical Systems with Data Scarcity\n\n 基本信息\n- **arXiv**: [2410.17913](https://arxiv.org/abs/2410.17913)\n- **作者**: Caroline Tatsuoka, Dongbin Xiu\n- **年份**: 2024\n\n "
+    },
+    {
+      "path": "papers/2024/FuXi-DA",
+      "year": 2024,
+      "title": "FuXi-DA: A Generalized Deep Learning Data Assimilation Framework",
+      "arxiv": "2404.08522",
+      "authors": [
+        "Xiaoze Xu",
+        "Xiuyu Sun",
+        "Wei Han",
+        "Xiaohui Zhong",
+        "Lei Chen",
+        "Hao Li"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Transformer"
+      ],
+      "application_tags": [
+        "Ocean-DA",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "FuXi-DA: A Generalized Deep Learning Data Assimilation Framework\n\n 基本信息\n\n- **arXiv**: [2404.08522](https://arxiv.org/abs/2404.08522)\n- **作者**: Xiaoze Xu, Xiuyu Sun, Wei Han, Xiaohui Zhong, Lei Chen, H"
+    },
+    {
+      "path": "papers/2024/LangYa_Cross_Spatiotemporal_Ocean_Forecasting",
+      "year": 2024,
+      "title": "LangYa: Cross-Spatiotemporal Ocean Forecasting",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Transformer"
+      ],
+      "application_tags": [
+        "Wave",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "LangYa: Revolutionizing Cross-Spatiotemporal Ocean Forecasting\n\n 基本信息\n- **arXiv**: [2412.18097](https://arxiv.org/abs/2412.18097)\n- **作者**: Nan Yang, Chong Wang, Meihua Zhao, Zimeng Zhao, Huiling Zhen"
+    },
+    {
+      "path": "papers/2024/Machine_Learning_Inverse_Problems_DA",
+      "year": 2024,
+      "title": "Machine Learning for Inverse Problems in Data Assimilation",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Machine Learning for Inverse Problems and Data Assimilation\n\n 基本信息\n- **arXiv**: [2410.10523](https://arxiv.org/abs/2410.10523)\n- **作者**: Eviatar Bach, Ricardo Baptista, Daniel Sanz-Alonso, Andrew Stua"
+    },
+    {
+      "path": "papers/2024/OceanCastNet_Wave_Forecasting",
+      "year": 2024,
+      "title": "OceanCastNet: Wave Forecasting Network",
+      "arxiv": "2406.03848",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "GNN"
+      ],
+      "application_tags": [
+        "Wave"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "OceanCastNet: Ocean Wave Forecasting with Deep Learning\n\n 基本信息\n- **arXiv**: [2406.03848](https://arxiv.org/abs/2406.03848)\n- **作者**: Ziliang Zhang, Huaming Yu, Danqin Ren, Chenyu Zhang, Minghua Sun, X"
+    },
+    {
+      "path": "papers/2024/Randomized_PINN_Bayesian_DA",
+      "year": 2024,
+      "title": "Randomized PINN for Bayesian Data Assimilation",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "Bayesian"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Randomized Physics-Informed Neural Networks for Bayesian Data Assimilation\n\n 基本信息\n- **arXiv**: [2407.04617](https://arxiv.org/abs/2407.04617)\n- **作者**: Yifei Zong, David Barajas-Solano, Alexandre M. T"
+    },
+    {
+      "path": "papers/2024/Semilinear_Neural_Operators",
+      "year": 2024,
+      "title": "Semilinear Neural Operators for Ocean Forecasting",
+      "arxiv": "2402.15656",
+      "authors": [
+        "Singh",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Learning Semilinear Neural Operators: A Unified Framework For Prediction And Data Assimilation\n\n 基本信息\n\n- **arXiv**: [2402.15656](https://arxiv.org/abs/2402.15656)\n- **作者**: Ashutosh Singh et al.\n- **年"
+    },
+    {
+      "path": "papers/2024/Tropical_Pacific_Ocean_DA",
+      "year": 2024,
+      "title": "Tropical Pacific Ocean Data Assimilation",
+      "arxiv": "2406.07063",
+      "authors": [
+        "Meng",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "Ocean-DA",
+        "ENSO"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Reconstructing the Tropical Pacific Upper Ocean using Online Data Assimilation with Deep Learning\n\n 基本信息\n\n- **arXiv**: [2406.07063](https://arxiv.org/abs/2406.07063)\n- **作者**: Zilu Meng et al.\n- **年份*"
+    },
+    {
+      "path": "papers/2024/cgkn_a_deep_learning_framework_for_modeling_comple",
+      "year": 2024,
+      "title": "CGKN: A Deep Learning Framework for Modeling Complex Dynamical Systems and Efficient Data Assimilation",
+      "arxiv": "2410.20072v2",
+      "authors": [
+        "Chuanqi Chen",
+        "Nan Chen",
+        "Yinling Zhang",
+        "Jin-Long Wu"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman",
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "ENSO",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "CGKN: A Deep Learning Framework for Modeling Complex Dynamical Systems and Efficient Data Assimilation\n\n 基本信息\n\n- **arXiv**: [2410.20072v2](http://arxiv.org/abs/2410.20072v2)\n- **作者**: Chuanqi Chen, Na"
+    },
+    {
+      "path": "papers/2024/conditional-gaussian-ensemble-kalman-filtering",
+      "year": 2024,
+      "title": "Conditional Gaussian Ensemble Kalman Filtering",
+      "arxiv": "2409.14300",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A competitive baseline for deep learning enhanced data assimilation using conditional Gaussian ensemble Kalman filtering\n\n 基本信息\n- **arXiv**: [2409.14300](https://arxiv.org/abs/2409.14300)\n- **作者**: Za"
+    },
+    {
+      "path": "papers/2024/koopman-based-deep-learning-nonlinear-system-estimation",
+      "year": 2024,
+      "title": "Koopman-based Deep Learning for Nonlinear System Estimation",
+      "arxiv": "2405.00627",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Koopman"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Koopman-based Deep Learning for Nonlinear System Estimation\n\n 基本信息\n- **arXiv**: [2405.00627](https://arxiv.org/abs/2405.00627)\n- **作者**: Zexin Sun, Mingyu Chen, John Baillieul\n- **年份**: 2024\n\n 中文总结\n**"
+    },
+    {
+      "path": "papers/2024/long-range_vision-based_uav-assisted_localization_",
+      "year": 2024,
+      "title": "Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles",
+      "arxiv": "2408.11429v1",
+      "authors": [
+        "Waseem Akram",
+        "Siyuan Yang",
+        "Hailiang Kuang",
+        "Xiaoyu He",
+        "Muhayy Ud Din",
+        "Yihao Dong",
+        "Defu Lin",
+        "Lakmal Seneviratne",
+        "Shaoming He",
+        "Irfan Hussain"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF"
+      ],
+      "application_tags": [
+        "ENSO",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles\n\n 基本信息\n\n- **arXiv**: [2408.11429v1](http://arxiv.org/abs/2408.11429v1)\n- **作者**: Waseem Akram, Siyuan Yang, Hailiang Kua"
+    },
+    {
+      "path": "papers/2024/neural-network-submesoscale-vertical-heat-flux",
+      "year": 2024,
+      "title": "Neural Network for Submesoscale Vertical Heat Flux",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning",
+        "Neural-Network"
+      ],
+      "application_tags": [
+        "Submesoscale"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A Neural Network-Based Submesoscale Vertical Heat Flux Parameterization and Its Implementation in Regional Ocean Modeling System (ROMS)\n\n 基本信息\n- **arXiv**: [2403.05028](https://arxiv.org/abs/2403.0502"
+    },
+    {
+      "path": "papers/2024/validating-deep-learning-weather-forecast-models",
+      "year": 2024,
+      "title": "Validating Deep Learning Weather Forecast Models",
+      "arxiv": "2404.17652",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Validating Deep Learning Weather Forecast Models on Recent High-Impact Extreme Events\n\n 基本信息\n- **arXiv**: [2404.17652](https://arxiv.org/abs/2404.17652)\n- **作者**: Olivier C. Pasche and 4 other authors"
+    },
+    {
+      "path": "papers/2023/Echo_State_DA",
+      "year": 2023,
+      "title": "Echo State Network for Data Assimilation",
+      "arxiv": "2304.00198",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "ESN"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Sequential Learning from Noisy Data: Data-Assimilation Meets Echo-State Network\n\n 基本信息\n\n- **arXiv**: [2304.00198](https://arxiv.org/abs/2304.00198)\n- **作者**: (authors not shown)\n- **年份**: 2023\n\n 中文总结\n"
+    },
+    {
+      "path": "papers/2023/Graph_SST_Forecast",
+      "year": 2023,
+      "title": "Graph Neural Network for SST Forecasting",
+      "arxiv": "2305.09468",
+      "authors": [
+        "Ning",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "GNN"
+      ],
+      "application_tags": [
+        "SST",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Graph-Based Deep Learning for Sea Surface Temperature Forecasts\n\n 基本信息\n\n- **arXiv**: [2305.09468](https://arxiv.org/abs/2305.09468)\n- **作者**: Ding Ning et al.\n- **年份**: 2023\n\n 中文总结\n\n**核心贡献**：提出基于图深度学习"
+    },
+    {
+      "path": "papers/2023/application_of_deep_learning_to_the_estimation_of_",
+      "year": 2023,
+      "title": "Application of deep learning to the estimation of normalization coefficients in diffusion-based covariance models",
+      "arxiv": "2312.05068v1",
+      "authors": [
+        "Folke K Skrunes",
+        "Mayeul Destouches",
+        "Anthony Weaver",
+        "Guillaume Coulaud",
+        "Olivier Goux",
+        "Corentin Lapeyre"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Application of deep learning to the estimation of normalization coefficients in diffusion-based covariance models\n\n 基本信息\n\n- **arXiv**: [2312.05068v1](http://arxiv.org/abs/2312.05068v1)\n- **作者**: Folke"
+    },
+    {
+      "path": "papers/2023/deep-learning_real-time_bias_correction_method_for",
+      "year": 2023,
+      "title": "A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific",
+      "arxiv": "2311.15001v1",
+      "authors": [
+        "Wei Zhang",
+        "Yu Sun",
+        "Yapeng Wu",
+        "Junyu Dong",
+        "Xiaojiang Song",
+        "Zhiyi Gao",
+        "Renbo Pang",
+        "Boyu Guoan"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "Regional-Forecast",
+        "Wave"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific\n\n 基本信息\n\n- **arXiv**: [2311.15001v1](http://arxiv.org/abs/2311.15001v1)\n- **作者**: Wei"
+    },
+    {
+      "path": "papers/2023/deep_learning_of_systematic_sea_ice_model_errors_f",
+      "year": 2023,
+      "title": "Deep learning of systematic sea ice model errors from data assimilation increments",
+      "arxiv": "2304.03832v1",
+      "authors": [
+        "William Gregory",
+        "Mitchell Bushuk",
+        "Alistair Adcroft",
+        "Yongfei Zhang",
+        "Laure Zanna"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Wave",
+        "Climate",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep learning of systematic sea ice model errors from data assimilation increments\n\n 基本信息\n\n- **arXiv**: [2304.03832v1](http://arxiv.org/abs/2304.03832v1)\n- **作者**: William Gregory, Mitchell Bushuk, Al"
+    },
+    {
+      "path": "papers/2023/on_the_relative_role_of_east_and_west_pacific_sea_",
+      "year": 2023,
+      "title": "On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST",
+      "arxiv": "2302.11357v1",
+      "authors": [
+        "Lekshmi S",
+        "Rajib Chattopadhyay",
+        "D. S. Pai",
+        "M. Rajeevan",
+        "Vinu Valsala",
+        "K. S. Hosalikar",
+        "M. Mohapatra"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "SST",
+        "ENSO",
+        "Wave"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST\n\n 基本信息\n\n- **arXiv**: [2302.11357v1](http://arxiv.org/abs/23"
+    },
+    {
+      "path": "papers/2022/4D-SRDA",
+      "year": 2022,
+      "title": "4D-SRDA: Spatio-Temporal Super-Resolution Data Assimilation",
+      "arxiv": "2212.03656",
+      "authors": [
+        "Yasuda",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Ocean-DA",
+        "Global-Forecast"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Spatio-Temporal Super-Resolution Data Assimilation (SRDA)\n\n 基本信息\n\n- **arXiv**: [2212.03656](https://arxiv.org/abs/2212.03656)\n- **作者**: Yuki Yasuda, Ryo Onishi\n- **年份**: 2022\n\n 中文总结\n\n**核心贡献**：提出 4D-SR"
+    },
+    {
+      "path": "papers/2022/4dvarnet-ssh_end-to-end_learning_of_variational_in",
+      "year": 2022,
+      "title": "4DVarNet-SSH: end-to-end learning of variational interpolation schemes for nadir and wide-swath satellite altimetry",
+      "arxiv": "2211.05904v1",
+      "authors": [
+        "Maxime Beauchamp",
+        "Quentin Febvre",
+        "Hugo Georgentum",
+        "Ronan Fablet"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var"
+      ],
+      "application_tags": [
+        "SSH",
+        "Submesoscale",
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "4DVarNet-SSH: end-to-end learning of variational interpolation schemes for nadir and wide-swath satellite altimetry\n\n 基本信息\n\n- **arXiv**: [2211.05904v1](http://arxiv.org/abs/2211.05904v1)\n- **作者**: Max"
+    },
+    {
+      "path": "papers/2022/Ocean_Observations_Expansion",
+      "year": 2022,
+      "title": "Ocean Observations Expansion with Deep Learning",
+      "arxiv": "2206.01599",
+      "authors": [
+        "Muhamed",
+        "et al."
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A Deep-Learning Usability Expansion Model of Ocean Observations\n\n 基本信息\n\n- **arXiv**: [2206.01599](https://arxiv.org/abs/2206.01599)\n- **作者**: Ali Muhamed et al.\n- **年份**: 2022\n\n 中文总结\n\n**核心贡献**：提出深度学习模"
+    },
+    {
+      "path": "papers/2022/Physics_Informed_Deep_Neural_Operator_Networks",
+      "year": 2022,
+      "title": "Physics-Informed Deep Neural Operator Networks",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "PINN",
+        "Neural-Operator"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Physics-Informed Deep Neural Operator Networks\n\n 基本信息\n- **arXiv**: [2207.05748](https://arxiv.org/abs/2207.05748)\n- **作者**: Somdatta Goswami, Aniruddha Bora, Yue Yu, George Em Karniadakis\n- **年份**: 20"
+    },
+    {
+      "path": "papers/2022/Scientific_Machine_Learning_PINN",
+      "year": 2022,
+      "title": "Scientific Machine Learning and PINN",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "PINN"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Scientific Machine Learning through Physics-Informed Neural Networks: Where we are and What's next\n\n 基本信息\n- **arXiv**: [2201.05624](https://arxiv.org/abs/2201.05624)\n- **作者**: Salvatore Cuomo, Vincenz"
+    },
+    {
+      "path": "papers/2022/deep-learning-enhanced-ensemble-based-data-assimilation",
+      "year": 2022,
+      "title": "Deep Learning Enhanced Ensemble-based Data Assimilation",
+      "arxiv": "2206.04811",
+      "authors": [],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "EnKF",
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Deep Learning-Enhanced Ensemble-Based Data Assimilation for High-Dimensional Nonlinear Dynamical Systems\n\n 基本信息\n- **arXiv**: [2206.04811](https://arxiv.org/abs/2206.04811)\n- **作者**: Ashesh Chattopadhy"
+    },
+    {
+      "path": "papers/2021/Sub-seasonal_Forecasting_Deep_Learning_Weather_Prediction",
+      "year": 2021,
+      "title": "Sub-seasonal Forecasting with Deep Learning Weather Prediction",
+      "arxiv": "",
+      "authors": [],
+      "source": "other",
+      "venue": "",
+      "method_tags": [
+        "Deep-Learning"
+      ],
+      "application_tags": [
+        "Global-Forecast",
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Sub-seasonal Forecasting with a Large Ensemble of Deep-Learning Weather Prediction Models\n\n 基本信息\n- **arXiv**: [2102.05107](https://arxiv.org/abs/2102.05107)\n- **作者**: Jonathan A. Weyn, Dale R. Durran,"
+    },
+    {
+      "path": "papers/2021/using_machine_learning_at_scale_in_hpc_simulations",
+      "year": 2021,
+      "title": "Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling",
+      "arxiv": "2104.09355v1",
+      "authors": [
+        "Sam Partee",
+        "Matthew Ellis",
+        "Alessandro Rigazzi",
+        "Scott Bachman",
+        "Gustavo Marques",
+        "Andrew Shao",
+        "Benjamin Robbins"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [],
+      "application_tags": [
+        "Climate"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling\n\n 基本信息\n\n- **arXiv**: [2104.09355v1](http://arxiv.org/abs/2104.09355v1)\n- **作者**: Sam Partee, "
+    },
+    {
+      "path": "papers/2015/framework_for_interpreting_regularized_state_estim",
+      "year": 2015,
+      "title": "A framework for interpreting regularized state estimation",
+      "arxiv": "1511.04790v1",
+      "authors": [
+        "Nozomi Sugiura",
+        "Shuhei Masuda",
+        "Yosuke Fujii",
+        "Masafumi Kamachi",
+        "Yoichi Ishikawa",
+        "Toshiyuki Awaji"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var",
+        "Hybrid"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "A framework for interpreting regularized state estimation\n\n 基本信息\n\n- **arXiv**: [1511.04790v1](http://arxiv.org/abs/1511.04790v1)\n- **作者**: Nozomi Sugiura, Shuhei Masuda, Yosuke Fujii, Masafumi Kamachi"
+    },
+    {
+      "path": "papers/2014/optimal_boundary_conditions_at_the_staircase-shape",
+      "year": 2014,
+      "title": "Optimal boundary conditions at the staircase-shaped coastlines",
+      "arxiv": "1402.7201v1",
+      "authors": [
+        "Eugene Kazantsev"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Optimal boundary conditions at the staircase-shaped coastlines\n\n 基本信息\n\n- **arXiv**: [1402.7201v1](http://arxiv.org/abs/1402.7201v1)\n- **作者**: Eugene Kazantsev\n- **年份**: 2014\n- **来源**: arXiv\n\n 摘要\n\nA 4D"
+    },
+    {
+      "path": "papers/2012/optimal_boundary_conditions_for_orca-2_model",
+      "year": 2012,
+      "title": "Optimal Boundary Conditions for ORCA-2 Model",
+      "arxiv": "1212.3116v1",
+      "authors": [
+        "Eugene Kazantsev"
+      ],
+      "source": "arXiv",
+      "venue": "",
+      "method_tags": [
+        "4D-Var"
+      ],
+      "application_tags": [
+        "Ocean-DA"
+      ],
+      "date_collected": "2026-03-21",
+      "paper_url": "",
+      "abstract_preview": "Optimal Boundary Conditions for ORCA-2 Model\n\n 基本信息\n\n- **arXiv**: [1212.3116v1](http://arxiv.org/abs/1212.3116v1)\n- **作者**: Eugene Kazantsev\n- **年份**: 2012\n- **来源**: arXiv\n\n 摘要\n\nA 4D-Var data assimila"
+    }
+  ],
+  "statistics": {
+    "total": 92,
+    "by_year": {
+      "2026": 19,
+      "2025": 37,
+      "2024": 19,
+      "2023": 6,
+      "2022": 6,
+      "2021": 2,
+      "2015": 1,
+      "2014": 1,
+      "2012": 1
+    },
+    "by_method": {
+      "GNN": 8,
+      "Transformer": 6,
+      "LSTM": 1,
+      "Hybrid": 20,
+      "Neural-Operator": 13,
+      "4D-Var": 14,
+      "PINN": 13,
+      "Koopman": 9,
+      "EnKF": 11,
+      "Surrogate": 4,
+      "Deep-Learning": 24,
+      "Neural-Network": 2,
+      "U-Net": 3,
+      "Bayesian": 1,
+      "ESN": 1
+    },
+    "by_application": {
+      "Regional-Forecast": 12,
+      "SST": 10,
+      "ENSO": 10,
+      "Climate": 15,
+      "Ocean-DA": 49,
+      "Wave": 12,
+      "Global-Forecast": 20,
+      "Submesoscale": 8,
+      "Deep-Ocean": 7,
+      "Carbon-Storage": 3,
+      "SSH": 5,
+      "Tidal": 2
+    }
+  },
+  "last_updated": "2026-03-21T12:26:57.325763"
+}

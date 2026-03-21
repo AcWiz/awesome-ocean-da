@@ -1,3 +1,16 @@
+---
+title: Validating Deep Learning Weather Forecast Models
+arXiv: '2404.17652'
+authors: []
+year: 2024
+source: arXiv
+method_tags:
+- Deep-Learning
+application_tags:
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # Validating Deep Learning Weather Forecast Models on Recent High-Impact Extreme Events
 
 ## 基本信息

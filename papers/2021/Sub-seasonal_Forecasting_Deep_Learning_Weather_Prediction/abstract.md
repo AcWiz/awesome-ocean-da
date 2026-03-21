@@ -1,3 +1,16 @@
+---
+title: Sub-seasonal Forecasting with Deep Learning Weather Prediction
+authors: []
+year: 2021
+source: other
+method_tags:
+- Deep-Learning
+application_tags:
+- Global-Forecast
+- Climate
+date_collected: '2026-03-21'
+---
+
 # Sub-seasonal Forecasting with a Large Ensemble of Deep-Learning Weather Prediction Models
 
 ## 基本信息

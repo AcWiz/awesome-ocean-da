@@ -1,3 +1,17 @@
+---
+title: 'SamudrACE: Coupled Climate Modeling'
+authors: []
+year: 2025
+source: other
+method_tags:
+- Deep-Learning
+- Hybrid
+application_tags:
+- Climate
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # SamudrACE: Fast and Accurate Coupled Climate Modeling with 3D Ocean and Atmosphere Emulators
 
 ## 基本信息

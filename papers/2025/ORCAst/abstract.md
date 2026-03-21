@@ -1,3 +1,19 @@
+---
+title: 'ORCAst: Operational High-Resolution Current Forecasts'
+arXiv: '2501.12054'
+authors:
+- Garcia
+- et al.
+year: 2025
+source: arXiv
+method_tags:
+- Deep-Learning
+application_tags:
+- Global-Forecast
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # ORCAst: Operational High-Resolution Current Forecasts
 
 ## 基本信息

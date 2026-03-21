@@ -1,3 +1,19 @@
+---
+title: Tropical Pacific Ocean Data Assimilation
+arXiv: '2406.07063'
+authors:
+- Meng
+- et al.
+year: 2024
+source: arXiv
+method_tags:
+- EnKF
+application_tags:
+- Ocean-DA
+- ENSO
+date_collected: '2026-03-21'
+---
+
 # Reconstructing the Tropical Pacific Upper Ocean using Online Data Assimilation with Deep Learning
 
 ## 基本信息

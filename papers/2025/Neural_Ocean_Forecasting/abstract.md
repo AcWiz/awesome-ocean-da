@@ -1,3 +1,16 @@
+---
+title: Neural Ocean Forecasting
+arXiv: '2512.22152'
+authors: []
+year: 2025
+source: arXiv
+method_tags:
+- Deep-Learning
+application_tags:
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # Neural Ocean Forecasting from Sparse Satellite Observations
 
 ## 基本信息

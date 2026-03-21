@@ -1,3 +1,15 @@
+---
+title: Machine Learning for Inverse Problems in Data Assimilation
+authors: []
+year: 2024
+source: other
+method_tags:
+- Deep-Learning
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Machine Learning for Inverse Problems and Data Assimilation
 
 ## 基本信息

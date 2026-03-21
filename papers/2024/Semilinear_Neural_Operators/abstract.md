@@ -1,3 +1,18 @@
+---
+title: Semilinear Neural Operators for Ocean Forecasting
+arXiv: '2402.15656'
+authors:
+- Singh
+- et al.
+year: 2024
+source: arXiv
+method_tags:
+- Neural-Operator
+application_tags:
+- Global-Forecast
+date_collected: '2026-03-21'
+---
+
 # Learning Semilinear Neural Operators: A Unified Framework For Prediction And Data Assimilation
 
 ## 基本信息

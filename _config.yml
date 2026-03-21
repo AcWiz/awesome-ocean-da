@@ -1,0 +1,43 @@
+# Jekyll Configuration
+title: AI + 海洋数据同化论文库
+description: 收集整理 AI/深度学习 + 海洋数据同化、预报相关的学术论文
+baseurl: ""
+url: "https://yourusername.github.io"
+repository: yourusername/ai-data-assimilation-papers
+
+# GitHub Pages
+github:
+  repository_url: https://github.com/yourusername/ai-data-assimilation-papers
+
+# Jekyll settings
+theme: minima
+plugins:
+  - jekyll-seo-tag
+  - jekyll-feed
+
+# Collections
+collections:
+  papers:
+    output: true
+    permalink: /papers/:path/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+# Markdown
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Exclude
+exclude:
+  - scripts/
+  - .github/
+  - papers/
+  - ".gitignore"
+  - "*.pdf"

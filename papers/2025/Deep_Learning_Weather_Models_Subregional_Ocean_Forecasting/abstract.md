@@ -1,3 +1,15 @@
+---
+title: Deep Learning Weather Models Subregional Ocean Forecasting
+authors: []
+year: 2025
+source: other
+method_tags:
+- Deep-Learning
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # Deep Learning Weather Models for Subregional Ocean Forecasting: A Case Study on the Canary Current Upwelling System
 
 ## 基本信息

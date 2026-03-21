@@ -1,3 +1,16 @@
+---
+title: Neural Network for Submesoscale Vertical Heat Flux
+authors: []
+year: 2024
+source: other
+method_tags:
+- Deep-Learning
+- Neural-Network
+application_tags:
+- Submesoscale
+date_collected: '2026-03-21'
+---
+
 # A Neural Network-Based Submesoscale Vertical Heat Flux Parameterization and Its Implementation in Regional Ocean Modeling System (ROMS)
 
 ## 基本信息

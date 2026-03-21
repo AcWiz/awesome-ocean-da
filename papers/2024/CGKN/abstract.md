@@ -1,3 +1,19 @@
+---
+title: 'CGKN: Conditional Gaussian Koopman Network'
+arXiv: '2410.20072'
+authors:
+- Chuanqi Chen
+- et al.
+year: 2024
+source: arXiv
+method_tags:
+- Koopman
+- Neural-Operator
+application_tags:
+- Ocean-DA
+date_collected: '2026-03-21'
+---
+
 # CGKN: Conditional Gaussian Koopman Network
 
 ## 基本信息

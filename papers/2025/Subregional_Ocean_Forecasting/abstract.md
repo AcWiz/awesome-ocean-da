@@ -1,3 +1,19 @@
+---
+title: Subregional Ocean Forecasting with Deep Learning
+arXiv: '2505.24429'
+authors:
+- Cuervo-Londono
+- et al.
+year: 2025
+source: arXiv
+method_tags:
+- Deep-Learning
+- GNN
+application_tags:
+- Regional-Forecast
+date_collected: '2026-03-21'
+---
+
 # Deep Learning Weather Models for Subregional Ocean Forecasting
 
 ## 基本信息

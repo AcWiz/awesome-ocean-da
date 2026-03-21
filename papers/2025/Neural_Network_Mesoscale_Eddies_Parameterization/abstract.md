@@ -1,3 +1,16 @@
+---
+title: Neural Network for Mesoscale Eddies Parameterization
+authors: []
+year: 2025
+source: other
+method_tags:
+- Deep-Learning
+- Neural-Network
+application_tags:
+- Submesoscale
+date_collected: '2026-03-21'
+---
+
 # Generalizable Neural-Network Parameterization of Mesoscale Eddies
 
 ## 基本信息

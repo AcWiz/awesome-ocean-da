@@ -1,3 +1,16 @@
+---
+title: CTP Hybrid Ocean Front Forecasting
+authors: []
+year: 2025
+source: other
+method_tags:
+- Deep-Learning
+- Hybrid
+application_tags:
+- Regional-Forecast
+date_collected: '2026-03-21'
+---
+
 # CTP: A hybrid CNN-Transformer-PINN model for ocean front forecasting
 
 ## 基本信息
