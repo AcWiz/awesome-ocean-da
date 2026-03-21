@@ -1,6 +1,6 @@
 ---
-title: Advancing Ocean State Estimation with efficient and scalable AI
-arXiv: 2511.06041v1
+title: 'Advancing Ocean State Estimation with efficient and scalable AI'
+arXiv: '2511.06041v1'
 authors:
 - Yanfei Xiang
 - Yuan Gao
@@ -12,14 +12,16 @@ authors:
 - Xiaomeng Huang
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Hybrid
-application_tags:
-- Global-Forecast
-- Submesoscale
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean, Submesoscale, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Advancing Ocean State Estimation with efficient and scalable AI
 
 ## 基本信息

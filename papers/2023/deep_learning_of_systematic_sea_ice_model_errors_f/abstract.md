@@ -1,6 +1,6 @@
 ---
-title: Deep learning of systematic sea ice model errors from data assimilation increments
-arXiv: 2304.03832v1
+title: 'Deep learning of systematic sea ice model errors from data assimilation increments'
+arXiv: '2304.03832v1'
 authors:
 - William Gregory
 - Mitchell Bushuk
@@ -9,14 +9,16 @@ authors:
 - Laure Zanna
 year: 2023
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Hybrid
-application_tags:
-- Wave
-- Climate
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves, Climate, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Deep learning of systematic sea ice model errors from data assimilation increments
 
 ## 基本信息

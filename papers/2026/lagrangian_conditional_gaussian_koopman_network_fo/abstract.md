@@ -1,7 +1,6 @@
 ---
-title: A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and
-  Prediction
-arXiv: 2603.14115v1
+title: 'A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction'
+arXiv: '2603.14115v1'
 authors:
 - Zhongrui Wang
 - Chuanqi Chen
@@ -9,14 +8,18 @@ authors:
 - Nan Chen
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
 - Neural-Operator
 - Hybrid
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction
 
 ## 基本信息

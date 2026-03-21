@@ -1,7 +1,6 @@
 ---
-title: 'SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature
-  Prediction'
-arXiv: 2511.05629v1
+title: 'SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction'
+arXiv: '2511.05629v1'
 authors:
 - Zheng Jiang
 - Wei Wang
@@ -9,15 +8,18 @@ authors:
 - Yi Wang
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - 4D-Var
 - Hybrid
-application_tags:
-- Regional-Forecast
-- SST
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean, Sea Surface Temperature
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction
 
 ## 基本信息

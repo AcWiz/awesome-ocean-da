@@ -1,15 +1,21 @@
 ---
-title: Randomized PINN for Bayesian Data Assimilation
-authors: []
+title: 'Randomized PINN for Bayesian Data Assimilation'
+arXiv: ''
+authors:
+
 year: 2024
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - Bayesian
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Randomized Physics-Informed Neural Networks for Bayesian Data Assimilation
 

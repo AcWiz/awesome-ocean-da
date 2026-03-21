@@ -1,6 +1,6 @@
 ---
-title: Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models
-arXiv: 2602.05416v1
+title: 'Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models'
+arXiv: '2602.05416v1'
 authors:
 - Freja Høgholm Petersen
 - Jesper Sandvig Mariegaard
@@ -8,13 +8,16 @@ authors:
 - Allan P. Engsig-Karup
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
-application_tags:
-- Regional-Forecast
-- Climate
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean, Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models
 
 ## 基本信息

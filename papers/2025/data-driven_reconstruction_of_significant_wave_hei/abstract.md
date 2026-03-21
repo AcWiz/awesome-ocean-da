@@ -1,6 +1,6 @@
 ---
-title: Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations
-arXiv: 2509.19384v1
+title: 'Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations'
+arXiv: '2509.19384v1'
 authors:
 - Hongyuan Shi
 - Yilin Zhai
@@ -10,15 +10,18 @@ authors:
 - Qing Wang
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Transformer
 - U-Net
 - Hybrid
-application_tags:
-- Wave
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations
 
 ## 基本信息

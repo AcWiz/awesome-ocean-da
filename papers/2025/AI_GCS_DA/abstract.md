@@ -1,16 +1,21 @@
 ---
-title: AI for Geological Carbon Storage Data Assimilation
+title: 'AI for Geological Carbon Storage Data Assimilation'
+arXiv: ''
 authors:
 - Seabra
 - et al.
 year: 2025
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
-application_tags:
-- Carbon-Storage
-date_collected: '2026-03-21'
+ocean_vars: Carbon-Storage
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # AI enhanced data assimilation and uncertainty quantification applied to Geological Carbon Storage
 

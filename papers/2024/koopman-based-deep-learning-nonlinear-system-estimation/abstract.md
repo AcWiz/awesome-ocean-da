@@ -1,15 +1,20 @@
 ---
-title: Koopman-based Deep Learning for Nonlinear System Estimation
+title: 'Koopman-based Deep Learning for Nonlinear System Estimation'
 arXiv: '2405.00627'
-authors: []
+authors:
+
 year: 2024
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Koopman-based Deep Learning for Nonlinear System Estimation
 

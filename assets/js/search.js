@@ -114,11 +114,19 @@
 
     noResults.style.display = 'none';
 
-    grid.innerHTML = papers.map(paper => `
+    grid.innerHTML = papers.map(paper => {
+      const venueBadge = paper.venue && paper.venue !== ''
+        ? `<span class="paper-venue-badge" title="正式发表">${escapeHtml(paper.venue)}</span>`
+        : (paper.source === 'arXiv' ? `<span class="paper-arxiv-badge" title="arXiv预印本">arXiv</span>` : '');
+
+      return `
       <div class="paper-card" data-id="${paper.arxiv || paper.title}">
         <div class="paper-header">
           <h3 class="paper-title">${escapeHtml(paper.title)}</h3>
-          <span class="paper-year">${paper.year}</span>
+          <div class="paper-meta-badges">
+            ${venueBadge}
+            <span class="paper-year">${paper.year}</span>
+          </div>
         </div>
         <div class="paper-authors">
           ${paper.authors.slice(0, 3).join(', ')}${paper.authors.length > 3 ? ' et al.' : ''}
@@ -132,7 +140,7 @@
           <a href="${paper.path}/" class="btn btn-secondary">详情</a>
         </div>
       </div>
-    `).join('');
+    `}).join('');
 
     // Add click handlers for cards
     grid.querySelectorAll('.paper-card').forEach(card => {
@@ -152,11 +160,16 @@
     const modal = document.getElementById('paper-modal');
     const body = document.getElementById('modal-body');
 
+    const venueDisplay = paper.venue && paper.venue !== ''
+      ? `<span class="paper-venue-badge">${escapeHtml(paper.venue)}</span>`
+      : (paper.source === 'arXiv' ? `<span class="paper-arxiv-badge">arXiv 预印本</span>` : `<span>${paper.source}</span>`);
+
     body.innerHTML = `
       <h2>${escapeHtml(paper.title)}</h2>
       <p><strong>作者:</strong> ${paper.authors.join(', ')}</p>
       <p><strong>年份:</strong> ${paper.year}</p>
-      <p><strong>来源:</strong> ${paper.source}${paper.venue ? ` - ${paper.venue}` : ''}</p>
+      <p><strong>发表:</strong> ${venueDisplay}</p>
+      ${paper.doi ? `<p><strong>DOI:</strong> <a href="https://doi.org/${paper.doi}" target="_blank">${paper.doi}</a></p>` : ''}
       <div class="paper-tags">
         ${paper.method_tags.map(tag => `<span class="tag method-tag">${tag}</span>`).join('')}
         ${paper.application_tags.map(tag => `<span class="tag application-tag">${tag}</span>`).join('')}

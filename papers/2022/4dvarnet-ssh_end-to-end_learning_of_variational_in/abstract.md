@@ -1,7 +1,6 @@
 ---
-title: '4DVarNet-SSH: end-to-end learning of variational interpolation schemes for
-  nadir and wide-swath satellite altimetry'
-arXiv: 2211.05904v1
+title: '4DVarNet-SSH: end-to-end learning of variational interpolation schemes for nadir and wide-swath satellite altimetry'
+arXiv: '2211.05904v1'
 authors:
 - Maxime Beauchamp
 - Quentin Febvre
@@ -9,14 +8,16 @@ authors:
 - Ronan Fablet
 year: 2022
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
-application_tags:
-- SSH
-- Submesoscale
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Sea Surface Height, Submesoscale, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # 4DVarNet-SSH: end-to-end learning of variational interpolation schemes for nadir and wide-swath satellite altimetry
 
 ## 基本信息

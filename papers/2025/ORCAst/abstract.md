@@ -6,13 +6,16 @@ authors:
 - et al.
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
-application_tags:
-- Global-Forecast
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # ORCAst: Operational High-Resolution Current Forecasts
 

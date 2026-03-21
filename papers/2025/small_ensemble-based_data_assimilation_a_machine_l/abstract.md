@@ -1,7 +1,6 @@
 ---
-title: 'Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation
-  Method with Limited Ensemble Size'
-arXiv: 2510.15284v1
+title: 'Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size'
+arXiv: '2510.15284v1'
 authors:
 - Zhilin Li
 - Zhou Yao
@@ -13,13 +12,16 @@ authors:
 - Guangyao Wang
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
-application_tags:
-- Wave
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size
 
 ## 基本信息

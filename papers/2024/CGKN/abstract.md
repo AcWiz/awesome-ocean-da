@@ -6,13 +6,17 @@ authors:
 - et al.
 year: 2024
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
 - Neural-Operator
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # CGKN: Conditional Gaussian Koopman Network
 

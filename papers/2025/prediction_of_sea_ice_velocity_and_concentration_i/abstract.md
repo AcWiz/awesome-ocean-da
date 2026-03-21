@@ -1,19 +1,23 @@
 ---
-title: Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using
-  Physics-informed Neural Network
-arXiv: 2510.17756v1
+title: 'Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network'
+arXiv: '2510.17756v1'
 authors:
 - Younghyun Koo
 - Maryam Rahnemoonfar
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - U-Net
 - Hybrid
-application_tags: []
-date_collected: '2026-03-21'
+ocean_vars: Unknown
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network
 
 ## 基本信息

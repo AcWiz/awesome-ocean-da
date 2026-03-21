@@ -1,16 +1,21 @@
 ---
-title: Deep Learning Enhanced Ensemble-based Data Assimilation
+title: 'Deep Learning Enhanced Ensemble-based Data Assimilation'
 arXiv: '2206.04811'
-authors: []
+authors:
+
 year: 2022
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
 - Deep-Learning
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Deep Learning-Enhanced Ensemble-Based Data Assimilation for High-Dimensional Nonlinear Dynamical Systems
 

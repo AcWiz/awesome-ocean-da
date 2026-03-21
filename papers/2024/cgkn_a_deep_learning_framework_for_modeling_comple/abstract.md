@@ -1,7 +1,6 @@
 ---
-title: 'CGKN: A Deep Learning Framework for Modeling Complex Dynamical Systems and
-  Efficient Data Assimilation'
-arXiv: 2410.20072v2
+title: 'CGKN: A Deep Learning Framework for Modeling Complex Dynamical Systems and Efficient Data Assimilation'
+arXiv: '2410.20072v2'
 authors:
 - Chuanqi Chen
 - Nan Chen
@@ -9,14 +8,17 @@ authors:
 - Jin-Long Wu
 year: 2024
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
 - Neural-Operator
-application_tags:
-- ENSO
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: ENSO, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # CGKN: A Deep Learning Framework for Modeling Complex Dynamical Systems and Efficient Data Assimilation
 
 ## 基本信息

@@ -1,7 +1,6 @@
 ---
-title: A Versatile Laboratory Approach to Reproduce and Analyze Internal Ocean Wave
-  Dynamics
-arXiv: 2603.13512v1
+title: 'A Versatile Laboratory Approach to Reproduce and Analyze Internal Ocean Wave Dynamics'
+arXiv: '2603.13512v1'
 authors:
 - Vohn Jacquez
 - Zachary Phan
@@ -11,13 +10,16 @@ authors:
 - Alberto Scotti
 year: 2026
 source: arXiv
-method_tags: []
-application_tags:
-- Deep-Ocean
-- Wave
-- Climate
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Deep-Ocean, Ocean Waves, Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # A Versatile Laboratory Approach to Reproduce and Analyze Internal Ocean Wave Dynamics
 
 ## 基本信息

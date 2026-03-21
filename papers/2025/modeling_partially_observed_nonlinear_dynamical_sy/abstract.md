@@ -1,7 +1,6 @@
 ---
-title: Modeling Partially Observed Nonlinear Dynamical Systems and Efficient Data
-  Assimilation via Discrete-Time Conditional Gaussian Koopman Network
-arXiv: 2507.08749v1
+title: 'Modeling Partially Observed Nonlinear Dynamical Systems and Efficient Data Assimilation via Discrete-Time Conditional Gaussian Koopman Network'
+arXiv: '2507.08749v1'
 authors:
 - Chuanqi Chen
 - Zhongrui Wang
@@ -9,15 +8,19 @@ authors:
 - Jin-Long Wu
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
 - Neural-Operator
 - 4D-Var
 - Surrogate
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Modeling Partially Observed Nonlinear Dynamical Systems and Efficient Data Assimilation via Discrete-Time Conditional Gaussian Koopman Network
 
 ## 基本信息

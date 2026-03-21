@@ -1,16 +1,21 @@
 ---
 title: 'OceanCastNet: Wave Forecasting Network'
 arXiv: '2406.03848'
-authors: []
+authors:
+
 year: 2024
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
 - GNN
-application_tags:
-- Wave
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # OceanCastNet: Ocean Wave Forecasting with Deep Learning
 

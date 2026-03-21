@@ -1,18 +1,22 @@
 ---
-title: Data Driven Air Entrainment Velocity Parameterization by Breaking Waves
-arXiv: 2602.04067v1
+title: 'Data Driven Air Entrainment Velocity Parameterization by Breaking Waves'
+arXiv: '2602.04067v1'
 authors:
 - Xiaohui Zhou
 - Anton S. Darmenov
 - Kianoosh Yousefi
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Hybrid
-application_tags:
-- Wave
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Data Driven Air Entrainment Velocity Parameterization by Breaking Waves
 
 ## 基本信息

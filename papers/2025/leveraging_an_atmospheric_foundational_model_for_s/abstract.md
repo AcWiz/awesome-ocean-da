@@ -1,23 +1,23 @@
 ---
-title: Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature
-  Forecasting
-arXiv: 2510.25563v1
+title: 'Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting'
+arXiv: '2510.25563v1'
 authors:
 - Víctor Medina
 - Giovanny A. Cuervo-Londoño
 - Javier Sánchez
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - Hybrid
-application_tags:
-- Regional-Forecast
-- SST
-- Climate
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean, Sea Surface Temperature, Climate, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting
 
 ## 基本信息

@@ -1,7 +1,6 @@
 ---
-title: 'HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with
-  Efficient Spatial Downscaling'
-arXiv: 2602.00598v1
+title: 'HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling'
+arXiv: '2602.00598v1'
 authors:
 - Ruiqi Shu
 - Xiaohui Zhong
@@ -12,14 +11,17 @@ authors:
 - Xiaomeng Huang
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - Hybrid
-application_tags:
-- Global-Forecast
-- Climate
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean, Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling
 
 ## 基本信息

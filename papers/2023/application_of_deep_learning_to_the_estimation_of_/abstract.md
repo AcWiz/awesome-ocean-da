@@ -1,7 +1,6 @@
 ---
-title: Application of deep learning to the estimation of normalization coefficients
-  in diffusion-based covariance models
-arXiv: 2312.05068v1
+title: 'Application of deep learning to the estimation of normalization coefficients in diffusion-based covariance models'
+arXiv: '2312.05068v1'
 authors:
 - Folke K Skrunes
 - Mayeul Destouches
@@ -11,13 +10,16 @@ authors:
 - Corentin Lapeyre
 year: 2023
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
-application_tags:
-- Global-Forecast
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Application of deep learning to the estimation of normalization coefficients in diffusion-based covariance models
 
 ## 基本信息

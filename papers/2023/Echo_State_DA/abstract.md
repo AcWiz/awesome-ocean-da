@@ -1,15 +1,20 @@
 ---
-title: Echo State Network for Data Assimilation
+title: 'Echo State Network for Data Assimilation'
 arXiv: '2304.00198'
-authors: []
+authors:
+
 year: 2023
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - ESN
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Sequential Learning from Noisy Data: Data-Assimilation Meets Echo-State Network
 

@@ -17,7 +17,7 @@
         "Xibin Zhao"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "GNN"
       ],
@@ -40,7 +40,7 @@
         "Z. George Xue"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "IEEE BigData 2025 (不确定)",
       "method_tags": [
         "Transformer",
         "LSTM",
@@ -66,7 +66,7 @@
         "Sylvie Thiria"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "SST",
@@ -89,7 +89,7 @@
         "Kianoosh Yousefi"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Hybrid"
       ],
@@ -111,7 +111,7 @@
         "Konobu Kimura"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "GNN",
         "Hybrid"
@@ -135,7 +135,7 @@
         "Javier Sánchez"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "GNN"
       ],
@@ -161,7 +161,7 @@
         "Xianyao Chen"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "ENSO",
@@ -184,7 +184,7 @@
         "Gege Wen"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Neural-Operator",
         "4D-Var",
@@ -213,7 +213,7 @@
         "Xiaomeng Huang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN",
         "Hybrid"
@@ -238,7 +238,7 @@
         "Nan Chen"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Koopman",
         "Neural-Operator",
@@ -263,7 +263,7 @@
         "Gabriel A. Vecchi"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "SST",
@@ -290,7 +290,7 @@
         "Kamaljit Singh"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF",
         "Hybrid"
@@ -326,7 +326,7 @@
         "Lin Wang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "Global-Forecast",
@@ -351,7 +351,7 @@
         "Allan P. Engsig-Karup"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Koopman"
       ],
@@ -375,7 +375,7 @@
         "Noel Cressie"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Neural-Operator"
       ],
@@ -398,7 +398,7 @@
         "Etienne Meunier"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Koopman",
         "Transformer",
@@ -422,7 +422,7 @@
         "Tanujit Chakraborty"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "SST"
@@ -442,7 +442,7 @@
         "Omar Knio"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF"
       ],
@@ -467,7 +467,7 @@
         "Alberto Scotti"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "Deep-Ocean",
@@ -566,7 +566,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "AAAI 2026",
       "method_tags": [
         "Neural-Operator"
       ],
@@ -603,7 +603,7 @@
       "arxiv": "2512.22152",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Deep-Learning"
       ],
@@ -624,7 +624,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Deep-Learning"
       ],
@@ -666,7 +666,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN"
       ],
@@ -687,7 +687,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "EGU 2025 / arXiv only",
       "method_tags": [
         "Deep-Learning",
         "GNN"
@@ -709,7 +709,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "ICML 2025",
       "method_tags": [
         "4D-Var",
         "Neural-Operator"
@@ -738,7 +738,7 @@
         "Xiaomeng Huang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Nature Communications (2025)",
       "method_tags": [
         "Hybrid"
       ],
@@ -768,7 +768,7 @@
         "Raquel Rodriguez Suquet"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF"
       ],
@@ -788,7 +788,7 @@
         "Ronald Katende"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN",
         "4D-Var"
@@ -814,7 +814,7 @@
         "Qing Wang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Transformer",
         "U-Net",
@@ -835,7 +835,7 @@
       "arxiv": "2505.24429",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "EGU 2025 / arXiv only",
       "method_tags": [
         "Deep-Learning",
         "GNN"
@@ -859,7 +859,7 @@
         "Antoine Venaille"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN"
       ],
@@ -885,7 +885,7 @@
         "Elizabeth A. Barnes"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "Regional-Forecast",
@@ -907,7 +907,7 @@
         "Zilu Meng"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Surrogate",
         "Hybrid"
@@ -937,7 +937,7 @@
         "Jiahui Huang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "GNN",
         "Transformer"
@@ -965,7 +965,7 @@
         "Femke Vossepoel"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF"
       ],
@@ -989,7 +989,7 @@
         "Javier Sánchez"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN",
         "Hybrid"
@@ -1016,7 +1016,7 @@
         "Rodrigo A. Vargas-Hernández"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "NeurIPS 2025 (ML4PS Workshop)",
       "method_tags": [
         "Neural-Operator",
         "4D-Var"
@@ -1040,7 +1040,7 @@
         "Jin-Long Wu"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Computer Methods in Applied Mechanics and Engineering (CMAME, 2025)",
       "method_tags": [
         "Koopman",
         "Neural-Operator",
@@ -1070,7 +1070,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "U-Net",
         "4D-Var"
@@ -1097,7 +1097,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "IEEE Transactions on Geoscience and Remote Sensing (TGRS, 2025)",
       "method_tags": [
         "4D-Var"
       ],
@@ -1124,7 +1124,7 @@
         "Peikun Xiao"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Hybrid"
       ],
@@ -1148,7 +1148,7 @@
         "Bing Cong"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Koopman",
         "Hybrid"
@@ -1171,7 +1171,7 @@
         "Sreedath Panat"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN",
         "Hybrid"
@@ -1191,7 +1191,7 @@
         "Maryam Rahnemoonfar"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN",
         "U-Net",
@@ -1213,7 +1213,7 @@
         "Robinson Hordoir"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "NeurIPS 2025 (ML4PS Workshop)",
       "method_tags": [
         "Neural-Operator"
       ],
@@ -1259,7 +1259,7 @@
         "Guangyao Wang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF"
       ],
@@ -1283,7 +1283,7 @@
         "Yi Wang"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "AAAI-AISI 2026",
       "method_tags": [
         "PINN",
         "4D-Var",
@@ -1304,7 +1304,7 @@
       "arxiv": "2503.19160",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN"
       ],
@@ -1329,7 +1329,7 @@
         "Hon Yung Wong"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "PINN",
         "Neural-Operator"
@@ -1352,7 +1352,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Computational Physics (2025)",
       "method_tags": [
         "Koopman",
         "Neural-Operator"
@@ -1409,7 +1409,7 @@
       "arxiv": "2405.16649",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Transactions on Machine Learning Research (TMLR, 2025)",
       "method_tags": [
         "Koopman"
       ],
@@ -1471,7 +1471,7 @@
         "Hao Li"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "npj Climate and Atmospheric Science (2025)",
       "method_tags": [
         "Deep-Learning",
         "Transformer"
@@ -1529,7 +1529,7 @@
       "arxiv": "2406.03848",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Advances in Modeling Earth Systems (2025)",
       "method_tags": [
         "Deep-Learning",
         "GNN"
@@ -1570,7 +1570,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "ICLR 2024",
       "method_tags": [
         "Neural-Operator"
       ],
@@ -1591,7 +1591,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Advances in Modeling Earth Systems (2024)",
       "method_tags": [
         "EnKF"
       ],
@@ -1615,7 +1615,7 @@
         "Jin-Long Wu"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Computational Physics (2025)",
       "method_tags": [
         "Koopman",
         "Neural-Operator"
@@ -1635,7 +1635,7 @@
       "arxiv": "2409.14300",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF"
       ],
@@ -1653,7 +1653,7 @@
       "arxiv": "2405.00627",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Koopman"
       ],
@@ -1682,7 +1682,7 @@
         "Irfan Hussain"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "EnKF"
       ],
@@ -1720,7 +1720,7 @@
       "arxiv": "2404.17652",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Artificial Intelligence for the Earth Systems (2025)",
       "method_tags": [
         "Deep-Learning"
       ],
@@ -1738,7 +1738,7 @@
       "arxiv": "2304.00198",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "IEEE CDC 2023",
       "method_tags": [
         "ESN"
       ],
@@ -1759,7 +1759,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "GNN"
       ],
@@ -1785,7 +1785,7 @@
         "Corentin Lapeyre"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "4D-Var"
       ],
@@ -1813,7 +1813,7 @@
         "Boyu Guoan"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Ocean Modelling (2024)",
       "method_tags": [],
       "application_tags": [
         "Regional-Forecast",
@@ -1836,7 +1836,7 @@
         "Laure Zanna"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Advances in Modeling Earth Systems (2024)",
       "method_tags": [
         "Hybrid"
       ],
@@ -1864,7 +1864,7 @@
         "M. Mohapatra"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [],
       "application_tags": [
         "SST",
@@ -1885,7 +1885,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Advances in Modeling Earth Systems (2024)",
       "method_tags": [
         "4D-Var"
       ],
@@ -1909,7 +1909,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Geoscientific Model Development (2023)",
       "method_tags": [
         "4D-Var"
       ],
@@ -1932,7 +1932,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "Deep-Learning"
       ],
@@ -1987,7 +1987,7 @@
       "arxiv": "2206.04811",
       "authors": [],
       "source": "arXiv",
-      "venue": "",
+      "venue": "Journal of Computational Physics (2023)",
       "method_tags": [
         "EnKF",
         "Deep-Learning"
@@ -2033,7 +2033,7 @@
         "Benjamin Robbins"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "ISC HPC 2022 / arXiv only",
       "method_tags": [],
       "application_tags": [
         "Climate"
@@ -2056,7 +2056,7 @@
         "Toshiyuki Awaji"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "4D-Var",
         "Hybrid"
@@ -2077,7 +2077,7 @@
         "Eugene Kazantsev"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "4D-Var"
       ],
@@ -2097,7 +2097,7 @@
         "Eugene Kazantsev"
       ],
       "source": "arXiv",
-      "venue": "",
+      "venue": "arXiv only",
       "method_tags": [
         "4D-Var"
       ],
@@ -2154,5 +2154,5 @@
       "Tidal": 2
     }
   },
-  "last_updated": "2026-03-21T12:26:57.325763"
+  "last_updated": "2026-03-21T16:30:00.000000"
 }

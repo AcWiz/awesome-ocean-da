@@ -1,14 +1,20 @@
 ---
-title: Deep Learning for ENSO Forecast
-authors: []
+title: 'Deep Learning for ENSO Forecast'
+arXiv: ''
+authors:
+
 year: 2024
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
-application_tags:
-- ENSO
-date_collected: '2026-03-21'
+ocean_vars: ENSO
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Using Deep Learning to Identify Initial Error Sensitivity for Interpretable ENSO Forecasts
 

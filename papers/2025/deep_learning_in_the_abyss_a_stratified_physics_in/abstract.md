@@ -1,7 +1,6 @@
 ---
-title: 'Deep learning in the abyss: a stratified Physics Informed Neural Network for
-  data assimilation'
-arXiv: 2503.19160v1
+title: 'Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation'
+arXiv: '2503.19160v1'
 authors:
 - Vadim Limousin
 - Nelly Pustelnik
@@ -9,16 +8,16 @@ authors:
 - Antoine Venaille
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
-application_tags:
-- SSH
-- Deep-Ocean
-- Wave
-- Submesoscale
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Sea Surface Height, Deep-Ocean, Ocean Waves, Submesoscale, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation
 
 ## 基本信息

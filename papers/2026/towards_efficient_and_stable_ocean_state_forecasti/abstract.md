@@ -1,7 +1,6 @@
 ---
-title: 'Towards Efficient and Stable Ocean State Forecasting: A Continuous-Time Koopman
-  Approach'
-arXiv: 2603.05560v2
+title: 'Towards Efficient and Stable Ocean State Forecasting: A Continuous-Time Koopman Approach'
+arXiv: '2603.05560v2'
 authors:
 - Rares Grozavescu
 - Pengyu Zhang
@@ -9,14 +8,18 @@ authors:
 - Etienne Meunier
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Koopman
 - Transformer
 - Surrogate
-application_tags:
-- Climate
-date_collected: '2026-03-21'
+ocean_vars: Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Towards Efficient and Stable Ocean State Forecasting: A Continuous-Time Koopman Approach
 
 ## 基本信息

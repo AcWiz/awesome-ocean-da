@@ -1,7 +1,6 @@
 ---
-title: Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational
-  Data Assimilation
-arXiv: 2509.22949v1
+title: 'Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation'
+arXiv: '2509.22949v1'
 authors:
 - Hamidreza Moazzami
 - Asma Jamali
@@ -9,13 +8,17 @@ authors:
 - Rodrigo A. Vargas-Hernández
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Neural-Operator
 - 4D-Var
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation
 
 ## 基本信息

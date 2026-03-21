@@ -1,6 +1,6 @@
 ---
-title: Physical Informed Neural Networks for modeling ocean pollutant
-arXiv: 2507.08834v1
+title: 'Physical Informed Neural Networks for modeling ocean pollutant'
+arXiv: '2507.08834v1'
 authors:
 - Karishma Battina
 - Prathamesh Dinesh Joshi
@@ -9,12 +9,17 @@ authors:
 - Sreedath Panat
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - Hybrid
-application_tags: []
-date_collected: '2026-03-21'
+ocean_vars: Unknown
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Physical Informed Neural Networks for modeling ocean pollutant
 
 ## 基本信息

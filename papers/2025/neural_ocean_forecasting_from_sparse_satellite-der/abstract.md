@@ -1,7 +1,6 @@
 ---
-title: 'Neural ocean forecasting from sparse satellite-derived observations: a case-study
-  for SSH dynamics and altimetry data'
-arXiv: 2512.22152v1
+title: 'Neural ocean forecasting from sparse satellite-derived observations: a case-study for SSH dynamics and altimetry data'
+arXiv: '2512.22152v1'
 authors:
 - Daria Botvynko
 - Pierre Haslée
@@ -13,14 +12,17 @@ authors:
 - Ronan Fablet
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - U-Net
 - 4D-Var
-application_tags:
-- SSH
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Sea Surface Height, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Neural ocean forecasting from sparse satellite-derived observations: a case-study for SSH dynamics and altimetry data
 
 ## 基本信息

@@ -1,6 +1,6 @@
 ---
-title: Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE
-arXiv: 2601.01501v1
+title: 'Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE'
+arXiv: '2601.01501v1'
 authors:
 - Fan Xu
 - Wei Gong
@@ -13,11 +13,16 @@ authors:
 - Xibin Zhao
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - GNN
-application_tags: []
-date_collected: '2026-03-21'
+ocean_vars: Unknown
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE
 
 ## 基本信息

@@ -1,7 +1,6 @@
 ---
-title: Machine learning enhanced data assimilation framework for multiscale carbonate
-  rock characterization
-arXiv: 2602.06989v1
+title: 'Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization'
+arXiv: '2602.06989v1'
 authors:
 - Zhenkai Bo
 - Ahmed H. Elsheikh
@@ -13,15 +12,17 @@ authors:
 - Kamaljit Singh
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
 - Hybrid
-application_tags:
-- Deep-Ocean
-- Carbon-Storage
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Deep-Ocean, Carbon-Storage, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization
 
 ## 基本信息

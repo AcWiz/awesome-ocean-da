@@ -1,15 +1,20 @@
 ---
-title: Continuous Data Assimilation for Turbulence Models
-authors: []
+title: 'Continuous Data Assimilation for Turbulence Models'
+arXiv: ''
+authors:
+
 year: 2024
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
-application_tags:
-- Submesoscale
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Submesoscale, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Parameter Analysis in Continuous Data Assimilation for Various Turbulence Models
 

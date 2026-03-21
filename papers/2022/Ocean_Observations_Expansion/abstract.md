@@ -1,17 +1,21 @@
 ---
-title: Ocean Observations Expansion with Deep Learning
+title: 'Ocean Observations Expansion with Deep Learning'
 arXiv: '2206.01599'
 authors:
 - Muhamed
 - et al.
 year: 2022
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # A Deep-Learning Usability Expansion Model of Ocean Observations
 

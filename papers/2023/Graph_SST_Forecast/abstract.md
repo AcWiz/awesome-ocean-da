@@ -1,18 +1,21 @@
 ---
-title: Graph Neural Network for SST Forecasting
+title: 'Graph Neural Network for SST Forecasting'
 arXiv: '2305.09468'
 authors:
 - Ning
 - et al.
 year: 2023
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - GNN
-application_tags:
-- SST
-- Global-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Sea Surface Temperature, Global Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Graph-Based Deep Learning for Sea Surface Temperature Forecasts
 

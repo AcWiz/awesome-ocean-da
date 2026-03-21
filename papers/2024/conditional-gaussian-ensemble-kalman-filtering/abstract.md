@@ -1,15 +1,20 @@
 ---
-title: Conditional Gaussian Ensemble Kalman Filtering
+title: 'Conditional Gaussian Ensemble Kalman Filtering'
 arXiv: '2409.14300'
-authors: []
+authors:
+
 year: 2024
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # A competitive baseline for deep learning enhanced data assimilation using conditional Gaussian ensemble Kalman filtering
 

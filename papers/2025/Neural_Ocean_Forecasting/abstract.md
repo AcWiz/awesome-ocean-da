@@ -1,15 +1,20 @@
 ---
-title: Neural Ocean Forecasting
+title: 'Neural Ocean Forecasting'
 arXiv: '2512.22152'
-authors: []
+authors:
+
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
-application_tags:
-- Global-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Neural Ocean Forecasting from Sparse Satellite Observations
 

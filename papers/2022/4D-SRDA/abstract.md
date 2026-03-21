@@ -6,13 +6,16 @@ authors:
 - et al.
 year: 2022
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
-application_tags:
-- Ocean-DA
-- Global-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Ocean State, Global Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Spatio-Temporal Super-Resolution Data Assimilation (SRDA)
 

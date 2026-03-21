@@ -1,7 +1,6 @@
 ---
-title: Observation-only learning of neural mapping schemes for gappy satellite-derived
-  ocean colour parameters
-arXiv: 2503.11532v1
+title: 'Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters'
+arXiv: '2503.11532v1'
 authors:
 - Clément Dorffer
 - Frédéric Jourdin
@@ -11,13 +10,16 @@ authors:
 - Ronan Fablet
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
-application_tags:
-- Regional-Forecast
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters
 
 ## 基本信息

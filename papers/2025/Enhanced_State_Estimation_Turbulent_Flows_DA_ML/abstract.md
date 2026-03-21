@@ -1,16 +1,21 @@
 ---
-title: Enhanced State Estimation for Turbulent Flows with DA and ML
-authors: []
+title: 'Enhanced State Estimation for Turbulent Flows with DA and ML'
+arXiv: ''
+authors:
+
 year: 2025
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
 - EnKF
-application_tags:
-- Submesoscale
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Submesoscale, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Enhanced State Estimation for turbulent flows combining Ensemble Data Assimilation and Machine Learning
 

@@ -1,21 +1,23 @@
 ---
-title: Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific
-  Pacemaker Experiments
-arXiv: 2511.20899v1
+title: 'Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments'
+arXiv: '2511.20899v1'
 authors:
 - Zhanxiang Hua
 - Christina Karamperidou
 - Zilu Meng
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Surrogate
 - Hybrid
-application_tags:
-- ENSO
-- Climate
-date_collected: '2026-03-21'
+ocean_vars: ENSO, Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments
 
 ## 基本信息

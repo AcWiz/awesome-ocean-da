@@ -1,16 +1,20 @@
 ---
-title: Optimal boundary conditions at the staircase-shaped coastlines
-arXiv: 1402.7201v1
+title: 'Optimal boundary conditions at the staircase-shaped coastlines'
+arXiv: '1402.7201v1'
 authors:
 - Eugene Kazantsev
 year: 2014
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Optimal boundary conditions at the staircase-shaped coastlines
 
 ## 基本信息

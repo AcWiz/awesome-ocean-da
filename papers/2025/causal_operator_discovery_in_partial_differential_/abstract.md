@@ -1,18 +1,21 @@
 ---
-title: Causal Operator Discovery in Partial Differential Equations via Counterfactual
-  Physics-Informed Neural Networks
-arXiv: 2506.20181v1
+title: 'Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks'
+arXiv: '2506.20181v1'
 authors:
 - Ronald Katende
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - 4D-Var
-application_tags:
-- Climate
-date_collected: '2026-03-21'
+ocean_vars: Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks
 
 ## 基本信息

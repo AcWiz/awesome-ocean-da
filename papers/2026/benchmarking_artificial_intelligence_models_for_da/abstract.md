@@ -1,6 +1,6 @@
 ---
-title: Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting
-arXiv: 2602.05178v1
+title: 'Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting'
+arXiv: '2602.05178v1'
 authors:
 - Magesh Rajasekaran
 - Md Saiful Sajol
@@ -10,14 +10,18 @@ authors:
 - Z. George Xue
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Transformer
 - LSTM
 - Hybrid
-application_tags:
-- Regional-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting
 
 ## 基本信息

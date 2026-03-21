@@ -1,6 +1,6 @@
 ---
 title: 'OceanForecastBench: A Benchmark Dataset for Data-Driven Global Ocean Forecasting'
-arXiv: 2511.18732v2
+arXiv: '2511.18732v2'
 authors:
 - Haoming Jia
 - Yi Han
@@ -11,13 +11,16 @@ authors:
 - Peikun Xiao
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Hybrid
-application_tags:
-- Global-Forecast
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # OceanForecastBench: A Benchmark Dataset for Data-Driven Global Ocean Forecasting
 
 ## 基本信息

@@ -3,11 +3,19 @@
                        data-applications="{{ include.paper.application_tags | join: ',' }}"
                        data-title="{{ include.paper.title | downcase }}"
                        data-authors="{{ include.paper.authors | join: ' ' | downcase }}"
-                       data-year="{{ include.paper.year }}">
+                       data-year="{{ include.paper.year }}"
+                       data-venue="{{ include.paper.venue | default: '' }}">
 
   <div class="paper-header">
     <h3 class="paper-title">{{ include.paper.title }}</h3>
-    <span class="paper-year">{{ include.paper.year }}</span>
+    <div class="paper-meta-badges">
+      {% if include.paper.venue and include.paper.venue != "" %}
+        <span class="paper-venue-badge" title="正式发表">{{ include.paper.venue }}</span>
+      {% elsif include.paper.source == "arXiv" %}
+        <span class="paper-arxiv-badge" title="arXiv预印本">arXiv</span>
+      {% endif %}
+      <span class="paper-year">{{ include.paper.year }}</span>
+    </div>
   </div>
 
   <div class="paper-authors">

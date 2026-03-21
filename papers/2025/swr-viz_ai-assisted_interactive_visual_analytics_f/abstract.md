@@ -1,7 +1,6 @@
 ---
-title: 'SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather
-  Routing'
-arXiv: 2511.15182v1
+title: 'SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing'
+arXiv: '2511.15182v1'
 authors:
 - Subhashis Hazarika
 - Leonard Lupin-Jimenez
@@ -10,14 +9,17 @@ authors:
 - Hon Yung Wong
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
 - Neural-Operator
-application_tags:
-- Wave
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing
 
 ## 基本信息

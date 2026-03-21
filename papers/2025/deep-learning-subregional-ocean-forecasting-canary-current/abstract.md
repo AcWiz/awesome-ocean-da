@@ -1,16 +1,21 @@
 ---
 title: 'Deep Learning Subregional Ocean Forecasting: Canary Current'
 arXiv: '2505.24429'
-authors: []
+authors:
+
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
 - GNN
-application_tags:
-- Regional-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Deep Learning Weather Models for Subregional Ocean Forecasting: A Case Study on the Canary Current Upwelling System
 

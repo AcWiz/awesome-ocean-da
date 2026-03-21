@@ -1,20 +1,23 @@
 ---
-title: Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks
-arXiv: 2601.12775v1
+title: 'Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks'
+arXiv: '2601.12775v1'
 authors:
 - Yuta Hirabayashi
 - Daisuke Matusoka
 - Konobu Kimura
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - GNN
 - Hybrid
-application_tags:
-- Global-Forecast
-- Submesoscale
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean, Submesoscale
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks
 
 ## 基本信息

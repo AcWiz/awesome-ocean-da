@@ -1,7 +1,6 @@
 ---
-title: Probabilistic reconstruction of global sea surface temperature using generative
-  diffusion models
-arXiv: 2603.16272v1
+title: 'Probabilistic reconstruction of global sea surface temperature using generative diffusion models'
+arXiv: '2603.16272v1'
 authors:
 - Haijie Li
 - Ya Wang
@@ -19,15 +18,16 @@ authors:
 - Lin Wang
 year: 2026
 source: arXiv
-method_tags: []
-application_tags:
-- Global-Forecast
-- SST
-- ENSO
-- Climate
-- Ocean-DA
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Global Ocean, Sea Surface Temperature, ENSO, Climate, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Probabilistic reconstruction of global sea surface temperature using generative diffusion models
 
 ## 基本信息

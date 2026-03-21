@@ -1,6 +1,6 @@
 ---
-title: A framework for interpreting regularized state estimation
-arXiv: 1511.04790v1
+title: 'A framework for interpreting regularized state estimation'
+arXiv: '1511.04790v1'
 authors:
 - Nozomi Sugiura
 - Shuhei Masuda
@@ -10,13 +10,17 @@ authors:
 - Toshiyuki Awaji
 year: 2015
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
 - Hybrid
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # A framework for interpreting regularized state estimation
 
 ## 基本信息

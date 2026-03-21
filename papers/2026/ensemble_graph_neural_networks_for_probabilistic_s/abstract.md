@@ -1,20 +1,22 @@
 ---
-title: Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting
-  via Input Perturbations
-arXiv: 2603.06153v1
+title: 'Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations'
+arXiv: '2603.06153v1'
 authors:
 - Alejandro J. González-Santana
 - Giovanny A. Cuervo-Londoño
 - Javier Sánchez
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - GNN
-application_tags:
-- Regional-Forecast
-- SST
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean, Sea Surface Temperature
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations
 
 ## 基本信息

@@ -1,7 +1,6 @@
 ---
-title: Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization
-  for Advanced Data Assimilation in Geological Carbon Storage
-arXiv: 2511.05266v1
+title: 'Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization for Advanced Data Assimilation in Geological Carbon Storage'
+arXiv: '2511.05266v1'
 authors:
 - Gabriel Serrão Seabra
 - Nikolaj T. Mücke
@@ -11,14 +10,16 @@ authors:
 - Femke Vossepoel
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
-application_tags:
-- Deep-Ocean
-- Carbon-Storage
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Deep-Ocean, Carbon-Storage, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization for Advanced Data Assimilation in Geological Carbon Storage
 
 ## 基本信息

@@ -1,18 +1,22 @@
 ---
 title: 'Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure'
-arXiv: 2510.09792v1
+arXiv: '2510.09792v1'
 authors:
 - Vahidreza Jahanmard
 - Ali Ramezani-Kebrya
 - Robinson Hordoir
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Neural-Operator
-application_tags:
-- Wave
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure
 
 ## 基本信息

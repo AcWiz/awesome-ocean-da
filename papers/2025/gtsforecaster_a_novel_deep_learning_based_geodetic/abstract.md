@@ -1,7 +1,6 @@
 ---
-title: 'GTS_Forecaster: a novel deep learning based geodetic time series forecasting
-  toolbox with python'
-arXiv: 2509.10560v1
+title: 'GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python'
+arXiv: '2509.10560v1'
 authors:
 - Xuechen Liang
 - Xiaoxing He
@@ -14,15 +13,17 @@ authors:
 - Jiahui Huang
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - GNN
 - Transformer
-application_tags:
-- Regional-Forecast
-- SSH
-- Tidal
-date_collected: '2026-03-21'
+ocean_vars: Regional Ocean, Sea Surface Height, Tidal
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python
 
 ## 基本信息

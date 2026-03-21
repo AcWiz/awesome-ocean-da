@@ -1,17 +1,21 @@
 ---
-title: Stratified PINN for Deep Ocean Data Assimilation
+title: 'Stratified PINN for Deep Ocean Data Assimilation'
 arXiv: '2503.19160'
 authors:
 - Limousin
 - et al.
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - PINN
-application_tags:
-- Deep-Ocean
-date_collected: '2026-03-21'
+ocean_vars: Deep-Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Deep learning in the abyss: A stratified Physics Informed Neural Network for data assimilation
 

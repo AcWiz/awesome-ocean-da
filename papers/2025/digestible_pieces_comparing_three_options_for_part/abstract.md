@@ -1,20 +1,22 @@
 ---
-title: 'Digestible Pieces: comparing three options for partitioning the Northeast
-  Pacific Coast for S2S sea surface height prediction'
-arXiv: 2510.18133v1
+title: 'Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction'
+arXiv: '2510.18133v1'
 authors:
 - Laura Thapa
 - Marybeth Arcodia
 - Elizabeth A. Barnes
 year: 2025
 source: arXiv
-method_tags: []
-application_tags:
-- Regional-Forecast
-- SSH
-- Tidal
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Regional Ocean, Sea Surface Height, Tidal
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction
 
 ## 基本信息

@@ -1,7 +1,6 @@
 ---
-title: Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency
-  and Sea Surface Temperature Variability
-arXiv: 2602.05083v1
+title: 'Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability'
+arXiv: '2602.05083v1'
 authors:
 - Zilu Meng
 - Gregory J. Hakim
@@ -9,13 +8,16 @@ authors:
 - Gabriel A. Vecchi
 year: 2026
 source: arXiv
-method_tags: []
-application_tags:
-- SST
-- ENSO
-- Ocean-DA
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Sea Surface Temperature, ENSO, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability
 
 ## 基本信息

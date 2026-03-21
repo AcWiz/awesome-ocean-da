@@ -1,6 +1,6 @@
 ---
-title: Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles
-arXiv: 2408.11429v1
+title: 'Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles'
+arXiv: '2408.11429v1'
 authors:
 - Waseem Akram
 - Siyuan Yang
@@ -14,13 +14,16 @@ authors:
 - Irfan Hussain
 year: 2024
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
-application_tags:
-- ENSO
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: ENSO, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles
 
 ## 基本信息

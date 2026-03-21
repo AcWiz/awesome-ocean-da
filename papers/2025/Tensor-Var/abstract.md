@@ -6,14 +6,17 @@ authors:
 - et al.
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - 4D-Var
 - Neural-Operator
-application_tags:
-- Ocean-DA
-- Global-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Ocean State, Global Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation
 

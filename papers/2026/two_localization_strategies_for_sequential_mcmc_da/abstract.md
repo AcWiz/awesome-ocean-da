@@ -1,19 +1,22 @@
 ---
-title: Two Localization Strategies for Sequential MCMC Data Assimilation with Applications
-  to Nonlinear Non-Gaussian Geophysical Models
-arXiv: 2603.05817v1
+title: 'Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models'
+arXiv: '2603.05817v1'
 authors:
 - Hamza Ruzayqat
 - Hristo G. Chipilski
 - Omar Knio
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models
 
 ## 基本信息

@@ -1,7 +1,6 @@
 ---
-title: A Deep-learning Real-time Bias Correction Method for Significant Wave Height
-  Forecasts in the Western North Pacific
-arXiv: 2311.15001v1
+title: 'A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific'
+arXiv: '2311.15001v1'
 authors:
 - Wei Zhang
 - Yu Sun
@@ -13,12 +12,16 @@ authors:
 - Boyu Guoan
 year: 2023
 source: arXiv
-method_tags: []
-application_tags:
-- Regional-Forecast
-- Wave
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Regional Ocean, Ocean Waves
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific
 
 ## 基本信息

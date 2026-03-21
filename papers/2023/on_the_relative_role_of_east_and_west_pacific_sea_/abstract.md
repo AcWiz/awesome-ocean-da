@@ -1,7 +1,6 @@
 ---
-title: On the Relative Role of East and West Pacific Sea Surface Temperature (SST)
-  Gradients in the Prediction Skill of Central Pacific NINO3.4 SST
-arXiv: 2302.11357v1
+title: 'On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST'
+arXiv: '2302.11357v1'
 authors:
 - Lekshmi S
 - Rajib Chattopadhyay
@@ -12,13 +11,16 @@ authors:
 - M. Mohapatra
 year: 2023
 source: arXiv
-method_tags: []
-application_tags:
-- SST
-- ENSO
-- Wave
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Sea Surface Temperature, ENSO, Ocean Waves
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST
 
 ## 基本信息

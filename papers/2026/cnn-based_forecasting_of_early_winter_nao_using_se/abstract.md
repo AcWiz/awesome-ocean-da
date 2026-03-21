@@ -1,6 +1,6 @@
 ---
-title: CNN-based forecasting of early winter NAO using sea surface temperature
-arXiv: 2603.16312v1
+title: 'CNN-based forecasting of early winter NAO using sea surface temperature'
+arXiv: '2603.16312v1'
 authors:
 - Elena Provenzano
 - Guillaume Gastineau
@@ -9,14 +9,16 @@ authors:
 - Sylvie Thiria
 year: 2026
 source: arXiv
-method_tags: []
-application_tags:
-- SST
-- ENSO
-- Climate
-- Ocean-DA
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Sea Surface Temperature, ENSO, Climate, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # CNN-based forecasting of early winter NAO using sea surface temperature
 
 ## 基本信息

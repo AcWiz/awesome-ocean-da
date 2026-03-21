@@ -1,16 +1,21 @@
 ---
 title: 'LangYa: Cross-Spatiotemporal Ocean Forecasting'
-authors: []
+arXiv: ''
+authors:
+
 year: 2024
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
 - Transformer
-application_tags:
-- Wave
-- Global-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Ocean Waves, Global Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # LangYa: Revolutionizing Cross-Spatiotemporal Ocean Forecasting
 

@@ -1,7 +1,6 @@
 ---
-title: 'Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic
-  to Real Data'
-arXiv: 2504.21670v1
+title: 'Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic to Real Data'
+arXiv: '2504.21670v1'
 authors:
 - Quentin Bonassies
 - Thanh Huy Nguyen
@@ -14,12 +13,16 @@ authors:
 - Raquel Rodriguez Suquet
 year: 2025
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - EnKF
-application_tags:
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic to Real Data
 
 ## 基本信息

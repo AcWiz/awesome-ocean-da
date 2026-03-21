@@ -1,7 +1,6 @@
 ---
-title: 'Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application
-  to Ocean Climate Modeling'
-arXiv: 2104.09355v1
+title: 'Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling'
+arXiv: '2104.09355v1'
 authors:
 - Sam Partee
 - Matthew Ellis
@@ -12,11 +11,16 @@ authors:
 - Benjamin Robbins
 year: 2021
 source: arXiv
-method_tags: []
-application_tags:
-- Climate
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling
 
 ## 基本信息

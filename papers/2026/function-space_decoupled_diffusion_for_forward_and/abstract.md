@@ -1,7 +1,6 @@
 ---
-title: Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon
-  Capture and Storage
-arXiv: 2602.12274v2
+title: 'Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon Capture and Storage'
+arXiv: '2602.12274v2'
 authors:
 - Xin Ju
 - Jiachen Yao
@@ -10,15 +9,18 @@ authors:
 - Gege Wen
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Neural-Operator
 - 4D-Var
 - Hybrid
-application_tags:
-- Deep-Ocean
-- Ocean-DA
-date_collected: '2026-03-21'
+ocean_vars: Deep-Ocean, Ocean State
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon Capture and Storage
 
 ## 基本信息

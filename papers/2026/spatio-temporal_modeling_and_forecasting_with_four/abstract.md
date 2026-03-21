@@ -1,6 +1,6 @@
 ---
-title: Spatio-temporal modeling and forecasting with Fourier neural operators
-arXiv: 2601.01813v1
+title: 'Spatio-temporal modeling and forecasting with Fourier neural operators'
+arXiv: '2601.01813v1'
 authors:
 - Pratik Nag
 - Andrew Zammit-Mangion
@@ -8,12 +8,16 @@ authors:
 - Noel Cressie
 year: 2026
 source: arXiv
-method_tags:
+venue: arXiv
+domain_tags:
 - Neural-Operator
-application_tags:
-- SST
-date_collected: '2026-03-21'
+ocean_vars: Sea Surface Temperature
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Spatio-temporal modeling and forecasting with Fourier neural operators
 
 ## 基本信息

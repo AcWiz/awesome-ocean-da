@@ -1,18 +1,22 @@
 ---
-title: 'Turning Time Series into Algebraic Equations: Symbolic Machine Learning for
-  Interpretable Modeling of Chaotic Time Series'
-arXiv: 2603.07261v1
+title: 'Turning Time Series into Algebraic Equations: Symbolic Machine Learning for Interpretable Modeling of Chaotic Time Series'
+arXiv: '2603.07261v1'
 authors:
 - Madhurima Panja
 - Grace Younes
 - Tanujit Chakraborty
 year: 2026
 source: arXiv
-method_tags: []
-application_tags:
-- SST
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: Sea Surface Temperature
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Turning Time Series into Algebraic Equations: Symbolic Machine Learning for Interpretable Modeling of Chaotic Time Series
 
 ## 基本信息

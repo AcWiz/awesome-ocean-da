@@ -1,15 +1,21 @@
 ---
-title: Deep Learning Model Correction for Dynamical Systems
-authors: []
+title: 'Deep Learning Model Correction for Dynamical Systems'
+arXiv: ''
+authors:
+
 year: 2024
 source: other
-method_tags:
+venue: arXiv
+domain_tags:
 - Deep-Learning
 - Surrogate
-application_tags:
-- Global-Forecast
-date_collected: '2026-03-21'
+ocean_vars: Global Ocean
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 
 # Deep Learning for Model Correction of Dynamical Systems with Data Scarcity
 

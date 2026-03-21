@@ -1,6 +1,6 @@
 ---
-title: Explore the Ideology of Deep Learning in ENSO Forecasts
-arXiv: 2601.02050v1
+title: 'Explore the Ideology of Deep Learning in ENSO Forecasts'
+arXiv: '2601.02050v1'
 authors:
 - Yanhai Gan
 - Yipeng Chen
@@ -10,12 +10,16 @@ authors:
 - Xianyao Chen
 year: 2026
 source: arXiv
-method_tags: []
-application_tags:
-- ENSO
-- Climate
-date_collected: '2026-03-21'
+venue: arXiv
+domain_tags:
+- 
+ocean_vars: ENSO, Climate
+spatiotemporal_res: Unknown
+difficulty: ★★★☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
+
 # Explore the Ideology of Deep Learning in ENSO Forecasts
 
 ## 基本信息

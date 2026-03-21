@@ -2,6 +2,55 @@
 
 按年份索引所有收录的 AI + 海洋数据同化、预报论文。
 
+## 论文 Abstract 模板
+
+每篇论文的 `abstract.md` 使用统一的 YAML front matter 格式：
+
+```yaml
+---
+title: '论文标题'
+arXiv: 'arXiv ID'
+authors:
+- 作者1
+- 作者2
+year: 2024
+source: arXiv
+venue: arXiv  # 或会议/期刊名称
+domain_tags:
+- Deep-Learning
+- Transformer
+ocean_vars: Sea Surface Temperature  # 海洋变量
+spatiotemporal_res: Unknown          # 时空分辨率
+difficulty: '★★★☆☆'                  # 难度
+importance: '★★★☆☆'                  # 重要性
+read_status: skim                    # skim/read/important
+---
+```
+
+### 字段说明
+
+| 字段 | 说明 | 默认值 |
+|------|------|--------|
+| `title` | 论文标题 | 必填 |
+| `arXiv` | arXiv ID | 必填 |
+| `authors` | 作者列表 | 必填 |
+| `year` | 发表年份 | 必填 |
+| `source` | 来源 (arXiv/Conference/Journal) | `arXiv` |
+| `venue` | 发表场所 | `arXiv` |
+| `domain_tags` | 方法标签 | `[]` |
+| `ocean_vars` | 海洋变量 | `Unknown` |
+| `spatiotemporal_res` | 时空分辨率 | `Unknown` |
+| `difficulty` | 难度 (★~★★★★★) | `★★★☆☆` |
+| `importance` | 重要性 (★~★★★★★) | `★★★☆☆` |
+| `read_status` | 阅读状态 (skim/read/important) | `skim` |
+
+### 迁移说明
+
+- 2026-03-21: 完成从旧格式（`method_tags`, `application_tags`）到新格式的批量迁移
+- 旧字段 `method_tags` → 新字段 `domain_tags`
+- 旧字段 `application_tags` → 新字段 `ocean_vars`（字符串）
+- 原有中文总结内容已保留在正文中
+
 ## 2025 年 (6 篇)
 
 | 论文 | arXiv | 关键词 |
@@ -52,4 +101,4 @@
 
 ---
 
-*最后更新: 2026-03-20*
+*最后更新: 2026-03-21*
