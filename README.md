@@ -1,16 +1,20 @@
-# AI + 海洋数据同化、预报论文搜集
+# AI + 海洋数据同化论文集
 
-[![Paper Count](https://img.shields.io/badge/Papers-30%2B-blue)](./papers)
+[![Paper Count](https://img.shields.io/badge/Papers-92-blue)](./papers)
 [![Last Updated](https://img.shields.io/badge/Last%20Updated-2026--03--21-green)](#)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 [English](./README_en.md) | 简体中文
 
-> 🤖 本项目由 GitHub Actions 自动维护，每 5 分钟自动搜集最新论文
+> 本项目由 GitHub Actions 自动维护，每 5 分钟自动搜集最新论文
+
+---
 
 ## 项目简介
 
 本项目收集整理 **AI/深度学习 + 海洋数据同化、预报** 相关的学术论文，包括来自 arXiv、顶会、顶刊的最新研究成果。
+
+---
 
 ## 研究方向
 
@@ -23,199 +27,119 @@
 
 ---
 
-## 分类索引
+## 论文发表概况
 
-### 按方法类型
-
-| 方法 | 论文数 | 代表作 |
-|------|--------|--------|
-| [PINN](#pinn-方法) | 8+ | Deep PINN, Stratified PINN DA |
-| [Koopman](#koopman-方法) | 3+ | CGKN, Deep Koopman Learning |
-| [Neural-Operator](#neural-operator-方法) | 5+ | NeuralOM, Semilinear Neural Operators |
-| [GNN](#gnn-方法) | 4+ | Graph SST Forecast, OceanCastNet |
-| [EnKF](#enkf-方法) | 3+ | Deep Learning EnKF, CG-EnKF |
-| [4D-Var](#4d-var-方法) | 2+ | Tensor-Var, 4D-SRDA |
-
-### 按应用场景
-
-| 应用 | 论文数 | 代表作 |
-|------|--------|--------|
-| [Global-Forecast](#全球预报) | 10+ | FuXi-DA, ORCAst |
-| [Regional-Forecast](#区域预报) | 8+ | Subregional Ocean Forecasting |
-| [SST/SSH](#sstssh-预测) | 5+ | Graph SST Forecast |
-| [ENSO](#enso-预测) | 3+ | Deep Learning ENSO Forecast |
-| [Deep-Ocean](#深海次表层) | 5+ | Stratified PINN DA |
-| [Wave](#海浪预报) | 2+ | OceanCastNet, LangYa |
+| 类别 | 数量 | 占比 |
+|------|------|------|
+| Top AI/ML 顶会 (NeurIPS/ICML/ICLR/AAAI) | 8 | 9% |
+| Top 海洋/地学期刊 (Nature Comm/JAMES/JCP/Ocean Modelling) | 12 | 13% |
+| 其他同行评审 (IEEE/EGU/TGRS) | 4 | 4% |
+| arXiv 预印本 | 68 | 74% |
 
 ---
 
-## 论文列表
-
-### 2025 年
-
-| 论文 | 作者 | 关键词 | arXiv |
-|------|------|--------|-------|
-| ORCAst: Operational High-Resolution Current Forecasts | Garcia et al. | 海洋表面流预报, 多分支网络 | [2501.12054](https://arxiv.org/abs/2501.12054) |
-| NeuralOM: Neural Ocean Model for S2S Simulation | Gao et al. | 神经算子, 渐进残差修正 | [2505.21020](https://arxiv.org/abs/2505.21020) |
-| Tensor-Var: Efficient 4D-Var | Yang et al. | 4D-Var, Kernel CME | [2501.13312](https://arxiv.org/abs/2501.13312) |
-| Neural Ocean Forecasting | - | 神经海洋预报, 卫星观测 | [2512.22152](https://arxiv.org/abs/2512.22152) |
-| Subregional Ocean Forecasting | Cuervo-Londono et al. | 区域海洋预报 | [2505.24429](https://arxiv.org/abs/2505.24429) |
-| Deep Learning in the Abyss | Limousin et al. | PINN, 深海, 海洋 | [2503.19160](https://arxiv.org/abs/2503.19160) |
-| AI GCS DA | Seabra et al. | 地质碳存储, 海洋 | [X-MOL](https://www.x-mol.com/paper/1757261839955890176) |
-| CTP Hybrid Ocean Front | - | 海洋锋预报, 混合方法 | [待补充] |
-| Recursive Kalman Net | - | 递归卡尔曼网络 | [待补充] |
-| Enhanced State Estimation Turbulent Flows | - | 湍流数据同化 | [待补充] |
-
-### 2024 年
-
-| 论文 | 作者 | 关键词 | arXiv |
-|------|------|--------|-------|
-| CGKN: Conditional Gaussian Koopman | Chen et al. | Koopman, 数据同化 | [2410.20072](https://arxiv.org/abs/2410.20072) |
-| Semilinear Neural Operators | Singh et al. | 神经算子, 预测 | [2402.15656](https://arxiv.org/abs/2402.15656) |
-| Tropical Pacific Ocean DA | Meng et al. | 太平洋, 上层海洋 | [2406.07063](https://arxiv.org/abs/2406.07063) |
-| FuXi-DA: DL for satellite obs | Xu et al. | 卫星观测, 气象海洋 | [2404.08522](https://arxiv.org/abs/2404.08522) |
-| Deep Learning Model Correction | - | 模型校正, 动态系统 | [待补充] |
-| Deep Koopman Learning Noisy Data | - | Koopman, 噪声数据 | [2405.16649](https://arxiv.org/abs/2405.16649) |
-| Deep Learning ENSO Forecast | - | ENSO, 深度学习 | [待补充] |
-| DUNE Climate Forecasting | - | 气候预报 | [待补充] |
-| Koopman-based Deep Learning | - | Koopman, 非线性系统 | [2405.00627](https://arxiv.org/abs/2405.00627) |
-| LangYa Ocean Forecasting | - | 海浪预报 | [待补充] |
-| Machine Learning Inverse Problems DA | - | 逆问题, 数据同化 | [待补充] |
-| OceanCastNet Wave Forecasting | - | 海浪预报, 深度学习 | [2406.03848](https://arxiv.org/abs/2406.03848) |
-| CG-EnKF Data Assimilation | - | 条件高斯 EnKF | [2409.14300](https://arxiv.org/abs/2409.14300) |
-| Validating DL Weather Forecast | - | 深度学习天气预报验证 | [2404.17652](https://arxiv.org/abs/2404.17652) |
-
-### 2023 年
-
-| 论文 | 作者 | 关键词 | arXiv |
-|------|------|--------|-------|
-| Graph SST Forecast | Ning et al. | 图神经网络, SST | [2305.09468](https://arxiv.org/abs/2305.09468) |
-| Echo-State Network DA | - | 回声状态网络 | [2304.00198](https://arxiv.org/abs/2304.00198) |
-
-### 2022 年
-
-| 论文 | 作者 | 关键词 | arXiv |
-|------|------|--------|-------|
-| 4D-SRDA | Yasuda et al. | 时空超分辨率 | [2212.03656](https://arxiv.org/abs/2212.03656) |
-| Ocean Observations Expansion | Muhamed et al. | 海洋观测扩展 | [2206.01599](https://arxiv.org/abs/2206.01599) |
-| Deep Learning EnKF | - | 深度学习增强EnKF | [2206.04811](https://arxiv.org/abs/2206.04811) |
-
----
-
-## 详细分类
-
-### PINN 方法 {#pinn-方法}
-
-- **Stratified PINN DA** (2025) - 深海数据同化
-- **Deep Learning in the Abyss** (2025) - PINN 深海应用
-- **Scientific ML + PINN** (2022) - 科学机器学习与 PINN
-- **Physics Informed Deep Neural Operator** (2022) - 物理信息神经算子
-
-### Koopman 方法 {#koopman-方法}
-
-- **CGKN** (2024) - 条件高斯 Koopman 网络
-- **Deep Koopman Learning Noisy Data** (2024) - 噪声数据 Koopman 学习
-- **Koopman-based Deep Learning** (2024) - 基于 Koopman 的深度学习
-
-### Neural Operator 方法 {#neural-operator-方法}
-
-- **NeuralOM** (2025) - 神经海洋模型
-- **Semilinear Neural Operators** (2024) - 半线性神经算子
-- **Tensor-Var** (2025) - 高效 4D-Var
-
-### GNN 方法 {#gnn-方法}
-
-- **Graph SST Forecast** (2023) - 图神经网络 SST 预报
-- **OceanCastNet** (2024) - 海浪预报
-- **Subregional Ocean Forecasting** (2025) - 亚区域海洋预报
-
-### EnKF 方法 {#enkf-方法}
-
-- **Deep Learning EnKF** (2022) - 深度学习增强 EnKF
-- **CG-EnKF** (2024) - 条件高斯 EnKF
-- **Recursive Kalman Net** (2025) - 递归卡尔曼网络
-
-### 4D-Var 方法 {#4d-var-方法}
-
-- **Tensor-Var** (2025) - 高效 4D-Var
-- **4D-SRDA** (2022) - 时空超分辨率
-
-### 全球预报 {#全球预报}
-
-- **ORCAst** (2025) - 高分辨率海流预报
-- **FuXi-DA** (2024) - 卫星观测数据同化
-- **NeuralOM** (2025) - 神经海洋模型
-- **Tensor-Var** (2025) - 高效 4D-Var
-
-### 区域预报 {#区域预报}
-
-- **Subregional Ocean Forecasting** (2025) - 区域海洋预报
-- **CTP Hybrid Ocean Front** (2025) - 海洋锋预报
-
-### SST/SSH 预测 {#sstssh-预测}
-
-- **Graph SST Forecast** (2023) - 图神经网络 SST 预报
-
-### ENSO 预测 {#enso-预测}
-
-- **Deep Learning ENSO Forecast** (2024) - 深度学习 ENSO 预报
-
-### 深海/次表层 {#深海次表层}
-
-- **Stratified PINN DA** (2025) - 分层 PINN 数据同化
-- **Deep Learning in the Abyss** (2025) - 深海深度学习
-
-### 海浪预报 {#海浪预报}
-
-- **OceanCastNet** (2024) - 海浪预报网络
-- **LangYa** (2024) - 跨时空海浪预报
-
----
-
-## 项目结构
+## 年度趋势
 
 ```
-ai-data-assimilation-papers/
-├── README.md              # 本文件
-├── README_en.md           # English version
-├── CONTRIBUTING.md        # 投稿指南
-├── LICENSE                # MIT License
-│
-├── _config.yml            # Jekyll 配置
-├── index.md               # GitHub Pages 主页
-├── _layouts/              # Jekyll 模板
-├── _includes/              # 可复用组件
-├── _data/                  # 论文索引数据
-├── assets/                 # CSS, JS 资源
-│
-├── scripts/                # 论文搜集脚本
-│   ├── collect_papers.py   # 搜集主脚本
-│   ├── search_strategy.py  # 搜索策略配置
-│   ├── paper_schema.py     # 数据模型
-│   ├── update_index.py     # 索引更新
-│   └── requirements.txt    # Python 依赖
-│
-├── .github/
-│   └── workflows/
-│       └── collect.yml     # GitHub Actions 定时任务
-│
-└── papers/                 # 论文目录
-    ├── 2022/
-    ├── 2023/
-    ├── 2024/
-    └── 2025/
-        └── [论文名]/
-            ├── abstract.md    # 论文摘要（含标签）
-            └── paper.pdf      # PDF 文件（可选）
+2026  ████████████████████                    19
+2025  ████████████████████████████████████████ 37
+2024  ████████████████████                    19
+2023  ██████                                    6
+2022  ██████                                    6
+2021  ██                                        2
+2015  █                                        1
+2014  █                                        1
+2012  █                                        1
 ```
+
+---
+
+## 顶会/顶刊论文
+
+| 论文 | 会议/期刊 | 年份 | 方法 |
+|------|----------|------|------|
+| Tensor-Var: Efficient 4D-Var | ICML 2025 | 2025 | 4D-Var, Neural-Operator |
+| Semilinear Neural Operators | ICLR 2024 | 2024 | Neural-Operator |
+| NeuralOM: Neural Ocean Model | AAAI 2026 (不确定) | 2025 | Neural-Operator |
+| Meta-Learning FNO for Hessian Inversion | NeurIPS 2025 (ML4PS) | 2025 | Neural-Operator, 4D-Var |
+| Principled Operator Learning in Ocean Dynamics | NeurIPS 2025 (ML4PS) | 2025 | Neural-Operator |
+| Advancing Ocean State Estimation | Nature Communications | 2025 | Hybrid |
+| CGKN: Conditional Gaussian Koopman | J. Computational Physics | 2025 | Koopman, Neural-Operator |
+| FuXi-DA: DL for satellite obs | npj Climate Atmos Sci | 2025 | Deep-Learning, Transformer |
+| OceanCastNet Wave Forecasting | J. Advances Modeling Earth Sys | 2025 | Deep-Learning, GNN |
+| Tropical Pacific Ocean DA | J. Advances Modeling Earth Sys | 2024 | EnKF |
+| Deep Learning Enhanced DA | J. Computational Physics | 2023 | EnKF, Deep-Learning |
+| 4D-SRDA | J. Advances Modeling Earth Sys | 2024 | 4D-Var |
+| Validating DL Weather Forecast | AI for Earth Systems | 2025 | Deep-Learning |
+| Discrete-Time Conditional Gaussian Koopman | CMAME | 2025 | Koopman, Neural-Operator |
+| Observation-only learning neural mapping | IEEE TGRS | 2025 | 4D-Var |
+| 4DVarNet-SSH | Geoscientific Model Dev | 2023 | 4D-Var |
+
+---
+
+## 方法论分布
+
+| 方法 | 论文数 |
+|------|--------|
+| Deep-Learning | 24 |
+| Hybrid | 20 |
+| 4D-Var | 14 |
+| PINN | 13 |
+| Neural-Operator | 13 |
+| EnKF | 11 |
+| Koopman | 9 |
+| GNN | 8 |
+| Transformer | 6 |
+| Surrogate | 4 |
+| U-Net | 3 |
+| Neural-Network | 2 |
+| LSTM | 1 |
+| Bayesian | 1 |
+| ESN | 1 |
+
+---
+
+## 应用领域分布
+
+| 应用 | 论文数 |
+|------|--------|
+| Ocean-DA（海洋数据同化） | 49 |
+| Global-Forecast（全球预报） | 20 |
+| Climate（气候） | 15 |
+| Wave（海浪） | 12 |
+| Regional-Forecast（区域预报） | 12 |
+| ENSO | 10 |
+| SST（海表温度） | 10 |
+| Submesoscale（次中尺度） | 8 |
+| Deep-Ocean（深海） | 7 |
+| SSH（海面高度） | 5 |
+| Carbon-Storage（碳封存） | 3 |
+| Tidal（潮汐） | 2 |
+
+---
+
+## 项目特色
+
+- **自动搜集**：GitHub Actions 每 5 分钟自动从 arXiv 搜集最新论文
+- **多维度标签**：方法类型（PINN/Koopman/GNN 等）+ 应用场景（全球预报/区域预报/ENSO 等）
+- **中文解读**：每篇论文配有中文总结
+- **在线展示**：GitHub Pages 支持关键词搜索和标签过滤
+
+---
+
+## 快速导航
+
+- [2026 年论文](./papers/2026/)
+- [2025 年论文](./papers/2025/)
+- [2024 年论文](./papers/2024/)
+- [按方法浏览](#方法论分布)
+- [按应用浏览](#应用领域分布)
 
 ---
 
 ## 在线展示
 
-本项目使用 GitHub Pages 提供在线论文检索：
-
-🔗 **https://yourusername.github.io/ai-data-assimilation-papers**
+GitHub Pages: https://AcWiz.github.io/ai-data-assimilation-papers
 
 功能：
 - 关键词搜索（标题、作者）
@@ -290,6 +214,46 @@ application_tags: ["Global-Forecast", "Deep-Ocean"]
 ### 手动触发
 
 在 GitHub 仓库页面点击 **Actions** -> **Collect Papers** -> **Run workflow**
+
+---
+
+## 项目结构
+
+```
+ai-data-assimilation-papers/
+├── README.md              # 本文件
+├── README_en.md           # English version
+├── CONTRIBUTING.md        # 投稿指南
+├── LICENSE                # MIT License
+│
+├── _config.yml            # Jekyll 配置
+├── index.md               # GitHub Pages 主页
+├── _layouts/              # Jekyll 模板
+├── _includes/              # 可复用组件
+├── _data/                  # 论文索引数据
+├── assets/                 # CSS, JS 资源
+│
+├── scripts/                # 论文搜集脚本
+│   ├── collect_papers.py   # 搜集主脚本
+│   ├── search_strategy.py  # 搜索策略配置
+│   ├── paper_schema.py     # 数据模型
+│   ├── update_index.py     # 索引更新
+│   └── requirements.txt    # Python 依赖
+│
+├── .github/
+│   └── workflows/
+│       └── collect.yml     # GitHub Actions 定时任务
+│
+└── papers/                 # 论文目录
+    ├── 2022/
+    ├── 2023/
+    ├── 2024/
+    ├── 2025/
+    └── 2026/
+        └── [论文名]/
+            ├── abstract.md    # 论文摘要（含标签）
+            └── paper.pdf      # PDF 文件（可选）
+```
 
 ---
 
