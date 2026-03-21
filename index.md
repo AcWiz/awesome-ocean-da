@@ -65,11 +65,12 @@ title: AI + 海洋数据同化论文库
 <!-- Load paper data -->
 <script>
   // Load papers.json
-  fetch('/_data/papers.json')
+  fetch('{{ "/_data/papers.json" | relative_url }}')
     .then(response => response.json())
     .then(data => {
       window.papersData = data.papers;
       window.papersStats = data.statistics;
+      allPapers = data.papers;
       renderPapers(data.papers);
       updateStats(data.statistics);
     })
