@@ -225,6 +225,56 @@ main {
   font-weight: 600;
 }
 
+/* Paper status badge (deep_read / skim) */
+.paper-status-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.paper-status-badge.status-deep_read {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  color: white;
+}
+
+.paper-status-badge.status-skim {
+  background: #666;
+  color: white;
+}
+
+/* Paper ratings (difficulty / importance stars) */
+.paper-ratings {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.paper-ratings .rating {
+  color: var(--text-muted);
+}
+
+.paper-ratings .rating strong {
+  color: var(--text-color);
+}
+
+/* Modal meta row */
+.paper-meta-row {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+}
+
+.paper-meta-row .meta-item {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.paper-meta-row .meta-item strong {
+  color: var(--text-color);
+}
+
 /* Paper Detail Page */
 .paper-detail {
   background: var(--card-bg);

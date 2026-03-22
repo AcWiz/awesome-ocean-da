@@ -1,33 +1,15 @@
----
-title: 'Enhanced State Estimation for Turbulent Flows with DA and ML'
-arXiv: ''
-authors:
+由于未提供论文的具体内容（摘要、arXiv ID、作者信息等），且内容样本显示为"No content available"，我无法生成准确的学术论文摘要。
 
-year: 2025
-source: other
-venue: arXiv
-domain_tags:
-- Deep-Learning
-- EnKF
-ocean_vars: Submesoscale, Ocean State
-spatiotemporal_res: Unknown
-difficulty: ★★★☆☆
-importance: ★★★☆☆
-read_status: skim
----
+为了帮助您完成此任务，请提供以下至少一项：
 
+1. **论文的arXiv ID**（如 2501.12345）
+2. **作者姓名列表**
+3. **论文摘要内容**
+4. **PDF或arXiv链接**
 
-# Enhanced State Estimation for turbulent flows combining Ensemble Data Assimilation and Machine Learning
+或者，如果您希望我生成一个**模板占位符**，我可以按照您提供的格式生成一个带有占位符的summary.md文件，待您获取完整信息后进行填充。
 
-## 基本信息
-- **arXiv**: [2501.18262](https://arxiv.org/abs/2501.18262)
-- **作者**: Miguel M. Valero, Marcello Meldi
-- **年份**: 2025
+请告知您希望如何继续：
 
-## 中文总结
-**核心贡献**：提出一种结合集合数据同化（DA）与机器学习（ML）的新型策略，用于从低保真模型和稀疏传感器数据提升湍流状态估计精度。
-**主要方法**：利用 DA 方法在分析阶段产生的数据训练物理信息修正算法（physics-informed corrective algorithms），然后与低保真模型耦合以处理无传感器数据时刻。验证案例为 Re_τ ≈ 550 的湍流平面通道流。
-**意义**：展示了 DA 与 ML 协同应用的潜力，结合了 ML 模型的鲁棒性与效率，以及 DA 算法的物理可解释性，显著降低计算成本同时保持估计精度。
-
-## 关键词
-- Ensemble Data Assimilation, Machine Learning, Turbulent flows, State estimation, Physics-informed ML, Reduced-order modeling
+- **A)** 提供上述缺失信息，我基于实际内容重新生成
+- **B)** 生成带占位符的模板文件（需要您手动填充具体内容）

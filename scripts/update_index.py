@@ -32,6 +32,35 @@ def parse_abstract_md(file_path: Path) -> dict:
     return {}, content
 
 
+def _extract_preview(body: str) -> str:
+    """从论文摘要/总结内容中提取预览文本。
+
+    优先提取 TL;DR 部分（迁移后 summary.md 的第2节），否则取前200字。
+    """
+    import re
+    lines = body.split('\n')
+    for i, line in enumerate(lines):
+        if 'TL;DR' in line or 'tl;dr' in line.lower():
+            # 找到 TL;DR 行后，找下一段非空内容
+            for j in range(i + 1, len(lines)):
+                next_line = lines[j].strip()
+                if next_line and not next_line.startswith('#'):
+                    # 清理 Markdown 格式符号
+                    preview = re.sub(r'[#*`]', '', next_line).strip()
+                    return preview[:200]
+
+    # 回退：找第一个非标题段落
+    for line in lines:
+        line = line.strip()
+        if line and not line.startswith('#') and len(line) > 20:
+            preview = re.sub(r'[#*`]', '', line).strip()
+            return preview[:200]
+
+    # 最后回退：前200字
+    preview = re.sub(r'[#*`]', '', body).strip()[:200]
+    return preview
+
+
 def scan_papers() -> list:
     """扫描所有论文目录"""
     papers = []
@@ -66,8 +95,8 @@ def scan_papers() -> list:
                 'paper_url': metadata.get('paper_url', ''),
             }
 
-            # 提取摘要前200字作为预览
-            abstract_preview = body.replace('#', '').strip()[:200]
+            # 提取摘要预览：优先从 TL;DR 部分提取，否则取前200字
+            abstract_preview = _extract_preview(body)
             paper_info['abstract_preview'] = abstract_preview
 
             papers.append(paper_info)

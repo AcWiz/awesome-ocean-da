@@ -27,6 +27,14 @@ defaults:
       path: ""
     values:
       layout: default
+  - scope:
+      path: ""
+      type: papers
+    values:
+      layout: paper
+      difficulty: ""
+      importance: ""
+      read_status: ""
 
 # Markdown
 markdown: kramdown

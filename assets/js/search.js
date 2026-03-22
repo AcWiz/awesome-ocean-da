@@ -5,6 +5,7 @@
 
   let currentMethodFilter = 'all';
   let currentApplicationFilter = 'all';
+  let currentYearFilter = 'all';
   let searchQuery = '';
   let allPapers = [];
 
@@ -23,9 +24,11 @@
       searchInput.addEventListener('input', debounce(handleSearch, 300));
     }
 
-    // Filter buttons
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', handleFilterClick);
+    // Event delegation for filter buttons (handles dynamically added year buttons)
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('filter-btn')) {
+        handleFilterClick(e);
+      }
     });
 
     // Modal close
@@ -68,8 +71,10 @@
     // Update filter
     if (filterType === 'method') {
       currentMethodFilter = filterValue;
-    } else {
+    } else if (filterType === 'application') {
       currentApplicationFilter = filterValue;
+    } else if (filterType === 'year') {
+      currentYearFilter = filterValue;
     }
 
     renderFilteredPapers();
@@ -77,11 +82,15 @@
 
   function renderFilteredPapers() {
     const filtered = allPapers.filter(paper => {
-      // Search filter
+      // Search filter - enhanced to include tags and abstract_preview
       if (searchQuery) {
-        const titleMatch = paper.title.toLowerCase().includes(searchQuery);
-        const authorMatch = paper.authors.some(a => a.toLowerCase().includes(searchQuery));
-        if (!titleMatch && !authorMatch) return false;
+        const q = searchQuery.toLowerCase();
+        const titleMatch = paper.title.toLowerCase().includes(q);
+        const authorMatch = paper.authors.some(a => a.toLowerCase().includes(q));
+        const methodMatch = paper.method_tags.some(t => t.toLowerCase().includes(q));
+        const appMatch = paper.application_tags.some(t => t.toLowerCase().includes(q));
+        const abstractMatch = (paper.abstract_preview || '').toLowerCase().includes(q);
+        if (!titleMatch && !authorMatch && !methodMatch && !appMatch && !abstractMatch) return false;
       }
 
       // Method filter
@@ -94,7 +103,18 @@
         if (!paper.application_tags.includes(currentApplicationFilter)) return false;
       }
 
+      // Year filter
+      if (currentYearFilter !== 'all') {
+        if (String(paper.year) !== currentYearFilter) return false;
+      }
+
       return true;
+    });
+
+    // Sort: year descending, then alphabetical
+    filtered.sort((a, b) => {
+      if (b.year !== a.year) return b.year - a.year;
+      return a.title.localeCompare(b.title);
     });
 
     renderPapers(filtered);
@@ -109,6 +129,8 @@
     if (papers.length === 0) {
       grid.innerHTML = '';
       noResults.style.display = 'block';
+      noResults.querySelector('p').textContent =
+        '没有找到匹配的论文。尝试使用更通用的关键词。';
       return;
     }
 
@@ -119,6 +141,12 @@
         ? `<span class="paper-venue-badge" title="正式发表">${escapeHtml(paper.venue)}</span>`
         : (paper.source === 'arXiv' ? `<span class="paper-arxiv-badge" title="arXiv预印本">arXiv</span>` : '');
 
+      const difficultyStars = paper.difficulty || '';
+      const importanceStars = paper.importance || '';
+      const readStatusBadge = paper.read_status
+        ? `<span class="paper-status-badge status-${paper.read_status}" title="阅读状态">${paper.read_status === 'deep_read' ? '精读' : '泛读'}</span>`
+        : '';
+
       return `
       <div class="paper-card" data-id="${paper.arxiv || paper.title}">
         <div class="paper-header">
@@ -126,6 +154,7 @@
           <div class="paper-meta-badges">
             ${venueBadge}
             <span class="paper-year">${paper.year}</span>
+            ${readStatusBadge}
           </div>
         </div>
         <div class="paper-authors">
@@ -135,6 +164,11 @@
           ${paper.method_tags.map(tag => `<span class="tag method-tag">${tag}</span>`).join('')}
           ${paper.application_tags.map(tag => `<span class="tag application-tag">${tag}</span>`).join('')}
         </div>
+        ${(difficultyStars || importanceStars) ? `
+        <div class="paper-ratings">
+          ${difficultyStars ? `<span class="rating" title="难度">${difficultyStars}</span>` : ''}
+          ${importanceStars ? `<span class="rating" title="重要度">${importanceStars}</span>` : ''}
+        </div>` : ''}
         <div class="paper-actions">
           ${paper.paper_url ? `<a href="${paper.paper_url}" target="_blank" class="btn btn-primary">arXiv</a>` : ''}
           <a href="${paper.path}/" class="btn btn-secondary">详情</a>
@@ -174,6 +208,12 @@
         ${paper.method_tags.map(tag => `<span class="tag method-tag">${tag}</span>`).join('')}
         ${paper.application_tags.map(tag => `<span class="tag application-tag">${tag}</span>`).join('')}
       </div>
+      ${(paper.difficulty || paper.importance || paper.read_status) ? `
+      <div class="paper-meta-row">
+        ${paper.difficulty ? `<span class="meta-item"><strong>难度:</strong> ${paper.difficulty}</span>` : ''}
+        ${paper.importance ? `<span class="meta-item"><strong>重要度:</strong> ${paper.importance}</span>` : ''}
+        ${paper.read_status ? `<span class="meta-item"><strong>状态:</strong> ${paper.read_status === 'deep_read' ? '精读' : '泛读'}</span>` : ''}
+      </div>` : ''}
       <hr style="margin: 1rem 0; border: none; border-top: 1px solid #eee;">
       <p>${escapeHtml(paper.abstract_preview || '')}</p>
       <div style="margin-top: 1rem;">

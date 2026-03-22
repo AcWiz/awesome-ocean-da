@@ -42,6 +42,10 @@ title: AI + 海洋数据同化论文库
     <button class="filter-btn" data-filter="ENSO" data-type="application">ENSO</button>
     <button class="filter-btn" data-filter="Deep-Ocean" data-type="application">深海</button>
   </div>
+  <div class="filter-buttons" id="year-filters">
+    <span class="filter-label">年份:</span>
+    <!-- Year buttons populated by JS -->
+  </div>
 </section>
 
 <!-- Papers Grid -->
@@ -71,6 +75,23 @@ title: AI + 海洋数据同化论文库
       window.papersData = data.papers;
       window.papersStats = data.statistics;
       allPapers = data.papers;
+
+      // Populate year filter buttons dynamically
+      const years = Object.keys(data.statistics.by_year || {}).sort((a, b) => b - a);
+      const yearFilterContainer = document.getElementById('year-filters');
+      if (yearFilterContainer && years.length > 0) {
+        let html = '<span class="filter-label">年份:</span>';
+        html += '<button class="filter-btn active" data-filter="all" data-type="year">全部</button>';
+        years.forEach(year => {
+          html += `<button class="filter-btn" data-filter="${year}" data-type="year">${year}</button>`;
+        });
+        yearFilterContainer.innerHTML = html;
+        // Re-attach event listeners for new buttons
+        document.querySelectorAll('#year-filters .filter-btn').forEach(btn => {
+          btn.addEventListener('click', handleFilterClick);
+        });
+      }
+
       renderPapers(data.papers);
       updateStats(data.statistics);
     })

@@ -9,6 +9,11 @@ layout: default
       <span class="paper-arxiv-badge">arXiv 预印本</span>
     {% endif %}
     <span class="paper-year">{{ page.year }}</span>
+    {% if page.read_status %}
+      <span class="paper-status-badge status-{{ page.read_status }}">
+        {{ page.read_status == 'deep_read' ? '精读' : '泛读' }}
+      </span>
+    {% endif %}
   </header>
 
   <h1 class="paper-title">{{ page.title }}</h1>
@@ -52,6 +57,17 @@ layout: default
     </div>
     {% endif %}
   </div>
+
+  {% if page.difficulty or page.importance %}
+  <div class="paper-ratings">
+    {% if page.difficulty %}
+    <span class="rating"><strong>难度:</strong> {{ page.difficulty }}</span>
+    {% endif %}
+    {% if page.importance %}
+    <span class="rating"><strong>重要度:</strong> {{ page.importance }}</span>
+    {% endif %}
+  </div>
+  {% endif %}
 
   <div class="paper-content">
     {{ content }}
