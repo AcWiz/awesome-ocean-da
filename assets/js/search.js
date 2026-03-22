@@ -6,14 +6,18 @@
   let currentMethodFilter = 'all';
   let currentApplicationFilter = 'all';
   let currentYearFilter = 'all';
+  let currentTagFilter = null;  // From tag cloud
+  let currentAuthorFilter = null;  // From author filter
   let searchQuery = '';
   let allPapers = [];
+  let currentSort = 'year-desc';  // Default sort: year descending
 
   // Initialize when DOM is ready
   document.addEventListener('DOMContentLoaded', init);
 
   function init() {
     setupEventListeners();
+    setupTagCloudListener();
     updateLastUpdated();
   }
 
@@ -22,6 +26,12 @@
     const searchInput = document.getElementById('search-input');
     if (searchInput) {
       searchInput.addEventListener('input', debounce(handleSearch, 300));
+    }
+
+    // Sort select
+    const sortSelect = document.getElementById('sort-select');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', handleSortChange);
     }
 
     // Event delegation for filter buttons (handles dynamically added year buttons)
@@ -35,13 +45,22 @@
     const modal = document.getElementById('paper-modal');
     const closeBtn = document.querySelector('.close');
     if (closeBtn) {
-      closeBtn.addEventListener('click', () => modal.style.display = 'none');
+      closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
     }
     if (modal) {
       modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.style.display = 'none';
       });
     }
+  }
+
+  // Listen for tag cloud filter events
+  function setupTagCloudListener() {
+    document.addEventListener('tagcloud:filter', (e) => {
+      currentTagFilter = e.detail.tag;
+      currentAuthorFilter = e.detail.author;
+      renderFilteredPapers();
+    });
   }
 
   function debounce(func, wait) {
@@ -54,6 +73,11 @@
 
   function handleSearch(e) {
     searchQuery = e.target.value.toLowerCase().trim();
+    renderFilteredPapers();
+  }
+
+  function handleSortChange(e) {
+    currentSort = e.target.value;
     renderFilteredPapers();
   }
 
@@ -108,16 +132,67 @@
         if (String(paper.year) !== currentYearFilter) return false;
       }
 
+      // Tag cloud filter
+      if (currentTagFilter) {
+        const hasTag = paper.method_tags.includes(currentTagFilter) ||
+                       paper.application_tags.includes(currentTagFilter);
+        if (!hasTag) return false;
+      }
+
+      // Author filter
+      if (currentAuthorFilter) {
+        if (!paper.authors.includes(currentAuthorFilter)) return false;
+      }
+
       return true;
     });
 
-    // Sort: year descending, then alphabetical
-    filtered.sort((a, b) => {
-      if (b.year !== a.year) return b.year - a.year;
-      return a.title.localeCompare(b.title);
-    });
+    // Sort papers
+    const sorted = sortPapers(filtered);
 
-    renderPapers(filtered);
+    // Update result count
+    updateResultCount(sorted.length, allPapers.length);
+
+    renderPapers(sorted);
+  }
+
+  function sortPapers(papers) {
+    return papers.sort((a, b) => {
+      if (currentSort === 'year-desc') {
+        return b.year - a.year;
+      } else if (currentSort === 'year-asc') {
+        return a.year - b.year;
+      } else if (currentSort === 'importance') {
+        // Sort by importance (stars: ★ = 1, ☆ = 0.5, etc.)
+        const impA = calculateImportance(a.importance);
+        const impB = calculateImportance(b.importance);
+        return impB - impA;
+      }
+      // Default: year descending
+      return b.year - a.year;
+    });
+  }
+
+  function calculateImportance(importanceStr) {
+    if (!importanceStr) return 0;
+    // Count stars: ★ = 1, ☆ = 0.5
+    let score = 0;
+    for (let char of importanceStr) {
+      if (char === '★') score += 1;
+      else if (char === '☆') score += 0.5;
+    }
+    return score;
+  }
+
+  function updateResultCount(shown, total) {
+    const countEl = document.getElementById('result-count');
+    if (countEl) {
+      if (shown === total) {
+        countEl.innerHTML = '显示全部 <strong>' + total + '</strong> 篇论文';
+      } else {
+        countEl.innerHTML = '显示 <strong>' + shown + '</strong> / ' + total + ' 篇论文';
+      }
+    }
   }
 
   function renderPapers(papers) {
@@ -130,7 +205,7 @@
       grid.innerHTML = '';
       noResults.style.display = 'block';
       noResults.querySelector('p').textContent =
-        '没有找到匹配的论文。尝试使用更通用的关键词。';
+        '没有找到匹配的论文。尝试使用更通用的关键词或调整筛选条件。';
       return;
     }
 
@@ -214,7 +289,7 @@
         ${paper.importance ? `<span class="meta-item"><strong>重要度:</strong> ${paper.importance}</span>` : ''}
         ${paper.read_status ? `<span class="meta-item"><strong>状态:</strong> ${paper.read_status === 'deep_read' ? '精读' : '泛读'}</span>` : ''}
       </div>` : ''}
-      <hr style="margin: 1rem 0; border: none; border-top: 1px solid #eee;">
+      <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border);">
       <p>${escapeHtml(paper.abstract_preview || '')}</p>
       <div style="margin-top: 1rem;">
         ${paper.paper_url ? `<a href="${paper.paper_url}" target="_blank" class="btn btn-primary">查看原文</a>` : ''}
