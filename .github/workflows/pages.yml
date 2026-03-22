@@ -24,11 +24,10 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Ruby
-        uses: actions/setup-ruby@v5
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
           bundler-cache: true
-          cache-version: 0
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
