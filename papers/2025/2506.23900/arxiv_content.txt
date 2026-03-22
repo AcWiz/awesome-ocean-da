@@ -1,0 +1,1394 @@
+arXiv:2506.23900v1  [physics.ao-ph]  30 Jun 2025Accurate Mediterranean Sea forecasting via
+graph-based deep learning
+Daniel Holmberg1,2*, Emanuela Clementi2, Italo Epicoco2,3, Teemu Roos1
+1Department of Computer Science, University of Helsinki, Finland.
+2CMCC Foundation - Euro-Mediterranean Center on Climate Change, Italy.
+3Department of Engineering for Innovation, University of Salento, Italy .
+*Corresponding author(s). E-mail(s): daniel.holmberg@helsinki.ﬁ ;
+Contributing authors: emanuela.clementi@cmcc.it ;italo.epicoco@cmcc.it ;
+teemu.roos@helsinki.ﬁ ;
+Abstract
+Accurate ocean forecasting systems are essential for understand ing marine dynamics,
+which play a crucial role in sectors such as shipping, aquacultu re, environmental mon-
+itoring, and coastal risk management. Traditional numerical so lvers, while eﬀective, are
+computationally expensive and time-consuming. Recent adv ancements in machine learn-
+ing have revolutionized weather forecasting, oﬀering fast and en ergy-eﬃcient alternatives.
+Building on these advancements, we introduce SeaCast, a neura l network designed for
+high-resolution regional ocean forecasting. SeaCast employs a graph-based framework to
+eﬀectively handle the complex geometry of ocean grids and inte grates external forcing
+data tailored to the regional ocean context. Our approach is val idated through experi-
+ments at a high horizontal resolution using the operational num erical forecasting system
+of the Mediterranean Sea, along with both numerical and data-dri ven atmospheric forc-
+ings. Results demonstrate that SeaCast consistently outperfo rms the operational model
+in forecast skill, marking a signiﬁcant advancement in regional ocean prediction.
+Keywords: Regional ocean forecasting, graph neural networks, learne d simulation
+1 Introduction
+Predicting sea dynamics is a formidable scientiﬁc challenge, dri ven by the need to anticipate
+changes in ocean conditions that aﬀect weather systems, marine ecosyst ems, and a wide range
+of maritime activities [ 1]. While the need for improved ocean and coastal data is global,
+actionable decisions in sectors such as shipping, marine resource manage ment, and coastal
+planning often depend on regional, high-resolution models that can deli ver accurate forecasts
+tailored to local conditions [ 2–6].
+Here, we focus on the Mediterranean Sea, a region characterized by inte nse mesoscale activ-
+ity, complex coastlines, and dense coastal populations. Regional ocean fore casts in this area are
+important for managing marine operations and mitigating coastal risks. Accurat e and timely
+predictions empower local agencies to address a wide range of challenge s, from water qual-
+ity monitoring [ 7] and oil spill containment [ 8] to maritime route optimization [ 9]. Currently,
+theMediterranean Forecasting System (MedFS) [ 10] delivered through the Copernicus Marine
+1
+h) Complete next state
+b) Atmospheric forcingSeaCastf) Predicted sea state
+c) Encode d) Process e) Decode
+g) Boundary forcing
+a) Input sea state
+Fig. 1 SeaCast performs autoregressive ocean forecasting using a graph neural network (GNN). (a) The input
+sea state and (b) atmospheric forcing are projected onto a co arser mesh representation through the (c) encoder.
+(d) GNN layers process this latent representation on a hiera rchical mesh. The output is then (e) decoded back
+onto the original grid to form (f) a predicted sea state. (g) B oundary conditions (here exaggerated in size) are
+incorporated to produce (h) the complete next state. This fo recast is then fed back into the system as a new
+input (as shown by the arrow looping from h to a), enabling mul ti-step forecasting through repeated application
+of the encode–process–decode cycle.
+Service (CMEMS) provides medium-range (10 days) forecasts using a physics-based two-way
+coupled wave-current modeling system, and serves as the operation al reference system for the
+region.
+Despite their accuracy, numerical models such as MedFS are computat ionally intensive and
+time-consuming to run. Recent advancements in machine learning-b ased weather prediction
+(MLWP) have demonstrated the potential for fast and performant alternat ives. Several autore-
+gressive machine learning models now rival or surpass state-of-the -art physics-based systems
+used by meteorological agencies worldwide. Notable developments includ e architectures based
+on Transformers [ 11,12], neural operators [ 13], and graph neural networks (GNNs) [ 14–16].
+While these advances have been transformative in the atmospheric dom ain, its applica-
+tion to ocean forecasting remains relatively nascent. Existing work has focused mostly on
+forecasting the global ocean, at climate [ 17], seasonal [ 18,19], and medium-range [ 20–22]
+timescales. Regional studies to date have primarily targeted the fore casting of a small set of
+surface variables, such as sea ice [ 23], sea surface height (SSH) [ 24], or surface currents and
+temperature [ 25]. However, regional data-driven ocean forecasting systems for depth- resolved
+prediction in high resolution operational settings are still lacking.
+To address this gap for the Mediterranean Sea, we introduce SeaCast, an autoregressive
+machine learning model designed for regional ocean forecasting, extend ing the methodology
+from weather forecasting using hierarchical GNNs [ 16]. Our approach involves several key
+features that enable accurate prediction of ocean states: 1) we adapt the gr aph creation,
+training, and evaluation processes to accommodate the irregular geometry of ocean grids; 2)
+the model includes relevant atmospheric forcing near the sea surf ace; and 3) lateral boundary
+2
+forcing is applied to account for water inﬂow and outﬂow, ensuring comp atibility with the
+ocean at large. SeaCast is evaluated in an operational setting alongside MedFS , including
+validation against observational data. In addition, we conduct targeted exper iments to assess
+the inﬂuence of atmospheric forcing components and the eﬀects of train ing period length.
+2 Results
+2.1 SeaCast: data-driven regional ocean forecasting
+SeaCast is a data-driven forecasting model for the Mediterranean Sea t hat delivers 15-day
+forecasts across 18 depth levels on a 1 /24◦(approximately 4km) horizontal grid, matching the
+resolution of the operational MedFS system (see Supplementary A). The model predicts key
+physical ocean variables, including depth-resolved zonal and merid ional currents, salinity, and
+temperature, along with SSH, resulting in 73 predicted ﬁelds in tot al. A major advantage of
+SeaCast is its computational eﬃciency: it produces a full 15-day forec ast in just 20 seconds
+on a single GPU, compared to approximately 70 minutes required by MedF S to generate a
+10-day forecast on 89 CPU cores, using a 120-second timestep and producing outputs at 141
+depth levels. Although the two systems diﬀer in how they operate, t he data-driven approach
+represents a signiﬁcant speedup in producing upper ocean forecas ts compared to what was
+previously possible.
+The model architecture follows an encode–process–decode framewor k [26] operating on
+a hierarchical graph mesh tailored to the Mediterranean basin (see Sup plementary B). As
+illustrated in Figure 1, the input sea state and atmospheric forcing are ﬁrst encoded onto
+a coarser multi-resolution mesh representation. The latent feature s are then processed by
+GNN layers in a hierarchical fashion, enabling the model to capture b oth short- and long-
+range ocean interactions. The processed output is subsequently de coded back onto the original
+high-resolution grid. Rather than directly predicting the next se a state, the model learns the
+tendency, i.e. the expected change over a one-day interval, whic h is added to the current state
+to obtain the forecast. Dynamic boundary conditions are then incorporated to generate the
+complete next sea state. This predicted state is then fed back int o the model as input for
+the next step, enabling the model to produce forecasts at diﬀeren t lead times by repeating
+the application of the same cycle in an autoregressive manner. Unlike mul tiscale models such
+as GraphCast [ 15], which connect nodes on a single mesh level, the hierarchical appr oach we
+employ separates the domain into multiple, distinct mesh levels . This design results in more
+uniform connectivity from the mesh to the grid, helping to mitigate artifacts associated with
+nodes having variable neighborhood sizes [ 16].
+The atmospheric forcing used in SeaCast includes 10-meter wind stre ss components, 2-
+meter temperature, and mean sea level pressure (MSLP), combined w ith the sine and cosine of
+the day of year as seasonal indicators. Open boundary conditions are handled by overwriting
+thepredictedseastatewiththetruestateinboundaryregionslocat edattheStraitofGibraltar
+and the Dardanelles Strait during training, and with MedFS data durin g evaluation. This
+approach is necessary to ensure realistic representation of inﬂow and outﬂow dynamics for the
+region considered [ 27].
+SeaCastistrainedon35years(1987–2021)ofMediterraneanreanalysisdailymeandata [28]
+and ﬁne-tuned using two additional years (2022–2023) of daily operational analysis [ 10]. Fine-
+tuning serves multiple purposes: it exposes the model to more re cent sea states, enables the use
+of analysis ﬁelds as initial conditions in an operational setting, and allows the model to adapt
+to updates introduced in the operational MedFS system that are absent in the reanalysis. The
+atmospheric forcings driving the surface of the model are taken from th e European Centre for
+Medium-Range Weather Forecasts (ECMWF) ERA5 reanalysis data [ 29] during the training
+phase, and during testing either from the ECMWF ensemble control forecast (ENS) [30] or the
+recentartiﬁcial intelligence forecasting system (AIFS) [31]. SeaCast is evaluated on a daily test
+set with initializations spanning from the beginning of July 2024 to the end of December 2024,
+each producing a 15-day forecast. Performance is assessed using both m odel-based reference
+3
+ﬁelds and satellite observations, and benchmarked against the operational MedFS. SeaCast
+uses the same initial conditions available to MedFS making for a fair com parison. Further
+details on the method are provided in Section 4.
+2.2 Comparing SeaCast to the operational MedFS
+SeaCast is evaluated against the operational MedFS, the primary regional oce an forecasting
+system for the Mediterranean Sea. MedFS provides deterministic forecasts up to 10-days lead,
+adhering to the 10-day standard of CMEMS ocean products, and also the ex tent of ECMWF’s
+legacyhigh-resolution(HRES)atmosphericforecastsusedassurfaceforc ing.Recentchangesto
+the ECMWF Integrated Forecasting System (IFS), extending mediu m-range predictions from
+10 to 15 days in Cycle 48r1 [ 32], was taken into account when developing SeaCast. By default,
+the model uses AIFS as atmospheric forcing, and in Section 2.4, also ENS for comparison. By
+using these products, and persisting the lateral boundary conditi ons the last 5 days, SeaCast is
+capable of producing 15-day forecasts. This extended forecast horizon r epresents an important
+step forward, enabling potential earlier warnings of marine extremes an d enhancing medium-
+range planning capabilities.
+To benchmark performance, we evaluate the forecast skill of both SeaCast and MedFS
+across six key ocean variables: zonal and meridional currents, salinity , temperature, sea sur-
+face temperature (SST), and sea level anomaly (SLA). Subsurface variabl es are validated
+against daily mean MedFS analysis ﬁelds. These gridded analysis ﬁelds, which assimilate
+quality-controlled observations into the physics model, provide a stable reference for subsur-
+face conditions. SST and SLA are compared to Level-3 (L3) satellite observat ions. Speciﬁcally,
+SST predictions from the model’s uppermost layer are evaluated agains t merged multi-sensor
+satellite data at 1 /16◦resolution [ 33], while SSH forecasts are converted to SLA and compared
+to along-track 5Hz altimeter measurements from multiple satellite mi ssions (see Section 4.2
+for further details).
+A persistence baseline is included as a naive benchmark, generated by repeating the initial
+conditions over all lead times. This baseline provides a conservati ve lower bound for model
+performance. As shown in Figure 2, both SeaCast and MedFS signiﬁcantly outperform per-
+sistence across all variables. Notably, SeaCast demonstrates improved f orecast skill relative to
+MedFS, and the gap between the two tends to increase at extended lead times.
+Figure3presents a depth-resolved comparison of SeaCast and MedFS, showing t he nor-
+malized RMSE diﬀerence, deﬁned as (RMSE SeaCast−RMSE MedFS)/RMSE MedFS, across all
+vertical levels and lead times. Negative values indicate improved pe rformance by SeaCast. The
+improvements are generally larger at longer forecast lead times, which i s in line with results
+for the global ocean [ 22]. For temperature and current components, the relative gains are
+strongest near the surface, while for salinity the largest improveme nts are found at greater
+depths. SeaCast generally does not outperform MedFS that much at the lo west level included
+here (192m depth), likely because inﬂuence from below this level are unaccounted for and
+aﬀect the conditions there.
+To further assess regional performance, Figure 4shows the spatial distribution of normal-
+ized RMSE diﬀerences in SST between SeaCast and MedFS, for forecast lead times of 1, 4, 7,
+and 10 days. Across the majority of the Mediterranean basin, SeaCast exhi bits increasing skill
+relative to MedFS as the lead time grows. These improvements are par ticularly notable in the
+Western basin, especially in the Alboran Sea, and in the Aegean Sea, areas ch aracterized by
+intense mesoscale processes. Meanwhile, MedFS demonstrates enh anced skill in the Adriatic
+and Ligurian Seas. This heterogeneous spatial pattern of skill may be link ed to diﬀerences in
+the atmospheric forcing used by the two systems.
+Additional evaluation metrics and results are presented in Supplem entary C and D,
+respectively. This includes a dedicated comparison against sparser in-situ observations (Sup-
+plementary D.1), depth-resolved RMSE relative to the analysis ﬁel ds (Supplementary D.2),
+and vertical error proﬁles (Supplementary D.3). Qualitative example s of SeaCast forecasts are
+shown in Supplementary E.
+4
+13579111315
+Lead time (days)0.0850.0900.0950.1000.1050.110RMSE (m/s)a) Zonal current
+13579111315
+Lead time (days)0.0850.0900.0950.1000.105RMSE (m/s)b) Meridional current
+13579111315
+Lead time (days)0.180.190.200.210.220.23RMSE (psu)c) Salinity
+13579111315
+Lead time (days)0.60.70.80.91.01.11.2RMSE (°C)d) T emperature
+13579111315
+Lead time (days)0.60.81.01.21.41.6RMSE (°C)e) SST
+13579111315
+Lead time (days)0.0440.0460.0480.0500.052RMSE (m)f) SLA
+SeaCast MedFS Persistence
+Fig. 2 RMSE as a function of lead time for SeaCast, MedFS, and a persi stence baseline. Sea state variables
+with several vertical levels (zonal and meridional current s, salinity, and temperature) are evaluated against
+analysis ﬁelds where the error is an average over all depths. SST and SLA are validated against L3 satellite
+observations, using the uppermost modeled temperature lev el for the SST comparison. The shading corresponds
+to the 50% conﬁdence intervals estimated via bootstrapping .
+12345678910
+Lead time (days)1
+5
+11
+16
+23
+30
+38
+47
+56
+67
+79
+91
+105
+120
+136
+153
+172
+192Depth (m)a) Zonal current
+12345678910
+Lead time (days)b) Meridional current
+12345678910
+Lead time (days)c) Salinity
+12345678910
+Lead time (days)d) T emperature
+5.0 2.5 0.0 2.5 5.0
+Norm. RMSE diff. (%)
+Fig. 3 Normalized RMSE diﬀerence between SeaCast and MedFS across all depth levels, evaluated against
+analysis ﬁelds. Negative values indicate better performan ce by SeaCast. Improvements are most pronounced
+near the surface for temperature and the current components , and at greater depths for salinity.
+2.3 Detecting high temperatures
+Machinelearning–basedforecastingmethodsthatoptimizethemeansqu arederror(MSE)such
+as we do are trained to predict the expected value of the forecast dist ribution. As a result, they
+could potentially struggle with accurately capturing extreme event s. In the marine context,
+one such extreme is unusually warm SST.
+ToevaluateSeaCast’sabilitytopredicttemperatureextremes,we drawinspirationfromthe
+marine heatwave (MHW) deﬁnition proposed by Hobday et al. [ 34], where an event is deﬁned
+as SST exceeding the 90th percentile of the daily climatology for at least ﬁve consecutive days,
+5
+33°N36°N39°N42°N45°Na) 1 day lead
+ b) 4 day lead
+5°W 0° 5°E 10°E 15°E 20°E 25°E 30°E 35°E33°N36°N39°N42°N45°Nc) 7 day lead
+5°W 0° 5°E 10°E 15°E 20°E 25°E 30°E 35°Ed) 10 day lead
+0.4 0.2 0.0 0.2 0.4
+Norm. RMSE diff. (%)
+Fig. 4 Spatial distribution of normalized RMSE diﬀerence in SST be tween SeaCast and MedFS, evaluated
+against L3 satellite data. Results are shown for lead times o f 1, 4, 7, and 10 days. Negative values indicate less
+error by SeaCast. Relative skill increases with lead time ac ross most of the Mediterranean.
+based on an 11-day rolling mean. In our case, we adopt a simpliﬁed criterion by identifying
+individual days when the daily SST exceeds the 90th percentile th reshold, allowing us to
+produce high temperature detections rates at each of the 15 lead times. The SST climatology
+is computed from L3 satellite observations spanning every day in the y ears 2008 to 2023, using
+an 11-day rolling mean. For each calendar day, the 90th percentile is calcu lated to deﬁne the
+threshold for extreme temperature events.
+We then evaluate each model’s performance in detecting high temper atures using the
+Heidke Skill Score (HSS) at each forecast lead time, and estimate 50% conﬁde nce intervals via
+bootstrapping. Higher HSS values indicate more accurate classiﬁcation of ev ents relative to
+random chance. As shown in Figure 5, both SeaCast and MedFS signiﬁcantly outperform the
+persistence baseline. Furthermore, SeaCast slightly outperforms MedFS also on temperature
+extremes. An additional advantage of SeaCast is its ability to provide fore casts up to 15 days,
+compared to the 10-day horizon of MedFS, oﬀering potential for earlier warn ings of MHWs.
+1 3 5 7 9 11 13 15
+Lead Time (days)0.450.500.550.600.65HSS
+SeaCast
+MedFS
+Persistence
+Fig. 5Heidke Skill Score (HSS) for detecting SST anomalies above t he 90th percentile, relative to climatology.
+Results are shown for SeaCast, MedFS, and the persistence ba seline. The shading corresponds to the 50%
+conﬁdence intervals estimated via bootstrapping.
+6
+2.4 Eﬀect of atmospheric forcing
+Atmospheric forcing plays a critical role in driving ocean dynamic s, particularly near the sea
+surface. To assess the sensitivity of SeaCast to diﬀerent atmospher ic inputs, we perform a
+controlled ablation experiment by randomly permuting each forcing var iable across the spatial
+grid dimension during inference. This preserves the statistic al distribution of the variable
+but removes its spatial coherence, eﬀectively making it uninform ative while leaving all other
+inputs intact. The resulting performance degradation reveals the re lative importance of each
+atmospheric variable for ocean forecasting.
+Figure6presentsthenormalizedRMSEdiﬀerenceperleadtimeforeachvariab le,evaluated
+against the original, unperturbed SeaCast model. The results indicat e that wind stress is one
+of the most critical drivers across all ocean state variables. By transfe rring momentum from
+the atmosphere to the ocean, wind stress generates horizontal curren ts and drives vertical
+transport. Thus, the results show that for zonal and meridional curren ts in particular, wind
+stress is the sole contributor to predictive skill among the atmosph eric forcing components.
+13579111315
+Lead time (days)012345Norm. RMSE diff. (%)a) Zonal current
+13579111315
+Lead time (days)012345Norm. RMSE diff. (%)b) Meridional current
+13579111315
+Lead time (days)0246Norm. RMSE diff. (%)c) Salinity
+13579111315
+Lead time (days)05101520Norm. RMSE diff. (%)d) T emperature
+13579111315
+Lead time (days)010203040Norm. RMSE diff. (%)e) SST
+13579111315
+Lead time (days)01234Norm. RMSE diff. (%)f) SLA
+SeaCast 2m-temp. perm. Wind stress perm. MSLP perm. All perm.
+Fig. 6Impact of permuted atmospheric forcings on forecast skill. Normalized RMSE diﬀerence per lead time is
+shown relative to the original SeaCast conﬁguration with un modiﬁed atmospheric inputs included as a reference
+line in blue. Each panel shows a diﬀerent predicted ocean var iable, while the curves correspond to the permuted
+atmospheric forcing variables. Larger positive values ind icate greater importance of the corresponding variable.
+Salinity forecasts are also strongly inﬂuenced by wind stress, an int uitive result given its
+central role in driving surface mixing and the lateral advection of fre shwater. The second most
+inﬂuential variable for salinity is the 2-meter air temperature, whi ch indirectly aﬀects surface
+buoyancy and stratiﬁcation triggering convective overturning and mi xing fresh or salty surface
+water into the subsurface [ 35]. For temperature proﬁles, wind stress again dominates across
+depth. Near the surface, however, 2-meter temperature becomes inc reasingly important due to
+its direct inﬂuence on air–sea heat ﬂux, particularly through modulat ion of the sensible heat
+ﬂux and its impact on vertical mixing in the subsurface [ 36].
+7
+For SLA, the dominant atmospheric driver is MSLP, which directly aﬀect s the sea level
+through the inverted barometer eﬀect [ 37] and large-scale ocean response. Moreover, MSLP
+gradients give rise to surface wind stress through atmospheric geostrop hic balance [ 38], making
+wind stress the second most signiﬁcant contributor to SLA.
+The patterns we see here conﬁrm known ocean–atmosphere coupling mec hanisms and sup-
+port the robustness of SeaCast’s sensitivity to physically meaningf ul drivers. A depth-resolved
+analysis of the eﬀect of atmospheric forcing on individual variables is f urther provided in
+Supplementary D.2.
+13579111315
+Lead time (days)1
+5
+11
+16
+23
+30
+38
+47
+56
+67
+79
+91
+105
+120
+136
+153
+172
+192Depth (m)a) Zonal current
+13579111315
+Lead time (days)b) Meridional current
+13579111315
+Lead time (days)c) Salinity
+13579111315
+Lead time (days)d) T emperature
+7.5 5.0 2.5 0.0 2.5 5.0 7.5
+Norm. RMSE diff. (%)
+Fig. 7 Normalized RMSE diﬀerence scorecard comparing SeaCast per formance when forced with AIFS versus
+ENS atmospheric inputs. Evaluations are performed against analysis ﬁelds across all depth levels. Negative
+values indicate less error when using AIFS forcing.
+Additionally,weassessSeaCast’sperformanceusingtwodiﬀerentatm osphericforcingprod-
+ucts: AIFS and ENS. Both forcings include the same set of variables, prov iding a consistent
+basisforcomparison.Figure 7presentsscorecardsofnormalizedRMSEdiﬀerencesacrossdepth
+levels. Results indicate that the AIFS forcing leads to improved f orecast skill for currents and
+temperature, particularly at longer lead times, with the most notable gai ns observed in SST.
+This is consistent with the evaluation of AIFS itself, which demonst rates lower forecast errors
+compared to its numerical counterpart beyond day one [ 31]. However, for salinity, SeaCast
+with ENS forcing exhibits slightly better performance in the uppe r layers here.
+2.5 Eﬀect of training period
+To evaluate the impact of training data duration and ﬁne-tuning on model performance, we
+compare SeaCast variants trained on diﬀerent historical timespans and ex amine the eﬀect of
+omitting ﬁne-tuning. Figure 8presents the normalized RMSE diﬀerence relative to a persis-
+tence baseline across forecast lead times, with MedFS included for r eference. The full SeaCast
+model is trained on 35 years of reanalysis data (January 1987 to December 2021), f ollowed
+by ﬁne-tuning on 2 years of more recent analysis data (January 2022 to Decem ber 2023). We
+compare this to a version trained solely on the 35-year reanalysis dataset, without ﬁne-tuning.
+Additionally, we include a shorter-term model variant trained on 8 ye ars of reanalysis data
+(January 2014 to December 2021), both with and without ﬁne-tuning on the sam e 2-year
+analysis period. This shorter-term model is denoted as SeaCast (10y). The models are trained
+using the same number of epochs and follow identical epoch-wise le arning rate schedules. As
+a result, SeaCast (10y, w/o ﬁnetuning) undergoes fewer optimization s teps during the pre-
+training phase compared to the full model, and requires a smaller com putational budget (6h
+vs. 20.5h on 64 GPUs).
+The results show that the 10-year variants of SeaCast generally perform on p ar with or
+slightly better than MedFS for zonal and meridional currents, temper ature proﬁles, and sea
+8
+13579111315
+Lead time (days)12.510.07.55.02.50.0Norm. RMSE diff. (%)a) Zonal current
+13579111315
+Lead time (days)12.510.07.55.02.50.0Norm. RMSE diff. (%)b) Meridional current
+13579111315
+Lead time (days)121086420Norm. RMSE diff. (%)c) Salinity
+13579111315
+Lead time (days)3020100Norm. RMSE diff. (%)d) T emperature
+13579111315
+Lead time (days)50403020100Norm. RMSE diff. (%)e) SST
+13579111315
+Lead time (days)4202Norm. RMSE diff. (%)f) SLA
+SeaCast
+SeaCast (w/o finetuning)SeaCast (10y)
+SeaCast (10y, w/o finetuning)MedFS
+Persistence
+Fig. 8 Normalized RMSE diﬀerence per lead time for SeaCast variant s and MedFS compared to a persistence
+baseline. SeaCast is trained on 35 years of reanalysis (1987 –2021) with 2-year ﬁne-tuning (2022–2023). The
+10y variant uses only 8 years of reanalysis (2014–2021), wit h or without the same ﬁne-tuning. Results show
+the impact of training duration and ﬁne-tuning on forecast p erformance.
+surface temperature. However, for salinity and SLA, only the full SeaCas t model, trained on
+35 years of reanalysis data and ﬁne-tuned on analysis data, outperforms MedF S. The SLA
+error for the ﬁne-tuned 10-year variant is slightly higher than that of the base version, which
+may seem counterintuitive. This can be partly explained by the fac t that SLA evaluation
+is performed along satellite tracks, whereas training is done on regular ly gridded simulation
+outputs. Minimizing MSE on simulated ﬁelds does not guarantee lower error on satellite tracks,
+even if SLA is assimilated into the physics-based model. Moreover , the satellite tracks yield
+a sparser and more variable target compared to other ﬁelds, producing a w ider conﬁdence
+interval,asobservedinFigure 2.Onotherﬁelds,theﬁne-tunedmodelconsistentlyoutperforms
+the base version. These ﬁndings are encouraging for regional settings wit h access to limited
+historical data, suggesting that even 10 years of reanalysis data and a more mo dest compute
+budget can produce forecast skill competitive with numerical forec ast models.
+Fine-tuning on analysis data yields consistent performance improv ements across variables,
+which is expected given that several evaluation targets are derived fr om the same analysis
+system. These analysis states are more up-to-date than the reanalysis an d incorporate sys-
+tem enhancements not present in the older data, including open bound ary conditions at the
+Dardanelles Strait, coupling with a wave model [ 39], and tidal forcing [ 40]. By ﬁne-tuning on
+this updated dataset, SeaCast adapts to the characteristics of the curr ent operational system,
+leading to better alignment with the evaluation targets and improved o verall forecast accuracy.
+3 Discussion
+In this study, we introduced SeaCast, a graph-based machine learnin g model designed for high-
+resolution regional ocean forecasting. SeaCast learns directly from hist orical reanalysis and
+analysisdatatopredictkeyoceanvariablesintheMediterraneanSea. Themodeldemonstrates
+9
+improved skill for all modeled variables across all depth levels comp ared to the operational
+MedFS when considering both analysis ﬁelds and satellite observation s as references. Another
+beneﬁt of SeaCast is its speed: once trained, it delivers a full 15-d ay, 18-level forecast on a
+1/24◦grid in just 20s on a single GPU, substantially faster than the physics- based model on
+a CPU cluster. This performance can enable new capabilities for Medi terranean forecasting
+such as rapid scenario testing and ensemble forecasting with many me mbers.
+Our sensitivity experiments underscore the central role of atmosp heric forcing, where wind
+stress emerges as a dominant driver of predictive skill across all oce an variables, with surface
+temperatureandMSLPexertingsecondaryinﬂuencemotivatedbythet heair–seaheat-ﬂuxand
+inverted-barometer eﬀects. These results suggest that physicall y meaningful coupling mech-
+anisms are captured by the data-driven framework. We further demonst rate that the length
+and recency of the training period materially aﬀect forecast accuracy. The 10-year variant of
+SeaCast achieves performance on par with MedFS for currents, temperat ure, and SST, while
+relying on very attainable historical data archives and computational res ources.
+Despite the promising outcomes, several avenues remain for future improvement. First,
+enhancements to the underlying reanalysis systems, in line wit h recent progress on MedFS [ 10],
+could further increase the ﬁdelity of data-driven forecasting mode ls. Additionally, increasing
+the temporal resolution of archived datasets, e.g. from daily to 6-hourly ﬁ elds, would provide
+richer training data and enable models to capture diurnal variabilit y. Furthermore, recent work
+has demonstrated that machine learning can be used to produce continu ous-time forecasts [ 41,
+42], a concept that could potentially be adapted to ocean modeling.
+While SeaCast takes as input lateral boundary forcing from MedFS, lever aging its existing
+regridded connection to the global ocean, early studies in limited ar ea weather modeling with
+machine learning provide interesting alternative ways for handli ng boundary conditions, such
+as using a globally stretched grid [ 43] or learned mappings from surrounding forecasts [ 44].
+Integrating both data-driven global ocean and atmospheric forecasts, whic h can be rolled out
+arbitrarily far, into machine learning-based regional ocean models woul d enable similarly long
+lead-time predictions for these models as well. This opens up the q uestion of how far into the
+future such forecasts can remain skillful.
+The interdependence of physics, biogeochemistry, and wave dynam ics in the MedFS sys-
+tem [10] suggests a natural extension for machine learning frameworks: a couple d neural
+architecture that jointly predicts sea state, biochemical tracer s, and wave variables, enabling
+truly holistic forecasts. While these particular components are usu ally represented on com-
+patible grids, recent advances in foundation models for weather and cl imate have shown that
+even heterogeneous spatial and temporal datasets, can be eﬀectively use d for training, result-
+ing in models that generalize across diverse prediction tasks [ 45,46]. Adopting this paradigm
+for ocean forecasting could enable the development of transferable rep resentations, supporting
+scalable and adaptable forecasting systems across regions and variable type s.
+Another direction of future work is developing probabilistic ocean for ecasting systems.
+While SeaCast currently produces deterministic forecasts akin t o traditional operational ocean
+forecasting systems, emerging generative machine learning method s for weather forecasting
+emphasize uncertainty quantiﬁcation through ensemble generation [ 47,48]. These approaches
+enable better decision-making by accounting for forecast spread and pr oducing potentially
+more physically consistent ensemble members, which could be ver y useful for risk-sensitive
+applications such as early warning systems and coastal hazard planning.
+In conclusion, SeaCast demonstrates the viability of machine learning for regional ocean
+forecasting by outperforming a physics-based system. This work als o presents novel sensitiv-
+ity experiments in data-driven ocean forecasting, revealing the rol es of atmospheric forcing
+components and training period characteristics. Further improve ments in data ﬁdelity, model
+coupling, and probabilistic prediction will be key to realizing the full potential of machine
+learning–based regional ocean forecasting.
+10
+4 Methods
+Problem deﬁnition. The forecasting problem is characterized by mapping a sequence of
+initial states X−p:0= (X−p,...,X0), where pis the length of the past window, to a sequence
+of future states X1:T= (X1,...,XT), where Tis the length of the forecast. Each state
+Xt∈RN×dx, contains dxvariables at Nlocations represented on a grid. Variables include both
+those at multiple vertical levels and single-level surface measure s. In addition to this, forcing
+inputsF1:T= (F1,...,FT) encompassing known dynamic factors relevant to the forecasting
+problem, are also available.
+4.1 SeaCast
+Graph-based neural forecasting. Initialstatestypicallycoverthetwoprecedingtimesteps
+X−1:0, enabling the capture of ﬁrst-order dynamics [ 15]. Concatenating a single-step forecast
+ˆXt=f(Xt−2:t−1,Ft) to the initial state and repeating the process with tincremented by one
+allows autoregressive forecasts ˆX1:Tof arbitrary length T. An integral part of this framework
+is mapping from Nsurface grid points onto a mesh graph GM= (VM,EM) coarser than the
+simulation domain [ 49]. The function fis implemented as a sequence of GNN layers following
+an encode-process-decode architecture [ 26] where: 1) grid inputs are encoded onto the mesh
+representation; 2) a number of GNN layers process this latent repre sentation; 3) the processed
+data is mapped back onto the original grid. SeaCast predicts the next ste p as a residual update
+to the most recent input state, making it an easier learning task than p redicting the next state
+directly. The mappings between grid and mesh nodes occur through bi partite grid-to-mesh
+GG2Mand mesh-to-grid GM2Ggraphs. Upwards node and edge updates are facilitated through
+GNN layers in the form of propagation networks [16], and the remaining updates through
+interaction networks [50], with all layers mapping to a latent dimensionality dz. This design
+leverages the inherent inductive bias of interaction networks to re tain information, whereas
+propagation networks are more eﬀective at forwarding new information through the graph.
+Multilayer perceptrons within GNN layers consists of a single hid den layer using the Swish
+activation function [ 51], followed by layer normalization [ 52].
+Hierarchical graph. The hierarchical mesh structure described in [ 16] consists of multi-
+ple graph levelsG1,...,GH, where each level Gh= (Vh,Eh) gets progressively coarser. The
+ﬁrst level connects directly to the grid, forming GG2M= (VG∪V1,EG2M) andGM2G=
+(VG∪V1,EM2G). A processing step on the mesh is deﬁned as a complete sweep throu gh the
+hierarchyGh,h+1= (Vh∪Vh+1,Eh,h+1) where the graph sequences are G1,2,...,GH−1,Hand
+GH,H−1,...,G2,1, respectively.
+Mesh construction. Regional oceans can take very irregular shapes, calling for a cus-
+tomizedmeshforthemodeledgeographicalarea.Thefoundationforourmeshi saquadrilateral
+construction used for graph-based limited area weather modeling [ 16]. It is initialized by select-
+ing only the nodes corresponding to the ocean surface grid. All nodes are connected with
+bidirectional edges to their neighbors horizontally, vertically and d iagonally. Nodes on higher
+resolution levels are positioned in the center of a 3 ×3 square on the level below. Upward
+edges are created by connecting each node at level hto the closest nodes at level h+1, and
+the downward edges mirror these. Edges crossing land areas with a thre shold of 8 grid points
+are excluded, both for inter- and intra-level graphs. This procedur e results in a mesh that
+conforms to the shape of the regional ocean.
+Rollout masking. Wewanttoensure1)thatthelearningtaskofthemodelisexclusivel yfor
+grid nodes inside the regional ocean at each depth level, and 2) that the p redictions are aligned
+with the inﬂuence of the global ocean. To address the ﬁrst point we only propagate predictions
+part of the internal depth-wise ocean grid Gin the autoregressive rollout. In response to the
+second point, boundary forcing is applied at each time step by replacin g predictions inside the
+11
+boundary region Bwith the ground truth forecast Xt. We update the row for each node vas:
+ˆXt
+v,i←/parenleftbig
+I{v∈Gl,i}−I{v∈Bl,i}/parenrightbigˆXt
+v,i+I{v∈Bl,i}Xt
+v,i∀l∈Li (1)
+Here,I{·}denotes the indicator function, equal to 1 if the speciﬁed condition is true and 0
+otherwise. Gl,irepresents the set of oceanic grid nodes at depth level lassociated with variable
+i, withBl,ideﬁned analogously for the boundary region. Finally, Lidenotes the set of vertical
+levels associated with variable i.
+Training objective. The model is trained to minimize the mean squared error (MSE)
+between the predictions and the ground truth over a rolled-out sequ ence of states. The loss
+function we use is similar to what is commonly applied in MLWP, with t he distinction that
+we account for the bathymetry, or the ocean grid structure at each depth level. The complete
+loss function is deﬁned as:
+L=1
+TrolloutTrollout/summationdisplay
+t=1C/summationdisplay
+i=1λiLi/summationdisplay
+l=1wl
+NlNl/summationdisplay
+v=1av/parenleftBig
+ˆXt
+v,i−Xt
+v,i/parenrightBig2
+(2)
+whereTrolloutis the number of steps in the rollout, Cis the number of ocean variables in the
+tensor,Liis the number of depth levels for variable i,Nlis the the number of ocean grid nodes
+at depth level l,avis the latitude-longitude area of grid cell vnormalized to unit mean, wlis
+the loss weight for depth level l, andλiis the inverse variance of time diﬀerences for variable i.
+The area factor avaccounts for variations in the size of grid cells due to the spherical
+geometry of the Earth, assigning lower weights to cells near the poles an d higher weights near
+the equator, and is normalized to have unit mean across the domain. The de pth-speciﬁc weight
+wlisdesignedtoprioritizepredictionaccuracyintheupperocean,r eﬂectingthegreatersocietal
+relevance of shallower depths. For depth-resolved variables, wlis proportional to (200 −d),
+wheredis the depth in meters, and the weights are normalized to have unit m ean across all
+depths. The single-level SSH variable is assigned a weight of one. Fur ther normalizing by the
+magnitude of the dynamics for each feature, signiﬁed by the λifactor, ensures that the model
+evaluates errors across vertical levels on a physically meaningful scal e [14].
+Model and training. We train SeaCast with 3 mesh levels and 3 processor layers with
+dz= 256 hidden units, totaling 17 .7M trainable parameters. Training initiates with a warm-
+up phase of ﬁve epochs, starting from a learning rate of 10−5and incrementing epoch-wise to a
+baserateof10−3.Followingthewarm-up,weemployacosinedecayschedule.Foropt imization,
+we use AdamW [ 53], conﬁgured with β1= 0.9,β2= 0.95, and a weight decay of 0 .1. SeaCast
+is trained on reanalysis data for 200 epochs using a local batch size of 1. Th e model is further
+ﬁnetuned on analysis data for 30 epochs, with the same learning rate sch edule, but the initial
+learning rate set to 10−7and the base rate as 10−5. Furthermore, the number of rollout steps
+is progressively increased to 2 at epoch 10 and 3 at epoch 20. Additional roll out steps can be
+added to the loss function, although this comes at an increased training c ost, and have been
+observed to yield diminishing returns in MLWP [ 14]. The pretraining on 35 years of daily
+reanalysis data took 20.5h on 64 AMD MI250x GPUs (1312 GPU hours) in a data-parallel
+conﬁguration, and ﬁnetuning on 2 years of analysis data took 3.5h on 8 GPUs (28 GP U hours).
+Computational complexity. SeaCastcanproduceacomplete15-dayforecastin20seconds
+on a single AMD MI250x GPU, which is roughly equivalent to 1.3 seconds per si mulated day
+(∼178 SYPD). The SeaCast forecast includes 18 depth levels, and outputs pr edictions at
+a daily temporal resolution. In contrast, the computational time requir ed for the MedFS is
+approximately 70 minutes to run a 10-day forecast ( ∼0.6 SYPD), using 89 CPU cores. This
+includes the time for generating and writing outputs for all 141 vertic al levels. Both models
+produce outputs at the same 1/24 °spatial resolution.
+12
+4.2 Dataset
+Ocean state. The Mediterranean Sea physics analysis and forecasting system leve rages a
+two-way coupled hydrodynamic–wave modeling framework composed of th e Nucleus for Euro-
+pean Modelling of the Ocean (NEMO) v4.2 [ 54], which includes an explicit representation of
+tides, and WAVEWATCH III v6.07 [ 55]. Model solutions are corrected using the 3D variational
+data assimilation scheme OceanVar [ 56], which integrates quality-controlled in situ and satel-
+lite observations to improve ocean dynamics. The Mediterranean rean alysis system is based on
+NEMO v3.6 (without tides) and OceanVar, assimilating reprocessed obs ervational data. The
+model is implemented at a high horizontal grid resolution of 1/24 °, utilizing a total of 141 ver-
+tical levels with uneven spacing. By choosing every other depth un til 200m the list of selected
+depths included in this study becomes: 1.02, 5.46, 10.5, 16.3, 22.7, 29.9, 37.9, 46.7, 56.3, 66. 9,
+78.6, 91.2, 105, 120, 136, 153, 172, and 192 meters. The topography is based on an interpola-
+tion of the General Bathymetric Chart of the Oceans (GEBCO) 30 arcsecond grid [57]. The
+test data consists of daily forecasts issued from July 3rd, 2024 to Decemb er 31st, 2024. The
+last date used for evaluation is hence January 14th, 2025, as SeaCast provides 15-d ay forecasts.
+Atmospheric forcing. Atmospheric forcing play an important role in data-driven modeling
+of the ocean’s response to atmospheric conditions [ 25], especially in driving marine dynamics
+near the sea surface. We incorporate four key atmospheric variables: th e 2-meter temperature,
+MSLP, and the 10-meter zonal and meridional wind stress components deriv ed from wind
+components using the Hellerman and Rosenstein formulation [ 58] for the drag coeﬃcient.
+The atmospheric data are sourced from daily mean aggregates of 6-hourly ERA5 rean alysis
+data [29]. For testing, we compare the 6-hourly daily means of the numerical ENS and the
+data-driven AIFS forecasts. All atmospheric forcing variables are bi-li nearly interpolated from
+their native 1/4 °resolution to the 1/24 °resolution of the sea grid. Additionally, the sine and
+cosine of the day of year, normalized between 0 and 1, are included as forci ng features to
+account for seasonal variations. The atmospheric forcing used in our mode l is windowed over
+three consecutive time steps. This means that each forcing input Ftincludes data from times
+t−1,t, andt+1.
+Lateral boundary forcing. We deﬁne the lateral boundary as the grid nodes west of lon-
+gitude -5.2 °to the edge the grid, covering the Strait of Gibraltar, as well as the Dar danelles
+Strait, which spans latitudes 39 .9◦to 40.4◦and longitudes 25 .9◦to 26.4◦. Note that we use a
+boundary region that lies inside the propagated data grid, allowing us to u se Mediterrenaen
+forecast data as boundary forcing. Current ocean forecasts at CMEMS are avai lable 10 days
+in the future for the most part, following the length of HRES atmospheri c forcing. However,
+we use the ENS/AIFS standard of 15-day forecasts. Hence we have to increase the length of
+the boundary forcing, and we do so by persisting the last forecast state in the boundary region
+ﬁve times at the end.
+Satellite data. Satellite observations of SST and SLA over the Mediterranean Sea are use d
+for evaluation. For SST, we use the super-collated Level-3S (L3S) multi- sensor merged prod-
+uct [33] delivered through CMEMS, which provides daily SST ﬁelds at a spat ial resolution of
+1/16◦. These observations are representative of nighttime conditions, the reby minimizing the
+eﬀects of the diurnal heating cycle. The L3S dataset is constructed by merging only the high-
+est quality Level-2P (L2P) input data from several satellite sensors, s elected within a strict
+local nighttime window to reduce cloud contamination and sensor incons istencies. The main
+contributing sensors include SLSTR from Sentinel-3A and -3B, VIIRS f rom NOAA-20 and
+Suomi-NPP, AVHRR from Metop-B and -C, and SEVIRI from Meteosat. Model forec asts are
+bilinearly interpolated to the L3S SST grid during evaluation.
+For SLA, we use the CMEMS along-track L3 near-real-time product. This p roduct con-
+tains high-resolution measurements, where we use 5Hz measurements from satellite altimeters
+HaiYang-2B, Jason-3 (interleaved orbit), Sentinel-3A and -3B, Sentine l-6A, and the SWOT
+mission (nadir track). The ﬁltered version of this dataset is used to minimize the inﬂuence of
+13
+measurement noise. Model SSH is converted to SLA and bilinearly int erpolated onto the satel-
+lite track coordinates during evaluation. The process of aligning mod el and observation data
+is detailed in Supplementary A.3.
+4.3 Evaluation metrics
+We assess the performance of SeaCast using several variations of RMSE, wh ich quantiﬁes
+the average magnitude of prediction errors relative to the reference observations. RMSE is
+computed per lead time and per variable, and includes area weighting t o account for the
+changing size of ocean grid cells with latitude, consistent with the loss function used during
+training. For the 3D variables temperature, salinity, and currents, w e report depth-averaged
+RMSE to provide a vertically integrated summary of forecast skill at e ach lead time. For SST,
+we additionally compute per-location RMSE by comparing model outputs interpolated onto
+the L3S SST grid to the observations.
+To evaluate the model’s ability to detect temperature extremes, we use HSS, which mea-
+sures categorical forecast skill relative to random chance. HSS is comput ed based on a binary
+classiﬁcation of observed threshold exceedances, deﬁned as SST value s above the 90th per-
+centile of the daily climatology, using an 11-day rolling mean. An HSS of 1 ind icates a perfect
+forecast, 0 indicates no skill beyond chance, and negative values indi cate performance worse
+than a random forecast.
+Additional details on the veriﬁcation metrics and their mathematical de ﬁnitions are
+provided in Supplementary C.
+Data availability
+The model weights and preprocessed data to reproduce the result s for this study are stored
+athttps://doi.org/10.57967/hf/5342 . The original data is publicly available via CMEMS
+for the ocean data and ECMWF for the atmospheric data. The Mediterranean r eanal-
+ysis and analysis data can be downloaded from https://doi.org/10.25423/cmcc/medsea
+multiyear phy006004e3r1andhttps://doi.org/10.25423/cmcc/medsea analysisforecast phy
+006013eas8. The atmospheric forcing is obtained from https://doi.org/10.21957/open-data .
+The observed SST, SLA, and in-situ data used for evaluation are available v iahttps://doi.
+org/10.48670/moi-00171 ,https://doi.org/10.48670/moi-00140 , andhttps://doi.org/10.48670/
+moi-00044 , respectively.
+Code availability
+The source code for SeaCast is available at https://doi.org/10.5281/zenodo.15367632 . The
+repository contains scripts for data downloading and preprocessing, as well as code for training
+and evaluating the models presented.
+References
+[1] Le Traon, P. Y. et al.From observation to information and users: The Copernicus Marine
+Service perspective. Frontiers in Marine Science 6, 234 (2019).
+[2] Sun, R. et al.SKRIPS v1.0: A regional coupled ocean–atmosphere modeling framework
+(MITgcm–WRF) using ESMF/NUOPC, description and preliminary result s for the Red
+Sea.Geoscientiﬁc Model Development 12, 4221–4244 (2019).
+[3] Sakamoto, K. et al.Development of a 2-km resolution ocean model covering the coastal
+seas around Japan for operational application. Ocean Dynamics 69, 1181–1202 (2019).
+14
+[4] Ciliberti, S. A. et al.Monitoring and forecasting the ocean state and biogeochemical pro-
+cesses in the Black Sea: Recent developments in the Copernicus Mar ine Service. Journal
+of Marine Science and Engineering 9, 1146 (2021).
+[5] K¨ arn¨ a, T. et al.Nemo-Nordic 2.0: Operational marine forecast model for the Baltic Sea.
+Geoscientiﬁc Model Development 14, 5731–5749 (2021).
+[6] Zhu, X. et al.Improvements in the regional South China Sea operational oceanography
+forecasting system (SCSOFSv2). Geoscientiﬁc Model Development 15, 995–1015 (2022).
+[7] Bruschi, A. et al.Indexes for the assessment of bacterial pollution in bathing waters fr om
+point sources: The northern Adriatic Sea CADEAU service. Journal of Environmental
+Management 293, 112878 (2021).
+[8] Liubartseva, S. et al.Modeling chronic oil pollution from ships. Marine Pollution Bulletin
+(2023).
+[9] Mannarini, G., Salinas, M. L., Carelli, L., Petacco, N. & Orovi´ c, J. VI SIR-2: Ship weather
+routing in Python. Geoscientiﬁc Model Development 17, 4355–4382 (2024).
+[10] Coppini, G. et al.The Mediterranean forecasting system—Part 1: Evolution and
+performance. Ocean Science 19, 1483–1516 (2023).
+[11] Bi, K. et al.Accurate medium-range global weather forecasting with 3D neural networks .
+Nature619, 533–538 (2023).
+[12] Nguyen, T. et al.Scaling transformer neural networks for skillful and reliable mediu m-
+rangeweatherforecasting. Advances in Neural Information Processing Systems 37,68740–
+68771 (2024).
+[13] Pathak, J. et al.FourCastNet: A global data-driven high-resolution weather model using
+adaptive Fourier neural operators. arXiv preprint arXiv:2202.11214 (2022).
+[14] Keisler, R. Forecasting global weather with graph neural networks. arXiv preprint
+arXiv:2202.07575 (2022).
+[15] Lam, R. et al.Learning skillful medium-range global weather forecasting. Science382,
+1416–1421 (2023).
+[16] Oskarsson,J.,Landelius,T.,Deisenroth,M.&Lindsten,F. Probab ilisticweatherforecast-
+ing with hierarchical graph neural networks. Advances in Neural Information Processing
+Systems 37, 41577–41648 (2024).
+[17] Dheeshjith, S. et al.Samudra: An AI global ocean emulator for climate. Geophysical
+Research Letters 52, e2024GL114318 (2025).
+[18] Wang, C. et al.Coupled ocean-atmosphere dynamics in a machine learning Earth syste m
+model.arXiv preprint arXiv:2406.08632 (2024).
+[19] Guo, Z. et al.Data-driven global ocean modeling for seasonal to decadal prediction. arXiv
+preprint arXiv:2405.15412 (2024).
+[20] Wang, X. et al.XiHe: A data-driven model for global ocean eddy-resolving forecasting.
+arXiv preprint arXiv:2402.02995 (2024).
+[21] Aouni, A. E. et al.GLONET: Mercator’s end-to-end neural forecasting system. arXiv
+preprint arXiv:2412.05454 (2024).
+15
+[22] Cui, Y. et al.Forecasting the eddying ocean with a deep neural network. Nature
+Communications 16, 2268 (2025).
+[23] Andersson,T.R. et al.SeasonalArcticseaiceforecastingwithprobabilisticdeeplearning.
+Nature Communications 12, 5124 (2021).
+[24] Chattopadhyay, A., Gray, M., Wu, T., Lowe, A. B. & He, R. OceanNet: A pr incipled
+neuraloperator-baseddigitaltwinforregionaloceans. Scientiﬁc Reports 14,21181(2024).
+[25] Subel,A.&Zanna,L. Buildingoceanclimateemulators. arXiv preprint arXiv:2402.04342
+(2024).
+[26] Sanchez-Gonzalez, A. et al.Learning to simulate complex physics with graph networks.
+International Conference on Machine Learning 8459–8468 (2020).
+[27] Marchesiello, P., McWilliams, J. C. & Shchepetkin, A. Open boun dary conditions for
+long-term integration of regional oceanic models. Ocean Modelling 3, 1–20 (2001).
+[28] Escudier, R. et al.A high resolution reanalysis for the Mediterranean Sea. Frontiers in
+Earth Science 9, 702285 (2021).
+[29] Hersbach, H. et al.ERA5 monthly averaged data on single levels from 1940 to present.
+Copernicus Climate Change Service (C3S) Climate Data Store (CDS) (2023).
+[30] Molteni, F., Buizza, R., Palmer, T. N. & Petroliagis, T. The ECMWF e nsemble predic-
+tion system: Methodology and validation. Quarterly Journal of the Royal Meteorological
+Society122, 73–119 (1996).
+[31] Lang, S. et al.AIFS - ECMWF’s data-driven forecasting system. arXiv preprint
+arXiv:2406.01465 (2024).
+[32] ECMWF. Plans for high resolution forecast (HRES) and ensemble forecas t (ENS).
+In focus (2024). URL https://www.ecmwf.int/en/about/media-centre/focus/2024/
+plans-high-resolution-forecast-hres-and-ensemble-forecast-en s.
+[33] Nardelli, B. B., Tronconi, C., Pisano, A. & Santoleri, R. High and Ultra-High resolution
+processing of satellite Sea Surface Temperature data over Souther n European Seas in the
+framework of MyOcean project. Remote Sensing of Environment 129, 1–16 (2013).
+[34] Hobday, A. J. et al.A hierarchical approach to deﬁning marine heatwaves. Progress in
+Oceanography 141, 227–238 (2016).
+[35] Marshall, J. & Schott, F. Open-ocean convection: Observations, th eory, and models.
+Reviews of Geophysics 37, 1–64 (1999).
+[36] Large, W. G., McWilliams, J. C. & Doney, S. C. Oceanic vertical mixi ng: A review and
+a model with a nonlocal boundary layer parameterization. Reviews of Geophysics 32,
+363–403 (1994).
+[37] Wunsch, C. & Stammer, D. Atmospheric loading and the oceanic “inve rted barometer”
+eﬀect.Reviews of Geophysics 35, 79–107 (1997).
+[38] Gill, A. E. Atmosphere—ocean dynamics (Academic Press, 1982).
+[39] Clementi, E. et al.Coupling hydrodynamic and wave models: ﬁrst step and sensitivit y
+experiments in the Mediterranean Sea. Ocean Dynamics 67, 1293–1312 (2017).
+16
+[40] McDonagh, B., Clementi, E., Goglio, A. C. & Pinardi, N. The characteris tics of tides
+and their eﬀects on the general circulation of the Mediterranean Sea. Ocean Science 20,
+1051–1066 (2024).
+[41] R¨ uhling Cachay, S., Zhao, B., Joren, H. & Yu, R. Dyﬀusion: A dynami cs-informed dif-
+fusion model for spatiotemporal forecasting. Advances in Neural Information Processing
+Systems 36, 45259–45287 (2023).
+[42] Andrae, M., Landelius, T., Oskarsson, J. & Lindsten, F. Continuous e nsemble weather
+forecasting with diﬀusion models. International Conference on Learning Representations
+(2025).
+[43] Nipen, T. N. et al.Regional data-driven weather modeling with a global stretched-grid.
+arXiv preprint arXiv:2409.02891 (2024).
+[44] Adamov, S. et al.Building machine learning limited area models: Kilometer-scale weather
+forecasting in realistic settings. arXiv preprint arXiv:2504.09340 (2025).
+[45] Nguyen, T., Brandstetter, J., Kapoor, A., Gupta, J. K. & Grover, A. C limaX: A foun-
+dation model for weather and climate. International Conference on Machine Learning
+(2023).
+[46] Bodnar, C. et al.A foundation model for the Earth system. Nature1–8 (2025).
+[47] Price, I. et al.Probabilistic weather forecasting with machine learning. Nature637, 84–90
+(2025).
+[48] Larsson, E., Oskarsson, J., Landelius, T. & Lindsten, F. Diﬀusion-LAM : Probabilistic
+limited area weather forecasting with diﬀusion. arXiv preprint arXiv:2502.07532 (2025).
+[49] Fortunato, M., Pfaﬀ, T., Wirnsberger, P., Pritzel, A. & Battaglia, P . Multiscale
+meshgraphnets. arXiv preprint arXiv:2210.00612 (2022).
+[50] Battaglia, P., Pascanu, R., Lai, M., Jimenez Rezende, D. et al.Interaction networks for
+learning about objects, relations and physics. Advances in Neural Information Processing
+Systems 29(2016).
+[51] Ramachandran, P., Zoph, B. & Le, Q. V. Searching for activation functions .arXiv
+preprint arXiv:1710.05941 (2017).
+[52] Ba, J., Kiros, J. & Hinton, G. Layer normalization. arXiv preprint arXiv:1607.06450
+(2016).
+[53] Loshchilov, I. & Hutter, F. Decoupled weight decay regularization. International
+Conference on Learning Representations (2019).
+[54] Madec, G. et al.NEMO ocean engine. Scientiﬁc Notes of Climate Modelling Center 27
+(2017).
+[55] WAVEWATCH III Development Group (WW3DG). User Manual and System Do cumen-
+tation of WAVEWATCH III Version 6.07. Tech. Note 333, NOAA/NWS/NCEP/MMAB,
+College Park, MD, USA (2019).
+[56] Dobricic, S. & Pinardi, N. An oceanographic three-dimensional variati onal data
+assimilation scheme. Ocean Modelling 22, 89–105 (2008).
+17
+[57] Weatherall, P. et al.A new digital bathymetric model of the world’s oceans. Earth and
+Space Science 2, 331–345 (2015).
+[58] Hellerman, S. & Rosenstein, M. Normal monthly wind stress over the world ocean with
+error estimates. Journal of Physical Oceanography 13, 1093–1104 (1983).
+Supplementary information. We provide a Supplementary Materials document that con-
+tainsadditionalmethodologicaldetails,aswellassupplementarytextan dresultsthatsupports
+the main claims of our paper.
+Acknowledgements. This work was ﬁnancially supported by the Research Council of Fin-
+land under the FAISER project (grant no. 361902). Computing resources were provided by
+the LUMI supercomputer, owned by the EuroHPC Joint Undertaking and host ed by CSC–IT
+Center for Science.
+Declarations.
+•Funding: This project was supported by the Research Council of Finl and.
+•Conﬂict of interest: None to report.
+•Ethics approval and consent to participate: Not applicable.
+•Consent for publication: All authors have reviewed the manuscript and consent to its
+publication.
+•Data availability: See section on data availability.
+•Materials availability: Not applicable.
+•Code availability: See section on code availability.
+•Author contribution: D.H. conceptualized the project and conducted t he experiments. E.C.
+and I.E. assisted with the assessment of regional ocean forecasting sys tems and provided
+guidance on interpreting the results. T.R. supervised the proj ect. All authors provided
+feedback on results at various stages of the project and contributed to t he writing of the
+manuscript.
+18
+Supplementary Materials
+Accurate Mediterranean Sea forecasting via graph-based
+deep learning
+Daniel Holmberg, Emanuela Clementi, Italo Epicoco, Teemu Ro os
+Contents
+A Data details 2
+A.1 Region considered . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+A.2 Variables considered . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+A.3 Satellite data . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 2
+B Model Details 4
+C Evaluation metrics 5
+D Additional results 6
+D.1 In-situ evaluation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 6
+D.2 Analysis evaluation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+D.3 Vertical error proﬁles . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+D.4 Eﬀect of atmospheric forcing . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+D.5 Eﬀect of training period . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 16
+E Example forecasts 19
+1
+A Data details
+A.1 Region considered
+The domain used in this study covers the Mediterranean Sea, with hor izontal resolution of
+1/24◦, from the surface down to 200 m depth, and includes two lateral open boun dary regions
+where external forcing is applied. These boundaries allow the mode l to account for the inﬂow
+and outﬂow of water with neighboring seas. The ﬁrst open boundary is locat ed at the western
+edge of the domain, near the Strait of Gibraltar connecting to the Atlanti c Ocean, and includes
+allgridcellswestoflongitude5 .2◦W.Thesecondopenboundaryissituatedinthenortheastern
+corner of the domain, corresponding to the Dardanelles Strait connecti ng to the Black Sea,
+and spans the region bounded by latitudes 39 .9◦N to 40.4◦N and longitudes 25 .9◦E to 26.4◦E.
+These regions are highlighted in red in Figure S1, overlaid on the bathymetry map of the
+Mediterranean Sea.
+5°W 0° 5°E 10°E 15°E 20°E 25°E 30°E 35°E33°N36°N39°N42°N45°N
+5001000150020002500300035004000
+Depth (m)
+Fig. S1 Bathymetry of the Mediterranean Sea domain used in SeaCast, with forcing regions highlighted in
+red. The western boundary at the Strait of Gibraltar and the e astern boundary at the Dardanelles Strait are
+designated as open boundaries, where boundary conditions a re applied to account for water exchange with
+adjacent seas.
+The minimum rectangle in which the Mediterranean Sea ﬁts at the cur rent resolution is
+371 by 1013 grid cells. This is a total of 375 823 cells, whereas the actual sea sur face of the
+Mediterranean only has N= 144 990 cells, or 45% of the total number. Only this subset of
+grid cells has to be processed by SeaCast. The complete data grid is sh own in Figure S1.
+Single-level features, forcing features, and static ﬁelds all cove r the surface area, whereas the
+simulated currents, temperature and salinity have values on sever al vertical levels.
+A.2 Variables considered
+TheseaphysicsdatasetusedtotrainandevaluateSeaCastconsistsofdy namicvariables,static
+ﬁelds, and atmospheric forcing inputs. Table S1provides a detailed overview of all included
+features. The core variables represent the three-dimensional stat e of the ocean, including cur-
+rents, temperature, salinity provided at 18 vertical levels, as we ll as SSH (73 predicted ﬁelds
+in total). The bathymetry and mean dynamic topography static ﬁelds are use d to deﬁne the
+spatial structure of the ocean domain. Finally, surface atmospheric for cing variables including
+wind stress, 2-meter temperature, and MSLP are incorporated to drive the ocean dynamics,
+along with cyclical encodings of time of year to account for seasonal variabil ity.
+A.3 Satellite data
+Predicted SST and SLA are compared also to satellite observations. SST i s fairly straight-
+forward to compare on the satellite L3S SST grid, but for SLA there is a bit of a procedure
+2
+Table S1 Summary of all variables, static ﬁelds, and
+forcing features in the Mediterranean Sea physics dataset.
+Unit Vertical Level
+Variables
+Zonal sea water velocity m/s 18 depths
+Meridional sea water velocity m/s 18 depths
+Sea water salinity psu 18 depths
+Sea water potential temperature °C 18 depths
+Sea surface height above geoid m Sea surface
+Static ﬁelds
+Sea ﬂoor depth below geoid m Sea ﬂoor
+Mean dynamic topography m Sea surface
+Latitude °-
+Longitude °-
+Forcing
+Zonal wind stress Pa Sea surface
+Meridional wind stress Pa Sea surface
+2-meter temperature °C Sea surface
+Mean sea level pressure Pa Sea surface
+Sine of time of year - -
+Cosine of time of year - -
+to align it with L3 measurements. To compute the observed SLA used in e valuation, we take
+the ﬁltered SLA satellite data and apply dynamic atmospheric correcti on, ocean tide correc-
+tion, and internal tide correction. These additional terms account for p hysical processes that
+inﬂuence sea level but are not captured directly in the raw altime ter measurements.
+In contrast, the sea level forecasts from MedFS and SeaCast are provide d as absolute SSH
+relative to the geoid. To make this comparable to observed SLA, we subtrac t the model’s mean
+dynamic topography, eﬀectively aligning the model output to a time-m ean reference sea level
+similar to the satellite product, which uses the 1993–2012 period as its c limatological baseline.
+Each satellite track is split into ocean-only segments by applying a sea mask. Tracks are
+divided wherever land is encountered, and only segments containing a minimum number of
+four valid ocean points are retained for evaluation. Finally, to minimiz e any residual bias in
+comparisons along individual satellite tracks, we remove the average S LA value from each
+track in both the model forecasts and the observations.
+3
+B Model Details
+SeaCast operates on a multi-resolution graph representation of the Medit erranean Sea, coarser
+than the original grid, enabling the model to capture ocean dynamics acr oss multiple spatial
+scales, while being computationally feasible to process on. Input v ariables are mapped onto
+a three-layer hierarchical graph, illustrated in Figure S2. Each graph layer captures ocean
+variability at a distinct resolution, allowing the model to learn bot h short and long range
+interactions that are useful for predicting future sea states.
+Fig. S2 Ocean variables are encoded onto a hierarchical mesh of the M editerranean Sea shown here. Each
+layer has a diﬀerent resolution allowing for interactions a t diﬀerent scales between observables.
+Each node is connected via bidirectional edges to its immediate nei ghbors—horizontally,
+vertically, and diagonally. This connectivity pattern is repeated acr oss three resolutions, with
+the spacing between nodes tripling at each successive level. Sp eciﬁcally, a node at resolution
+levelhis placed at the center of a 3 ×3 patch of nodes at resolution h−1.
+TableS2summarizes the structure of the full graph used in SeaCast, includi ng the number
+of nodes and edges at each layer, as well as the mapping components that conn ect the physical
+grid, mesh, and graph representations. The base layer, G0, corresponds to the ﬁnest resolution
+in the mesh. Two additional layers, G1andG2, represent increasingly coarser resolutions,
+allowing for eﬃcient message passing over larger spatial extents.
+Table S2 Number of nodes
+and edges in the sea graph.
+Graph Nodes Edges
+G0 22677 174007
+G0,1/G1,0- 22677
+G1 2515 18206
+G1,2/G2,1- 2515
+G2 272 1610
+Mesh 25464 219015
+GG2M - 542271
+GM2G - 579960
+Grid 144990 -
+Inter-layer connections, such as G0,1andG1,2, deﬁne bidirectional edges that facilitate
+hierarchical information ﬂow between levels. Additionally, SeaCast i ncludes mappings between
+the physical simulation grid and the mesh graph, denoted GG2M(grid-to-mesh) and GM2G
+(mesh-to-grid), which enable the model to interface with the oce an data grid.
+4
+C Evaluation metrics
+Root mean squared error (RMSE). For each lead time t, variable i, and depth level l
+the RMSE is deﬁned as:
+RMSE t,i,l=/radicaltp/radicalvertex/radicalvertex/radicalbt1
+TevalTeval/summationdisplay
+t0=11
+NlNl/summationdisplay
+v=1av/parenleftBig
+ˆXt0+t
+v,i−Xt0+t
+v,i/parenrightBig2
+. (1)
+Here,t0indexes forecast initialization times up to Teval;vindexes valid grid nodes at depth
+levellup toNl;avis the cell-area weight (normalized to unit mean); and ˆXandXdenote
+the predicted and observed values, respectively.
+Root mean squared error (RMSE), depth-averaged. For each lead time tand variable
+i, the RMSE is deﬁned as:
+RMSE t,i=/radicaltp/radicalvertex/radicalvertex/radicalbt1
+TevalTeval/summationdisplay
+t0=11
+LiLi/summationdisplay
+l=11
+NlNl/summationdisplay
+v=1av/parenleftBig
+ˆXt0+t
+v,i−Xt0+t
+v,i/parenrightBig2
+. (2)
+Here,lindexes the vertical levels associated with variable iup toLi, and the other variables
+are as deﬁned above.
+Root mean squared error (RMSE), per location. We evaluate model outputs on
+observed SST also by breaking down RMSE per location. The spatial RMS E is calculated for
+lead time t, variable i, and grid point vas:
+RMSE t,i,v=/radicaltp/radicalvertex/radicalvertex/radicalbt1
+TevalTeval/summationdisplay
+t0=1/parenleftBig
+ˆXt0+t
+v,i−Xt0+t
+v,i/parenrightBig2
+. (3)
+Heidke skill score (HSS). We evaluate the models’ ability to detect temperature extremes
+for each lead time using The Heidke Skill Score (HSS) derived from the contingency table
+consisting of true positives (TP), false positives (FP), false negat ives (FN), and true negatives
+(TN). HSS compares forecast accuracy to that expected by chance. It is de ﬁned by:
+HSS =2(TP·TN−FP·FN)
+(TP+FN)(FN+TN)+(TP+FP)(FP+TN). (4)
+An HSS of 1 indicates a perfect forecast, 0 indicates no better than chan ce, and negative values
+indicate performance worse than a random forecast.
+Anomaly Correlation Coeﬃcient (ACC), depth-averaged. For each lead time tand
+multi-level variable i, we deﬁne the forecast and analysis anomalies as:
+At0+t
+v,i=ˆXt0+t
+v,i−Ct0+t
+v,i, Bt0+t
+v,i=Xt0+t
+v,i−Ct0+t
+v,i. (5)
+The anomaly correlation coeﬃcient is then computed as:
+ACCt,i=1
+TevalTeval/summationdisplay
+t0=11
+Li/summationtextLi
+l=1/summationtextNl
+v=1avAt0+t
+v,iBt0+t
+v,i/radicalbigg/bracketleftBig
+1
+Li/summationtextLi
+l=1/summationtextNl
+v=1av/parenleftbig
+At0+t
+v,i/parenrightbig2/bracketrightBig/bracketleftBig
+1
+Li/summationtextLi
+l=1/summationtextNl
+v=1av/parenleftbig
+Bt0+t
+v,i/parenrightbig2/bracketrightBig.(6)
+Here,Ct0+t
+v,iis the daily climatology at grid point vand time t0+t, and the other variables are
+as deﬁned above. ACC hence measures the correlation between the dev iation of the prediction
+and ground truth from daily climatology.
+5
+D Additional results
+D.1 In-situ evaluation
+To assess forecasted depth-wise variables on ground-truth beyond grid ded analysis data, we
+compare them against quality controlled in-situ measurements from th e Mediterranean Sea.
+The in-situ data is sourced from the CMEMS In Situ Thematic Assembl y Centre, which
+compiles observations from a broad network of national and international monit oring systems.
+To ensure consistency with the model output, the observations are s patially and temporally
+bin-averaged, following the SeaCast simulation grid, to produce dail y mean values. Forecast
+ﬁelds are interpolated bilinearly to the latitude–longitude coordin ates of the observations and
+linearly in the vertical to match the measured depths.
+Lead time (days)0.1900.1950.2000.2050.2100.2150.220RMSE (m/s)a) Zonal current
+Lead time (days)0.1700.1750.1800.185RMSE (m/s)b) Meridional current
+1 3 5 7 911 13 15
+Lead time (days)0.260.270.280.290.30RMSE (psu)c) Salinity
+1 3 5 7 911 13 15
+Lead time (days)0.80.91.01.11.2RMSE (°C)d) T emperature
+SeaCast MedFS Persistence
+Fig. S3 RMSE as a function of lead time for SeaCast forecasts compare d to in-situ measurements. Results
+are shown for zonal and meridional currents, salinity, and t emperature. The shading corresponds to the 50%
+conﬁdence intervals estimated via bootstrapping.
+6
+D.2 Analysis evaluation
+Here, model forecasts are evaluated against analysis ﬁelds, using both de pth-averaged ACC
+and RMSE at every other forecasted depth level. To account for the impac t of the weekly
+data assimilation cycle, we also compute errors separately for forecasts initialized on the best
+performing day of the week, which is on Tuesday. Given the sizeab le improvements we see
+below, these results make the case for performing assimilation more of ten, or at least aim to
+do so in the future. Zonal and meridional currents behave so similar ly that only the former is
+included for the RMSE evaluation.
+13579111315
+Lead time (days)0.450.500.550.600.65ACCa) Zonal current
+13579111315
+Lead time (days)0.400.450.500.550.60ACCb) Meridional current
+13579111315
+Lead time (days)0.7250.7500.7750.8000.8250.850ACCc) Salinity
+13579111315
+Lead time (days)0.840.860.880.900.92ACCd) T emperature
+SeaCast
+SeaCast (Tuesdays)MedFS
+MedFS (Tuesdays)Persistence
+Fig. S4 ACC versus lead time for SeaCast, MedFS, and a persistence ba seline. Additional SeaCast and
+MedFS results from Tuesday initializations are included to account for peak performance due to weekly data
+assimilation.
+7
+0.100.120.14RMSE (m/s)a) Zonal current, 1m
+0.100.110.120.130.14b) Zonal current, 11m
+0.100.110.120.13c) Zonal current, 23m
+0.090.100.110.12RMSE (m/s)d) Zonal current, 38m
+0.090.100.11e) Zonal current, 56m
+0.080.090.10f) Zonal current, 79m
+13579111315
+Lead time (days)0.0700.0750.0800.0850.090RMSE (m/s)g) Zonal current, 105m
+13579111315
+Lead time (days)0.0650.0700.075h) Zonal current, 136m
+13579111315
+Lead time (days)0.0620.0640.0660.068i) Zonal current, 172m
+SeaCast
+SeaCast (Tuesdays)MedFS
+MedFS (Tuesdays)Persistence
+Fig. S5 RMSE of zonal currents versus lead time across depth levels. Each subplot corresponds to a diﬀerent
+depth. Comparisons include SeaCast, MedFS, and persistenc e. Additional SeaCast and MedFS results from
+Tuesday initializations are included to account for peak pe rformance due to weekly data assimilation. The
+shading corresponds to the 50% conﬁdence intervals estimat ed via bootstrapping.
+8
+0.2250.2500.2750.300RMSE (psu)a) Salinity, 1m
+0.180.200.220.24b) Salinity, 11m
+0.180.200.220.24c) Salinity, 23m
+0.180.200.220.24RMSE (psu)d) Salinity, 38m
+0.160.180.200.22e) Salinity, 56m
+0.140.160.18f) Salinity, 79m
+13579111315
+Lead time (days)0.120.140.16RMSE (psu)g) Salinity, 105m
+13579111315
+Lead time (days)0.090.100.110.120.13h) Salinity, 136m
+13579111315
+Lead time (days)0.070.08i) Salinity, 172m
+SeaCast
+SeaCast (Tuesdays)MedFS
+MedFS (Tuesdays)Persistence
+Fig. S6 RMSE of salinity versus lead time across depth levels. Each s ubplot represents a diﬀerent depth,
+comparing SeaCast, MedFS, and persistence. Additional Sea Cast and MedFS results from Tuesday initializa-
+tions are included to account for peak performance due to wee kly data assimilation. The shading corresponds
+to the 50% conﬁdence intervals estimated via bootstrapping .
+9
+0.500.751.001.251.50RMSE (°C)a) T emperature, 1m
+0.751.001.251.50b) T emperature, 11m
+0.81.01.21.41.6c) T emperature, 23m
+1.01.21.4RMSE (°C)d) T emperature, 38m
+0.70.80.91.01.1e) T emperature, 56m
+0.50.60.7f) T emperature, 79m
+13579111315
+Lead time (days)0.350.400.450.50RMSE (°C)g) T emperature, 105m
+13579111315
+Lead time (days)0.300.350.40h) T emperature, 136m
+13579111315
+Lead time (days)0.2250.2500.2750.300i) T emperature, 172m
+SeaCast
+SeaCast (Tuesdays)MedFS
+MedFS (Tuesdays)Persistence
+Fig. S7 RMSE of temperature versus lead time across depth levels. Ea ch subplot corresponds to a distinct
+depth, showing performance of SeaCast, MedFS, and persiste nce. Additional SeaCast and MedFS results from
+Tuesday initializations are included to account for peak pe rformance due to weekly data assimilation. The
+shading corresponds to the 50% conﬁdence intervals estimat ed via bootstrapping.
+10
+D.3 Vertical error proﬁles
+To better understand how forecast skill varies with depth, we analy ze RMSE proﬁles across
+the vertical column for key ocean variables. These proﬁles are averaged over lead times only
+to reveal depth-dependent behavior. SeaCast initialized from the best available analysis ﬁelds
+serves as a lower bound on forecast error, while a persistence baseli ne provides an upper bound.
+Zonal and meridional currents behave so similarly that only the former is included here.
+As seen in Figures S9andS10, temperature, and salinity to a small extent, exhibit a bump
+in RMSE between approximately 10 and 60 meters depth. This depth ran ge often corresponds
+to the base of the mixed layer during late summer-autumn seasons (wh ich comprise a majority
+of the evaluation set), a zone prone to rapid transitions in stratiﬁcation driven by atmospheric
+forcing or mesoscale variability, dynamics that remain challenging to c apture accurately in
+simulations. Figure S8shows that RMSE for zonal currents does not exhibit a similar bump,
+indicating that errors in current forecasts are more vertically unif orm and less sensitive to
+stratiﬁcation-related biases compared to scalar ﬁelds like temperatu re and salinity.
+0
+50
+100
+150
+200Depth (m)a) Zonal current, 1d b) Zonal current, 3d c) Zonal current, 5d d) Zonal current, 7d
+0.05 0.10 0.15
+RMSE (m/s)0
+50
+100
+150
+200Depth (m)e) Zonal current, 9d
+0.05 0.10 0.15
+RMSE (m/s)f) Zonal current, 11d
+0.05 0.10 0.15
+RMSE (m/s)g) Zonal current, 13d
+0.05 0.10 0.15
+RMSE (m/s)h) Zonal current, 15d
+SeaCast SeaCast (analysis init.) MedFS Persistence
+Fig. S8 Vertical proﬁle of RMSE for zonal currents averaged across l ead times. SeaCast initialized from
+analysis ﬁelds and a persistence model are included to show u pper and lower performance bounds across depths.
+11
+0
+50
+100
+150
+200Depth (m)a) Salinity, 1d b) Salinity, 3d c) Salinity, 5d d) Salinity, 7d
+0.0 0.1 0.2 0.3
+RMSE (psu)0
+50
+100
+150
+200Depth (m)e) Salinity, 9d
+0.0 0.1 0.2 0.3
+RMSE (psu)f) Salinity, 11d
+0.0 0.1 0.2 0.3
+RMSE (psu)g) Salinity, 13d
+0.0 0.1 0.2 0.3
+RMSE (psu)h) Salinity, 15d
+SeaCast SeaCast (analysis init.) MedFS Persistence
+Fig. S9 Vertical proﬁle of RMSE for salinity, averaged over all lead times. SeaCast initialized from analysis
+ﬁelds and a persistence model are included to show upper and l ower performance bounds across depths.
+0
+50
+100
+150
+200Depth (m)a) T emperature, 1d b) T emperature, 3d c) T emperature, 5d d) T emperature, 7d
+0.0 0.5 1.0 1.5
+RMSE (°C)0
+50
+100
+150
+200Depth (m)e) T emperature, 9d
+0.0 0.5 1.0 1.5
+RMSE (°C)f) T emperature, 11d
+0.0 0.5 1.0 1.5
+RMSE (°C)g) T emperature, 13d
+0.0 0.5 1.0 1.5
+RMSE (°C)h) T emperature, 15d
+SeaCast SeaCast (analysis init.) MedFS Persistence
+Fig. S10 Vertical proﬁle of RMSE for temperature, averaged across le ad times. SeaCast initialized from
+analysis ﬁelds and a persistence model are included to show u pper and lower performance bounds across depths.
+12
+D.4 Eﬀect of atmospheric forcing
+To examine the sensitivity of SeaCast to surface atmospheric inputs , we perform a series of
+ablation studies in which individual atmospheric ﬁelds are permute d during inference. The
+normalized RMSE diﬀerences reveal the relative importance of each for cing variable and their
+inﬂuenceonforecastaccuracyatdiﬀerentdepthsandleadtimes.Zonalan dmeridionalcurrents
+behave so similarly that only the former is included here. We can se e a clear trend of the
+atmospheric forcing being more impactful closer to the sea surface i n the plots below.
+02468Norm. RMSE diff. (%)a) Zonal current, 1m b) Zonal current, 11m c) Zonal current, 23m
+02468Norm. RMSE diff. (%)d) Zonal current, 38m e) Zonal current, 56m f) Zonal current, 79m
+13579111315
+Lead time (days)02468Norm. RMSE diff. (%)g) Zonal current, 105m
+13579111315
+Lead time (days)h) Zonal current, 136m
+13579111315
+Lead time (days)i) Zonal current, 172m
+2m-temp. perm. Wind stress perm. MSLP perm. All perm. SeaCast
+Fig. S11 Normalized RMSE diﬀerence for zonal currents per lead time a cross depths. Results show the impact
+of permuting individual atmospheric forcing ﬁelds relativ e to the original SeaCast conﬁguration.
+13
+051015Norm. RMSE diff. (%)a) Salinity, 1m b) Salinity, 11m c) Salinity, 23m
+051015Norm. RMSE diff. (%)d) Salinity, 38m e) Salinity, 56m f) Salinity, 79m
+13579111315
+Lead time (days)051015Norm. RMSE diff. (%)g) Salinity, 105m
+13579111315
+Lead time (days)h) Salinity, 136m
+13579111315
+Lead time (days)i) Salinity, 172m
+2m-temp. perm. Wind stress perm. MSLP perm. All perm. SeaCast
+Fig. S12 Normalized RMSE diﬀerence for salinity per lead time across depths. Comparisons show the impact
+of permuted atmospheric forcings versus the unperturbed Se aCast baseline.
+14
+01020304050Norm. RMSE diff. (%)a) T emperature, 1m b) T emperature, 11m c) T emperature, 23m
+01020304050Norm. RMSE diff. (%)d) T emperature, 38m e) T emperature, 56m f) T emperature, 79m
+13579111315
+Lead time (days)01020304050Norm. RMSE diff. (%)g) T emperature, 105m
+13579111315
+Lead time (days)h) T emperature, 136m
+13579111315
+Lead time (days)i) T emperature, 172m
+2m-temp. perm. Wind stress perm. MSLP perm. All perm. SeaCast
+Fig. S13 Normalized RMSE diﬀerence for temperature per lead time acr oss depths. Each line shows the eﬀect
+of permuting one atmospheric variable compared to the origi nal SeaCast model.
+15
+D.5 Eﬀect of training period
+Here, we explore how extending the training period aﬀects forecast performance by comparing
+SeaCast models trained on 35 years and 8 years of reanalysis data (w/o ﬁnetun ing) to models
+that are further ﬁnetuned on 2 years of analysis data. The forecasts are ben chmarked against
+the persistence model using the normalized RMSE diﬀerence as sk ill metric for each lead time.
+Zonal and meridional currents behave so similarly that only the former is included here.
+151050Norm. RMSE diff. (%)a) Zonal current, 1m b) Zonal current, 11m c) Zonal current, 23m
+151050Norm. RMSE diff. (%)d) Zonal current, 38m e) Zonal current, 56m f) Zonal current, 79m
+13579111315
+Lead time (days)151050Norm. RMSE diff. (%)g) Zonal current, 105m
+13579111315
+Lead time (days)h) Zonal current, 136m
+13579111315
+Lead time (days)i) Zonal current, 172m
+SeaCast
+SeaCast (w/o finetuning)SeaCast (10y)
+SeaCast (10y, w/o finetuning)MedFS
+Persistence
+Fig. S14 Normalized RMSE diﬀerence for zonal current as a function of lead time, comparing SeaCast models
+trained on diﬀerent time spans against the persistence base line.
+16
+12.510.07.55.02.50.0Norm. RMSE diff. (%)a) Salinity, 1m b) Salinity, 11m c) Salinity, 23m
+12.510.07.55.02.50.0Norm. RMSE diff. (%)d) Salinity, 38m e) Salinity, 56m f) Salinity, 79m
+13579111315
+Lead time (days)12.510.07.55.02.50.0Norm. RMSE diff. (%)g) Salinity, 105m
+13579111315
+Lead time (days)h) Salinity, 136m
+13579111315
+Lead time (days)i) Salinity, 172m
+SeaCast
+SeaCast (w/o finetuning)SeaCast (10y)
+SeaCast (10y, w/o finetuning)MedFS
+Persistence
+Fig. S15 Normalized RMSE diﬀerence for salinity as a function of lead time, comparing SeaCast models
+trained on diﬀerent time spans against the persistence base line.
+17
+403020100Norm. RMSE diff. (%)a) T emperature, 1m b) T emperature, 11m c) T emperature, 23m
+403020100Norm. RMSE diff. (%)d) T emperature, 38m e) T emperature, 56m f) T emperature, 79m
+13579111315
+Lead time (days)403020100Norm. RMSE diff. (%)g) T emperature, 105m
+13579111315
+Lead time (days)h) T emperature, 136m
+13579111315
+Lead time (days)i) T emperature, 172m
+SeaCast
+SeaCast (w/o finetuning)SeaCast (10y)
+SeaCast (10y, w/o finetuning)MedFS
+Persistence
+Fig. S16 Normalized RMSE diﬀerence for temperature as a function of l ead time, comparing SeaCast models
+trained on diﬀerent time spans against the persistence base line.
+18
+E Example forecasts
+To qualitatively illustrate SeaCast’s forecasting capabilities, we show example outputs for a
+selection of ﬁelds. Forecasts are initialized from operational simulati on states on October 1st,
+2024, and include horizontal maps of currents, temperature, salinity at 11m depth, as well as
+SSH. The bias is calculated towards the corresponding analysis ﬁelds.
+1dSeaCast
+ Bias
+8d
+15d
+1.00.50.00.51.0
+m/s
+0.50.00.5
+m/s
+1.00.50.00.51.0
+m/s
+0.50.00.5
+m/s
+1.00.50.00.51.0
+m/s
+0.50.00.5
+m/s
+Fig. S17 SeaCast forecast of zonal current at 11m depth, initialized on October 1st, 2024.
+1dSeaCast
+ Bias
+8d
+15d
+0.50.00.5
+m/s
+0.50.00.5
+m/s
+0.50.00.5
+m/s
+0.50.00.5
+m/s
+0.50.00.5
+m/s
+0.50.00.5
+m/s
+Fig. S18 SeaCast forecast of meridional current at 11m depth, initia lized on October 1st, 2024.
+19
+1dSeaCast
+ Bias
+8d
+15d
+3536373839
+psu
+21012
+psu
+3536373839
+psu
+21012
+psu
+3536373839
+psu
+21012
+psu
+Fig. S19 SeaCast forecast of salinity at 11m depth, initialized on Oc tober 1st, 2024.
+1dSeaCast
+ Bias
+8d
+15d
+17.520.022.525.027.5
+°C
+42024
+°C
+17.520.022.525.027.5
+°C
+42024
+°C
+17.520.022.525.027.5
+°C
+42024
+°C
+Fig. S20 SeaCast forecast of temperature at 11m depth, initialized o n October 1st, 2024.
+20
+1dSeaCast
+ Bias
+8d
+15d
+0.40.20.00.20.4
+m
+0.20.00.2
+m
+0.40.20.00.20.4
+m
+0.20.00.2
+m
+0.40.20.00.20.4
+m
+0.20.00.2
+m
+Fig. S21 SeaCast forecast of SSH, initialized on October 1st, 2024.
+21

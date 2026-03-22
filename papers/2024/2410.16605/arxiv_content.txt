@@ -1,0 +1,841 @@
+IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION. ACCEPTED OCTOBER, 2024 1
+EnKode: Active Learning of Unknown Flows
+with Koopman Operators
+Alice K. Li1, Thales C. Silva1, and M. Ani Hsieh1
+Abstract —In this letter, we address the task of adaptive
+sampling to model vector fields. When modeling environmental
+phenomena with a robot, gathering high resolution information
+can be resource intensive. Actively gathering data and modeling
+flows with the data is a more efficient alternative. However,
+in such scenarios, data is often sparse and thus requires flow
+modeling techniques that are effective at capturing the relevant
+dynamical features of the flow to ensure high prediction accuracy
+of the resulting models. To accomplish this effectively, regions
+with high informative value must be identified. We propose
+EnKode, an active sampling approach based on Koopman Opera-
+tor theory and ensemble methods that can build high quality flow
+models and effectively estimate model uncertainty. For modeling
+complex flows, EnKode provides comparable or better estimates
+of unsampled flow regions than Gaussian Process Regression
+models with hyperparameter optimization. Additionally, our
+active sensing scheme provides more accurate flow estimates
+than comparable strategies that rely on uniform sampling. We
+evaluate EnKode using three common benchmarking systems:
+the Bickley Jet, Lid-Driven Cavity flow with an obstacle, and
+real ocean currents from the National Oceanic and Atmospheric
+Administration (NOAA).
+Index Terms —Environment Monitoring and Management; Dy-
+namics; Active Sensing; Uncertainty Quantification; Koopman
+Operator Theory
+I. I NTRODUCTION
+MODELING unknown fluid flow fields is fundamental
+for aerial and marine robotic applications including
+search and rescue, oil spill mitigation, and scientific discovery,
+to name a few [1]. However, obtaining accurate flow maps
+is challenging because data are difficult to acquire, and the
+physics of flows are not yet fully understood. Robots are
+increasingly being deployed to gather data to build better
+models [2]–[10]. As such, since obtaining data is difficult,
+there is an increasing need for effective flow models and
+active information-theoretic sampling strategies to improve
+flow estimation online.
+Although there are works that use adaptive sampling to
+model flows online using sparse data gathered by robots
+[3], [4], we have not yet seen works that leverage Koopman
+theory. Koopman Operator Theory (KOT), discovered by B.O.
+Manuscript received: June, 14, 2024; Revised September, 1, 2024; Accepted
+September, 29, 2024. This paper was recommended for publication by
+Editor-in-Chief Tamim Asfour and Editor Jens Kober upon evaluation of the
+Reviewers’ comments. This work was supported by NSF IUCRC 1939132,
+NSF IIS 1910308, and the University of Pennsylvania’s University Research
+Foundation Award
+1Alice K. Li, Thales C. Silva, and M. Ani Hsieh are with the
+General Robotics Actuation Sensing and Perception (GRASP) Lab-
+oratory at the University of Pennsylvania, Philadelphia, PA USA
+{alicekl,scthales,mya }@seas.upenn.edu
+Digital Object Identifier (DOI): see top of this page.
+Fig. 1: EnKode modeling and active sensing scheme. Flow measure-
+ments are acquired by a robot, and fed into EnKode, which combines
+ensemble methods and Koopman operator theory to model unknown
+nonlinear ordinary differential equations with model uncertainty
+quantification. Measurements are encoded via lifting functions into
+a space where dynamics are linear, propagated forward in time by
+the estimated Koopman operator, and reconstructed to produce a flow
+estimate and uncertainty map. The next best sampling location is that
+with the greatest epistemic uncertainty, a measure of information,
+providing a feedback loop for the next best sampling location.
+Koopman in 1931, is a principled and observational bias based
+physics-informed method [11], for estimating the dynamics of
+nonlinear systems [12]–[14]. This is accomplished by a coor-
+dinate transform via observables that lift the nonlinear system
+into a space where the dynamics are linear. The evolution of an
+observable can be considered an evolution of a hypersurface
+[15], meaning the linearity offered by KOT allows for high
+quality predictions in unsampled regions. Therefore, it can be
+insightful to apply KOT to the task of modeling flows, which
+are nonlinear ordinary differential equations.
+In this letter, we apply Koopman-based methods to enhance
+the efficacy of estimating flows and modeling uncertainties
+where data are adaptively sampled by a robot. This is a
+different problem to [13], [16]–[22], where the focus is on
+extracting dynamics from large spariotemporal datasets. Our
+contributions are as follows. We present a framework, called
+EnKode, that is used for active modeling of unknown flows
+with sparse data. Koopman theory is used for sample effi-
+cient modeling of flows. We devise a novel measure of flow
+model uncertainty which governs the active learning strategy,
+iteratively guiding a data-gathering robot towards informative
+sampling locations. We apply our methods to various fluid
+flows, and compare flow modeling errors when a robot actively
+samples, as opposed to uniform back-and-forth coverage. WearXiv:2410.16605v1  [cs.RO]  22 Oct 2024
+2 IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION. ACCEPTED OCTOBER, 2024
+also make comparisons with the commonly used Gaussian
+Process regression (GP) model representation as a baseline.
+II. R ELATED WORK
+To date, GPs [23] have been widely used for modeling
+fluid flows from sparse measurements [3], [4], [24]–[26]. The
+wide adoption of GPs for estimating fluid flows is primarily
+due to its ease of use, the uncertainty estimation it offers,
+and the ability to make predictions in unsampled regions of
+the flow. However, a well-known drawback of such methods
+is the need to pre-select a mean and covariance kernel,
+where the choice governs the quality of the predictions. In
+addition, hyperparameters must be pre-defined. Despite these
+drawbacks, many robotics flow modeling works use GPs.
+Additional works have demonstrated success in modeling
+fluid flows in robotics using other regression techniques. Ker-
+nel embeddings that enforce the same incompressible kernel
+methods derived in [24] are used in [2], combining ensemble
+forecasts with sensor measurements to estimate real ocean
+currents. A linear combination of RBFs are used in [5] to
+model ocean currents. In [27], a single singularity (either
+source or sink) is assumed to exist, inducing regional fluid
+motion, and eight flow model parameters are estimated via
+least squares based on measurements obtained by a robot.
+While these dynamics-agnostic regression methods have
+shown decent prediction capabilities, they are not operator-
+theoretic methods that model a linear functional form of
+dynamics. Dynamics are estimated by lifting the system into
+a space in which the evolution of the system is linear. Beyond
+prediction, this linearity enables linear analysis [13], control
+[28], and extraction of physically interpretable dynamics, such
+as modes [13] and coherent sets in [29]. While kernel methods
+fit a linear model in feature space for regression, linear
+analysis tools and control cannot be applied, as the mapping
+from inputs to targets is nonlinear. Therefore, using KOT,
+an operator-theoretic method, to model flows with limited
+observations could be both more effective and favorable, but
+to the authors’ knowledge has not been investigated yet.
+In addition to dealing with nonlinearities, the evolution of
+functions of the states, called observables, can be considered
+an evolution of hypersurfaces [15], meaning that the linear-
+ity offered by KOT allows for high quality predictions in
+unsampled regions. An example of improvements in sample
+efficiency is shown in [30] where KOT methods were utilized
+for learning dexterous manipulation skills. They observed an
+improvement in sample efficiency in comparison to their non-
+Koopman baselines. In our work, we are interested in inves-
+tigating whether Koopman-based models make high quality
+predictions in unsampled flow regions.
+Koopman theory has been applied to other areas in robotics,
+many of which involve modeling the dynamics of a robot
+for improved control [31]–[35], rather than the dynamics of a
+robot’s environment. To the best of our knowledge, our work
+is the first to use Koopman methods for adaptive sampling
+of flows. Of all these Koopman-based works listed above,
+[35] is the most similar in that the dynamics of quadcopters
+are parameterized by Koopman operators and learnt online
+to stabilize during free-fall. We are similarly interested inlearning system dynamics online, because power and resource
+constrained robots acquiring real world data is resource inten-
+sive and can become intractable for large-scale environments
+[36], [37]. However, to learn environmental dynamics online,
+prediction uncertainty must be quantified to guide robots to
+information rich regions.
+Numerous techniques inspired by information theory, such
+as mutual information [38], have been adopted to define state
+estimation uncertainty in robotics. Assuming that maximizing
+epistemic uncertainty is a proxy for maximizing information
+gain, an agent is able to query the environment and acquire
+more information about the state that a robot is most uncertain
+about [39].
+We introduce a novel method for estimating the informa-
+tiveness of a sampling location when modeling flow dynamics.
+Existing uncertainty estimation for KOT methods are shown
+in [40], where the Fisher information of each element of the
+Koopman operator is estimated, based on historical dynamics
+data gathered prior to deployment. This is used to determine
+the robot control policy, providing quadcopter trajectories
+which maximize information gained. We do not assume access
+to prior information. Instead, our techniques are inspired from
+active learning methods [41] and the concept of query by dis-
+agreement [42]–[44]. We train an ensemble of models online,
+and a robot samples in spatial locations corresponding to the
+largest disagreement in an ensemble of these models [45].
+This method does not require computations of variables in the
+observable space, and intuitively provides the uncertainty as
+the variance across the outputs of a set of models. Our novel
+Koopman-based sparse modeling, uncertainty, and adaptive
+sampling methods are detailed in the sections that follow.
+III. P ROBLEM FORMULATION
+A. Connections Between Flows & Koopman Operators
+We consider fluid systems that are assumed to be time-
+invariant, and can be represented by a continuous autonomous
+dynamical system of the form:
+˙ x=F(x) (1)
+on a smooth manifold M ∈R2, with a smooth and Lipschitz
+vector field F:M → M , and Φ(x0, k) =x(k)is the
+flow of F. We define Fas the observable space, which
+is the possibly infinite-dimensional space of scalar complex
+valued observables or observable functions φ:M → C.
+An observable is a scalar-valued lifting function measuring
+a relevant property of the dynamical system. It provides a
+coordinate transformation into a possibly infinite-dimensional
+Koopman invariant space, such that the system’s originally
+nonlinear dynamics behaves linearly.
+Finally, while Facts on x∈ M , the linear Koopman
+operator K:F → F acts on observable functions φby
+composition with the evolution rule, F. This is defined by:
+Kφ=φ◦F, (2)
+where ◦is the function composition.
+EnKode estimates a discrete dynamics model, xk+1=
+F(xk), that is sampled from the underlying process, (1). The
+LIet al. : ACTIVE LEARNING OF UNKNOWN FLOWS WITH KOOPMAN OPERATORS 3
+discrete form of (2) is: K∆tφ=φ(xk+1). When K∆tacts on
+observable functions of the system at time k, the observables
+move along the solution curve to time k+ 1.
+According to [12]–[15], Koopman eigenfunctions, ψ, are a
+special set of observables such that the following holds:
+ψ(xk+1) =K∆tψ(xk) =λψ(xk) (3)
+where xkrepresents the state at time k,xk+1is the state at
+timek+ 1, and λis an eigenvalue of the Koopman operator.
+With the above, we formulate our problem as follows.
+Problem 1. Given a robot operating in a domain D, and a
+sampling budget Ntotal, the robot must model an a priori
+unknown velocity flow field F:
+xk+1=F(xk),
+where x= [x, y]T∈ D, and F:R2→R2based on zero-mean
+noisy in-situ flow measurements zof variance σ:
+z(x) =F(x) +ω, . (4)
+where ω∼ N(0, σ2)is an additive noise. In the absence of
+in-situ flow measurements, ∆x=F(x)∆tprovides a proxy
+of the flow dynamics, where ∆x=xk+∆t−xkis the change
+in robot position, between time ∆t.
+Information used to estimate a flow field are gathered itera-
+tively by selecting the next best sampling location:
+x∗= arg max
+x∈DfreeI(x), (5)
+where Iis measure of informativeness of sampling from a
+flow field location, and Dfreeare obstacle free and previously
+unsampled regions.
+IV. M ETHODOLOGY
+A. Estimating the Observables with EnKode
+EnKode is based on (3), and finds an estimate of observables
+that linearize the dynamics, which is when eigenfunctions
+live in the span of the observables. As mentioned previously,
+the lifted space is possibly infinite-dimensional. However,
+dealing with infinite dimensions is computationally intractable.
+Therefore, like many data-driven Koopman theory works [20],
+[46]–[49], we aim to find a finite approximation of both the
+eigenfunctions ˆψand the associated Koopman operator, ˆK.
+Training Data. The training data of size Nis organized into
+two matrices: inputs, Xk∈RN×2and corresponding labels,
+Xk+1∈RN×2. At the start of an experiment N= 1,i.e.,
+we have a single training sample in the dataset. The flow is
+then estimated; the next sampling location is determined; and
+a new sample is added to the dataset, making N= 2. This
+continues until the end of the experiment, where the robot is
+allowed a budget of Ntotal samples. For the n-th pair of input
+and label, xn
+k∈Xkrepresents the robot’s initial position at
+adaptive sampling iteration n, and xn
+k+1∈Xk+1represents
+the robot’s next position, after it is evolved by the underlying
+flow dynamics. We assume the flow to be time-invariant,
+similar to many works including [2], [50], and assume the time
+between any xn
+kandxn
+k+1pair is ∆t. We refer to samples as
+the size of the training data.Providing Structure for Observables. For EnKode, Xk
+is lifted via a feature map defined by νFourier features.
+Each Fourier basis function is defined by a frequency vector,
+wi∈R2, and phase shift, bi, fori= 0, ..., ν . These parameters
+are learnable model weights, and are unknown prior to the
+modeling task and are initialized randomly. There are 3ν
+learnable parameters for EnKode. They are optimized online
+as the robot collects additional observations. The feature map
+ˆΨis represented as:
+ˆΨ(Xk) =
+Xk,cos(wT
+0Xk+b0),cos(wT
+1Xk+b1),
+. . . ,cos(wT
+νXk+bν)
+,(6)
+where cosine is vector-valued and applied applied element-
+wise to its inputs. We choose Fourier features because we
+empirically find that they capture the periodic and vortex-like
+flow dynamics well. Additional results are shown in [29].
+Loss Function. Based on this definition of the feature map,
+we can then find an estimate of the Koopman operator, ˆK,
+using its relationship with K∆t, in (3). We jointly learn both
+the feature map ˆΨand the linear operator, ˆK, via stochastic
+gradient decent, using PyTorch, trained with the Adam opti-
+mizer and autograd, where we minimize the following loss
+function over θ={ω, b, ˆK}:
+min
+θ∥ˆΨ(Xk+1)−ˆK ˆΨ(Xk)
+∥2. (7)
+The mean squared error (MSE) is used to compute the loss,
+L. This loss term is to ensure linearity of ˆKapplied to all
+the lifted measurements. To prevent over-fitting, we apply L2
+regularization on ˆK, and weights θvia PyTorch’s Adam weight
+decay.
+Note that in (6), the measurements are appended to the
+set of Fourier basis. This is done for two reasons. First, it
+prevents model weights from approaching zero, as a feature
+map with weights of zero magnitude satisfies the loss (7).
+Also, the system state at the next timestep, can then be found
+with the identity observable ψ(Xk) =Xk, without relying on
+any mapping for reconstruction, similar to [48].
+B. EnKode Flow Prediction and Uncertainty Estimation
+Using the linearity offered by Koopman Operators, the flow
+field in both sampled and unsampled regions of the flow
+is estimated by EnKode, and defined by the learnt lifting
+functions and Koopman Operator from (3). Let us define the
+model output by EnKode as a flow field for x∈ D:
+ˆxk+1=ˆF(xk)≃ˆΨ−1(ˆKˆΨ(xk)). (8)
+The flow is estimated for test points X′∈ D . The forward
+propagated identity observable in (6) is used to construct the
+flow field. The resolution of the estimated velocity field is
+variable, and can be defined depending on the application. To
+make flow predictions, we aggregate the output of Mmodels
+with the same structure, i.e., identical ν, but model weights
+are initialized to non-identical sets of θ, as in [45], to obtain
+an average flow of Mmodels, where Mis the number of
+members of the ensemble.
+To obtain the estimation uncertainty, we compute the vari-
+ance of Mflow vectors for all x′∈X′. LetV(x′)represent
+4 IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION. ACCEPTED OCTOBER, 2024
+the set of M2D vector flow estimates vm(x′)at a location
+x′. We quantify uncertainty, U, as the weighted sum of the
+variance of the L2 norm and circular variance:
+U(x′) = Var[ ∥V(x′)∥2] +βVarΘ[V(x′)], (9)
+where VarΘ[V(x′)] = 1 −¯R;¯R=R/M , and R2= PM
+jcos(θj)2+ PM
+jsin(θj)2, as defined by Fisher in
+[51], θis the angle of the vector from a universal x-axis, β
+is a hyperparameter that weights the importance of the two
+forms of uncertainty in the modeling task. Any number of
+ensemble models can be used—we show a sensitivity analysis
+based on the number of ensemble models used in Sec. VI.
+Unless specified, we use M= 10 .
+Algorithm 1 Active Learning Loop
+Require: D, ν, M, θ, N total,Xk= [x0
+k],Xk+1= [x0
+k+1]
+forN←1toNtotal do
+form in M do
+for(xk,xk+1)in(Xk,Xk+1)do
+Predict, ˆxk+1←EnKode( xk, θ)
+Compute loss, L ← MSELoss( ˆxk+1,xk+1)
+Compute gradients, ∇θL
+Update weights for ˆΨandˆK
+end for
+Predict vector field ˆFm(x)
+end for
+Compute variance over M vector fields, U
+Get next best sampling location, x∗= arg max
+x∈DfreeU(x)
+Acquire training sample at x∗,(xN
+k,xN
+k+1)
+Append new inputs, Xk←[Xk,xN
+k]
+Append new targets, Xk+1←[Xk+1,xN
+k+1]
+end for
+C. Active Learning Loop
+Algorithm 1 describes the active learning loop:
+ACTIVE SENSING or learning allows the robot to query
+the environment from specific locations that benefit the map
+estimate, depending on the next best sensing location criterion.
+At the very start of the experiment, N= 1, and an initial
+random sensing location is selected.
+ENKODE UPDATES are performed by incorporating the
+actively sampled observations into the training data. Model
+weights are updated from the previous model weights.
+PLANNING for the next best sampling location is determined
+by the concept of query by disagreement [41]. For this, we
+assume that minimizing uncertainty is a proxy for maximizing
+information gain Iin 5, as in [43]. The most informative sam-
+pling location is that with greatest disagreement in prediction
+in the Mmodels. The most informative point x∗∈ D free,
+given model prediction uncertainty Uis:
+x∗= arg max
+x∈DfreeU(x). (10)
+We note the sampling strategy is myopic and does not con-
+sider distance travelled. This is done intentionally to remove
+all other independent variables, allowing us to systematically
+assess whether sampling in spatial locations with maximum
+uncertainty estimated by EnKode reduces modeling error.V. E XPERIMENTS
+We conduct various experiments with N≤36. First, we
+use adaptive sampling to model vector fields using EnKode
+without hyperparameter optimization, versus GP with hyper-
+parameter optimization ( W/OPT), and GP without hyperpa-
+rameter optimization when number of samples N < 10(W/O
+OPT). We then make comparisons of adaptive versus uniform
+sampling, akin to back-and-forth patterns for information
+gathering commonly adopted in real-world applications. We
+evaluate the performance of EnKode on three different fluid
+flow domains: Bickley Jet, the Lid-driven Cavity flow with an
+obstacle, and real ocean currents from the National Oceanic
+and Atomspheric Administration, from ERDDAP [52]. Finally,
+we assess the effect of three parameters of interest (number
+of Fourier features νin (6), number of ensemble models M,
+weighting βdefined in (10).
+The following metrics are used to assess Enkode’s modeling
+and adaptive sampling performance:
+1)End-to-End Point Error (EPE). We take inspiration from
+optical flow metrics, which apply to our flow estimation
+task. For spatial plots, for every x∈X′, we compute the
+Euclidean norm of point-wise EPE: ∥˙ x−˙ˆ x∥2[53].
+2)Cosine Similarity (CS) . For CS, we compute point-wise
+errors across the domain CS=˙ x·˙ˆ x
+∥˙ x∥2∥˙ˆ x∥2∈[−1,1], and
+report the average CS across the entire domain. The closer
+the CS to 1, the more aligned the vector. A value of −1
+signifies vectors are oriented in opposite directions.
+3)Magnitude Error (ME) . While EPE may capture a notion
+of magnitude error, we additionally evaluate on ME, which
+removes any angular error dependence. ME is defined as∥˙ x∥2− ∥˙ˆ x∥2
+2.
+Every CS, EPE, and ME curve and sensitivity results represent
+an aggregate of 10experimental trials. For the GP baseline, we
+use GPy [54] and their L-BFGS hyperparameter optimization
+functionality, either performed at every sampling iteration
+(W/OPT), or at every sampling iteration N < 10samples
+(W/O OPT ). We make comparisons with two commonly used
+kernels: (1) Radial Basis Function (GP-rbf), also known as the
+squared exponential function: k(xi,xj) =exp
+−d(xi,xj)2
+2l2
+,
+where ddenotes Euclidean distance between its inputs, and
+lis a lengthscale, and (2) Mat ´ern32 (GP-m32): σ2
+f
+1 +q
+3d(xi,xj)2
+l2
+exp
+−q
+3d(xi,xj)2
+l2
+. The GP has 4learnable
+parameters: noise variance σn, signal variance σf, and length-
+scale parameters for each dimension l1, l2. Next, we define
+variables with standard GP notation, making connections with
+our EnKode variables wherever possible. GP training inputs
+areXGP=Xk. The labels are yGP=Xk+1. A GP kernel
+K(X′,XGP)denotes a matrix of covariances evaluated at
+all pairs of test points X′and training points XGP. Given
+a grid of initial position as input, X′, the GP prediction of the
+next position, y′=K(X′,XGP)[K(XGP,XGP)+σ2
+nI]−1y.
+Since [55] demonstrates similar uncertainty quantification be-
+tween ensemble GPs and standard GPs, and by construction,
+standard GPs offer prediction uncertainty, we use standard GP
+uncertainty to determine the next best sampling location: x∗=
+arg maxx∈X′Σ(X′,X′)where Σ(X′,X′) =K(X′,X′)−
+LIet al. : ACTIVE LEARNING OF UNKNOWN FLOWS WITH KOOPMAN OPERATORS 5
+TABLE I: PERFORMANCE METRICS FOR ACTIVE SAMPLING UP TO N≤36WITH ENKODE AND GP.
+Bickley Cavity Ocean
+CS (↑) ME ( ↓) CS ( ↑) ME ( ↓) CS ( ↑) ME ( ↓)
+N EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf
+9 0.256 0.021 -0.037 0.012 0.012 0.013 0.284 0.608 0.323 0.063 0.062 0.073 0.234 0.440 0.319 0.074 0.017 0.017
+16 0.456 0.272 0.060 0.010 0.011 0.013 0.573 0.604 0.601 0.051 0.057 0.065 0.385 0.354 0.474 0.024 0.018 0.016
+25 0.644 0.566 0.148 0.008 0.008 0.015 0.668 0.649 0.636 0.039 0.055 0.054 0.531 0.503 0.479 0.013 0.016 0.017
+36 0.791 0.715 0.231 0.005 0.007 0.015 0.728 0.657 0.638 0.030 0.051 0.054 0.639 0.599 0.510 0.011 0.013 0.016
+TABLE II: PERFORMANCE METRICS FOR UNIFORM SAMPLING UP TO N≤36WITH ENKODE AND GP.
+Bickley Cavity Ocean
+CS (↑) ME ( ↓) CS ( ↑) ME ( ↓) CS ( ↑) ME ( ↓)
+N EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf EnK GP-m32 GP-rbf
+9 0.017 0.030 -0.032 0.012 0.012 0.013 0.410 0.596 0.551 0.063 0.063 0.064 0.428 0.526 0.513 0.032 0.014 0.014
+16 0.204 0.185 0.119 0.012 0.012 0.013 0.633 0.633 0.626 0.059 0.059 0.063 0.437 0.560 0.523 0.021 0.013 0.014
+25 0.322 0.267 0.243 0.009 0.010 0.013 0.643 0.658 0.642 0.042 0.042 0.058 0.498 0.578 0.524 0.014 0.013 0.014
+36 0.463 0.471 0.324 0.007 0.005 0.013 0.769 0.780 0.654 0.025 0.024 0.042 0.621 0.587 0.527 0.011 0.013 0.013
+Fig. 2: Pixel-wise EPE after actively modeling the flow of the Bickley Jet, for Ntotal = 36 . Overall EnKode error is lower than that of
+GP-32 W/OPT. There are localized regions with errors for the GP that do not appear in the EnKode estimate.
+K(X′,XGP)[K(XGP,XGP)+σ2
+nI]−1K(XGP,X′). The lo-
+cation corresponds to x′∈X′with maximum uncertainty,
+given by the diagonal entries of Σ.
+VI. R ESULTS AND DISCUSSION
+A. Performance Overview
+Overall, the proposed Koopman based modeling, uncer-
+tainty quantification, and adaptive sampling scheme is suitable
+for learning unknown flows online. When actively modeling
+flows, EnKode achieves either comparable or higher CS and
+lower ME errors by the end of the sampling task, in compar-
+ison to the GP with or without hyperparameter optimization.
+This is demonstrated by the errors in Table I, for all flows.
+EnKode errors converge more stably with increasing number
+of samples, compared to the GP. Active sampling is preferred
+over uniform sampling when flows are dominated by more
+complex structure, and less uniform flow (uni-directional),
+e.g., Bickley Jet. This is observed when comparing Table I
+with Table II for each flow system. In general, when restricted
+to very few samples (on the order of 9−16), uniform sampling
+is preferable, as uniformly distributed samples capture the
+general flow structure better. Unless stated, we use ν= 64 , for
+all flow models. Due to space limitations, we show qualitative
+EPE, and tabulate and plot quantitative ME and CS for varying
+N.
+B. Bickley Jet
+The Bickley Jet is a complex flow, exhibiting a thin jet
+traversing from left to right and oscillating along the center
+line of the domain, inducing counter rotating vortices above
+and below this stream.This experiment demonstrates the effectiveness of combin-
+ing Koopman theory and our uncertainty measure for active
+sampling. In comparing Table I with Table II, we see that
+active sampling is better than uniform sampling for both
+EnKode and the GP. Furthermore, when actively sampling,
+Table I shows that CS is higher for EnKode in comparison to
+either GP, showing greater angular alignment of the estimated
+velocity field for any number of samples. ME for EnKode
+is lower or comparable to either GP. Active sampling spatial
+errors are shown in Fig. 2 with 36samples. There are regions
+with high errors for the GP that do not exist when actively
+sampling and modeling with EnKode. Finally, trends in Fig.
+3 show that EnKode metrics are better than both GP W/OPT.
+Fig. 3: Errors when actively modeling Bickley Jet. ME values closer
+to0are desired, while CS closer to 1are desired. For N≥10, ME
+is lower and CS is higher when actively sampling with EnKode.
+C. Lid-Driven Cavity with Obstacle
+To add complexity to the standard Lid-Driven Cavity flow,
+we embed an obstacle (cross shape) in the middle of the cavity.
+The bulk of the flow in this domain is a large clockwise
+6 IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION. ACCEPTED OCTOBER, 2024
+rotating vortex. The obstacles, namely the cross and walls,
+give rise to smaller vortex structures—it can be challenging to
+capture features with different length scales.
+Unsurprisingly, uniform sampling in Table II is preferred
+over active sampling in Table I, as the flow structure is uniform
+across the majority of the domain. When uniformly sampling,
+GP-m32 performs better than EnKode which performs bet-
+ter than GP-rbf. However, Fig. 5 shows that when actively
+sampling, EnKode CS and ME performance exceeds either
+GP after 20samples have been collected, as Eq. (10) guides
+the robot to sample around the embedded cross in Fig. 4.
+Fig. 4 better illustrates how EnKode is able to capture the
+regions around the obstacle that exhibits smaller clockwise
+rotating vortices, while the GP cannot. In addition to showing
+that active sampling with EnKode performs better compared
+to the GP baseline, we also note that this is a successful
+demonstration of EnKode modeling obstacle-laden flow.
+D. Real Ocean Currents
+In comparison to the previous two flows, ocean currents
+exhibit less symmetry. A good model should be able to capture
+features with varying degrees of magnitude and vorticity, and
+not smooth out the features with smaller magnitudes.
+After acquiring 20samples selected via adaptive sampling,
+EnKode performs better than both GPs, as observed in Fig. 6.
+While active sampling with GP can occasionally outperform
+EnKode uniform and active sampling, the error fluctuations are
+undesirable, possibly capturing the GP sensitivity to training
+data and hyperparameter selection. By the end of the active
+sensing task, N= 36 , active sampling is better than uniform
+sampling for both EnKode and GP, when comparing results
+across I and II. For uniform sampling in II, the initial well-
+performing GP is likely because the grid of samples repre-
+sent the general flow of the domain. For a more consistent
+performance when modeling ocean currents, EnKode should
+be adopted with the active sampling scheme. Again, Table
+I further confirms that actively sampling with EnKode is
+effective. EnKode performs better than both GP models for
+both metrics when modeling with N≥25.
+Overall, these experiments demonstrate that the uncertainty
+metric we define for active sampling is effective, not only for
+simulated data, but also using real ocean model data. Fig. 7
+shows a comparison between pixel-wise errors and uncertainty
+after sampling at 20locations, demonstrating the effectiveness
+of the informativeness measure in (10). Furthermore, the
+results highlight that the EnKode uncertainty estimation is
+more meaningful as it more closely represents the prediction
+error compared to that of the GP baseline.
+E. Sensitivity Analyses
+Information Weighting, β.Table III shows the effect of the
+weighting in Eq. (9). A small βvalue places more importance
+on sampling in regions with high magnitude variance, and a
+large βvalue encourages sampling in regions with high an-
+gular variance. We observe that lower ME errors are obtained
+when βis more heavily weighted towards one type of variance.
+The best CS value is obtained when β= 10 , while the bestME value is obtained when β= 0.1. However, in general,
+there is no significant trend when βis varied.
+Number of Fourier Features, ν.Given a fixed number
+of optimization iterations, there is an ideal number of Fourier
+features used to model the ocean flow as shown in Table III. In
+this experiment, we optimize over Eq. (7) with a fixed number
+of iterations, and an 8×8uniform grid of samples.
+Fig. 4: TOP. Pixel-wise EPE for Lid-Driven Cavity with Obsta-
+cle. B OTTOM . Corresponding streamlines. When actively sampling,
+EnKode captures both the bulk flow dynamics and small vortices,
+while the GP is able to capture the bulk flow only.
+Fig. 5: Errors for modeling the Lid-Driven Cavity flow with obstacle
+overN≤36samples. If active sampling is used, EnKode performs
+better than the GP baseline.
+Fig. 6: Errors for modeling ocean currents over N≤36samples. Ac-
+tive sampling with EnKode modeling provides reliable performance
+after 20samples. GP performance occasionally exceeds EnKode, but
+the performance is less consistent, which is undesirable.
+We evaluate the effect of increasing the number of Fourier
+features used to define the observables. We observe that for
+LIet al. : ACTIVE LEARNING OF UNKNOWN FLOWS WITH KOOPMAN OPERATORS 7
+Fig. 7: Spatial plots of ground-truth flow, pixel-wise EPE, and uncertainty for EnKode and GP-m32, when modeling ocean currents. For
+EnKode, there is overlap in the spatial regions with high values of prediction error and uncertainty, indicating that the EnKode uncertainty
+estimation is meaningful for both defining the next best sampling location in an information gathering scenario, as well as serving as a
+suitable method for flow prediction uncertainty. On the other hand, the uncertainty values for the GP is low in sampled locations, and high
+elsewhere.
+the number of iterations selected, 25Fourier features is ideal
+for the lowest ME error. The CS is best with 26features. The
+increased errors with few features is likely from a lack of
+expressivity; while errors from many features is likely due to
+a lack of estimation convergence or overfitting.
+Ensemble Size, M. Table. III shows the effect of the number
+of ensemble members. To compute metrics in the sensitivity
+analyses, we accumulate the sum of errors for N= 50
+samples. In general, the more members, the lower the ME. The
+CS is marginally greater with the largest number of ensemble
+members. There is no significant trend for CS versus M.
+We note that the performance across 10experiments with 5
+ensemble members is much more varied, and is a possible
+reason why the result for 5ensemble members does not fit
+the same trend as the results for other ensemble sizes.
+TABLE III: EFFECT OF β,νANDMFOR ACTIVE SAMPLING .
+β 0.1 0.5 1 2 10
+CS(↑) 2.326 (1.395) 2.272 (1.389) 2.362 (1.426) 2.358 (1.417) 2.385 (1.282)
+ME (↓) 1.023 (0.278) 1.172 (0.268) 1.133 (0.266) 1.044 (0.274) 1.051 (0.319)
+ν 2324252627
+CS(↑) 0.711 (0.044) 0.836 (0.018) 0.876 (0.009) 0.883 (0.005) 0.854 (0.014)
+ME (↓) 0.029 (3E-3) 0.018 (9E-4) 0.015 (6E-4) 0.016 (6E-4) 0.023 (1E-3)
+M 5 10 15 20 25
+CS(↑) 2.338 (1.347) 2.333 (1.444) 2.366 (1.525) 2.330 (1.442) 2.447 (1.400)
+ME (↓) 1.105 (0.272) 1.179 (0.253) 1.162 (0.251) 1.088 (1.174) 1.019 (0.258)
+VII. C ONCLUSIONS
+In this letter, we propose EnKode, a framework that provides
+flow estimation and uncertainty quantification for robotic
+adaptive sampling. We demonstrate the efficacy of EnKode in
+three different flow environments. Through these experiments,
+we show that KOT allows for high quality predictions in
+unsampled flow regions. This, along with its other benefits,
+including linear analysis, control, and physical interpretability,
+make methods grounded in operator theory favorable over
+dynamics-agnostic flow models. Results also show that the
+EnKode informativeness criterion and uncertainty quantifica-
+tion with ensemble methods is effective for determining the
+next best sampling location, as it gives rise to a reduction in
+the overall modeling error for three different metrics (end-
+to-end point error, magnitude error, and cosine similarity).
+When comparing sampling strategies and modeling methods,
+we find that for more complex flows—those with higher vortex
+structure like the Bickley Jet—active sampling is preferredover uniform sampling, and EnKode modeling is preferred
+over GP modeling.
+This work provides an opportunity for many interesting
+directions for future work. This work could be extended to
+actively learning the dynamics of higher dimensional systems,
+where larger amounts of data would likely be required to
+learn the system dynamics. In addition, in this work, the next
+best sampling location is intentionally point-based to assess
+the modeling and uncertainty estimation of EnKode. In future
+work, planning can be trajectory-based and also subject to
+travel budget and robot kinodynamic constraints. Furthermore,
+our approach can be extended to modeling time-varying flows,
+known to be periodic, as in [56], and planning with multi-robot
+sytems.
+ACKNOWLEDGEMENTS
+We greatly acknowledge the support of NSF IUCRC
+1939132, NSF IIS 1910308, and the University of Pennsylva-
+nia’s University Research Foundation Award. We would also
+like to thank Spencer Folk for data generation of the Lid-driven
+Cavity flow.
+REFERENCES
+[1] M. Dunbabin and L. Marques, “Robots for environmental monitoring:
+Significant advancements and applications,” IEEE Robotics & Automa-
+tion Magazine , vol. 19, no. 1, pp. 24–39, 2012.
+[2] K. C. To, F. H. Kong, K. M. B. Lee, C. Yoo, S. Anstee, and R. Fitch,
+“Estimation of spatially-correlated ocean currents from ensemble fore-
+casts and online measurements,” in 2021 IEEE International Conference
+on Robotics and Automation (ICRA) . IEEE, 2021, pp. 2301–2307.
+[3] J. Hansen and G. Dudek, “Coverage optimization with non-actuated,
+floating mobile sensors using iterative trajectory planning in marine flow
+fields,” in 2018 IEEE/RSJ International Conference on Intelligent Robots
+and Systems (IROS) . IEEE, 2018, pp. 1906–1912.
+[4] R. Khodayi-mehr, P. Jian, and M. M. Zavlanos, “Physics-guided active
+learning of environmental flow fields,” in Learning for Dynamics and
+Control Conference . PMLR, 2023, pp. 928–940.
+[5] D. Chang, W. Wu, C. R. Edwards, and F. Zhang, “Motion tomography:
+Mapping flow fields using autonomous underwater vehicles,” The In-
+ternational Journal of Robotics Research , vol. 36, no. 3, pp. 320–336,
+2017.
+[6] M. Michini, M. A. Hsieh, E. Forgoston, and I. B. Schwartz, “Robotic
+tracking of coherent structures in flows,” IEEE Transactions on Robotics ,
+vol. 30, no. 3, pp. 593–603, 2014.
+[7] A. Molchanov, A. Breitenmoser, and G. S. Sukhatme, “Active drifters:
+Towards a practical multi-robot system for ocean monitoring,” in 2015
+IEEE International Conference on Robotics and Automation (ICRA) .
+IEEE, 2015, pp. 545–552.
+[8] G. A. Hollinger, A. A. Pereira, J. Binney, T. Somers, and G. S.
+Sukhatme, “Learning uncertainty in ocean current predictions for safe
+and reliable navigation of underwater vehicles,” Journal of Field
+Robotics , vol. 33, no. 1, pp. 47–66, 2016.
+8 IEEE ROBOTICS AND AUTOMATION LETTERS. PREPRINT VERSION. ACCEPTED OCTOBER, 2024
+[9] T. Salam and M. A. Hsieh, “Adaptive sampling and reduced-order
+modeling of dynamic processes by robot teams,” IEEE Robotics and
+Automation Letters , vol. 4, no. 2, pp. 477–484, 2019.
+[10] S. Folk, J. Melton, B. W. Margolis, M. Yim, and V . Kumar, “Learning
+local urban wind flow fields from range sensing,” IEEE Robotics and
+Automation Letters , 2024.
+[11] G. E. Karniadakis, I. G. Kevrekidis, L. Lu, P. Perdikaris, S. Wang, and
+L. Yang, “Physics-informed machine learning,” Nature Reviews Physics ,
+vol. 3, no. 6, pp. 422–440, 2021.
+[12] B. O. Koopman, “Hamiltonian systems and transformation in hilbert
+space,” Proceedings of the National Academy of Sciences , vol. 17, no. 5,
+pp. 315–318, 1931.
+[13] I. Mezi ´c, “Analysis of fluid flows via spectral properties of the koopman
+operator,” Annual review of fluid mechanics , vol. 45, pp. 357–378, 2013.
+[14] M. Budi ˇsi´c, R. Mohr, and I. Mezi ´c, “Applied koopmanism,” Chaos: An
+Interdisciplinary Journal of Nonlinear Science , vol. 22, no. 4, 2012.
+[15] P. Bevanda, S. Sosnowski, and S. Hirche, “Koopman operator dynamical
+models: Learning, analysis and control,” Annual Reviews in Control ,
+vol. 52, pp. 197–212, 2021.
+[16] S. E. Otto and C. W. Rowley, “Koopman operators for estimation and
+control of dynamical systems,” Annual Review of Control, Robotics, and
+Autonomous Systems , vol. 4, pp. 59–87, 2021.
+[17] M. O. Williams, I. G. Kevrekidis, and C. W. Rowley, “A data–driven
+approximation of the koopman operator: Extending dynamic mode
+decomposition,” Journal of Nonlinear Science , vol. 25, pp. 1307–1346,
+2015.
+[18] J. H. Tu, “Dynamic mode decomposition: Theory and applications,”
+Ph.D. dissertation, Princeton University, 2013.
+[19] S. Klus, I. Schuster, and K. Muandet, “Eigendecompositions of transfer
+operators in reproducing kernel hilbert spaces,” Journal of Nonlinear
+Science , vol. 30, pp. 283–315, 2020.
+[20] B. Lusch, J. N. Kutz, and S. L. Brunton, “Deep learning for universal
+linear embeddings of nonlinear dynamics,” Nature communications ,
+vol. 9, no. 1, p. 4950, 2018.
+[21] S. Leask, V . McDonell, and S. Samuelsen, “Modal extraction of
+spatiotemporal atomization data using a deep convolutional koopman
+network,” Physics of Fluids , vol. 33, no. 3, 2021.
+[22] P. J. Schmid, “Dynamic mode decomposition and its variants,” Annual
+Review of Fluid Mechanics , vol. 54, pp. 225–254, 2022.
+[23] C. E. Rasmussen, C. K. Williams et al. ,Gaussian processes for machine
+learning . Springer, 2006, vol. 1.
+[24] K. M. B. Lee, C. Yoo, B. Hollings, S. Anstee, S. Huang, and R. Fitch,
+“Online estimation of ocean current from sparse gps data for underwater
+vehicles,” in 2019 International conference on robotics and automation
+(ICRA) . IEEE, 2019, pp. 3443–3449.
+[25] R. Berlinghieri, B. L. Trippe, D. R. Burt, R. Giordano, K. Srinivasan,
+T.¨Ozg¨okmen, J. Xia, and T. Broderick, “Gaussian processes at the
+helm (holtz): A more fluid model for ocean currents,” arXiv preprint
+arXiv:2302.10364 , 2023.
+[26] R. C. Gonc ¸alves, M. Iskandarani, T. ¨Ozg¨okmen, and W. C. Thacker,
+“Reconstruction of submesoscale velocity field from surface drifters,”
+Journal of Physical Oceanography , vol. 49, no. 4, pp. 941–958, 2019.
+[27] J. Petrich, C. A. Woolsey, and D. J. Stilwell, “Planar flow model iden-
+tification for improved navigation of small auvs,” Ocean Engineering ,
+vol. 36, no. 1, pp. 119–131, 2009.
+[28] H. Arbabi, M. Korda, and I. Mezic, “A data-driven koopman model
+predictive control framework for nonlinear flows,” arXiv preprint
+arXiv:1804.05291 , 2018.
+[29] T. Salam, A. K. Li, and M. A. Hsieh, “Online estimation of the
+koopman operator using fourier features,” in Learning for Dynamics
+and Control Conference, L4DC 2023 , ser. Proceedings of Machine
+Learning Research, vol. 211. PMLR, 2023, pp. 1271–1283. [Online].
+Available: https://proceedings.mlr.press/v211/salam23a.html
+[30] Y . Han, M. Xie, Y . Zhao, and H. Ravichandar, “On the utility of
+koopman operator theory in learning dexterous manipulation skills,” in
+Conference on Robot Learning . PMLR, 2023, pp. 106–126.
+[31] D. Bruder, B. Gillespie, C. D. Remy, and R. Vasudevan, “Modeling and
+control of soft robots using the koopman operator and model predictive
+control,” arXiv preprint arXiv:1902.02827 , 2019.
+[32] A. Joglekar, S. Sutavani, C. Samak, T. Samak, K. C. Kosaraju,
+J. Smereka, D. Gorsich, U. Vaidya, and V . Krovi, “Data-driven modeling
+and experimental validation of autonomous vehicles using koopman
+operator,” in 2023 IEEE/RSJ International Conference on Intelligent
+Robots and Systems (IROS) . IEEE, 2023.
+[33] C. Folkestad, D. Pastor, and J. W. Burdick, “Episodic koopman learning
+of nonlinear robot dynamics with application to fast multirotor landing,”in2020 IEEE International Conference on Robotics and Automation
+(ICRA) . IEEE, 2020, pp. 9216–9222.
+[34] L. Shi and K. Karydis, “Acd-edmd: Analytical construction for dictio-
+naries of lifting functions in koopman operator-based nonlinear robotic
+systems,” IEEE Robotics and Automation Letters , vol. 7, no. 2, pp. 906–
+913, 2021.
+[35] I. Abraham and T. D. Murphey, “Active learning of dynamics for
+data-driven control using koopman operators,” IEEE Transactions on
+Robotics , vol. 35, no. 5, pp. 1071–1083, 2019.
+[36] A. K. Li, Y . Mao, S. Manjanna, S. Liu, J. Dhanoa, B. Mehta, V . M.
+Edwards, F. C. Ojeda, M. A. Hsieh, M. Le Men et al. , “Towards
+understanding underwater weather events in rivers using autonomous
+surface vehicles,” in OCEANS 2022, Hampton Roads . IEEE, 2022, pp.
+1–8.
+[37] V . Edwards, T. C. Silva, B. Mehta, J. Dhanoa, and M. A. Hsieh, “On
+collaborative robot teams for environmental monitoring: A macroscopic
+ensemble approach,” in 2023 IEEE/RSJ International Conference on
+Intelligent Robots and Systems (IROS) . IEEE, 2023, pp. 11 148–11 153.
+[38] A. Krause and C. Guestrin, “Nonmyopic active learning of gaussian
+processes: an exploration-exploitation approach,” in Proceedings of the
+24th international conference on Machine learning , 2007, pp. 449–456.
+[39] A. T. Taylor, T. A. Berrueta, and T. D. Murphey, “Active learning in
+robotics: A review of control principles,” Mechatronics , vol. 77, p.
+102576, 2021.
+[40] T. A. Berrueta, I. Abraham, and T. Murphey, “Experimental applications
+of the koopman operator in active learning for control,” The Koopman
+Operator in Systems and Control: Concepts, Methodologies, and Appli-
+cations , pp. 421–450, 2020.
+[41] B. Settles, “Active learning literature survey,” 2009.
+[42] H. S. Seung, M. Opper, and H. Sompolinsky, “Query by committee,”
+inProceedings of the fifth annual workshop on Computational learning
+theory , 1992, pp. 287–294.
+[43] D. Pathak, D. Gandhi, and A. Gupta, “Self-supervised exploration
+via disagreement,” in International conference on machine learning .
+PMLR, 2019, pp. 5062–5071.
+[44] G. Georgakis, B. Bucher, K. Schmeckpeper, S. Singh, and K. Daniilidis,
+“Learning to map for active semantic goal navigation,” in International
+Conference on Learning Representations , 2022. [Online]. Available:
+https://openreview.net/forum?id=swrMQttr6wN
+[45] B. Lakshminarayanan, A. Pritzel, and C. Blundell, “Simple and scalable
+predictive uncertainty estimation using deep ensembles,” Advances in
+neural information processing systems , vol. 30, 2017.
+[46] S. L. Brunton, M. Budi ˇsi´c, E. Kaiser, and J. N. Kutz, “Modern koopman
+theory for dynamical systems,” arXiv preprint arXiv:2102.12086 , 2021.
+[47] E. Yeung, S. Kundu, and N. Hodas, “Learning deep neural network
+representations for koopman operators of nonlinear dynamical systems,”
+in2019 American Control Conference (ACC) . IEEE, 2019, pp. 4832–
+4839.
+[48] Q. Li, F. Dietrich, E. M. Bollt, and I. G. Kevrekidis, “Extended
+dynamic mode decomposition with dictionary learning: A data-driven
+adaptive spectral decomposition of the koopman operator,” Chaos: An
+Interdisciplinary Journal of Nonlinear Science , vol. 27, no. 10, 2017.
+[49] A. Mauroy and J. Goncalves, “Koopman-based lifting techniques for
+nonlinear systems identification,” IEEE Transactions on Automatic Con-
+trol, vol. 65, no. 6, pp. 2550–2565, 2019.
+[50] L. Shi, R. Zheng, S. Zhang, and M. Liu, “Cooperative estimation
+to reconstruct the parametric flow field using multiple auvs,” IEEE
+Transactions on Instrumentation and Measurement , vol. 70, pp. 1–10,
+2021.
+[51] N. I. Fisher, Statistical analysis of circular data . cambridge university
+press, 1995.
+[52] R. Simons and C. John, “Erddap,” 2022, monterey, CA:
+NOAA/NMFS/SWFSC/ERD. [Online]. Available: https://coastwatch.
+pfeg.noaa.gov/erddap
+[53] M. Otte and H. H. Nagel, “Optical flow estimation: advances and com-
+parisons,” in Computer Vision—ECCV’94: Third European Conference
+on Computer Vision Stockholm, Sweden, May 2–6, 1994 Proceedings,
+Volume I 3 . Springer, 1994, pp. 49–60.
+[54] GPy, “GPy: A gaussian process framework in python,” http://github.
+com/SheffieldML/GPy, since 2012.
+[55] M.-P. Verner Christiansen, N. Rønne, and B. Hammer, “Efficient en-
+semble uncertainty estimation in gaussian processes regression,” arXiv
+e-prints , pp. arXiv–2407, 2024.
+[56] I. Mezic and A. Surana, “Koopman mode decomposition for
+periodic/quasi-periodic time dependence,” IFAC-PapersOnLine , vol. 49,
+no. 18, pp. 690–697, 2016.

@@ -1,0 +1,679 @@
+1
+CTP: A hybrid CNN-Transformer-PINN model for ocean front
+forecasting
+Yishuo Wanga,b, Feng Zhoub,a,∗, Muping Zhoub, Qicheng Mengb, Zhijun Huc,b, Yi Wangc,b
+aSchool of Oceanography, Shanghai Jiao Tong University, China
+bState Key Laboratory of Satellite Ocean Environment Dynamics, Second Institute of Oceanography, MNR, China
+cCollege of Marine Science and Technology, China University of Geosciences, China
+{Yishuo Wang }wys1998@sjtu.edu.cn, {Feng Zhou }zhoufeng@sio.org.cn, {Muping
+Zhou}zhoumuping@sio.org.cn, {Qicheng Meng }q.meng@sio.org.cn, {Zhijun Hu }huzhijun@cug.edu.cn, {Yi
+Wang}1202311356@cug.edu.cn
+Abstract —This paper proposes CTP, a novel deep learning
+framework that integrates convolutional neural network(CNN),
+Transformer architectures, and physics-informed neural net-
+work(PINN) for ocean front prediction. Ocean fronts, as dynamic
+interfaces between distinct water masses, play critical roles in
+marine biogeochemical and physical processes. Existing methods
+such as LSTM, ConvLSTM, and AttentionConv often struggle to
+maintain spatial continuity and physical consistency over multi-
+step forecasts. CTP addresses these challenges by combining
+localized spatial encoding, long-range temporal attention, and
+physical constraint enforcement. Experimental results across
+south China sea(SCS) and Kuroshio(KUR) regions from 1993
+to 2020 demonstrate that CTP achieves state-of-the-art(SOTA)
+performance in both single-step and multi-step predictions, sig-
+nificantly outperforming baseline models in accuracy, F1score,
+and temporal stability.
+Index Terms —Front, Prediction, CNN, Transformer, PINN.
+I. I NTRODUCTION
+OCEAN fronts, characterized by sharp gradients in phys-
+ical and biogeochemical properties such as temperature,
+salinity, and nutrient concentrations, are critical yet dynamic
+features of the global ocean [1]. These transitional zones,
+formed by the convergence of distinct water masses, play a
+pivotal role in regulating energy transfer, material cycling,
+and biological processes across marine ecosystems [2]. The
+study of fronts is essential for advancing understanding of
+ocean dynamics, as they act as hotspots for vertical mixing,
+influence large-scale circulation patterns, and modulate air-sea
+interactions that impact regional and global climate systems
+[3]. Ecologically, fronts enhance primary productivity by facil-
+itating nutrient upwelling, thereby supporting trophic cascades
+and aggregating diverse marine species, from phytoplank-
+ton to apex predators. Furthermore, fronts are increasingly
+recognized for their socioeconomic relevance, as they shape
+fisheries productivity, guide migratory routes of commercially
+important species, and affect the dispersion of pollutants in a
+changing ocean. Automatic detection, tracking, and prediction
+of ocean fronts are therefore essential.
+Front detection is handled by many previous researchers
+[4]–[8]. This study is based on the detection results of mi-
+crocanonical multiscale formalism(MMF) model and track-
+ing results of metric space analysis [9], [10]. In addition,researchers have typically focused on predicting other oceano-
+graphic variables such as sea surface temperature(SST) and
+chlorophyll with relatively limited efforts devoted to ocean
+front prediction.
+Due to the lack of image understanding, traditional machine
+learning methods are not suitable for this study [11], [12].
+Therefore, deep learning methods are used and compared
+in this paper. In the past, long short-term memory(LSTM)
+is usually adopted for prediction task not only in natural
+language processing but also in oceanography [13]–[16].
+Spatial features are also added by CNN to form convolu-
+tional LSTM(ConvLSTM) algorithm [17], [17]–[19]. How-
+ever, Transformer have become dominant in prediction task
+nowadays with the advantage of attention mechanism, which
+has boosted the development of large language models(LLMs)
+and ocean elements prediction [20]–[23].Yang combined CNN
+and attention mechanism to form AttentionConv framework
+for ocean front prediction [24]. PINN add constraint equations
+for these networks to regularize and disclose the dynamics
+of ocean phenomena [25]–[27]. This work proposes CTP
+framework to incorporate physical information to improve
+performance. Through this, spatial, temporal and physical
+information are well blended to form a more robust and precise
+model.
+Key advantages over prior work
+1. Physics-informed regularization: PINN constraints intro-
+duce domain knowledge through governing equations such
+as Navier-Stokes(N-S), enhancing physical plausibility and
+reducing overfitting.
+2. Superior predictive performance: Extensive evaluations
+show that CTP consistently outperforms LSTM, ConvLSTM,
+CNN-LSTM-PINN(CLP), and AttentionConv in terms of ac-
+curacy, F1score, and robustness across diverse regions and
+time scales.
+3. Balanced computational cost: Despite its hybrid structure,
+CTP achieves competitive training efficiency, making it suit-
+able for large-scale, long-term forecasting tasks in operational
+oceanography.arXiv:2505.10894v1  [cs.LG]  16 May 2025
+2
+II. P ROPOSED CTP A RCHITECTURE
+A. Data
+The SST is obtained from the NOAA Coral Reef Watch
+daily global 5km(0.05° exactly) satellite coral bleaching heat
+stress monitoring product(v3.1). This fine-grained resolution is
+essential for understanding ocean fronts and it can be down-
+loaded from https://coralreefwatch.noaa.gov/product/5km/.
+The eastward and northward velocity( uand vre-
+spectively) is from the global ocean physics reanaly-
+sis product released by Copernicus marine service. The
+spatial resolution is 9km(1/12° exactly) and can be
+downloaded from https://data.marine.copernicus.eu/product/
+GLOBAL MULTIYEAR PHY 001 030/services.
+SCS and KUR are selected as regions studied in this paper.
+The spatial range is 100−125°E,0−25°N and 120−145°E,
+20−45°N respectively, with the temporal range 1993-2020.
+The resolution is unified to 9km, so the spatial dimension is
+300×300and10227 daily records are available. In this paper,
+the task is to predict the frontal zone, u,vusing frontal zone,
+u,vin the preceding one week. Therefore, the input dimension
+is7×3×300×300, the target is 1×3×300×300and the
+total number of samples is 10220 .
+B. CNN
+When it comes to prediction task, each sample has a spatial
+size of 3×300×300 = 270000 . If such a large amount of
+data is rearranged into a one-dimensional vector, it will lead
+to two issues: (1) loss of spatial structure, and (2) increased
+computational cost.
+A CNN encoder is placed before the Transformer module
+in this work. It is composed of 2layers and the decoder coun-
+terpart includes 2deconvolution layers to restore data after
+Transformer. ReLU is selected as the activation function, group
+normalization(GN) and transposed convolution(ConvTran) are
+applied. The data size after CNN is 32×75×75 = 180000 ,
+only 2/3of raw size. The number of CNN layers( 2) is
+determined in III-B1.
+C. Transformer
+Transformer framework in this paper consists of encoders
+only to reduce calculation complexity. The number of encoder
+layers is 2and the dimension of model is dmodel = 512 .
+Multi-head attention mechanism is adopted and the number
+of headers is h= 8. Here, the dimension of key, query and
+value is the same( dk=dq=dv=dmodel /h= 64 ) and the
+dimension of feed-forward network is 1024 .
+Zi=softmax (QiKT
+i√dk)Vi (1)
+The7×3×300×300initial tensor is reduced to 7×32×
+75×75after the aforementioned CNN decoder , flattened to
+7×180000 and projected to 7×dmodel by a linear layer. Then
+it is multiplied by WQ
+i∈Rdmodel ×dq,WK
+i∈Rdmodel ×dkand
+WV
+i∈Rdmodel ×dvrespectively to generate Qi,KiandVifor
+these heads, where iis the index of the specific head. Attention
+mechaism is imposed using (1) to obtain Zi∈R7×dv. TheseZiare concatenated to Z∈R7×dmodel . Finally, Zgoes
+through the feed-forward network which is composed of 2
+fully-connected layers and a ReLU function. The network
+extend Zto7×1024 , activate it by ReLU and contract it
+to7×dmodel .
+The mean along the temporal dimension of the Transformer
+output is used as the final prediction embedding, with size
+dmodel . It is projected to 180000 and rearranged to 32×75×75.
+The CNN decoder mentioned above is applied to restore data
+to size 3×300×300. In addition, the first component in
+dimension 2should be the probability of frontal zone, so a
+Sigmoid function is needed to make the value fall in the (0,1)
+interval.
+D. PINN
+∂⃗ v
+∂t+ (⃗ v· ∇)⃗ v=ν∆⃗ v−1
+ρ∇⃗ p+⃗f (2)
+The N-S equation for momentum conservation is illustrated
+by (2). In it, ⃗ vrepresents uorv,νis kinematic viscosity and
+its dimension is m2/s,ρis the water density, ⃗ pis pressure
+and⃗fis the external force per unit mass.
+For the items in (2),∂⃗ v
+∂tis the rate of change of velocity, (⃗ v·
+∇)⃗ vis the convection item and ν∆⃗ vrepresents the diffusion.
+These three terms are incorporated into the loss function other
+than cross entropy(CE) loss for frontal zone classification and
+mean squared error(MSE) for velocity prediction.
+CE=−PH
+i=1PW
+j=1[pijln(ˆpij) + (1 −pij)ln(1−ˆpij)]
+HW(3)
+MSE =PH
+i=1PW
+j=1(yij−ˆyij)2
+HW(4)
+In (3), Hrepresents the height of studied region and W
+is the width. pijis the label of frontal zone( 1is frontal zone
+point and 0is non frontal zone point) at position i, j,ˆpijis the
+predicted probability at that point. Whereas in (4), yijis the
+target value and ˆyijis the predicted value. yijcan represent
+u,v, or the derived physical terms from Eq. (2), such as∂⃗ v
+∂t,
+(⃗ v· ∇)⃗ vandν∆⃗ v.
+loss 1=CE(frontal zone ) +MSE (u) +MSE (v)+
+MSE (∂u
+∂t) +MSE (∂v
+∂t) +MSE ((⃗ v· ∇)u)+
+MSE ((⃗ v· ∇)v) +MSE (ν∆u) +MSE (ν∆v)(5)
+To sum up, the loss function is composed of 5items:
+CE of frontal zone and MSE of velocity, rate of change,
+convection and diffusion. CE is suitable for classification
+task for it is based on Bernoulli distribution and MSE for
+regression based on Gaussian. In addition, MSE is derivable
+compared to other choice like mean absolute error(MAE), so
+the rate of convergent is faster with MSE. It should be clarified
+that the rate of change and convection is approximated by
+forward finite difference in time and space respectively. As to
+diffusion, the second derivative is approximated using central
+3
+ConvGN
+ReLu
+Conv Flatten3
+30030016
+15015032
+75
+75Linear  
+Projection
+Concatenate
+Linear  
+ProjectionMatrix 
+multiplication
+𝑊1𝑄
+𝑑𝑞(64) 𝑑𝑣(64)𝑑𝑘𝑑𝑚𝑜𝑑𝑒𝑙𝑊1𝐾𝑊1𝑉 7
+𝑑q𝑑𝑘𝑑𝑣𝑄1𝐾1𝑉1
+𝑑𝑣7Z8
+Transformer ×2
+CNN DecoderCNN Encoder
+32
+75
+7516
+1501503
+3003007…
+7𝑑𝑚𝑜𝑑𝑒𝑙 (512)…
+𝑊8𝑄
+𝑑𝑞(64) 𝑑𝑣(64)𝑑𝑘𝑑𝑚𝑜𝑑𝑒𝑙
+𝑊8𝐾𝑊8𝑉Matrix 
+multiplication
+7
+𝑑q𝑑𝑘𝑑𝑣𝑄8𝐾8𝑉8Softmax(Q8𝐾8𝑇
+𝑑𝑘)𝑉8
+AttentionZ1
+𝑑𝑣7
+𝑍=𝑑𝑚𝑜𝑑𝑒𝑙
+Z1 Z8…SoftmaxQ1𝐾1𝑇
+𝑑𝑘𝑉1
+Attention
+ReLuLinear  
+Projection
+Feed -forward Layer1024 10247 7 7 
+Mean
+Value𝑑𝑚𝑜𝑑𝑒𝑙
+𝑑𝑚𝑜𝑑𝑒𝑙1 1800000
+Linear  
+Projection
+1 1800000Unflatten ConvTranReLU
+ConvTran
+Fig. 1. Overall architecture of the proposed CTP framework, including CNN encoding, temporal attention and physical loss integration
+finite difference. The time step( 1day), spatial resolution( 9km)
+andν(10−6m2/s) should be considered to ensure all physical
+terms have consistent units( m/s2), enabling balanced gradient
+contributions and stable training. Further demonstration will be
+shown in III-B3.
+The architecture of the proposed CTP framework is illus-
+trated in figure 1.
+III. E XPERIMENTS
+A. Experimental Setup
+These hyperparameters: batch size is set at 32, learning
+rate is 10−4and epoch is 50for further comparison. Adam
+optimizer is used. The ratio of training set and test set is 8 : 2,
+i.e.,8176 : 2044 samples.
+In III-B and III-C, only 1/4data(2555 samples) are used
+to determine parameters and architecture for quick calculation
+and SCS is selected.
+In III-D, the CLP architecture is also included in the
+comparison to thoroughly evaluate the effectiveness of dif-
+ferent model combinations.. The learning rate of LSTM-based
+models(LSTM, ConvLSTM and CLP) is 10−3for LSTM’s
+recurrent feature. Hidden size is 512and number of layers is
+2. In addition, the CNN architecture of ConvLSTM and CLP is
+the same as CTP. AttentionConv is the same as Yang’s setting
+[24].
+The device for computing is one NVIDIA Tesla P100 GPU
+with16GB memory.
+Fig. 2. Performance of different number of CNN layers
+B. Hyperparameter analysis
+1) CNN layers: The number of CNN decoder and encoder
+layers are changed from 1to4to explore its impact on the
+whole network, with the number of Transformer layers set
+at2andloss 1used. The tensor size after each layer is 3×
+300×300,16×150×150,32×75×75,64×38×38and
+128×19×19.
+The performance comparison across varying layer depth re-
+veals a non-linear relationship between depth and classification
+metrics, as shown in figure 2. The 2-layer CNN achieved the
+best overall performance, with the highest accuracy ( 97.10%),
+precision ( 90.52%), recall ( 88.29%), and F1score ( 89.39%).
+4
+Fig. 3. Performance of different number of Transformer layers
+While 1-layer and 3-layer models showed comparable accu-
+racy ( 96.11% and96.48%, respectively), their precision and
+recall were lower, especially for the 1-layer model, indicating
+limited feature extraction capability. Notably, the 4-layer CNN
+performed worst across all metrics, suggesting that excessive
+depth leads to overfitting or vanishing gradients, resulting in
+degraded generalization.
+2) Transformer layers: With 2-layer CNN and loss 1, the
+number of Transformer layers is also studied by changing from
+1to4.
+The evaluation of Transformer depth shows that perfor-
+mance generally peaks at 2layers in figure 3. The 2-
+layer Transformer achieved the highest scores across all met-
+rics, including accuracy ( 97.58%), precision ( 91.84%), recall
+(90.14%), and F1score ( 90.98%). While 1-layer and 3-
+layer models performed similarly, their slight drop in recall
+andF1suggests less effective context modeling. The 4-
+layer Transformer consistently yields the lowest performance,
+indicating that deeper architectures may introduce overfitting
+or optimization difficulties.
+3) Loss function:
+MAE =PH
+i=1PW
+j=1|yij−ˆyij|
+HW(6)
+loss 2=MSE (frontal zone ) +MSE (u) +MSE (v)+
+MSE (∂u
+∂t) +MSE (∂v
+∂t) +MSE ((⃗ v· ∇)u)+
+MSE ((⃗ v· ∇)v) +MSE (ν∆u) +MSE (ν∆v)
+loss 3=CE(frontal zone ) +MAE (u) +MAE (v)+
+MAE (∂u
+∂t) +MAE (∂v
+∂t) +MAE ((⃗ v· ∇)u)+
+MAE ((⃗ v· ∇)v) +MAE (ν∆u) +MAE (ν∆v)
+loss 4=MAE (frontal zone ) +MAE (u) +MAE (v)+
+MAE (∂u
+∂t) +MAE (∂v
+∂t) +MAE ((⃗ v· ∇)u)+
+MAE ((⃗ v· ∇)v) +MAE (ν∆u) +MAE (ν∆v)
+(7)
+Fig. 4. Performance of different loss functions
+The loss function is illustrated by (5), where CE is adopted
+for frontal zone classification and MSE for the other items.
+Another commonly used loss fuction is mean absolute er-
+ror(MAE), displayed by (6). A natural question arises which
+loss fucntion assembly is better for this work. 4combinations
+are put forward: CE + MSE, MSE, CE + MAE, MAE, as
+shown in (7).
+In figure 4, the result( 2-layer CNN and Transformer) shows
+thatloss 1, which combines CE for classification and MSE
+for velocity and physical terms, achieves the best overall
+performance across all metrics. loss 2, which replaces CE
+with MSE for the frontal zone term, performs comparably
+but slightly lower, suggesting CE better guides classification.
+loss 3, which uses MAE instead of MSE but retains CE,
+results in moderate performance, indicating MAE may reduce
+sensitivity to outliers but lacks the precision of MSE. loss 4,
+which relies entirely on MAE, shows a significant drop in
+recall and F1score—especially recall ( 53.36%)—highlighting
+that MAE alone is insufficient for capturing the full complexity
+of both classification and physical constraints in this task.
+C. Ablation studies
+To investigate the influence of PINN on the proposed
+network, a model without PINN is trained. The 3-channel
+input and 3-channel output are altered to frontal zone-input and
+frontal zone-output. The architecture is the same as the former,
+only the first CNN encoder is 1×300×300to16×150×150
+and the last decoder layer is 16×150×150to1×300×300.
+The loss function is thus reduced to CE(frontal zone) only.
+The CNN module can also be removed to study its function.
+In this situation, the input 3×300×300is directedly flattened
+to270000 rather than 180000 . If both CNN and PINN are
+removed, the input 1×300×300is flattened to 90000 before
+Transformer.
+As displayed in figure 5, the Transformer baseline shows
+poor overall performance (accuracy: 50.12%,F1:21.67%),
+with particularly low precision ( 13.80%) suggesting significant
+false positives. This indicates inadequate feature discrimina-
+tion. Adding CNN layers slightly reduces accuracy ( 41.42%)
+but improves recall ( 61.97%), implying CNN enhances pattern
+detection at the cost of increased misclassifications.
+5
+Fig. 5. Results of ablation studies
+The Transformer+PINN configuration achieves a dramatic
+improvement (accuracy: 93.57%,F1:74.54%), where PINN’s
+physics-informed constraints likely stabilize training and en-
+force domain-specific priors, boosting both precision ( 83.66%)
+and recall ( 67.21%).
+The CTP model delivers optimal results (accuracy: 97.58%,
+F1:90.98%). The synergy arises from: CNN extracting local-
+ized spatial features; Transformer capturing sequential depen-
+dencies; PINN regularizing outputs via physical knowledge.
+PINN contributes most significantly to performance gains
+by mitigating overfitting and aligning predictions with physical
+plausibility. In addition, CNN alone degrades precision due to
+overemphasis on local patterns without global context. The full
+hybrid architecture balances local/global feature learning and
+domain constraints, achieving harmonized precision ( 91.84%)
+and recall ( 90.14%).
+D. Quantative comparisons
+1) Case analysis: Figure 6 and 7 are the 7-step prediction
+cases on SCS and KUR test set. Across both regions, CTP
+exhibits the most consistent and physically plausible evolu-
+tion of the frontal structures over the 14-day sequence. The
+transitions between days are smooth and well-aligned with the
+ground truth ( 2nd row), preserving both spatial continuity and
+fine-scale features, particularly after Day 10.
+The LSTM model captures coarse-scale frontal features ini-
+tially, but its predictive capability deteriorates in later days. A
+significant issue is that from around Day 9onwards, the output
+becomes static. This plateau effect indicates LSTM’s difficulty
+in maintaining dynamic progression across multiple steps—a
+known limitation when error accumulation and internal state
+degradation occur in sequence-to-sequence models; ConvL-
+STM’s Incorporating spatial convolutions improves structural
+recognition compared to LSTM, especially in earlier forecast
+days. However, the model still fails to sustain the fine-scale
+features after Day 11, and frontal transitions become blurred,
+particularly in SCS; CLP benefits from physical constraints
+via PINN and produces more realistic outputs. Yet, it still
+struggles with sharpness and stability, particularly in the KUR,where the frontal zone appears fragmented by the end of the
+sequence.
+AttentionConv improves by applying attention mechanisms
+to convolutional features. As a result, AttentionConv preserves
+spatial coherence and enhances detail retention better than
+ConvLSTM and CLP. However, while it shows clear improve-
+ments, it occasionally exhibits patchy noise or over-smoothing
+in areas with rapid frontal shifts, suggesting limitations in
+how it handles long-range dependencies and complex physical
+transitions without explicit physical constraints; CTP combines
+the strengths of CNN for spatial encoding, Transformers for
+long-range temporal attention, and PINN for physics-informed
+regularization. It delivers the most temporally consistent and
+spatially accurate results across all days. Notably, CTP main-
+tains mesoscale structures and shows minimal degradation
+even on Day 14. The transitions in both SCS and KUR are
+smooth, realistic, and physically plausible.
+2)1-step prediction: Figures 8 and 9 show the box plots
+of the 1-step average(1993-2020) forecasting F1scores for
+different methods on the SCS and KUR test sets respectively.
+These results provide insight into the predictive accuracy and
+stability of each model over the testing samples.
+In SCS, LSTM, ConvLSTM, and CLP all exhibit relatively
+low median F1scores ( 53.65%,50.55% and49.89%) and large
+interquartile ranges, indicating high variability and less reliable
+prediction performance. The lower whiskers and outliers also
+suggest frequent failures in capturing frontal zones accurately;
+AttentionConv significantly improves the median F1score to
+around 75.37%, with a tighter distribution. This indicates that
+the attention-enhanced convolutional structure offers improved
+generalization and better focus on frontal features, even in a
+challenging region like the SCS; CTP achieves the highest
+accuracy and the most stable performance, with a median
+F1score 91.02% and a narrow interquartile range, showing
+not only superior prediction fidelity but also remarkably low
+variance across test cases. This suggests that the combination
+of CNN, Transformer, and PINN modules allows CTP to
+robustly capture dynamic oceanic patterns with high precision.
+In KUR, the performance trend across models is similar
+to SCS. LSTM-based models (LSTM, ConvLSTM, CLP)
+again display broad variability and modest central tendency,
+with median scores slightly above 50%(55.27%,55.41% and
+52.24%); AttentionConv delivers a solid boost in both accu-
+racy and consistency, outperforming all LSTM-based methods
+and showing better adaptation to the more dynamic Kuroshio
+frontal system; CTP consistently outperforms all baselines
+with a median F1score above 92.35% and minimal spread,
+indicating excellent generalizability in a region characterized
+by strong currents and complex frontal structures.
+These results quantitatively confirm the limitations of re-
+current architectures like LSTM and ConvLSTM, particularly
+their inability to maintain consistent spatial accuracy across
+samples. While AttentionConv bridges the gap through better
+feature attention, it still lacks the explicit physical constraints
+necessary for high robustness. By integrating physical priors
+with deep temporal-spatial modeling, CTP achieves the best of
+both worlds, yielding both higher average accuracy and lower
+uncertainty in frontal prediction tasks.
+6
+Fig. 6. Performance of different methods on SCS in 2020.01.01-2020.01.14
+3) Mluti-step prediction: Table I is the multi-step
+average(1993-2020) metrics for different methods on the SCS
+and KUR test sets. It comprehensively demonstrates the
+superiority of the proposed CTP framework over existing
+approaches across multiple datasets and prediction horizons.
+As evidenced in the SCS dataset, CTP achieves SOTA per-
+formance with 97.51% accuracy at step 1, surpassing the
+second-best model (AttentionConv: 93.82%) by3.69percent-
+age points. This performance advantage becomes more pro-
+nounced in precision ( 91.71% vs84.35%) and recall ( 90.14%
+vs67.83%), indicating CTP’s enhanced capability to balancefalse positives and negatives.
+Three architectural innovations drive this improvement:
+1. Multi-scale feature integration: The CNN-Transformer
+hierarchy synergistically captures local spatial patterns through
+convolutional layers and global temporal dependencies via
+self-attention mechanisms, overcoming the limited receptive
+fields of LSTM variants. This is particularly evident in the
+KUR dataset, where CTP maintains 80.48% recall at 7-step
+versus ConvLSTM’s 29.54%.
+2. Physics-informed regularization: The integration of PINN
+constraints reduces overfitting compared to AttentionConv, as
+7
+Fig. 7. Performance of different methods on KUR in 2020.01.01-2020.01.14
+shown through the F1score improvement from 74.72% to
+87.83% in SCS 7-step predictions.
+3. Temporal consistency: CTP demonstrates remarkable
+multi-step stability, with only a 6.49% F1score decrease
+from step 1to7in KUR dataset. This robustness stems from
+the Transformer’s ability to model long-range dependencies
+complemented by PINN’s domain-specific regularization.
+While baseline models like AttentionConv show escalating
+resource demands with prediction horizons, CTP maintains
+consistent performance through optimized attention patterns
+and physical constraints. These results validate that combiningdata-driven learning with domain knowledge through our
+hybrid architecture effectively addresses the precision-stability
+trade-off in multi-step forecasting tasks.
+4) Training time: Table II is the training time of each
+method on 1/10samples( 1022 ) with epoch set at 50. All
+methods exhibit longer training durations on the KUR dataset,
+which stems from higher intensity and occurence of fronts in
+this region.
+In SCS, LSTM achieves the fastest training (SCS: 537.0s)
+through architectural simplicity; ConvLSTM incurs 38.9%
+overhead vs LSTM due to convolutional operations; CLP
+8
+TABLE I
+AVERAGE METRICS FOR DIFFERENT MENTHODS
+Step Dataset Metric(%) LSTM ConvLSTM CLP AttentionConv CTP
+1 SCS Accuracy 89.41 88.88 88.88 93.82 97.51
+Precision 68.91 66.29 66.08 84.35 91.71
+Recall 42.49 39.55 39.94 67.83 90.14
+F1 52.57 49.54 49.79 75.19 90.92
+KUR Accuracy 87.38 84.67 84.67 92.86 97.32
+Precision 69.93 60.35 60.32 85.96 92.55
+Recall 45.87 29.92 29.97 69.58 91.7
+F1 55.4 40 40.04 76.91 92.12
+3 SCS Accuracy 89.41 88.88 88.88 93.73 96.89
+Precision 68.89 66.29 66.09 83.74 89.92
+Recall 42.45 39.55 39.94 67.72 87.22
+F1 52.53 49.54 49.79 74.88 88.55
+KUR Accuracy 87.24 84.52 84.52 92.65 95.82
+Precision 69.63 59.84 59.83 85.19 91.79
+Recall 45.35 29.56 29.61 69.19 83.05
+F1 54.93 39.57 39.62 76.36 87.2
+7 SCS Accuracy 89.41 88.88 88.88 93.68 96.7
+Precision 68.86 66.29 66.09 83.48 89.35
+Recall 42.44 39.55 39.94 67.62 86.35
+F1 52.52 49.54 49.79 74.72 87.83
+KUR Accuracy 87.23 84.51 84.51 92.61 95.37
+Precision 69.61 59.82 59.81 84.97 91.49
+Recall 45.33 29.54 29.6 69.11 80.48
+F1 54.91 39.55 39.6 76.22 85.63
+TABLE II
+TRAINING TIME FOR DIFFERENENT METHODS(SECONDS)
+Dataset/Method LSTM ConvLSTM CLP AttentionConv CTP
+SCS 537.0 746.1 841.7 651.0 733.4
+KUR 554.2 795.6 890.4 683.9 775.4
+Fig. 8. F1score of different methods on SCS test set( 1-step)
+requires 56.7%more time than LSTM from multi-component
+synchronization; CTP demonstrates optimized efficiency–
+despite its hybrid architecture, it trains 12.7%faster than CLP
+through memory-efficient attention mechanism.
+Notably, CTP maintains this efficiency while delivering
+superior metrics, confirming its practical viability for real-
+world deployments. The results demonstrate that this architec-
+ture successfully balances model capacity with computational
+practicality.
+Fig. 9. F1score of different methods on KUR test set( 1-step)
+IV. C ONCLUSION
+In this work, CTP is presented, a hybrid deep learning
+architecture that effectively combines CNN, Transformer, and
+PINN components for accurate and physically consistent ocean
+front prediction. By leveraging CNN’s spatial encoding, Trans-
+former’s temporal modeling, and PINN’s physical constraints,
+CTP achieves a balance between precision, robustness, and
+domain fidelity. The model demonstrates superior perfor-
+mance across different ocean regions and forecasting horizons,
+9
+outperforming both recurrent and attention-based baselines.
+Furthermore, ablation studies confirm that each module con-
+tributes uniquely to the overall effectiveness of the framework.
+Given its accuracy, temporal stability, and computational ef-
+ficiency, CTP provides a promising foundation for real-time
+marine forecasting and decision-making. Future research may
+explore its extension to three-dimensional ocean processes and
+its integration with multi-source satellite observations [28].
+REFERENCES
+[1] Y . Yang, Y . Ju, Y . Gao, C. Zhang, and K.-M. Lam, “Remote sensing
+insights into ocean fronts: a literature review,” Intelligent Marine Tech-
+nology and Systems , vol. 2, no. 1, p. 10, 2024.
+[2] C. B. Woodson and S. Y . Litvin, “Ocean fronts drive marine fishery
+production and biogeochemical cycling,” Proceedings of the National
+Academy of Sciences , vol. 112, no. 6, pp. 1710–1715, 2015.
+[3] C. C. Chapman, M.-A. Lea, A. Meyer, J.-B. Sall ´ee, and M. Hindell,
+“Defining southern ocean fronts and their influence on biological and
+physical processes in a changing climate,” Nature Climate Change ,
+vol. 10, no. 3, pp. 209–219, 2020.
+[4] Y . Yang, J. Dong, X. Sun, R. Lguensat, M. Jian, and X. Wang,
+“Ocean front detection from instant remote sensing sst images,” IEEE
+Geoscience and Remote Sensing Letters , vol. 13, no. 12, pp. 1960–1964,
+2016.
+[5] J. Canny, “A computational approach to edge detection,” IEEE Transac-
+tions on pattern analysis and machine intelligence , no. 6, pp. 679–698,
+1986.
+[6] S. Prants, M. Budyansky, and M. Y . Uleysky, “Lagrangian fronts in the
+ocean,” Izvestiya, Atmospheric and Oceanic Physics , vol. 50, pp. 284–
+291, 2014.
+[7] Q. Xing, H. Yu, H. Wang, and S.-i. Ito, “An improved algorithm for
+detecting mesoscale ocean fronts from satellite observations: Detailed
+mapping of persistent fronts around the china seas and their long-term
+trends,” Remote Sensing of Environment , vol. 294, p. 113627, 2023.
+[8] J.-F. Cayula and P. Cornillon, “Edge detection algorithm for sst images,”
+Journal of atmospheric and oceanic technology , vol. 9, no. 1, pp. 67–80,
+1992.
+[9] A. Tamim, H. Yahia, K. Daoudi, K. Minaoui, A. Atillah, D. Aboutajdine,
+and M. F. Smiej, “Detection of moroccan coastal upwelling fronts
+in sst images using the microcanonical multiscale formalism,” Pattern
+Recognition Letters , vol. 55, pp. 28–33, 2015.
+[10] Y . Wang, F. Zhou, Q. Meng, M. Zhou, Z. Hu, C. Zhang, and T. Zhao,
+“An ocean front detection and tracking algorithm,” 2025.
+[11] C. Hu, L. Feng, and Q. Guan, “A machine learning approach to estimate
+surface chlorophyll a concentrations in global oceans from satellite
+measurements,” IEEE Transactions on Geoscience and Remote Sensing ,
+vol. 59, no. 6, pp. 4590–4607, 2020.
+[12] H. Guo, J. J. Huang, X. Zhu, B. Wang, S. Tian, W. Xu, and Y . Mai, “A
+generalized machine learning approach for dissolved oxygen estimation
+at multiple spatiotemporal scales using remote sensing,” Environmental
+Pollution , vol. 288, p. 117734, 2021.
+[13] M. Rußwurm, M. Ali, X. X. Zhu, Y . Gal, and M. K ¨orner, “Model and
+data uncertainty for satellite time series forecasting with deep recurrent
+models,” in IGARSS 2020-2020 IEEE International Geoscience and
+Remote Sensing Symposium , pp. 7025–7028, IEEE, 2020.
+[14] T. Sadeghifar, M. Nouri Motlagh, M. Torabi Azad, and M. Moham-
+mad Mahdizadeh, “Coastal wave height prediction using recurrent neural
+networks (rnns) in the south caspian sea,” Marine Geodesy , vol. 40,
+no. 6, pp. 454–465, 2017.
+[15] C. Xiao, N. Chen, C. Hu, K. Wang, J. Gong, and Z. Chen, “Short and
+mid-term sea surface temperature prediction using time-series satellite
+data and lstm-adaboost combination approach,” Remote Sensing of
+Environment , vol. 233, p. 111358, 2019.
+[16] H. Su, T. Zhang, M. Lin, W. Lu, and X.-H. Yan, “Predicting subsur-
+face thermohaline structure from remote sensing data based on long
+short-term memory neural networks,” Remote Sensing of Environment ,
+vol. 260, p. 112465, 2021.
+[17] K. Zhang, X. Geng, and X.-H. Yan, “Prediction of 3-d ocean temperature
+by multilayer convolutional lstm,” IEEE Geoscience and Remote Sensing
+Letters , vol. 17, no. 8, pp. 1303–1307, 2020.
+[18] G. Zhou, J. Chen, M. Liu, and L. Ma, “A spatiotemporal attention-
+augmented convlstm model for ocean remote sensing reflectance predic-
+tion,” International Journal of Applied Earth Observation and Geoin-
+formation , vol. 129, p. 103815, 2024.[19] Z. I. Petrou and Y . Tian, “Prediction of sea ice motion with convolutional
+long short-term memory networks,” IEEE Transactions on Geoscience
+and Remote Sensing , vol. 57, no. 9, pp. 6865–6876, 2019.
+[20] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez,
+Ł. Kaiser, and I. Polosukhin, “Attention is all you need,” Advances in
+neural information processing systems , vol. 30, 2017.
+[21] Z. Gao, Z. Li, J. Yu, and L. Xu, “Global spatiotemporal graph attention
+network for sea surface temperature prediction,” IEEE Geoscience and
+Remote Sensing Letters , vol. 20, pp. 1–5, 2023.
+[22] H. Dai, Z. He, G. Wei, F. Lei, X. Zhang, W. Zhang, and S. Shang, “Long-
+term prediction of sea surface temperature by temporal embedding
+transformer with attention distilling and partial stacked connection,”
+IEEE Journal of Selected Topics in Applied Earth Observations and
+Remote Sensing , vol. 17, pp. 4280–4293, 2024.
+[23] W. Yue, Y . Xu, L. Xiang, S. Zhu, C. Huang, Q. Zhang, L. Zhang, and
+X. Zhan, “Prediction of 3-d ocean temperature based on self-attention
+and predictive rnn,” IEEE Geoscience and Remote Sensing Letters ,
+vol. 21, pp. 1–5, 2024.
+[24] Y . Yang, X. Sun, J. Dong, K.-M. Lam, and X. Xiang Zhu, “Attention-
+convnet network for ocean-front prediction via remote sensing sst
+images,” IEEE Transactions on Geoscience and Remote Sensing , vol. 62,
+pp. 1–16, 2024.
+[25] Y . Meng, F. Gao, E. Rigall, R. Dong, J. Dong, and Q. Du, “Physical
+knowledge-enhanced deep neural network for sea surface temperature
+prediction,” IEEE Transactions on Geoscience and Remote Sensing ,
+vol. 61, pp. 1–13, 2023.
+[26] S. L. Brunton, B. R. Noack, and P. Koumoutsakos, “Machine learning
+for fluid mechanics,” Annual review of fluid mechanics , vol. 52, no. 1,
+pp. 477–508, 2020.
+[27] S. Cui, Z. Wang, J. Han, X. Cui, and Q. Meng, “A deep learning method
+for solving high-order nonlinear soliton equations,” Communications in
+Theoretical Physics , vol. 74, no. 7, p. 075007, 2022.
+[28] H. Albanwan, R. Qin, and Y . Tang, “Image fusion in remote sensing: An
+overview and meta-analysis,” Photogrammetric Engineering & Remote
+Sensing , vol. 90, no. 12, pp. 755–775, 2024.

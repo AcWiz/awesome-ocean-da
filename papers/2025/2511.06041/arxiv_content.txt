@@ -1,0 +1,1049 @@
+Advancing Ocean State Estimation with efficient
+and scalable AI
+Yanfei Xiang1, Yuan Gao1, Hao Wu1, Quan Zhang1, Ruiqi Shu1,
+Xiao Zhou1, Xiaomeng Huang1*
+1Department of Earth System Science, Ministry of Education Key
+Laboratory for Earth System Modeling, Institute for Global Change
+Studies, Tsinghua University, Beijing, 100084 China.
+*Corresponding author(s). E-mail(s): hxm@tsinghua.edu.cn;
+Abstract
+Accurate and efficient global ocean state estimation remains a grand challenge
+for Earth system science, hindered by the dual bottlenecks of computational
+scalability and degraded data fidelity in traditional data assimilation (DA) and
+deep learning (DL) approaches. Here we present an AI-driven Data Assimila-
+tion Framework for Ocean (ADAF-Ocean) that directly assimilates multi-source
+and multi-scale observations, ranging from sparse in-situ measurements to 4
+km satellite swaths, without any interpolation or data thinning. Inspired by
+Neural Processes, ADAF-Ocean learns a continuous mapping from heteroge-
+neous inputs to ocean states, preserving native data fidelity. Through AI-driven
+super-resolution, it reconstructs 0.25◦mesoscale dynamics from coarse 1◦fields,
+which ensures both efficiency and scalability, with just 3.7% more parameters
+than the 1◦configuration. When coupled with a DL forecasting system, ADAF-
+Ocean extends global forecast skill by up to 20 days compared to baselines
+without assimilation. This framework establishes a computationally viable and
+scientifically rigorous pathway toward real-time, high-resolution Earth system
+monitoring.
+Keywords:Ocean Data Assimilation (DA), Deep Learning, Multi-Source
+Observations, Ocean Forecasting, Earth System Science
+1arXiv:2511.06041v1  [cs.LG]  8 Nov 2025
+1 Introduction
+The ocean is central to the Earth system, fundamentally regulating climate, driving
+global resource distribution, and sustaining ecosystems [1–3]. Accurate modeling and
+forecasting of the global ocean are crucial for understanding the Earth system [4–6].
+However, the predictive capabilities of numerical ocean models are limited by ini-
+tial condition uncertainties and the significant computational challenge posed by the
+rapidly increasing volume of observational data from multiple sources [7–9].
+Data assimilation (DA) is the established method to mitigate these limitations by
+optimally combining observations with models [10–12]. However, classical DA meth-
+ods are grappling with a critical scaling crisis. Methods such as four-dimensional
+variational (4DVar) [13, 14] and the ensemble Kalman filter (EnKF) [15, 16] face com-
+putation costs that scale polynomially with resolution, making high-resolution global
+applications computationally infeasible. Furthermore, these methods often rely on sim-
+plified physical assumptions, such as linearity or Gaussian error statistics, which fail
+to capture the complexities of strong non-linear dynamics inherent in the ocean sys-
+tem [17]. Another major challenge is integrating diverse observational data. Ocean
+data is highly heterogeneous, ranging from sparse in-situ profiles to high-resolution
+satellite swaths. To cope with the data volume, current practice often uses observation
+thinning or averaging [18]. However, it irreversibly sacrifices valuable fine-scale infor-
+mation. As a result, increasing data availability does not lead to proportional model
+improvement.
+Recent advances in deep learning (DL) offer a promising avenue to overcome the
+limitations of traditional DA, excelling at capturing non-linear dynamics and accelerat-
+ing computations. DL has already demonstrated success in enhancing DA components,
+such as observation operators [19], dynamic error covariance estimation [20, 21], and
+online model error correction [22]. Indeed, several DL frameworks show potential to
+entirely replace traditional DA methods in atmospheric and oceanic applications [23–
+27]. However, most existing DL-based data assimilation (DL-DA) frameworks suffer
+from a critical architectural flaw: their reliance on vision-based DL models, including
+Convolutional Neural Networks (CNNs) [28] and Vision Transformer (ViT) [29], neces-
+sitates extensive preprocessing steps that often degrade data fidelity. Specifically, this
+preprocessing typically involves interpolating or downsampling all observations onto
+a uniform, regular grid [24, 25, 27], irreversibly discarding high-frequency information
+and limiting the utility of high-resolution sensors. Moreover, the substantial graph-
+ics processing unit (GPU) memory demands for training these architectures severely
+constrain their scalability and real-time applicability for high-dimensional DA tasks.
+To address these challenges, we introduce ADAF-Ocean (AI-Driven Data Assim-
+ilation Framework for the Ocean). This novel DL-based framework fundamentally
+redefines the DA paradigm by overcoming the dual bottlenecks of computational scal-
+ability and degraded data fidelity in traditional DA and existing DL approaches.
+Our core innovation lies in the ability of the framework to operate directly on raw,
+heterogeneous, and multi-scale observational data without any prior interpolation or
+data-degrading preprocessing. Our Neural Process-inspired encoder-decoder architec-
+ture maximizes information extraction by handling diverse inputs—from sparse in-situ
+2
+points to 4 km satellite swaths—at their native resolutions. The main contributions
+of this study are as follows:
+•Maximized Data Fidelity: A novel encoder-decoder architecture that cir-
+cumvents data-degrading preprocessing, maximizing observations utilization and
+preserving data integrity.
+•AI-Driven Super-Resolution: ADAF-Ocean physically reconstructs high-
+resolution (0.25◦) mesoscale dynamics even with a coarse 1◦background field. This
+capability is achieved without increasing the complexity of model, requiring only 28
+million parameters for 0.25◦DA, a minimal increase from 27 million for 1◦DA.
+•Enhanced Forecast Skill: Coupled with a DL forecast model, the analysis
+fields produced by ADAF-Ocean provide superior initial conditions, significantly
+improving forecast skill for up to 20 days.
+ADAF-Ocean provides a computationally efficient, scientifically robust, and scalable
+approach to address the DA crisis. It enables the evaluation of the contributions of
+diverse observation types through an effective, data-driven methodology, facilitating
+the optimization of global ocean monitoring networks. By maximizing the utility of
+observational data, this framework represents a critical step toward real-time, high-
+resolution Earth system monitoring and prediction.
+2 Results
+2.1 Overall performance of analysis
+To illustrate the ability of ADAF-Ocean in fully assimilating diverse observational
+data sources, six types of observations, including satellite and in-situ measurements
+that are irregularly and sparsely distributed, were utilized (refer to Section 4.4 and
+Table 1). The model was trained to reconstruct global surface ocean states using 3-
+day forecast fields from the DL ocean forecasting model Triton [30] as the background,
+with GLORYS reanalysis serving as the target. Data from 2018 were used for training,
+2019 for validation, and 2020 for testing (details in Section 4.5). The assimilation was
+performed daily.
+Three experimental configurations were designed to evaluate the performance
+of ADAF-Ocean: ADAF-Ocean-Full, ADAF-Ocean-Thinned, and ADAF-Thinned.
+In ADAF-Ocean-Full, we assimilated observations at their original spatial resolu-
+tions, leveraging the ability of ADAF-Ocean to effectively utilize multi-source and
+multi-resolution data. In ADAF-Ocean-Thinned, assimilated observations were pre-
+processed to a unified 1◦resolution. For a robust baseline comparison, ADAF-Thinned
+employed the existing deep learning framework ADAF (An Artificial Intelligence
+Data Assimilation Framework) [24] to assimilate the same 1◦resolution data. The
+ADAF-Ocean-Full configuration highlights the benefits of assimilating high-resolution
+observations, while ADAF-Ocean-Thinned demonstrates the superior capability of
+ADAF-Oceanin handling multi-source data compared to the established DL-DA
+method, ADAF-Thinned.
+3
+ADAF-Ocean-FullADAF-Ocean-ThinnedADAF-ThinnedT
+S
+U
+V
+SSH
+T
+S
+U
+V
+SSH
+T
+S
+U
+V
+SSH
+RMSE Reduction (%)AnalysisBackground
+abcdFig. 1 Overall performance of analysis for 5 surface ocean variables. a, bComparison of
+ADAF-Ocean-Full, ADAF-Ocean-Thinned, and ADAF-Thinned analysis in terms of ACC improve-
+ment and RMSE reduction.cMonthly latitude-weighted RMSE trends for the background and
+analysis produced by ADAF-Ocean-Full, along with RMSE reduction for the analysis.dSpatial
+MAE reduction (MAE analysis −MAE background ). Negative values (blue) indicate a reduction in MAE
+achieved by ADAF-Ocean.
+4
+The analysis results (Fig. 1) were evaluated against the GLORYS reanalysis
+reference, providing a comprehensive assessment of the effectiveness of ADAF-
+Ocean in assimilating multi-source, multi-resolution, and irregularly distributed
+observations. The ADAF-Ocean-Full configuration, which assimilates observations
+at their original fidelity (up to 4 km) by circumventing data-degrading pre-
+processing, consistently achieves the highest Anomaly Correlation Coefficient
+(ACC) improvement and superior Root Mean Square Error (RMSE) reduction
+across all surface variables (Fig. 1a, b). ACC improvement is quantified as
+(ACC analysis −ACC background )/ACC background , and RMSE reduction is quantified
+as (RMSE background −RMSE analysis )/RMSE background . This superior performance of
+ADAF-Ocean-Full over the ADAF-Ocean-Thinned and ADAF-Thinned baselines
+stems directly from the intrinsic capability of ADAF-Ocean to fully extract multi-
+scale observational information. This capability allows the model to leverage the rich,
+high-frequency details preserved in the original data, a feature unavailable to methods
+relying on thinned or homogenized inputs. Notably, the ACC improvements for T and
+SSH (>6%) are significantly larger compared to the other configurations. A distinct
+result is observed for S: while ADAF-Ocean-Full shows the highest ACC improvement
+(indicating superior spatial pattern correlation), its absolute RMSE reduction for S is
+comparatively smaller. This discrepancy arises because ADAF-Ocean-Full effectively
+enhances the spatial correlation of the salinity field with the reference, yet simultane-
+ously retains localized variability, which slightly limits the overall reduction in absolute
+errors.
+The monthly averaged latitude-weighted RMSE for ADAF-Ocean-Full is consis-
+tently lower than the background across all variables (Fig. 1c). SSH achieves the largest
+RMSE reduction (∼18%), while S shows the smallest (∼5%). Significant seasonal pat-
+terns are observed. Improvements for T, S, and SSH peak from July to December,
+suggesting better constraint of density-driven variables due to denser satellite thermal
+data (SST) during summer and autumn, while velocity components (U and V) show
+maximum improvement from January to May, indicating optimal effectiveness when
+wind forcing (SSW) is typically strongest. The monthly averaged latitude-weighted
+ACC is presented in Supplementary Fig. A1, showing improvements of approximately
+6% for T, 2.5% for S, 5% for U, 6% for V, and 7% for SSH compared to the background.
+Additionally, the spatial distribution of MAE difference (MAE analysis −MAE background )
+(Fig. 1d) was evaluated. The percentage of grid points showing MAE reduction reaches
+85%, 68%, 93%, 95%, and 80% for T, S, U, V, and SSH, respectively. For T, the most
+significant improvements are observed in the Arctic and Antarctic regions. SSH shows
+notable enhancements in the Kuroshio region, a highly energetic western boundary
+current, while U and V demonstrate improvements exceeding 90% across the global
+ocean, with the greatest gains in the North Pacific where dynamic constraints are
+critical.
+We further investigate the contributions of observations (Supplementary Fig. B2).
+The results highlight the critical role of satellite-based observations—particularly SST,
+SSW, and SSS—in enhancing the accuracy of ocean state estimation. To account for
+observational uncertainties, we assessed the sensitivity of state estimation to satellite
+observations under noise perturbations. The findings reveal that surface ocean state
+5
+estimation is particularly sensitive to satellite SLA, with more details provided in
+Supplementary Section C.
+2.2 AI-Driven Super-Resolution Reconstruction
+T, ADAF-Ocean (MAE: 0.548)T, Interp (MAE: 0.536)T, Target
+S, TargetS, Interp (MAE: 0.143)S, ADAF-Ocean (MAE: 0.176)
+SSH, ADAF-Ocean (MAE: 0.048)SSH, Interp (MAE: 0.053)SSH, Target
+Stream speed, ADAF-Ocean (MAE: 0.114)Stream speed, Interp(MAE: 0.117)T, MAE reduction region: 51%
+S, MAE reduction region: 48%
+SSH, MAE reduction region: 58%Stream speed, MAE reduction region: 53%Stream speed, Targetb
+c
+d
+eSSHStream speedST
+MAE reduction (m)MAE reduction (m/s)MAE reduction (PSU)MAE reduction (°C)°CPSUm/sma
+Fig. 2 AI-Driven Super-Resolution Reconstruction and Physical Fidelity.The figure
+demonstrates the ability of ADAF-Ocean to reconstruct fine-scale features compared to linear inter-
+polation (Interp).aPower Spectral Density (PSD) analysis from a representative test day across the
+global domain for T, S, Stream speed (√
+U2+V2), and SSH, showing the superior capture of high-
+wavenumber (small-scale) features by ADAF-Ocean.b-eCase studies in the highly dynamic Kuroshio
+region, showing the target from GLORYS reanalysis, 0.25◦analysis produced by ADAF-Ocean and
+Interp, and the resulting MAE reduction (MAE ADAF-Ocean −MAE Interp ). Negative values (blue)
+indicate lower MAE achieved by ADAF-Ocean compared to Interp.
+6
+High-resolution ocean modeling significantly enhances ocean state fidelity, neces-
+sitating effective high-resolution data assimilation (HR-DA) [31–33]. To train this
+capability, we utilized the high-fidelity 0.25◦GLORYS reanalysis as the ground-truth
+target. We then demonstrate that ADAF-Ocean achieves AI-Driven Super-Resolution
+Reconstruction, generating 0.25◦analysis fields from a coarse 1◦background. This is
+realized because our DL model learns a continuous DA operator that directly predicts
+the analysis increment, representing high-frequency error correction at the targeted
+0.25◦resolution. This high-fidelity reconstruction is achieved with minimal compu-
+tational overhead, utilizing only 28 million parameters—a minimal increase from the
+27 million required for 1◦DA—a significant contrast to the computational scaling
+typically required for traditional DA methods.
+Crucially, the Power Spectral Density (PSD) analysis (Fig. 2a) provides evidence
+of the physical reconstruction capability of ADAF-Ocean. The PSD curve of ADAF-
+Ocean aligns closer to the ground-truth GLORYS spectrum in the high-wavenumber
+regime (small scales) compared to the sharply attenuated PSD of Interp. This con-
+vergence confirms that ADAF-Ocean effectively captures and reconstructs the energy
+cascade associated with mesoscale and sub-mesoscale eddies, which are physical fea-
+tures that are entirely lost or misrepresented by linear interpolation. To validate
+the ability of ADAF-Ocean in fine-scale reconstruction, we compared the perfor-
+mance of ADAF-Ocean against statistical linear interpolation (Interp) applied to a 1◦
+DA analysis. Globally, ADAF-Ocean consistently achieves superior performance with
+lower MAE for most variables compared to Interp of the 1◦analysis, confirming its
+reconstruction ability (Supplementary Fig. D4).
+Focusing on the highly dynamic Kuroshio region (Fig. 2b-e), ADAF-Ocean cap-
+tures finer-scale oceanic structures and achieves significant error reduction: the MAE
+for SSH is reduced to 0.048 and stream speed (√
+U2+V2) to 0.114, substantially
+outperforming Interp. This high-fidelity reconstruction is evident in the well-defined
+mesoscale eddies in the Stream Speed field (Fig. 2d) and the SSH field (Fig. 2e), which
+are strongly attenuated by Interp. While ADAF-Ocean exhibits a slightly higher MAE
+for T and S, this is because the Interp method cannot produce valid values near com-
+plex land-sea boundaries. These regions inherently exhibit high local variability in
+their T and S fields. The ability of ADAF-Ocean to reconstruct details in these chal-
+lenging areas, rather than omitting them, results in a higher localized MAE compared
+to Interp. Within this Kuroshio region, the percentage of grid points showing MAE
+reduction is 51% for T, 48% for S, 53% for stream speed, and 58% for SSH.
+2.3 Forecast verification
+The primary goal of DA is to provide accurate initial conditions (ICs) to enhance fore-
+cast skills. To evaluate the effectiveness of the analysis generated by ADAF-Ocean,
+we conducted 27-day global forecasts using a DL-based forecast model (details in
+Supplementary Section E). We compared forecast skills using three types of ICs: analy-
+sis produced by ADAF-Ocean-Full, ADAF-Ocean-Thinned, and ADAF-Thinned. The
+3–30 days forecasts using GLORYS ICs served as the baseline (w/o DA), as the 3-day
+forecast was used as the background in this section. Fig. 3a shows the time-averaged
+7
+a
+eTarget15-day prediction(IC: ADAF-Ocean-Full)Bias of 15-day prediction(IC: ADAF-Ocean-Full)Bias of 15-day prediction(IC: GLORYS)
+bcdADAF-Ocean-FullADAF-Ocean-ThinnedADAF-ThinnedGLORYS (w/o DA)Fig. 3 Global forecast after a single DA. aTime-averaged, latitude-weighted RMSE reduc-
+tion during a 27-day forecast, comparing three types of initial conditions (ICs): ADAF-Ocean-Full
+(red), ADAF-Ocean-Thinned (blue), and ADAF-Thinned (green), relative to forecasts initialized with
+baseline GLORYS (w/o DA). More negative values (larger reduction) indicate better forecast skill
+compared to the baseline.bGLORYS used as a reference target.c15-day forecast for T, S, Stream
+speed (√
+U2+V2), and SSH using ADAF-Ocean-Full IC. Bias maps of the 15-day forecast using
+ADAF-Ocean-Full IC (d) and GLORYS IC (e).
+RMSE reduction, defined as (RMSE IC−RMSE w/o DA )/RMSE w/o DA , over the 27-day
+forecast for 3 types of IC.
+All three DA-initialized configurations demonstrated a clear improvement in fore-
+cast skill over the baseline (w/o DA). They achieved substantial initial RMSE
+reductions (up to -15% for T and -21% for SSH) and sustained this skill advantage for
+at least 20 days across all variables (Fig. 3a). Among the DA methods, ADAF-Ocean-
+Full consistently and significantly outperforms both thinned-data configurations. It
+exhibits the maximum RMSE reduction at the initial analysis state (t=0), signify-
+ing optimal IC improvement. Importantly, ADAF-Ocean-Thinned also demonstrates
+a consistent, albeit smaller, advantage over ADAF-Thinned, particularly for T, U, and
+8
+SSH. This highlights the superior capability of the ADAF-Ocean framework itself,
+even when constrained to identical thinned data. While the skill advantage of all DA
+runs naturally decays, ADAF-Ocean-Full maintains the most pronounced and sus-
+tained superiority for T, S, U, and SSH. Conversely, for V, the skill levels of all three
+DA methods converge after approximately 10 days.
+Furthermore, we analyze a representative 15-day prediction case initialized with
+ADAF-Ocean-Full ICs (Fig. 3c), which is broadly consistent with the GLORYS refer-
+ence target (Fig. 3b). Fig. 3d,e present the bias maps (prediction - target) for 15-day
+predictions using the two ICs: ADAF-Ocean-Full and GLORYS analysis. For S and
+stream speed, the spatial distribution of the bias is similar between the two ICs,
+indicating comparable forecast accuracy. However, predictions for T and SSH initial-
+ized with ADAF-Ocean-Full analysis exhibit larger errors in high-latitude (Arctic and
+Antarctic) regions than those starting with GLORYS. This is directly attributed to
+the larger initial errors already present in the ADAF-Ocean-Full ICs (the analysis
+field) in these polar regions (Fig. 1d).
+3 Discussion
+ADAF-Ocean represents a paradigm shift in Earth system Data Assimilation (DA)
+by directly confronting the dual crisis of computational scale and observational data
+fidelity that has constrained global high-resolution modeling. Our framework system-
+atically overcomes the core limitations of both traditional and prior DL methods.
+First, ADAF-Ocean replaces the iterative, high-cost optimization of traditional meth-
+ods (4DVar/EnKF) with a single, lightweight forward inference pass. This drastically
+reduces the computational cost. Achieving global 0.25◦analysis requires solving a
+system with only 28 million parameters, a computational scale that is orders of magni-
+tude smaller than the massive linear algebra required by operational NWP-based DA
+systems. By integrating a purely DL forecasting model, the framework further estab-
+lishes a computationally efficient prediction system. The analysis fields produced by
+ADAF-Ocean provide superior initial conditions, significantly improving forecast skill
+for up to 20 days.
+Second, unlike prior DL-DA methods that fail to address the underlying data
+fidelity crisis, the Neural Process-inspired architecture in ADAF-Ocean is inherently
+designed to handle the irregularity of observations. By transforming raw, multi-source,
+and multi-scale data into a latent space, we eliminate the necessity for interpolation
+and thinning. This innovation maximizes the information content of the observational
+network, as robustly demonstrated by the superior performance of the ADAF-Ocean-
+Full configuration (Fig. 1a,b) over thinned-data baselines.
+ADAF-Ocean successfully reconstruct 0.25◦analysis field from a coarse 1◦
+background, leveraging its AI-driven super-resolution capability. Spectral analysis
+confirms that the AI-driven reconstruction of the high-wavenumber spectrum demon-
+strates strong implicit capture of dynamics (Fig. 2f). This proves the ability of
+ADAF-Ocean to physically reconstruct the energy associated with mesoscale and sub-
+mesoscale features that are lost by traditional linear methods. The utility of this
+high-fidelity reconstruction extends to operational design.
+9
+Our evaluation of observation contributions (Supplementary Section B) provides
+actionable insights for observation strategies. A nuanced finding emerges for Sea Level
+Anomaly (SLA) data. Its role is apparently contradictory. The sensitivity analysis
+(Supplementary Section C) identifies SLA as having the most significant influence, yet
+the contribution experiment (Supplementary Section B) ranks its unique contribution
+as less significant. This discrepancy highlights the different aspects measured, specifi-
+cally influence versus irreplaceability. The sensitivity test confirms SLA is a primary
+constraint for geostrophic balance. The contribution test, however, suggests the infor-
+mation from SLA is partially redundant, as the framework implicitly derives sea level
+components from the density and wind-driven dynamics constrained by SST, SSS, and
+SSW.
+Despite these advancements, several avenues for future research exist to enhance
+the scientific rigor and utility of ADAF-Ocean. The current study focuses on surface
+variables. Extending ADAF-Ocean to effectively assimilate vertical profiles from in-situ
+platforms is a critical next step to estimate the subsurface state of the ocean, enhancing
+its utility for climate and ecosystem modeling. While the AI-driven reconstruction of
+the high-wavenumber spectrum demonstrates strong implicit capture of dynamics, our
+next generation of ADAF-Ocean will explicitly incorporate soft physical constraints,
+such as mass, heat, or momentum balance penalties, directly into the loss function to
+guarantee a physically consistent analysis state. Moreover, developing a fully coupled
+framework to simultaneously assimilate oceanic and atmospheric observations, such
+as wind stress and surface heat flux could significantly improve the representation of
+complex coupled phenomena, such as tropical cyclones or El Ni˜ no events.
+4 Methods
+4.1 Overview
+The primary goal of ADAF-Ocean is to reconstruct the state of Ocean by integrating
+sparse, noisy observational data with background fields derived from forecasting mod-
+els (Fig. 4a). This process involves predicting unknown variables at target locations
+within the global ocean domain Ω, using limited and uncertain information.
+Observations are defined as the set of coordinate-value pairs,O={(x i,yo
+i)}n
+i=1,
+wherex i∈R2are the spatial coordinates (e.g., latitude and longitude), andyo
+i∈RNO
+are the observed variables, whereN Ois the number of observed variables. Similarly,
+the background field is defined as the setB={(x i,yb
+i)}m
+i=1, whereyb
+i∈RNBare
+the background variables derived from forecasting models, whereN Bis the number
+of background variables.
+The objective is to predict the analysis variableyaat all target locationsxa∈Ω
+by combiningOandB. Mathematically, this is expressed as:
+ya=F(xa|O,B),(1)
+whereFrepresents the mapping function that fuses sparse, noisy observations with
+background fields to produce gap-free estimates of the analysis variableya∈RNA.
+10
+Crucially,Fis designed to achieve super-resolution, generating higher-resolution
+analysis fields from coarse-resolution background (B) to resolve fine-scale variability.
+4.2 Model structure
+Fig. 4 The model architecture. aOverview of the DA process: Observations (O) and background
+fields (B) are integrated to generate the analysis (ya).bThe point-based Encoder (E) processes coor-
+dinates and values (x,y) into the latent featureR.cThe Decoder (D) uses the fused latent feature
+(Rc) and query coordinates (xa) to predict the analysis (ya).dSpecialized encoders ({Eo
+j}, Eb) inde-
+pendently transform multi-source inputs (O,B) into latent features (Ro,Rb).eGlobal partitioning:
+The domain is split into overlapping regions to ensure continuity and manage computational memory.
+ADAF-Ocean employs an encoder-decoder architecture inspired by Neural Pro-
+cesses (NPs)[34], which are particularly well-suited for handling irregular, sparse, and
+multi-scale environmental sensor data[35–37]. To implement the NP-inspired frame-
+work, we utilize Multi-Layer Perceptrons (MLPs) [38] as the core building blocks for
+their simplicity, computational efficiency, and adaptability. MLPs encode spatial coor-
+dinates and variable values into latent representations, enabling seamless integration of
+multi-source data, such as satellite swaths and in-situ measurements, while preserving
+the fidelity of the original observations.
+The model takes three inputs: observations (O), background fields (B), and target
+analysis coordinates (xa). It learns a continuous, non-linear mappingFto estimate
+the analysis variables (ya) at any desired grid location:
+ya=F(xa|O,B) (2)
+To implement this mapping, the architecture features a set of specialized encoders,
+Eo
+j	
+for observations andEbfor the background field, to handle heterogeneous
+data formats independently (Fig. 4d). Crucially, while all encoders (
+Eo
+j	
+andEb)
+share a conceptually similar MLP-based architecture, including (e.g., depth, activa-
+tion functions, and skip connections), their input layers are specifically tailored. The
+11
+dimensionality of the first layer of each encoder is adapted to match the specific num-
+ber of variables in its corresponding data source, allowing them to consistently process
+heterogeneous input data organized as isolated points.
+To achieve this structural homogeneity, both the sparse observations (O) and the
+gridded background field (B) are transformed into a combined point vector (x,y)
+before encoding. For the sparse observations (O j), the measurements (y) are first com-
+bined with its trigonometrically encoded coordinatesx(refer to Section 4.3, Fig. 4b).
+For the gridded background field (B), the field is first sampled or flattened into discrete
+data pointsyat their respective grid locationsx.
+This combined vector (x,y) is then transformed by the corresponding encoder:
+R=E(x,y),(3)
+whereRis the latent feature that represents the contextual information of the input
+data, andEdenotes the general MLP-based encoding function. The latent features
+for observations (Ro
+j) and background fields (Rb) are computed separately using their
+dedicated encoders:
+Ro
+j=Eo
+j(Oj),Rb=Eb(B),(4)
+Observations (O j) consist of a variable number of sparse measurements and are pro-
+cessed by separate encoders (Eo
+j), producing the latent feature (Ro
+j).jindexes different
+observation sources. These encoders are crucial for direct DA as they naturally handle
+the irregular, sparse input structure. The dedicated encoder,Eb, processes the back-
+ground field and encodes its spatial and physical context, producing the latent feature
+Rb.
+The decoder (D, Fig. 4c) performs the final state estimation and drives resolution
+enhancement. The fused latent feature,Rc={Rb,Ro}, combines all encoded contex-
+tual information into a single representation, which is then fed into the decoder. The
+decoder takes three inputs: the target query coordinates (xa), and the separate latent
+features for observations (Ro) and background fields (Rb). The analysis variable (ya)
+at the queried locations is computed as:
+ya=D(xa,Ro,Rb) (5)
+The final output,ya, represents the analysis variable at the precisely defined latitude
+and longitude coordinates (xa). By querying coordinates on a high-resolution grid, the
+architecture inherently achieves its super-resolution capability.
+Both the encoders ({Eo
+j}, Eb) and the decoder (D) are implemented as deep MLPs,
+featuring linear layers, activation functions, and skip connections for enhanced gra-
+dient flow and feature mixing. This design—processing feature vectors rather than
+image grids—enables the direct assimilation of irregular and multi-source data without
+requiring prior interpolation or resampling.
+4.3 Partition and location encoding
+To efficiently process global-scale, high-dimensional data, ADAF-Ocean partitions the
+global ocean into overlapping sub-regions (patches) (Fig. 4e). This overlapping design
+12
+is critical for ensuring that boundary areas are fully captured, thereby preventing
+discontinuities between regions. This patch-based strategy is crucial for the scalability
+of ADAF-Ocean, primarily by decoupling the instantaneous GPU memory footprint
+from the total global domain size. Without partitioning, processing the entire global
+field would require loading all input tensors simultaneously, which is computationally
+infeasible. By splitting the domain patch-by-patch, the GPU memory requirement is
+determined only by the size of a single patch, not the global field. This allows the model
+to scale to arbitrarily high resolutions without increasing the instantaneous GPU
+memory demand. A further critical benefit of partitions is implicit data augmentation.
+A single global state is split into numerous (overlapping) patches, each serving as an
+independent training sample. This massively inflates the training dataset, enabling
+the model to learn from a relatively short temporal record.
+The model does not inherently account for spatial locations. To incorporate geospa-
+tial information, we encode the latitude and longitude into a continuous, cyclic,
+and normalized representation using trigonometric transformations. This ensures the
+preservation of the cyclic properties of geospatial coordinates (e.g., the periodicity
+of longitude) and improves the numerical stability of training. The latitudeϕ radand
+longitudeλ rad, expressed in radians, are transformed as follows:
+latsin = sin(ϕ rad),lat cos = cos(ϕ rad),(6)
+lonsin = sin(λ rad),lon cos = cos(λ rad).(7)
+These transformations provide a cyclically consistent encoding of spatial locations,
+enabling the model to effectively represent the continuity of geospatial relationships.
+By combining the partitioning strategy with trigonometric location encoding, the
+model can construct field predictions at arbitrary subsets of the global domain. This
+flexibility significantly reduces computational requirements, as predictions can be
+generated piece by piece rather than processing the entire domain at once.
+4.4 Datasets
+To demonstrate the efficacy of ADAF-Ocean in global surface ocean DA tasks, we uti-
+lized a combination of a high-resolution reanalysis product for ground truth and six
+diverse real-world observational datasets. We use the GLORYS12V1 [39, 40] dataset
+(referred to as GLORYS), a global ocean physics reanalysis product from the Coper-
+nicus Marine Environment Monitoring Service (CMEMS). GLORYS, based on the
+Nucleus for European Ocean Models (NEMO), assimilates various observations to
+reconstruct the 3D ocean circulation. The native spatial resolution of the product is
+1/12◦. In this study, we focus on five key surface variables: temperature (T), salinity
+(S), zonal velocity (U), meridional velocity (V), and sea surface height (SSH). These
+variables were temporally aggregated to a daily resolution.
+The study assimilates six types of multi-source observations, classified into satellite-
+based and in-situ measurements (Table 1). Visualization examples are presented in
+Supplementary Fig. F6. We utilize the high-resolution, near-real-time Sea Surface
+Temperature (SST) from the Advanced Very High Resolution Radiometer (AVHRR)
+(4 km) [41] to constrain thermal dynamics. Sea Level Anomaly (SLA) from Jason-2/3
+13
+(25 km) [42] provides crucial information for geostrophic balance and circulation fea-
+tures. For air-sea interaction, Sea Surface Wind (SSW) from MetOp-A (25 km) [43]
+constrains surface currents. Finally, Sea Surface Salinity (SSS) from SMOS (25 km) [44]
+and Sea Ice Concentration (SIC) from NOAA/NSIDC (100 km) [45] are included to
+constrain density-driven processes and polar dynamics, respectively. This combination
+of multi-resolution satellite inputs is directly leveraged by the model’s architecture to
+maximize information utilization. We also employ the HadIOD.1.2.0.0 dataset [46],
+which includes sparse, point-based measurements of surface and subsurface tempera-
+ture (T) and salinity (S), sourced from ships, buoys, and profiling floats. This dataset
+is quality-controlled and contains metadata concerning bias corrections and uncer-
+tainties. The integration of high-resolution, globally-covered satellite data with local
+in-situ measurements provides a robust foundation for accurate ocean state estimation.
+Table 1 Summary of Observational Datasets
+Observation SourceSpatial
+ResolutionTemporal
+Resolution
+SST(SAT) AVHRR [41] 4 km Twice-daily
+SSS(SAT) SMOS [44] 25 km Twice-daily
+SSW(SAT) MetOp-A [43] 25 km Twice-daily
+SIC(SAT) NOAA/NSIDC [45] 100 km Daily
+SLA(SAT) Jason-2,3 [42] 25 km Daily
+T, S(In-situ) HadIOD.1.2.0.0 [46] Point-based Daily
+‘SAT’ refers to satellite observations, while ‘In-situ’ refers to measurements collected from ships,
+buoys, and floats. All satellite observations are Level-3 (L3) products.
+4.5 Model training
+To establish a purely AI-based DA framework, we replace the traditional numerical
+weather prediction (NWP) model with an AI forecast model. The AI forecast serves
+as the background input for the ADAF-Ocean. In this study, we employ Triton [30] as
+the forecast model, a hierarchical architecture designed to process information across
+multiple spatial and temporal resolutions. Triton mitigates spectral bias and explicitly
+captures cross-scale dynamics, enabling it to achieve superior performance in various
+challenging forecasting tasks. For training the forecast model, we use the GLORYS
+reanalysis dataset, covering the period from 2010 to 2020. Training is conducted on
+data from 2010 to 2016, with 2017 data reserved for validation. Forecasts are performed
+for the independent period from 2018 to 2020, using a forecast step of one day. During
+inference, Triton operates in an auto-regressive manner, where initial conditions are
+sourced either from reanalysis fields or from the analysis produced by ADAF-Ocean.
+The training data for the ADAF-Ocean model consists of input-target pairs. The
+inputs include background fields and observations, while the target is the analysis
+increment (the bias between the GLORYS reanalysis and the background fields). This
+setup allows the model to focus on learning the necessary corrections to improve the
+14
+background. The assimilation time window spans one day, including data from the
+day prior to the analysis time. Background fields are sourced from the third day
+predictions of the AI forecast model. To avoid temporal data leakage, the dataset is
+split chronologically, with 2018 data used for training, 2019 for validation, and 2020
+for testing.
+The spatial domain of the target and background fields is 180◦×360◦with a
+spatial resolution of 1◦. These fields are partitioned into patches of size 10◦×20◦with
+overlapping 5◦×5◦. Observation patches correspond to the same regions as the target
+patches, but their sizes vary depending on their resolution. Specifically, the patch sizes
+are (250, 500) for SST, (50, 100) for SSS, (40, 80) for SSW, and (10, 20) for both
+SLA and SIC. In-situ observations are also partitioned into patches of 10◦×20◦. Each
+variable has a specific number of channels: SST, SSS, SLA, and SIC each have one
+channel, while SSW includes two channels for wind direction and wind speed.
+The ADAF-Ocean model is implemented using the PyTorch[47] framework. The
+encoder and decoder architectures of the model are configured with depths of 6 and 8
+layers, respectively. Training is conducted on two NVIDIA A100 GPUs and requires
+approximately 24 hours for 200 epochs. A masked-land Mean Squared Error (MSE)
+loss function is employed, which excludes land areas to ensure the model focuses
+exclusively on oceanic regions. The optimizer used is Adam[48], and a MultiStepLR
+scheduler is applied to decay the learning rate by a factor of 0.5 at epochs 80, 160,
+and 200.
+4.6 Evaluation metrics
+To evaluate the performance of the proposed model, we used three key met-
+rics commonly applied in geophysical data analysis: latitude-weighted Root Mean
+Squared Error (RMSE), Mean Absolute Error (MAE), and latitude-weighted Anomaly
+Correlation Coefficient (ACC) [27, 49, 50].
+Latitude-Weighted RMSE quantifies the difference between predicted and true val-
+ues while accounting for the uneven spatial distribution of grid points across latitudes,
+which is calculated as follows:
+RMSE =vuutPH
+i=1PW
+j=1cosϕ i(ˆyi,j−yi,j)2
+PH
+i=1PW
+j=1cosϕ i(8)
+whereHandWrepresent the total number of latitude and longitude grid points, ˆy
+andyare the analysis produced by ADAF-Ocean and the reanalysis references from
+GLORYS, respectively, and cosϕ iis the weight applied at latitudeϕ i.
+MAE is primarily used to quantify the spatial distribution of errors at the grid level.
+It is less sensitive to large outliers than RMSE and is calculated as the unweighted
+average of absolute errors overNgrid points:
+MAE =1
+H×WHX
+i=1WX
+j=1|ˆyi,j−yi,j|(9)
+15
+whereNis the total number of valid grid points in the region of interest.
+ACC measures the correlation between predicted and true anomalies, highlighting
+the ability to capture spatial deviations from the mean state. Anomalies are calculated
+by subtracting the climatological mean. The latitude-weighted ACC is formulated as:
+ACC =PH
+i=1PW
+j=1cosϕ i(yi,j−ci,j)(ˆyi,j−ci,j)rhPH
+i=1PW
+j=1cosϕ i(yi,j−ci,j)2ihPH
+i=1PW
+j=1cosϕ i(ˆyi,j−ci,j)2i(10)
+wherecrepresents the climatological mean over the day-of-year, which is averaged
+from 2010 to 2020 with GLORYS data. cosϕ iis the latitude weight.
+5 Data Availability
+The datasets used in this study are publicly available from the following sources: (i)
+The GLORYS reanalysis dataset is available from the Copernicus Marine Service at
+https://doi.org/10.48670/moi-00021. (ii) The AVHRR Pathfinder SST is available
+from NCEI at https://doi.org/10.7289/v52j68xx. (iii) The SMOS L3 Sea Surface
+Salinity (MULTIOBS GLO PHY SSSL3MYNRT 015014) is available from the
+Copernicus Marine Service at https://doi.org/10.1016/j.rse.2016.02.061. (iv) The
+sea surface wind observations from ASCAT (WIND GLO PHY L3MY012005)
+is available at https://doi.org/10.48670/moi-00183. (v) The sea ice con-
+centration Climate Data Record (CDR) is available from NSIDC at
+https://doi.org/10.7265/efmz-2t65. (vi) The global ocean along track L3 sea
+surface heights (SEALEVEL GLO PHY L3MY008062) can be accessed at
+https://doi.org/10.48670/moi-00146. (vii) The HadIOD version 1.2.0.0 can be
+accessed at https://www.metoffice.gov.uk/hadobs/hadiod. Some example datasets
+and the weights of the trained model can be accessed from [51].
+6 Code Availability
+The core code of ADAF-Ocean is available via GitHub at
+https://github.com/xiangyanfei212/ADAF.git.
+16
+References
+[1] G. Flato, J. Marotzke, B. Abiodun, P. Braconnot, S.C. Chou, W. Collins, P. Cox,
+F. Driouech, S. Emori, V. Eyring, et al., inClimate change 2013: the physical
+science basis. Contribution of Working Group I to the Fifth Assessment Report
+of the Intergovernmental Panel on Climate Change(Cambridge University Press,
+2014), pp. 741–866
+[2] M.D. Palmer, G.R. Harris, J.M. Gregory, Extending cmip5 projections of global
+mean temperature change and sea level rise due to thermal expansion using a
+physically-based emulator. Environmental Research Letters13(8), 084003 (2018)
+[3] S. Khatiwala, F. Primeau, T. Hall, Reconstruction of the history of anthropogenic
+co2 concentrations in the ocean. Nature462(7271), 346–349 (2009)
+[4] T.N. Stockdale, A.J. Busalacchi, D.E. Harrison, R. Seager, Ocean modeling for
+enso. Journal of Geophysical Research: Oceans103(C7), 14325–14355 (1998).
+https://doi.org/https://doi.org/10.1029/97JC02440
+[5] B.P. Kirtman, C. Bitz, F. Bryan, W. Collins, J. Dennis, N. Hearn, J.L. Kinter,
+R. Loft, C. Rousset, L. Siqueira, C. Stan, R. Tomas, M. Vertenstein, Impact of
+ocean model resolution on ccsm climate simulations. Climate Dynamics39(6),
+1303–1328 (2012). https://doi.org/10.1007/s00382-012-1500-3
+[6] K. Caldeira, M.E. Wickett, Ocean model predictions of chemistry changes from
+carbon dioxide emissions to the atmosphere and ocean. Journal of Geophysi-
+cal Research: Oceans110(C9) (2005). https://doi.org/https://doi.org/10.1029/
+2004JC002671
+[7] B. Fox-Kemper, A. Adcroft, C.W. B¨ oning, E.P. Chassignet, E. Curchitser,
+G. Danabasoglu, C. Eden, M.H. England, R. Gerdes, R.J. Greatbatch, et al.,
+Challenges and prospects in ocean circulation models. Frontiers in Marine Science
+6, 65 (2019)
+[8] H. Hurlburt, G. Brassington, Y. Drillet, M. Kamachi, M. Benkiran, R. Bourdall´ e-
+Badie, E. Chassignet, G. Jacobs, O.L. Galloudec, J. Lellouche, E. Metzger,
+P. Oke, T. Pugh, A. Schiller, O. Smedstad, B. Tranchant, H. Tsujino, N. Usui,
+A. Wallcraft, High-resolution global and basin-scale ocean analyses and forecasts.
+Oceanography22, 110–127 (2009). https://doi.org/10.5670/OCEANOG.2009.70
+[9] Y. Cui, R. Wu, X. Zhang, Z. Zhu, B. Liu, J. Shi, J. Chen, H. Liu, S. Zhou, L. Su,
+Z. Jing, H. An, L. Wu, Forecasting the eddying ocean with a deep neural network.
+Nature Communications16(2025). https://doi.org/10.1038/s41467-025-57389-2
+[10] G. Jacobs, J.M. D’Addezio, H. Ngodock, I. Souopgui, Observation and model
+resolution implications to ocean prediction. Ocean Modelling159, 101760 (2021).
+https://doi.org/https://doi.org/10.1016/j.ocemod.2021.101760
+17
+[11] J. Huang, J.L. G´ omez-Dans, H. Huang, H. Ma, Q. Wu, P.E. Lewis, S. Liang,
+Z. Chen, J.H. Xue, Y. Wu, F. Zhao, J. Wang, X. Xie, Assimilation of remote
+sensing into crop growth models: Current status and perspectives. Agricultural
+and Forest Meteorology276-277, 107609 (2019). https://doi.org/https://doi.
+org/10.1016/j.agrformet.2019.06.008
+[12] M. Asch, M. Bocquet, M. Nodet,Data assimilation: methods, algorithms, and
+applications(SIAM, 2016)
+[13] A.C. Lorenc, Analysis methods for numerical weather prediction. Quarterly
+Journal of the Royal Meteorological Society112(474), 1177–1194 (1986). https:
+//doi.org/https://doi.org/10.1002/qj.49711247414
+[14] R.N. Bannister, A review of operational methods of variational and ensemble-
+variational data assimilation. Quarterly Journal of the Royal Meteorological
+Society143(703), 607–633 (2017). https://doi.org/https://doi.org/10.1002/qj.
+2982. URL https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.2982
+[15] G. Evensen, The ensemble kalman filter: theoretical formulation and practical
+implementation. Ocean Dynamics53(4), 1616–7228 (2003). https://doi.org/10.
+1007/s10236-003-0036-9
+[16] A. Carrassi, M. Bocquet, L. Bertino, G. Evensen, Data assimilation in the geo-
+sciences: An overview of methods, issues, and perspectives. WIREs Climate
+Change9(5) (2018). https://doi.org/10.1002/wcc.535. URL http://dx.doi.org/
+10.1002/wcc.535
+[17] G. Evensen, Sequential data assimilation with a nonlinear quasi-geostrophic
+model using monte carlo methods to forecast error statistics. Journal of Geophys-
+ical Research99, 10143–10162 (1994). https://doi.org/10.1029/94JC00572
+[18] C. Zhou, W. Cui, R. Sun, Y. Huang, Z. Zhuang, Enhancing the assimilation
+of swot simulated observations using a multi-scale 4dvar method in regional
+ocean modeling system. Remote. Sens.16, 778 (2024). https://doi.org/10.3390/
+rs16050778
+[19] T. Frerix, D. Kochkov, J.A. Smith, D. Cremers, M.P. Brenner, S. Hoyer. Varia-
+tional data assimilation with a learned inverse observation operator (2021). URL
+https://arxiv.org/abs/2102.11192
+[20] T.J. Cocucci, M. Pulido, M. Lucini, P. Tandeo, Model error covariance estimation
+in particle and ensemble kalman filters using an online expectation–maximization
+algorithm. Quarterly Journal of the Royal Meteorological Society147(734), 526–
+543 (2021). https://doi.org/10.1002/qj.3931
+[21] B. Melinc, ˇZ. Zaplotnik, 3D-Var data assimilation using a variational autoencoder.
+Quarterly Journal of the Royal Meteorological Society150(761), 2273–2295
+18
+(2024). https://doi.org/10.1002/qj.4708
+[22] A. Farchi, P. Laloyaux, M. Bonavita, M. Bocquet, Using machine learning to
+correct model error in data assimilation and forecast applications. Quarterly
+Journal of the Royal Meteorological Society147(739), 3067–3084 (2021). https:
+//doi.org/10.1002/qj.4116
+[23] L. Huang, L. Gianinazzi, Y. Yu, P.D. Dueben, T. Hoefler. DiffDA: a diffusion
+model for weather-scale data assimilation (2024). URL https://arxiv.org/abs/
+2401.05932
+[24] Y. Xiang, W. Jin, H. Dong, J. Weyn, M. Bai, Z. Fang, P. Zhao, H. Sun, K. Tham-
+biratnam, Q. Zhang, X. Huang, Adaf: An artificial intelligence data assimilation
+framework for weather forecasting. Journal of Advances in Modeling Earth Sys-
+tems17(9), e2024MS004839 (2025). https://doi.org/https://doi.org/10.1029/
+2024MS004839
+[25] K. Chen, L. Bai, F. Ling, P. Ye, T. Chen, J.J. Luo, H. Chen, Y. Xiao, K. Chen,
+T. Han, W. Ouyang. Towards an end-to-end artificial intelligence driven global
+weather forecasting system (2024). URL https://arxiv.org/abs/2312.12462
+[26] Y.G. Ham, Y.S. Joo, J.H. Kim, J.G. Lee, Partial-convolution-implemented gen-
+erative adversarial network for global oceanic data assimilation. Nature Machine
+Intelligence6(7), 834–843 (2024)
+[27] X. Xu, X. Sun, W. Han, X. Zhong, L. Chen, Z. Gao, H. Li, Fuxi-da: a generalized
+deep learning data assimilation framework for assimilating satellite observations.
+npj Climate and Atmospheric Science8(1), 156 (2025). https://doi.org/10.1038/
+s41612-025-01039-3
+[28] A. Khan, A. Sohail, U. Zahoora, A.S. Qureshi, A survey of the recent architectures
+of deep convolutional neural networks. Artificial intelligence review53(8), 5455–
+5516 (2020). https://doi.org/10.1007/s10462-020-09825-6. URL https://doi.org/
+10.1007/s10462-020-09825-6
+[29] A. Dosovitskiy, L. Beyer, A. Kolesnikov, D. Weissenborn, X. Zhai, T. Unterthiner,
+M. Dehghani, M. Minderer, G. Heigold, S. Gelly, J. Uszkoreit, N. Houlsby. An
+image is worth 16x16 words: Transformers for image recognition at scale (2021).
+URL https://arxiv.org/abs/2010.11929
+[30] H. Wu, Y. Gao, R. Shu, K. Wang, R. Gou, C. Wu, X. Liu, J. He, S. Cao, J. Fang,
+X. Shi, F. Tao, Q. Song, S. Ji, Y. Xiang, Y. Sun, J. Li, F. Xu, H. Dong, H. Wang,
+F. Zhang, P. Zhao, X. Wu, Q. Wen, D. Chen, X. Huang. Advanced long-term
+earth system forecasting by learning the small-scale nature (2025). URL https:
+//arxiv.org/abs/2505.19432
+19
+[31] R.D. Smith, M.E. Maltrud, F.O. Bryan, M.W. Hecht, Numerical simulation of
+the north atlantic ocean at 1/10°. Journal of Physical Oceanography30(7), 1532
+– 1561 (2000). https://doi.org/10.1175/1520-0485(2000)030⟨1532:NSOTNA⟩2.0.
+CO;2
+[32] Q. Wang, Q. Shu, A. Bozec, E.P. Chassignet, P.G. Fogli, B. Fox-Kemper, A.M.
+Hogg, D. Iovino, A.E. Kiss, N. Koldunov, J. Le Sommer, Y. Li, P. Lin, H. Liu,
+I. Polyakov, P. Scholz, D. Sidorenko, S. Wang, X. Xu, Impact of increased
+resolution on arctic ocean simulations in ocean model intercomparison project
+phase 2 (omip-2). Geoscientific Model Development17(1), 347–379 (2024).
+https://doi.org/10.5194/gmd-17-347-2024
+[33] E.P. Chassignet, X. Xu, On the importance of high-resolution in large-scale
+ocean models. Advances in Atmospheric Sciences38(10), 1621–1634 (2021).
+https://doi.org/10.1007/s00376-021-0385-7. URL http://dx.doi.org/10.1007/
+s00376-021-0385-7
+[34] M. Garnelo, J. Schwarz, D. Rosenbaum, F. Viola, D.J. Rezende, S.M.A. Eslami,
+Y.W. Teh. Neural processes (2018). URL https://arxiv.org/abs/1807.01622
+[35] T.R. Andersson, W.P. Bruinsma, S. Markou, J. Requeima, A. Coca-Castro,
+A. Vaughan, A.L. Ellis, M.A. Lazzara, D. Jones, S. Hosking, et al., Environmental
+sensor placement with convolutional gaussian neural processes. Environmental
+Data Science2, e32 (2023). https://doi.org/10.1017/eds.2023.22
+[36] A. Allen, S. Markou, W. Tebbutt, J. Requeima, W.P. Bruinsma, T.R. Andersson,
+M. Herzog, N.D. Lane, M. Chantry, J.S. Hosking, R.E. Turner, End-to-end data-
+driven weather prediction. Nature641(8065), 1172–1179 (2025). https://doi.org/
+10.1038/s41586-025-08897-0. URL https://doi.org/10.1038/s41586-025-08897-0
+[37] A. Vaughan, W. Tebbutt, J.S. Hosking, R.E. Turner, Convolutional conditional
+neural processes for local climate downscaling. Geoscientific Model Development
+15(1), 251–268 (2022). https://doi.org/10.5194/gmd-15-251-2022
+[38] K. Hornik, M. Stinchcombe, H. White, Multilayer feedforward networks are uni-
+versal approximators. Neural Networks2(5), 359–366 (1989). https://doi.org/
+10.1016/0893-6080(89)90020-8
+[39] E.C.M.S.I. (CMEMS). Global ocean physics reanalysis [dataset] (2025). https:
+//doi.org/https://doi.org/10.48670/moi-00021
+[40] L. Jean-Michel, G. Eric, B.B. Romain, G. Gilles, M. Ang´ elique, D. Marie,
+B. Cl´ ement, H. Mathieu, L.G. Olivier, R. Charly, C. Tony, T. Charles-Emmanuel,
+G. Florent, R. Giovanni, B. Mounir, D. Yann, L.T. Pierre-Yves, The coperni-
+cus global 1/12°oceanic and sea ice glorys12 reanalysis. Frontiers in Earth
+ScienceVolume 9 - 2021(2021). https://doi.org/10.3389/feart.2021.698876.
+URL https://www.frontiersin.org/journals/earth-science/articles/10.3389/feart.
+20
+2021.698876
+[41] K. Saha, X. Zhao, H.m. Zhang, K.S. Casey, D. Zhang, S. Baker-Yeboah, K.A.
+Kilpatrick, R.H. Evans, T. Ryan, J.M. Relph. AVHRR Pathfinder version 5.3 level
+3 collated (L3C) global 4km sea surface temperature for 1981-2023 (2016). https:
+//doi.org/10.7289/v52j68xx. URL https://doi.org/10.7289/v52j68xx. [indicate
+subset used]
+[42] E.U. Copernicus Marine Service Information (CMEMS). Global ocean along track
+L3 sea surface heights reprocessed 1993 ongoing tailored for data assimilation.
+https://doi.org/10.48670/moi-00146. URL https://doi.org/10.48670/moi-00146.
+(Accessed on 06-04-2025)
+[43] E.U. Copernicus Marine Service Information (CMEMS). Global ocean daily
+gridded reprocessed L3 sea surface winds from scatterometer. https://doi.org/
+10.48670/moi-00183. URL https://doi.org/10.48670/moi-00183. (Accessed on
+06-04-2025)
+[44] N. Kolodziejczyk, J. Boutin, J.L. Vergely, S. Marchand, N. Martin, G. Reverdin,
+Mitigation of systematic errors in smos sea surface salinity. Remote Sensing of
+Environment180, 164–177 (2016). https://doi.org/https://doi.org/10.1016/j.rse.
+2016.02.061
+[45] W.N. Meier, F. Fetterer, A.K. Windnagel, S. Stewart. NOAA/NSIDC climate
+data record of passive microwave sea ice concentration, version 4 (2021). https:
+//doi.org/10.7265/efmz-2t65. URL https://doi.org/10.7265/efmz-2t65
+[46] C.P. Atkinson, N.A. Rayner, J.J. Kennedy, S.A. Good, An integrated database
+of ocean temperature and salinity observations. Journal of Geophysical Research:
+Oceans119(10), 7139–7163 (2014). https://doi.org/https://doi.org/10.1002/
+2014JC010053
+[47] A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen,
+Z. Lin, N. Gimelshein, L. Antiga, A. Desmaison, A. K¨ opf, E. Yang, Z. DeVito,
+M. Raison, A. Tejani, S. Chilamkurthy, B. Steiner, L. Fang, J. Bai, S. Chin-
+tala. Pytorch: An imperative style, high-performance deep learning library (2019).
+URL https://arxiv.org/abs/1912.01703
+[48] I. Loshchilov, F. Hutter. Decoupled weight decay regularization (2019). URL
+https://arxiv.org/abs/1711.05101
+[49] W. Wang, J. Zhang, Q. Su, X. Chai, J. Lu, W. Ni, B. Duan, K. Ren, Accurate ini-
+tial field estimation for weather forecasting with a variational constrained neural
+network. npj Climate and Atmospheric Science7(1), 223 (2024)
+[50] W. Xiong, Y. Xiang, H. Wu, S. Zhou, Y. Sun, M. Ma, X. Huang, Ai-goms: Large
+ai-driven global ocean modeling system. arXiv preprint arXiv:2308.03152 (2023)
+21
+[51] Y. Xiang. Adaf-ocean data and model weights (2025). https://doi.org/10.5281/
+zenodo.17543316. URL https://doi.org/10.5281/zenodo.17543316
+7 Acknowledgements
+We sincerely appreciate the researchers and staff at the Met Office (for the HadIOD
+dataset), GHRSST and the NOAA National Centers for Environmental Information
+(for SST), the Copernicus Marine Environment Monitoring Service (for SSS, SSW,
+SLA, and the GLORYS reanalysis), and the NOAA/NSIDC (for the SIC Climate Data
+Record). Their significant efforts in curating, maintaining, and providing these public
+datasets were essential for our experiments and analyses.
+The authors are grateful for the support of Natural Science Foundation of China
+(No: 12427811(X.L.), 52176082(H.H.), 12275261(Q.L.)), and the authors also want to
+appreciate the LingChuang Research Project of China National Nuclear Corporation
+(H.H.) and “Shu Guang” project supported by Shanghai Municipal Education Com-
+mission (X.L.) and Shanghai Education Development Foundation (21SG13(H.H.)). In
+addition, the authors are especially grateful to Professor Jinbiao Xiong for his guidance
+and advice.
+8 Contributions
+S.W., J.C. and H.H. conceived the study. S.W., J.C., X.L., T.Z., X.C., Q.L., D.S. and
+H.H. designed the study. S.W. and J.C. developed the program. S.W., J.C., X.L. and
+H.H. performed the analyses. X.L., T.Z., X.C., Q.L. and D.S. supervised the analyses.
+S.W. and H.H. wrote the paper with input from all authors.
+22
+Appendix A Performance of analysis
+TS
+UVSSH
+ACC Improvements (%)AnalysisBackground
+Fig. A1 Monthly ACC and Improvements for 5 Ocean Surface Variables.Solid lines
+represent the analysis (ADAF-Ocean), dashed lines indicate the background (no DA), and bars show
+ACC improvements for temperature (T), salinity (S), zonal velocity (U), meridional velocity (V), and
+sea surface height (SSH).
+Appendix B Observations contributions
+Observations are critical for DA, as they provide the direct measurements of oceanic
+conditions. To quantify the contributions of different observation types, we systemati-
+cally evaluate the impact of excluding specific observations and measure their influence
+on reducing mean absolute error (MAE) (Fig. B2b). The ”All” scenario represents
+the baseline, where all types of observations are assimilated. ”w/o SST (SAT)” indi-
+cates the exclusion of satellite-based SST observations during DA, and similar labels
+apply to other observation types. The contributions of each observation type across
+five variables are quantified in Fig. B2a.
+Satellite-based SST observations make the largest contribution to improving the
+estimation of T, particularly in western boundary currents such as the Kuroshio Cur-
+rent and the Gulf Stream. For S, satellite-based SSW observations have the greatest
+impact, especially in the Western Pacific (Fig. B2e). This is because SSW drives
+critical physical processes, such as ocean circulation, evaporation and precipitation,
+surface mixing, and the redistribution of freshwater fluxes, all of which influence SSS.
+Although satellite-based SSS observations provide direct salinity measurements, their
+impact is more localized and limited by spatial and temporal coverage. In contrast,
+SSW observations indirectly enhance SSS estimation by constraining the physical pro-
+cesses that govern salinity distribution on a global scale, making them more essential
+for surface salinity estimation.
+23
+ba
+cdefT, SST (SAT)
+S, SST (SAT)
+U, SST (SAT)
+V, SST (SAT)
+SSH, SST (SAT)T, SSS (SAT)
+S, SSS (SAT)
+U, SSS (SAT)
+V, SSS (SAT)
+SSH, SSS (SAT)T, SSW (SAT)
+S, SSW (SAT)
+U, SSW (SAT)
+V, SSW (SAT)
+SSH, SSW (SAT)T, SIC (SAT)
+S, SIC (SAT)
+U, SIC (SAT)
+V, SIC (SAT)
+SSH, SIC (SAT)MAE (°C)
+MAE (PSU)
+MAE (m/s)
+MAE (m/s)
+MAE (m)Fig. B2 Observation Contribution. aRelative contributions of 5 observational datasets: satellite-
+measured (SAT) Sea Surface Temperature (SST), Salinity (SSS), Wind (SSW), Ice Concentration
+(SIC), and Sea Level Anomaly (SLA), along with in-situ temperature (T) and salinity (S) measure-
+ments. Contribution is quantified as (MAE w/o obs −MAE all)/MAE all, where higher values indicate
+greater importance.bGlobal average MAE when specific observational datasets are excluded (w/o).
+c-fSpatial MAE reductions achieved by assimilating satellite-based observations.
+Ocean surface currents (U and V) also benefit most from satellite-based SSW
+observations, with notable improvements observed in the North Indian Ocean, North
+Pacific Ocean, and Southern Ocean (Fig. B2e). This reflects the critical role of winds
+in driving surface currents and shaping global circulation patterns. For SSH, satellite-
+based SSS observations are the most influential (Fig. B2d). Improvements are evident
+across nearly all ocean regions, with particularly pronounced enhancements in the
+Arctic Ocean. This underscores the importance of salinity in affecting ocean density
+and sea level variability. In contrast, satellite-based SLA observations are less signif-
+icant, as they primarily capture short-term, localized sea level changes rather than
+density-driven processes that govern SSH.
+24
+The results highlights the vital role of satellite-based observations—particularly
+SST, SSW, and SSS—in improving the accuracy of ocean state estimation. By quan-
+tifying their contributions, we provide actionable insights for optimizing observation
+strategies, especially in dynamic and climatically significant regions such as the Arctic
+Ocean, the Western Pacific, and major current systems. These findings pave the way
+for advancing DA frameworks and enhancing global ocean estimation capabilities.
+Appendix C Uncertainty and sensitivity
+Accurately accounting for errors and uncertainties in observations is essential for effec-
+tive DA and reliable state estimation. To consider these uncertainties and evaluate
+their impact on the analysis, we conducted a series of perturbation experiments. Each
+type of satellite observational dataset—sea surface temperature (SST), sea surface
+salinity (SSS), wind speed, and sea level anomaly (SLA)—was perturbed 50 times
+by adding random Gaussian noise. For each perturbation, the standard deviation of
+the noise was sampled from the climatological standard deviation of the respective
+observation type, as described mathematically:
+Operturbed,i =O original +N(0, σ2
+i),(C1)
+whereσ irepresents the observational error sampled from the climatological standard
+deviation, andiindicates the perturbation instance. The sensitivity of each variable
+at each grid point was quantified as the standard deviation of the 50 analysis fields:
+Sensitivity(lat, lon) = std
+Vi(lat, lon)50
+i=1
+,(C2)
+whereV i(lat, lon) represents the value of variableVat grid location (lat, lon) in thei-
+th analysis field. To make the sensitivity metrics dimensionless and comparable across
+different variables, the computed sensitivities were normalized by dividing them by
+the climatological standard deviation of the corresponding observation type.
+Fig. C3 illustrates the sensitivity of state estimation to four types of satellite obser-
+vations. The SST analysis field (T) exhibits notable sensitivity to all observation types,
+which can be attributed to its strong coupling with SST and related processes, such as
+air-sea heat flux and ocean mixing. Sensitivity is particularly high near land-sea bound-
+aries, reflecting the complexity and variability of physical processes in these regions. In
+contrast, the SSH analysis field shows the lowest sensitivity. This reduced sensitivity
+can be attributed to the strong dynamical constraints imposed by geostrophic balance
+and the assimilation system. These constraints make SSH less dependent on additional
+observations compared to T, U, and V, indicating that it is already well-constrained
+in the current system.
+Among the four observation types, SLA has the most significant influence on the
+analysis fields (see Fig. C3d). Perturbations to SLA have a widespread impact on SSH,
+affecting both regional and basin-wide scales. This highlights the critical role of satel-
+lite SLA in providing information for geostrophic balance and large-scale ocean current
+25
+b. Satellite SSS
+1e-3
+1e-31e-31e-31e-3
+1e-3
+1e-21e-2
+1e-2
+1e-2
+1e-3
+1e-3
+1e-2
+1e-3
+1e-3
+1e-3
+1e-3
+1e-2
+1e-2
+1e-2T
+S
+U
+V
+SSHT
+S
+U
+V
+SSHT
+S
+U
+V
+SSHT
+S
+U
+V
+SSHa Satellite SST b Satellite SSSc Satellite Wind Speedd Satellite SLAFig. C3 Sensitivity to Satellite Observations.Columns a-d present the sensitivities of the
+analysis fields to satellite observations of SST, SSS, wind speed, and SLA. Rows correspond to different
+variables (T, S, U, V, SSH), with the last row summarizing the overall sensitivity distributions across
+all variables.
+adjustments. The sensitivity maps for the zonal (U) and meridional (V) currents veloc-
+ity fields reveal strikingly similar spatial patterns across three satellite observation
+types—SSS, wind speed, and SLA. High-sensitivity regions are concentrated along the
+equator, underscoring the importance of satellite observations in constraining equato-
+rial currents. These currents, such as the Equatorial Undercurrent and zonal jets, are
+vital for global ocean circulation and coupled ocean-atmosphere dynamics.
+These results underscore the high sensitivity of satellite observations, particularly
+SLA, in ocean state estimation. By identifying key regions and variables with high sen-
+sitivity, this perturbation analysis provides a foundation for optimizing observational
+strategies and enhancing global ocean monitoring systems.
+26
+ADAF-OceanInterp
+abFig. D4 Global Performance Assessment of High-Resolution Data Assimilation (HR-
+DA). aGlobal distribution of Mean Absolute Error (MAE) for five surface variables (T, S, U, V, SSH)
+comparing ADAF-Ocean and linear interpolation (Interp).bSpatial distribution of MAE reduction
+(MAE ADAF-Ocean −MAE Interp ). Negative values (blue) indicate MAE reduction achieved by ADAF-
+Ocean. The percentage of the global grid points showing MAE reduction is 70% for T, 45% for S,
+66% for SSH, 57% for U, and 66% for V.
+Appendix D High resolution data assimilation
+(HR-DA)
+Satellite observation resolution plays a critical role in high-resolution data assimilation
+(HR-DA). To evaluate its importance, we conducted experiments using observations
+at three resolutions: the original resolution (0.04◦for SST, 0.2◦for SSS, and 0.25◦for
+SSW), 0.5◦, and 1◦. For fair comparisons, separate models were trained for each reso-
+lution to ensure unbiased results. To quantify the impact of resolution, we calculated
+the latitude-weighted RMSE reduction ratio, which measures the relative improvement
+in RMSE when switching from lower- to original-resolution observations:
+RMSE Reduction =RMSE lr−RMSE origin
+RMSE lr(D3)
+Here, RMSElrand RMSE origin represent the RMSE for lower- and original-resolution
+observations, respectively.
+High-resolution SST observations (0.04◦) significantly improve model accuracy for
+T, S, and SSH (Fig. D5a,d). However, as SST resolution becomes coarser, the accuracy
+declines sharply, especially for these three variables, which are highly sensitive to SST
+resolution. This underscores the critical role of high-resolution SST data in improv-
+ing surface ocean state estimation. The resolution of satellite-based SSS observations
+27
+has minimal impact on the accuracy of most variables. Only slight improvements are
+observed for S (Fig. D5b,e), likely because salinity gradients are less pronounced and
+less variable than temperature gradients in the ocean. For satellite-based SSW obser-
+vations, interestingly, the RMSE for SSH estimation is highest at the intermediate
+resolution (0.5◦) but slightly lower at the coarsest resolution (1◦) (Fig. D5c). This
+suggests that higher-resolution SSW data may introduce noise or capture small-scale
+wind patterns that have limited influence on large-scale ocean dynamics. Fig. D5d-f
+further illustrate that SST resolution has the most significant impact on improving the
+accuracy of multiple variables. These findings emphasize the need for continued invest-
+ment in high-resolution satellite missions to enhance ocean and climate monitoring
+capabilities.
+a
+b
+cd
+e
+f
+Fig. D5 Impact of satellite observation resolution on HR-DA. a-cRMSE for five variables
+(T, S, U, V, and SSH) obtained using satellite-based (SAT) SSS, SST, and SSW observations at three
+resolutions: original (0.2◦for SSS, 0.04◦for SST, and 0.25◦for SSW), 0.5◦, and 1◦.d-fLatitude-
+weighted RMSE reduction for each variable, comparing the original resolution to 0.5◦and 1◦.
+Appendix E DL forecast model
+In this study, we employ Triton [30] as the DL forecast model, which features
+a hierarchical architecture designed to process information across multiple spatial
+28
+and temporal resolutions, mitigating spectral bias and explicitly capturing cross-
+scale dynamics. Triton has demonstrated superior performance in various challenging
+forecasting tasks.
+For training, we use the GLORYS reanalysis dataset, covering the period from 2010
+to 2020. Training is conducted on data from 2010 to 2016, while data from 2017 are
+reserved for validation. Forecasts are performed for the independent period from 2018
+to 2020, with a forecast step of one day. Due to computational constraints, the model
+is trained at a spatial resolution of 1◦. During inference, Triton operates in an auto-
+regressive manner, where the initial conditions can be sourced either from reanalysis
+fields or from the outputs of the DA process.
+Appendix F Observations
+g  Sea Ice Concentration (Satellite)
+a  SST (GLORYS Analysis)b  SLA (Satellite)
+c  SSS (Satellite)
+d  Wind Speed (Satellite)
+e  SST (Satellite)
+f  T (In-situ Measurements)
+h  Coverage of Satellite Observation
+Fig. F6 Visualization of data used in this study and the coverage of satellite obser-
+vations. aGlobal Sea Surface Temperature (SST) field from the GLORYS reanalysis.b-fSpatial
+distribution of observations, including Along-track SLA, SSS, Wind Speed, SST and sparse in-situ
+Temperature (T) measurements.gSpatial distribution of SIC for the Arctic (left) and Antarctic
+(right).hGlobal percentage coverage of four satellite observation types (Wind, SST, SSS, SLA).
+29

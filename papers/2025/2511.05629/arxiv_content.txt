@@ -1,0 +1,1106 @@
+SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs
+for Sea Surface Temperature Prediction
+Zheng Jiang1, Wei Wang1*, Gaowei Zhang1, Yi Wang2
+1School of Artificial Intelligence, Beijing University of Posts and Telecommunications, Beijing, China
+2School of Computer Science, Beijing University of Posts and Telecommunications, Beijing, China
+{jiangzheng, weiwang, zhanggaowei}@bupt.edu.cn, wang@cocolabs.org
+Abstract
+Sea Surface Temperature (SST) is crucial for understand-
+ing upper-ocean thermal dynamics and ocean-atmosphere in-
+teractions, which have profound economic and social im-
+pacts. While data-driven models show promise in SST pre-
+diction, their black-box nature often limits interpretability
+and overlooks key physical processes. Recently, physics-
+informed neural networks have been gaining momentum but
+struggle with complex ocean-atmosphere dynamics due to
+1) inadequate characterization of seawater movement (e.g.,
+coastal upwelling) and 2) insufficient integration of exter-
+nal SST drivers (e.g., turbulent heat fluxes). To address these
+challenges, we propose SSTODE, a physics-informed Neu-
+ral Ordinary Differential Equations (Neural ODEs) frame-
+work for SST prediction. First, we derive ODEs from fluid
+transport principles, incorporating both advection and diffu-
+sion to model ocean spatiotemporal dynamics. Through vari-
+ational optimization, we recover a latent velocity field that
+explicitly governs the temporal dynamics of SST. Building
+upon ODE, we introduce an Energy Exchanges Integrator
+(EEI)—inspired by ocean heat budget equations—to account
+for external forcing factors. Thus, the variations in the com-
+ponents of these factors provide deeper insights into SST
+dynamics. Extensive experiments demonstrate that SSTODE
+achieves state-of-the-art performances in global and regional
+SST forecasting benchmarks. Furthermore, SSTODE visually
+reveals the impact of advection dynamics, thermal diffusion
+patterns, and diurnal heating-cooling cycles on SST evolu-
+tion. These findings demonstrate the model’s interpretability
+and physical consistency.
+Code— https://github.com/nicezheng/SSTODE-code
+Introduction
+Covering 75% of Earth’s surface, the ocean regulates cli-
+mate through ocean-atmosphere interactions governing en-
+ergy exchange and hydrological cycles, largely governed
+by Sea Surface Temperature (SST) variability (Huang and
+Shukla 2005). SST field constrains upper-ocean circulation
+and thermal structure across daily to decadal scales, mod-
+ulating air-sea energy exchange (Garcia-Soto et al. 2021).
+As the dominant climate fluctuation of this coupling, ENSO
+*Corresponding author.
+Copyright © 2026, Association for the Advancement of Artificial
+Intelligence (www.aaai.org). All rights reserved.
+Figure 1: Two primary mechanisms govern SST variabil-
+ity (red: warming, blue: cooling): internal ocean dynam-
+ics (coupled advection-diffusion dynamics) and external en-
+ergy exchanges. Among them, thermal diffusion is particu-
+larly crucial since it models heat spread driven by seawater
+movements like subgrid-scale eddies (see zoomed-in box),
+and coastal upwelling due to boundary effects (see black ar-
+rows). External energy exchanges mainly include shortwave
+radiation (SW), longwave radiation (LW), sensible heat flux
+(SHF), and latent heat flux (LHF).
+affects the global climate and disrupts normal weather pat-
+terns (Ham, Kim, and Luo 2019). Accurate SST predictions
+at various time-scale are thus crucial for scientific and so-
+cioeconomic applications.
+SST prediction has traditionally relied on coupled ocean-
+atmosphere models that numerically solve fluid dynamics
+equations, e.g., Navier-Stokes (Singh and Roxy 2022; Ma
+et al. 2021). While offering physical fidelity, they suffer
+from high computational cost. Deep learning models–from
+CNNs to Transformers–have recently advanced spatiotem-
+poral SST forecasting by modeling complex ocean sys-
+tems (Tan et al. 2023b; Shi, Zheng, and Dong 2024). For
+example, Wenhai (Cui et al. 2025) is a ViT-based model
+pretrained on 25 years of reanalysis data, enabling skillful
+multi-day SST forecasting (1-10 day lead times). Though
+predictive accuracy is essential, the omission of explicit fine-arXiv:2511.05629v1  [cs.LG]  7 Nov 2025
+scale thermodynamic processes in these models compro-
+mises both physical consistency and interpretability–a fun-
+damental requirement in ocean science. Furthermore, oper-
+ating at fixed intervals (e.g., daily or weekly) limits their
+ability to capture multiscale ocean-atmosphere interactions
+that evolve across varying timescales.
+Recently, Physics-Informed Neural Networks (PINNs)
+have emerged to incorporate physical laws into model train-
+ing, preventing physically implausible predictions (Li et al.
+2024b,a). A typical strategy involves encoding partial dif-
+ferential equations into Neural ODE frameworks (Verma,
+Heinonen, and Garg 2024; Xiang et al. 2024). However, the
+existing physical-informed architectures may not be suitable
+for SST prediction due to the following inherent challenges.
+(1)Inadequate Characterization of Seawater Movement.
+While the advection equations are typically the basis of ex-
+isting Neural ODE models for atmospheric transport, SST
+evolution is governed by coupled advection-diffusion dy-
+namics. As depicted in Fig. 1, this diffusion component is es-
+sential to model subgrid-scale heat transfer processes asso-
+ciated with seawater movements, such as turbulence mixing,
+mesoscale eddies, or coastal upwelling. In particular, due to
+boundary effects, coastal upwelling generates sharp temper-
+ature gradients near coastlines and leads to numerical oscil-
+lation during model training (Salois et al. 2022). (2)Insuf-
+ficient Integration of External SST Drivers.In the upper
+ocean layers, due to surface energy exchanges, the external
+factors (see Fig. 1) further drive changes in SST tendency.
+Ignoring such forcings leads to biased predictions, particu-
+larly for diurnal heating–cooling cycles, regional warming
+trends, and seasonal anomalies.
+To address the above challenges, we propose SSTODE,
+an ocean-atmosphere physics-informed Neural ODE frame-
+work for SST prediction. SSTODE formulates a continuous-
+time Neural ODE grounded in the advection–diffusion equa-
+tion governing oceanic heat transport. Specifically, we incor-
+porate a diffusion term into the Neural ODEs by applying the
+Laplacian of the SST field (O’dea et al. 2012), scaled by a
+learnable thermal diffusivity. The Laplacian operator explic-
+itly captures the spatial curvature of SST fields induced by
+subgrid-scale ocean dynamics, with particular effectiveness
+in resolving sharp thermal gradients around coastal bound-
+ary regions. The learned diffusivity dynamically modulates
+diffusion strength, smoothing abrupt SST variations in re-
+gions with strong thermal gradients. The combination ef-
+fectively models seawater movement and enhances the nu-
+merical stability of ODE, ultimately generating physically
+consistent and accurate SST predictions. Building upon the
+Neural ODEs, we introduce an Energy Exchanges Integrator
+(EEI, a time-dependent network) to further account for ex-
+ternal SST drivers in the upper open ocean. Derived from the
+ocean heat budget equation (Vijith et al. 2020), EEI incor-
+porates four physically grounded surface flux factors (i.e.,
+shortwave radiation, longwave radiation, latent heat flux,
+and sensible heat flux) from ERA5 reanalysis data to quan-
+tify their collective impact on SST dynamics over the fore-
+cast horizon. Comprehensive experiments on SST forecast-
+ing benchmark and visualizations substantiate the effective-
+ness and interpretability of SSTODE.Our main contributions are as follows:
+• We propose SSTODE, a continuous-time Neural ODE
+framework that explicitly models coupled advection-
+diffusion processes for SST spatiotemporal prediction.
+• The EEI is developed that integrates surface heat fluxes,
+improving ODE solutions by accounting for air-sea energy
+exchanges–enhancing open-ocean predictions.
+• Our model achieves state-of-the-art performance on
+global and regional SST forecasting benchmarks, reveal-
+ing three physical mechanisms behind SST evolution: 1)
+coherent advection flows; 2) boundary-aware diffusion
+patterns; and 3) external forcing of diurnal variations.
+Related Work
+Ocean Parameters Prediction Models
+Numerical ocean models traditionally simulate ocean dy-
+namics using physical equations but suffer from high com-
+putational cost and limited adaptability to dynamic external
+forcings (Veeresha 2021). Deep models for spatiotemporal
+forecasting, initially developed for computer vision tasks
+such as video and traffic prediction, have been extended
+to SST prediction using both recurrent-based (e.g., ConvL-
+STM (Lin et al. 2020), Transformers (Tang et al. 2024)) and
+recurrent-free architectures (e.g., SimVPv2 (Tan et al. 2025),
+COTERE (Shi, Zheng, and Dong 2024)). Large models have
+recently emerged as a promising paradigm in ocean and cli-
+mate science, e.g., AI-GOMS (Xiong et al. 2023), XiHe
+(Wang et al. 2024), and WenHai (Cui et al. 2025), which
+leverage massive datasets and millions of parameters to im-
+prove prediction accuracy. While these DL models achieve
+impressive performance, their lack of explicit physical con-
+straints limits their interpretability and thermodynamic con-
+sistency. Meanwhile, they are typically trained on reanalysis
+data sampled at fixed, discrete time intervals (e.g., daily),
+overlooking the fact that the seawater continuously trans-
+ports heat and redistributes mass while surface fluxes add or
+remove energy. This discreteness violates mass conservation
+and introduces approximation errors. In contrast, our work
+focuses on ensuring physical interpretability by preserving
+intermediate states and enabling earlier anomaly detection
+through continuous-time forecasting.
+Physic-Informed Neural Networks
+Recent PINNs aim to combine data-driven learning with
+physical priors to improve prediction accuracy and physi-
+cal plausibility (Xu et al. 2024; Li et al. 2024a). A straight-
+forward way is to embed the governing partial differential
+equations (PDEs) in the loss function to enforce physical
+laws (Ghosh et al. 2023). However, these methods often re-
+quire full observation of key variables to close the equa-
+tions, which is challenging for advection-diffusion systems
+because the requisite velocity fields are typically unavailable
+from satellite observations (Sun and Wang 2020).
+Neural ODEs extend PINNs by parameterizing time
+derivatives with neural networks and integrating dynamics
+from initial conditions in continuous time (Chen et al. 2018;
+Chu et al. 2024). This framework has shown success in
+modeling physical systems such as fluid dynamics (Rojas,
+Figure 2: SSTODE framework. It comprises three modules: (1) Initial Velocity Estimation infers latent initial velocity from past
+SST by solving a PDE-constrained inverse problem; (2) SST-ODE integrates the advection–diffusion equation using Neural
+ODEs to prediction SST and latent velocity over continuous time; and (3) Energy Exchange Integrator (EEI) refines predictions
+using surface heat flux data via a learned source network. Spatiotemporal Embeddings (ST Embedding) encode position and
+time context.⊗: concatenation.⊕: element-wise addition.
+Dengel, and Ribeiro 2021; Tian et al. 2024) and climate
+processes (Hwang et al. 2021; Verma, Heinonen, and Garg
+2024). For example, ClimODE embeds the advection equa-
+tion to model atmospheric spatiotemporal patterns, achiev-
+ing promising results in weather and climate prediction
+(Verma, Heinonen, and Garg 2024). However, these meth-
+ods often assume idealized advection in unbounded, com-
+pressible atmospheric settings, making them suboptimal for
+ocean modeling. Specifically, they can not adequately cap-
+ture key ocean-specific dynamics: (1) intense thermal dif-
+fusion near coastlines from turbulence and eddies, (2) in-
+compressible fluid assumptions unique to seawater, and (3)
+external forcings of surface energy exchange (e.g., radiative
+and turbulent heat fluxes). Our model addresses this limi-
+tation by explicitly integrating coupled advection-diffusion
+and surface energy exchange patterns into Neural ODE, en-
+abling improved accuracy and realism of SST modeling in
+the upper open ocean.
+Method
+Overview
+Problem DefinitionWe aim to predict the spatiotemporal
+evolution of SST distribution over the global ocean, repre-
+sented by a 2D spatial domainΩ = [−90,90]×[−180,180],
+with latitude and longitude defining the horizontal coordi-
+nates. LetY(s, t)∈Rdenote the SST at locations=
+(x, y)∈Ωand timet. Given a sequence ofppast SST fields
+Y(s, t 1), . . . , Y(s, t p)sampled at uniform intervals∆t, the
+goal is to predictqfuture fieldsY(s, t p+1), . . . , Y(s, t p+q).
+We frame this task as a continuous-time neural dynamicalsystem, initialized with the last observed fieldY(s, t p)and
+integrated forward to generate future SST fields.
+Overall frameworkAs shown in Fig. 2, SSTODE com-
+prises three main components: the Initial Velocity Esti-
+mation, the SST-ODE Module, and the Energy Exchange
+Integrator (EEI) Module. Given past SST observations
+Y(s, t 1:tp), the Initial Velocity Estimation module infers
+the initial velocity fieldV(t p)to initialize the ODE sys-
+tem. The SST-ODE Module then solves a continuous
+advection-diffusion ODE, integrating fromY(s, t p)with ve-
+locityV(t p)to produce predictions ˆY(s, t p+1:p+q )itera-
+tively. This module captures both large-scale advection and
+subgrid-scale thermal diffusion in a unified, physics-driven
+manner. To account for external forcings, the EEI Mod-
+ule integrates surface heat flux data through a mixed-layer
+source network and adds their effects to the ODE outputs,
+yielding the final SST forecastY(s, t p+1:p+q ).
+Physical Dynamics Modeling
+Physical EquationsWe formulate SST evolution using
+the advection–diffusion equation, which captures the core
+physical processes underlying spatiotemporal SST dynam-
+ics. This PDE models temporal SST changes driven by
+horizontal transport (advection) and subgrid-scale dynamics
+(diffusion), and is defined point-wise over the spatial domain
+as follows (Eq. 1):
+∂Y(s, t)
+∂t|{z}
+Temporal
+Derivatives+V(s, t)· ∇Y(s, t)| {z }
+Advection=κ∆Y(s, t)|{z}
+Diffusion.
+(1)
+•Advection term.V(s, t)· ∇Y(s, t)represents the hor-
+izontal heat transport by ocean surface currents. Here,
+V(s, t)∈R2denotes the 2D velocity field consisting of
+zonal (V x) and meridional (V y) components, and∇is the
+spatial gradient operator.
+•Diffusion term.κ∆Y(s, t)is subgrid-scale thermal dif-
+fusion caused by unresolved processes such as turbulence
+and mesoscale eddies. The scalar coefficientκ∈R+con-
+trols the strength of diffusion, and∆denotes the spatial
+Laplacian operator.
+ODE DynamicsTo enable continuous-time model-
+ing with neural networks, we reformulate the advec-
+tion–diffusion PDEs as a system of first-order ODEs us-
+ing the Method of Lines (MOL) (Iakovlev, Heinonen, and
+L¨ahdesm ¨aki 2021). For notational simplicity, we omit the
+spatial coordinatesinY(t)andV(t); all spatial operators
+∇and∆are applied over the discretized grid. The resulting
+continuous-time ODE integration is given in Eq. 2:
+Y(t) =Y(t 0) +Zt
+t0[−V(τ)· ∇Y(τ) +κ∆Y(τ)]dτ,
+V(t) =V(t 0) +Zt
+t0˙V(τ)dτ,
+(2)
+whereτ∈Rdenotes continuous integration time, allow-
+ing predictions at arbitrary time resolutions without rely-
+ing on fixed discrete steps. Such continuous integration is
+performed across multiple time intervals during the sys-
+tem’s evolution. Integration begins att 0, the last observed
+timestep. The first equation describes SST evolution via the
+advection-diffusion equation, while the second defines the
+velocity field’s evolution through temporal derivative ˙V(τ).
+These formulations underpin the framework presented in the
+subsequent sections.
+Initial Velocity Estimation
+The Neural ODE requires an initial condition to initiate in-
+tegration, but the initial velocity fieldV(t 0)in Eq. 2 is typi-
+cally unavailable in satellite data (Sun and Wang 2020). We
+adopt the preprocessing approach from Verma, Heinonen,
+and Garg (2024) and estimateV(t 0)by solving a PDE-
+constrained inverse problem. Specifically, we first approx-
+imate the temporal derivative∂Y(t 0)
+∂tfrom pastpSST obser-
+vations using cubic spline interpolation, yielding a smooth
+and differentiable proxy ground truth of local SST varia-
+tion. We then optimize a learnable latent field ˆVθ(t0)∈
+R2×H×Wby minimizing the loss of MSE between the in-
+terpolated and ODE-computed derivatives under the advec-
+tion–diffusion equation, with a spatial smoothness regular-
+ization term.
+ˆVθ(t0) = arg min
+Vθ(t)
+∥R(t 0)∥2+α∥V θ(t)∥2	
+,(3)
+R(t) =∂Y(t)
+∂t+V θ(t)· ∇Y(t)−κ θ∆Y(t), (4)
+whereκ θis a learnable scalar diffusion coefficient con-
+strained via softplus, andαcontrols the strength of spatialsmoothing. We also place an RBF-kernel Gaussian prior on
+Vθ(t)to encourage coherence. See Appendix A.1 for details
+and an initial condition robustness test.
+SST-ODE Module
+The SST-ODE Module jointly models the continuous-time
+evolution of SST and latent velocity by Neural ODEs
+grounded in the advection–diffusion equation. As shown
+in Fig. 2, the module solves the advection–diffusion equa-
+tion and explicitly captures both large-scale advection and
+subgrid-scale thermal diffusion. Initialized with estimated
+velocity fieldV(t 0)and SST fieldY(t 0), the integration
+progresses in continuous time. The dynamics are split into
+two ODEs: one for SST evolution, and one for latent veloc-
+ity evolution.
+Temporal SST EvolutionGiven the velocity fieldV(t),
+the SST temporal derivative is computed using the advec-
+tion–diffusion equation. At each continuous integration time
+τ, this yields:
+∂Y(τ)
+∂τ=−V(τ)· ∇Y(τ) +κ θ∆Y(τ),(5)
+whereκ θis parameterized similarly to the initial velocity
+estimation. The resulting derivative is integrated from the
+initial SST state using a Neural ODE solver, yielding a con-
+tinuous and differentiable prediction trajectory. This formu-
+lation supports flexible forecasting over arbitrary horizons
+while preserving a physically interpretable decomposition of
+SST dynamics into advection and diffusion processes.
+Temporal Velocity EvolutionUnlike SST, directly mod-
+eling velocity evolution is challenging due to the lack of
+pressure observations and the nonlinearity inherent of the
+Navier-Stokes equations (Hoang and Sell 2010). To ad-
+dress this, we parameterize the complex velocity evolution
+˙V(τ)as a neural function learned during forward ODE in-
+tegration. Inspired by the influence of temperature gradi-
+ents on fluid motion through buoyancy and density-driven
+forces (Willeit and Ganopolski 2024), we condition the ve-
+locity dynamics on both the SST field and its spatial gradi-
+ents. At each integration timeτ, the temporal derivative of
+velocity is defined as:
+∂V(τ)
+∂τ=˙V(τ) =f v(V(τ), Y(τ),∇Y(τ), ϕ(s, τ)), (6)
+wheref vis a neural velocity dynamics network, andϕ(s, τ)
+denotes the spatiotemporal embedding (See Appendix A.2).
+To capture both local and global dependencies,f vadopts a
+hybrid architecture network combining ResNet blocks and
+attention modules. Similar to SST dynamics, the velocity
+fieldV(t)is continuously updated over time by integrating
+˙V(t)using a Neural ODE solver.
+Energy Exchange Integrator Module
+To incorporate external drivers of SST dynamics, the EEI
+Module estimate surface energy exchanges (theSource
+TermQ(s, t)), and refines the ODE-based outputs accord-
+ingly. We begin by outlining the external data sources, fol-
+lowed by our estimation and integration strategy.
+External Forcing VariablesInspired by the ocean mixed-
+layer heat budget (Shu et al. 2024), which relates surface
+energy exchanges to net energy fluxesQ netat the air–sea
+interface, we adopt the following formulation:
+Qnet=QLW+Q SW+Q LHF+Q SHF
+ρcph,(7)
+whereρ,h, andc pare the mean density, the mixed layer
+depth, and the specific heat capacity of sea water, respec-
+tively. The numerator includes four dominant fluxes: short-
+wave (Q SW) and longwave radiation (Q LW), latent (Q LHF),
+and sensible heat flux (Q SHF). These four components con-
+stitute the dominant forms of energy exchange at the ocean
+surface and are considered essential to SST evolution.
+Estimation and IntegrationWe construct the external in-
+putsH(s, t) ={Q LW, QSW, QLHF, QSHF}by concate-
+nating four surface heat flux variables. Since futureH(s, t)
+is unavailable during inference, we extendH(s, t 0)across
+the prediction horizon and concatenate it with the predicted
+SST fields ˆY(s, t p+1:p+q )and spatiotemporal embeddings
+ϕ(see Appendix A.2). These inputs are fed into a time-
+dependent neural networkf s(Source Network in Fig. 2) to
+estimate the sequence of future source terms:
+ˆQ(s, t p+1:p+q ) =f s
+H(s, t 0),ˆY(s, t p+1:p+q ), ϕ
+.(8)
+This temporally-aware design captures both the impact of
+external forcing on SST and the feedback effects from SST
+to surface energy exchange, implicitly modeling short-term
+feedback effects driven by thermodynamic coupling at the
+air—sea interface. The estimated source term ˆQ(s, t)is then
+added as a correction to the ODE-based forecast:
+Y(s, t p+1:p+q ) =ˆY(s, t p+1:p+q ) +ˆQ(s, t p+1:p+q ).(9)
+This formulation explicitly integrates external energy inputs
+into the forecasting pipeline, allowing the model to adjust its
+forecast based on real-world environmental variability.
+Experiment
+Dataset
+We evaluate our method on the OceanVP (Shi, Zheng, and
+Dong 2024) and ERA5 (Hersbach et al. 2020) benchmark.
+OceanVP benchmark is built on HYCOM reanalysis (Chas-
+signet et al. 2007), providing 3-hourly global surface tem-
+perature, salinity, and velocity fields from 1994 to 2015 at
+5.625◦resolution. We follow the standard split: 1994–2013
+(train), 2014 (val), and 2015 (test). ERA5 offers hourly
+global reanalysis data from 1940 onward at0.25◦resolution.
+We extract SST as the target and use four heat flux compo-
+nents—shortwave, longwave, latent, and sensible fluxes—to
+drive the EEI module. To avoid potential long-term ocean
+memory effects (Ham, Kim, and Luo 2019), we introduce a
+4-year gap by training on 2000 to 2015, validating on 2016,
+and testing on 2021 to 2022.Baselines
+We benchmark our method against representative spa-
+tiotemporal forecasting baselines from three categories:
+Recurrent-based: ConvLSTM (SHI et al. 2015), MAU
+(Chang et al. 2021), and PredRNNv2 (Wang et al. 2022) uti-
+lize recurrent structures to capture temporal dependencies.
+Recurrent-free: TAU (Tan et al. 2023a), SimVPv2 (Tan
+et al. 2025), and CORETE (Shi, Zheng, and Dong 2024) em-
+ploy parallel architectures for improving efficiency and scal-
+ability.Physics-Informed: ClimODE (Verma, Heinonen,
+and Garg 2024) incorporates the advection equation within
+a Neural ODE framework without requiring velocity in-
+puts. Neural operator (NO) models learn field-to-field map-
+pings without enforcing explicit physical constraints and
+thus compared separately in Appendix A.9.
+Global Ocean Forecasting Results
+We evaluate SSTODE for global SST forecasting on
+OceanVP and ERA5, comparing against representative spa-
+tiotemporal baselines. To balance computational cost and
+support long-term forecasting, all data are downsampled to
+5.625◦resolution, 6-hour intervals, and standardized. Mod-
+els observe 3 past snapshots and predictq= 5, 7, 12 future
+steps (30h, 42h, 72h). We report MSE, and Anomaly Cor-
+relation Coefficient (ACC) after de-normalization to assess
+both short-term variability and long-range dynamics. Table 1
+shows that SSTODE consistently outperforms all baselines
+on both OceanVP and ERA5 across all horizons (q= 5, 7,
+12). Compared to both recurrent-based and recurrent-free
+baselines, SSTODE leverages embedded physical priors for
+better performance under limited observations. It also out-
+performs the physics-informed ClimODE by jointly model-
+ing thermal diffusion and surface energy exchange.
+Regional Ocean Forecasting Results
+We evaluate our model on regional forecasting over three
+oceanographically diverse domains constrained by fixed
+spatial bounding boxes (Lee et al. 2022; Jiang and Li 2021;
+Kang et al. 2023): (1) the Equatorial Pacific (5◦S–5◦N,
+160◦E–100◦W), which captures tropical SST variability
+linked to ENSO dynamics; (2) the Northwest Atlantic
+(30◦N–50◦N,80◦W–40◦W), dominated by the Gulf Stream
+mesoscale activity; and (3) the Southern Ocean (50◦S–65◦S,
+all longitudes), representing high-latitude regions sensitive
+to heat exchange and climate variability. We use the same
+experimental setup as in the global evaluation. Table 2 shows
+that SSTODE consistently achieves notable gains across all
+regions and both horizons (q= 5, 12). See Appendix A.5 for
+complete metrics.
+Visualization Analysis of Neural ODE Dynamics
+To further demonstrate the physical interpretability of
+SSTODE, we visualize intermediate components of the
+advection-diffusion over three forecast steps (t= 1tot= 3)
+in Fig. 3. Specifically, we decompose the dynamics into: (1)
+ground-truth SSTY(t), (2) observed SST variation∆Y=
+Y(t+ 1)−Y(t). (3) learned velocity fieldV(t), (4) advec-
+tion term−V(t)· ∇Y(t), (5) diffusion termκ∆Y(t), and
+ModelOceanVP ERA5
+q=5 q=7 q=12 q=5 q=7 q=12
+MSE↓ACC↑ MSE↓ACC↑ MSE↓ACC↑ MSE↓ACC↑ MSE↓ACC↑ MSE↓ACC↑
+ConvLSTM 0.0781 0.9985 0.1091 0.9980 0.1758 0.9967 0.1745 1.0000 0.1879 1.0000 0.2295 1.0000
+MAU 0.0627 0.9988 0.0792 0.9985 0.1143 0.9978 0.0242 1.0000 0.0326 1.0000 0.0508 1.0000
+PredRNNv2 0.1081 0.9980 0.1251 0.9977 0.1552 0.9972 0.1892 1.0000 0.2081 1.0000 0.2007 1.0000
+TAU 0.0576 0.9989 0.0756 0.9985 0.1092 0.9979 0.0242 1.0000 0.0326 1.0000 0.0508 1.0000
+SimVPv2 0.0612 0.9988 0.0815 0.9984 0.1221 0.9977 0.0227 1.0000 0.0295 1.0000 0.0450 1.0000
+COTERE 0.0624 0.9988 0.0778 0.9984 0.1062 0.9979 0.0284 1.0000 0.0335 1.0000 0.0612 1.0000
+ClimODE 0.0622 0.9988 0.0705 0.9986 0.1004 0.9981 0.0196 1.0000 0.0258 1.0000 0.0408 1.0000
+SSTODE 0.0527 0.9990 0.0638 0.9987 0.0954 0.9981 0.01801.0000 0.02321.0000 0.03491.0000
+Table 1: Global forecasting results on OceanVP and ERA5 at prediction stepsq= 5, 7, and 12. The evaluation metrics are MSE
+↓and ACC↑, where↓indicates lower is better, and↑indicates higher is better. Bold indicates the best result.
+Figure 3: Visualization of intermediate dynamics across three time steps (t= 1 to 3). Rows show: Ground-truth SST, SST
+Variation, Advection, Diffusion, Velocity Field, and Source Term. SSTODE decouples these components, yielding interpretable
+and physically grounded results across the forecast horizon.
+ModelE.P. N.A. S.O.
+q=5 q=12 q=5 q=12 q=5 q=12
+ConvLSTM 0.5578 1.1256 1.4052 2.9191 0.4766 1.1772
+MAU 0.5590 0.8755 1.1125 1.8058 0.3504 0.7103
+PredRNNv2 0.9216 1.2223 1.9601 2.6103 0.6236 0.9231
+TAU 0.5736 0.9200 1.0621 1.8038 0.3014 0.6135
+SimVPv2 0.5160 0.9612 1.1709 1.9543 0.3051 0.6946
+COTERE 0.5736 0.8653 1.1118 1.7515 0.3259 0.6183
+ClimODE 0.6064 0.8466 1.1234 1.7046 0.3098 0.5716
+SSTODE 0.5157 0.7473 0.9432 1.6445 0.2641 0.5597
+Table 2: Regional forecasting results (MSE↓) on OceanVP
+across Equatorial Pacific (E.P.), Northwest Atlantic (N.A.),
+and Southern Ocean (S.O.) at forecast stepsq= 5, 12. Bold
+indicates the best result per column. MSE is scaled×1000
+for better readability.
+(6) source termQ(t)estimated by external forcings. These
+visualizations illustrate how SSTODE decouples SST evo-
+lution into interpretable physical terms.
+•Velocity Field & Advection.These fields reveal coher-
+ent large-scale circulations and localized high-magnitudestructures. Red arrows highlight key advection zones (e.g.,
+Western Pacific Warm Pool, Indonesian Throughflow, and
+Caribbean Current between North and South America),
+which align with known boundary current systems. This
+indicates that the model captures physically consistent ve-
+locity patterns essential for SST transport.
+•Diffusion term.This component shows smooth and co-
+herent spatial patterns across ocean regions, demonstrat-
+ing that the diffusivity effectively smooths temperature
+gradients and models gradual heat transport while avoid-
+ing overfitting to local noise. Notably, the model effec-
+tively captures sharp gradients near coastlines, aligning
+with dynamic coastal processes such as coastal upwelling
+and boundary currents.
+•Source term.The learned source term captures diurnal
+patterns aligned with radiative and turbulent fluxes, pre-
+senting strong correspondence with observed SST varia-
+tions—particularly in regions undergoing day–night heat-
+ing transitions. This consistency underscores the source
+term’s contribution to accurate forecasting and empha-
+sizes the importance of modeling external energy ex-
+changes for reliable SST prediction.
+Robustness Analysis
+Ablation Study on Diffusion Term DesignWe evaluate
+the effect of thermal diffusion in SST forecasting by remov-
+ing the diffusion term and comparing three formulations of
+the diffusion coefficientκin Eq. 2, ranging from fixed diffu-
+sivity (no parameterization) to spatially varying setups (high
+parameterization): (i) a fixedκto a constant (κ= 1, as used
+in (Vijith et al. 2020)), (ii) a learnable global scalar, and
+(iii) a learnable spatially-varying 2D map. Experiments on
+OceanVP with a 5-step forecast show that removing diffu-
+sion markedly degrades performance, while the global scalar
+yields the best results across all metrics (Table 3). In prac-
+tice, we observed that the 2D diffusivity map often fails due
+to over-parameterization. With only SST observed and ve-
+locity inferred latently,κ∆Tbecomes unstable and partly
+interchangeable with advection term−V·∇Tin explaining
+SST tendencies. In contrast, the global scalar diffusivity acts
+as an effective regularizer stabilizing the ODE integration
+and capturing global diffusion.
+Fig. 4 reveals that regions with strong SST gradients, par-
+ticularly near coastlines and straits in the Northwest Pa-
+cific, are highly sensitive to diffusion modeling. Excluding
+the diffusion term leads to numerical artifacts during and
+larger errors in these areas. In contrast, the diffusion term
+acts as a physical regularizer, enabling the model to cap-
+ture sharp gradients and coastal dynamics (e.g., coastal up-
+welling) more accurately and stably during training.
+Model Variant MSE↓MAE↓ACC↑
+SSTODE w/o diffusion 0.0596 0.1185 0.9989
+SSTODE Kappa (Fixed) 0.0562 0.1158 0.9989
+SSTODE Kappa (2D) 0.0578 0.1166 0.9989
+SSTODE0.0527 0.1107 0.9990
+Table 3: Diffusion term ablation. Comparison of diffusivity
+κparameterizations and removal of diffusion (w/o) cases at
+forecast step q=5.
+Figure 4: Impact of diffusion modeling on prediction bias.
+Left to right: SST variation, learned diffusion term with
+strong coastal responses, prediction bias without diffusion,
+and reduced bias with diffusion, especially in the red box.
+Ablation Study on Source Term DesignWe assess the
+contribution of each surface heat flux variable used in the
+EEI Module by incrementally adding SW, LW, LHF, and
+SHF. As shown in Table 4, adding the full source term leads
+to a substantial performance gain, underscoring the impor-
+tance of energy forcing. Among individual terms, SW con-Model Variant MSE↓MAE↓ACC↑
+SSTODE w/o Source 0.0595 0.1198 0.9988
+SSTODE + SW 0.0546 0.1109 0.9990
+SSTODE + LW 0.0560 0.1135 0.9990
+SSTODE + LHF 0.0559 0.1136 0.9990
+SSTODE + SHF 0.0554 0.1173 0.9990
+SSTODE0.0527 0.1107 0.9990
+Table 4: Source term ablation. Performance at forecast stepq
+= 5 with incremental addition of surface heat flux component
+(SW, LW, LHF, SHF) in the EEI module.
+tributes the most, while all variables offer complementary
+benefits for accurate SST forecasting.
+Longer Horizon and Sparse SamplingWe evaluate tem-
+poral generalization over a longer 7-day forecast horizon
+with both standard 6-hourly (q= 28) and sparser 12-hourly
+(q= 14) intervals on OceanVP. SSTODE demonstrates ro-
+bust performance against strong baselines under both set-
+tings, as reported in Appendix A.6.
+Scalability to Higher Spatial ResolutionWe assess
+SSTODE’s scalability to finer spatial grids by increasing the
+resolution to2.8125◦. Using SST and energy forcing vari-
+ables extracted from ERA5, experiments in Appendix A.7
+report that SSTODE maintains strong performance against
+representative baselines, demonstrating its potential to scale
+effectively to even finer resolutions.
+Model Parameters ComparisonWe compare model pa-
+rameters under identical settings on a2.8125◦-resolution
+SST forecasting in Appendix A.8. SSTODE demonstrates
+superior parameter efficiency over both recurrent-based and
+recurrent-free baselines, benefiting from its autoregressive
+design. With a marginal increase in parameter count (4.62M
+vs 3.67M) over ClimODE, SSTODE achieves an∼10% im-
+provement in forecasting accuracy–a favorable trade-off that
+remains highly acceptable for practical deployment.
+Conclusion
+SST prediction remains fundamentally important for under-
+standing evolving ocean structure and its feedback with at-
+mospheric circulation. This paper addresses the challenges
+of adapting Neural ODE framework for SST forecasting
+by incorporating explicit advection-diffusion constraints to
+model ocean dynamics and designing an EEI Module to ac-
+count for surface heat fluxes. Extensive experiments demon-
+strate that our model achieves competitive performance, ef-
+fectively capturing key physical processes such as advec-
+tion, boundary-aware diffusion and diurnal variations. This
+work highlights the potential of combining physical priors
+with Neural ODEs for more interpretable and accurate ocean
+forecasting and also establishes it as a promising component
+for foundation models that support regional refinement and
+physically consistent downscaling. Future work will explore
+the extension to ocean subsurface thermohaline and multi-
+scale dynamics.
+Acknowledgments
+This work is partially supported by National Natural Science
+Foundation of China under grants 62076232 and 62172049.
+References
+Cao, S. 2021. Choose a Transformer: Fourier or Galerkin.
+Advances in Neural Information Processing Systems, 34:
+24924–24940.
+Chang, Z.; Zhang, X.; Wang, S.; Ma, S.; Ye, Y .; Xinguang,
+X.; and Gao, W. 2021. Mau: A Motion-aware Unit for Video
+Prediction and Beyond.Advances in Neural Information
+Processing Systems, 34: 26950–26962.
+Chassignet, E. P.; Hurlburt, H. E.; Smedstad, O. M.; Halli-
+well, G. R.; Hogan, P. J.; Wallcraft, A. J.; Baraille, R.; and
+Bleck, R. 2007. The HYCOM (hybrid coordinate ocean
+model) Data Assimilative System.Journal of Marine Sys-
+tems, 65(1-4): 60–83.
+Chen, R. T. Q.; Rubanova, Y .; Bettencourt, J.; and Duve-
+naud, D. K. 2018. Neural Ordinary Differential Equations.
+In Bengio, S.; Wallach, H.; Larochelle, H.; Grauman, K.;
+Cesa-Bianchi, N.; and Garnett, R., eds.,Advances in Neural
+Information Processing Systems, volume 31. Curran Asso-
+ciates, Inc.
+Chu, Z.; Ma, W.; Li, M.; and Chen, H. 2024. Adaptive Deci-
+sion Spatio-temporal Neural ODE for Traffic Flow Forecast-
+ing with Multi-Kernel Temporal Dynamic Dilation Convo-
+lution.Neural Networks, 179: 106549.
+Cui, Y .; Wu, R.; Zhang, X.; Zhu, Z.; Liu, B.; Shi, J.; Chen,
+J.; Liu, H.; Zhou, S.; Su, L.; et al. 2025. Forecasting the
+Eddying Ocean with a Deep Neural Network.Nature Com-
+munications, 16(1): 2268.
+Garcia-Soto, C.; Cheng, L.; Caesar, L.; Schmidtko, S.; Jew-
+ett, E. B.; Cheripka, A.; Rigor, I.; Caballero, A.; Chiba, S.;
+B´aez, J. C.; et al. 2021. An Overview of Ocean Climate
+Change Indicators: Sea Surface Temperature, Ocean Heat
+Content, Ocean pH, Dissolved Oxygen Concentration, Arc-
+tic Sea Ice Extent, Thickness and V olume, Sea Level and
+Strength of the AMOC (Atlantic Meridional Overturning
+Circulation).Frontiers in Marine Science, 8.
+Ghosh, S.; Chakraborty, A.; Brikis, G. O.; and Dey, B. 2023.
+RANS-PINN Based Simulation Surrogates for Predicting
+Turbulent Flows.arXiv preprint arXiv:2306.06034.
+Ham, Y .-G.; Kim, J.-H.; and Luo, J.-J. 2019. Deep Learning
+for Multi-year ENSO Forecasts.Nature, 573(7775): 568–
+572.
+Hersbach, H.; Bell, B.; Berrisford, P.; Hirahara, S.; Hor ´anyi,
+A.; Mu ˜noz-Sabater, J.; Nicolas, J.; Peubey, C.; Radu, R.;
+Schepers, D.; et al. 2020. The ERA5 Global Reanaly-
+sis.Quarterly Journal of the Royal Meteorological Society,
+146(730): 1999–2049.
+Hoang, L. T.; and Sell, G. R. 2010. Navier–Stokes Equations
+with Navier Boundary Conditions for an Oceanic Model.
+Journal of Dynamics and Differential Equations, 22: 563–
+616.
+Huang, B.; and Shukla, J. 2005. Ocean–Atmosphere Interac-
+tions in the Tropical and Subtropical Atlantic Ocean.Jour-
+nal of Climate, 18(11): 1652 – 1672.Hwang, J.; Choi, J.; Choi, H.; Lee, K.; Lee, D.; and Park,
+N. 2021. Climate Modeling with Neural Diffusion Equa-
+tions. In2021 IEEE international conference on data mining
+(ICDM), 230–239. IEEE.
+Iakovlev, V .; Heinonen, M.; and L ¨ahdesm ¨aki, H. 2021.
+Learning Continuous-time PDEs from Sparse Data with
+Graph Neural Networks. InInternational Conference on
+Learning Representations. OpenReview. net.
+Jiang, L.; and Li, T. 2021. Impacts of Tropical North At-
+lantic and Equatorial Atlantic SST anomalies on ENSO.
+Journal of Climate, 34(14): 5635–5655.
+Kang, S. M.; Yu, Y .; Deser, C.; Zhang, X.; Kang, I.-S.; Lee,
+S.-S.; Rodgers, K. B.; and Ceppi, P. 2023. Global Impacts
+of Recent Southern Ocean Cooling.Proceedings of the Na-
+tional Academy of Sciences, 120(30): e2300881120.
+Lee, S.; L’Heureux, M.; Wittenberg, A. T.; Seager, R.;
+O’Gorman, P. A.; and Johnson, N. C. 2022. On the Future
+Zonal Contrasts of Equatorial Pacific climate: Perspectives
+from Observations, Simulations, and Theories.Npj Climate
+and Atmospheric Science, 5(1): 82.
+Li, W.; Liu, Z.; Chen, K.; Chen, H.; Liang, S.; Zou, Z.; and
+Shi, Z. 2024a. Deepphysinet: Bridging Deep Learning and
+Atmospheric Physics for Accurate and Continuous Weather
+Modeling.arXiv preprint arXiv:2401.04125.
+Li, Z.; Kovachki, N. B.; Azizzadenesheli, K.; Bhattacharya,
+K.; Stuart, A.; Anandkumar, A.; et al. 2021. Fourier Neural
+Operator for Parametric Partial Differential Equations. In
+International Conference on Learning Representations.
+Li, Z.; Shu, D.; and Barati Farimani, A. 2023. Scalable trans-
+former for pde surrogate modeling.Advances in Neural In-
+formation Processing Systems, 36: 28010–28039.
+Li, Z.; Zheng, H.; Kovachki, N.; Jin, D.; Chen, H.; Liu, B.;
+Azizzadenesheli, K.; and Anandkumar, A. 2024b. Physics-
+Informed Neural Operator for Learning Partial Differential
+Equations.ACM / IMS J. Data Sci., 1(3).
+Lin, Z.; Li, M.; Zheng, Z.; Cheng, Y .; and Yuan, C. 2020.
+Self-Attention ConvLSTM for Spatiotemporal Prediction.
+InProceedings of the AAAI Conference on Artificial Intel-
+ligence, volume 34, 11531–11538.
+Ma, Y .; Li, J.; Zhang, S.; and Zhao, H. 2021. A Multi-model
+Study of Atmosphere Predictability in Coupled Ocean–
+Atmosphere Systems.Climate Dynamics, 56: 3489–3509.
+O’dea, E.; Arnold, A.; Edwards, K.; Furner, R.; Hyder, P.;
+Martin, M.; Siddorn, J.; Storkey, D.; While, J.; Holt, J.;
+et al. 2012. An Operational Ocean Forecast System Incor-
+porating NEMO and SST Data Assimilation for the Tidally
+Driven European North-West Shelf.Journal of Operational
+Oceanography, 5(1): 3–17.
+Rahman, M. A.; Ross, Z. E.; and Azizzadenesheli, K. 2023.
+U-NO: U-shaped Neural Operators.Transactions on Ma-
+chine Learning Research.
+Rojas, C. J.; Dengel, A.; and Ribeiro, M. D. 2021. Reduced-
+order Model for Fluid Flows via Neural Ordinary Differen-
+tial Equations.arXiv preprint arXiv:2102.02248.
+Salois, S. L.; Gouhier, T. C.; Helmuth, B.; Choi, F.; Seabra,
+R.; and Lima, F. P. 2022. Coastal Upwelling Generates
+Cryptic Temperature Refugia.Scientific Reports, 12(1):
+19313.
+SHI, X.; Chen, Z.; Wang, H.; Yeung, D.-Y .; Wong, W.-k.;
+and WOO, W.-c. 2015. Convolutional LSTM Network: A
+Machine Learning Approach for Precipitation Nowcasting.
+In Cortes, C.; Lawrence, N.; Lee, D.; Sugiyama, M.; and
+Garnett, R., eds.,Advances in Neural Information Process-
+ing Systems, volume 28. Curran Associates, Inc.
+Shi, Z.; Zheng, H.; and Dong, J. 2024. OceanVP: A
+HYCOM Cased Benchmark Dataset and a Relational Spa-
+tiotemporal Predictive Network for Oceanic Variable Pre-
+diction.Ocean Engineering, 304: 117748.
+Shu, R.; Wu, H.; Gao, Y .; Xu, F.; Gou, R.; and Huang, X.
+2024. Improved Forecasts of Global Extreme Marine Heat-
+waves Through a Physics-guided Data-driven Approach.
+arXiv preprint arXiv:2412.15532.
+Singh, V . K.; and Roxy, M. 2022. A Review of Ocean-
+Atmosphere Interactions During Tropical Cyclones in the
+North Indian Ocean.Earth-Science Reviews, 226: 103967.
+Sun, L.; and Wang, J.-X. 2020. Physics-constrained
+Bayesian Neural Network for Fluid Flow Reconstruction
+with Sparse and Noisy Data.Theoretical and Applied Me-
+chanics Letters, 10(3): 161–169.
+Tan, C.; Gao, Z.; Li, S.; and Li, S. Z. 2025. SimVPv2:
+Towards Simple yet Powerful Spatiotemporal Predictive
+Learning.IEEE Transactions on Multimedia, 1–15.
+Tan, C.; Gao, Z.; Wu, L.; Xu, Y .; Xia, J.; Li, S.; and Li,
+S. Z. 2023a. Temporal Attention unit: Towards Efficient
+Spatiotemporal Predictive Learning. InProceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 18770–18782.
+Tan, C.; Li, S.; Gao, Z.; Guan, W.; Wang, Z.; Liu, Z.; Wu, L.;
+and Li, S. Z. 2023b. Openstl: A Comprehensive Benchmark
+of Spatio-temporal Predictive Learning.Advances in Neural
+Information Processing Systems, 36: 69819–69831.
+Tang, Y .; Dong, P.; Tang, Z.; Chu, X.; and Liang, J. 2024.
+Vmrnn: Integrating Vision Mamba and Lstm for Efficient
+and Accurate Spatiotemporal Forecasting. InProceedings of
+the IEEE/CVF Conference on Computer Vision and Pattern
+Recognition, 5663–5673.
+Tian, J.; Liang, Y .; Xu, R.; Chen, P.; Guo, C.; Zhou, A.; Pan,
+L.; Rao, Z.; and Yang, B. 2024. Air Quality Prediction with
+Physics-Guided Dual Neural ODEs in Open Systems. In
+The Twelfth International Conference on Learning Repre-
+sentations.
+Tran, A.; Mathews, A.; Xie, L.; and Ong, C. S. 2023. Fac-
+torized Fourier Neural Operators. InThe Eleventh Interna-
+tional Conference on Learning Representations.
+Veeresha, P. 2021. A Numerical Approach to the Cou-
+pled Atmospheric Ocean Model using a Fractional Opera-
+tor.Mathematical Modelling and Numerical Simulation with
+Applications, 1(1): 1–10.
+Verma, Y .; Heinonen, M.; and Garg, V . 2024. ClimODE:
+Climate Forecasting With Physics-informed Neural ODEs.
+InThe Twelfth International Conference on Learning Rep-
+resentations.Vijith, V .; Vinayachandran, P.; Webber, B. G.; Matthews,
+A. J.; George, J. V .; Kannaujia, V . K.; Lotliker, A. A.; and
+Amol, P. 2020. Closing the Sea Surface Mixed Layer Tem-
+perature Budget from in Situ Observations Alone: Operation
+Advection during BoBBLE.Scientific Reports, 10(1): 7062.
+Wang, X.; Wang, R.; Hu, N.; Wang, P.; Huo, P.; Wang, G.;
+Wang, H.; Wang, S.; Zhu, J.; Xu, J.; et al. 2024. Xihe: A
+Data-driven Model for Global Ocean Eddy-Resolving Fore-
+casting.arXiv preprint arXiv:2402.02995.
+Wang, Y .; Wu, H.; Zhang, J.; Gao, Z.; Wang, J.; Yu, P. S.;
+and Long, M. 2022. Predrnn: A Recurrent Neural Network
+for Spatiotemporal Predictive Learning.IEEE Transactions
+on Pattern Analysis and Machine Intelligence, 45(2): 2208–
+2225.
+Wen, G.; Li, Z.; Azizzadenesheli, K.; Anandkumar, A.; and
+Benson, S. M. 2022. U-FNO—An enhanced Fourier Neural
+Operator-based Deep-learning Model for Multiphase Flow.
+Advances in Water Resources, 163: 104180.
+Willeit, M.; and Ganopolski, A. 2024. Generalized Stability
+Landscape of the Atlantic Meridional Overturning Circula-
+tion.Earth System Dynamics, 15(6): 1417–1434.
+Wu, H.; Hu, T.; Luo, H.; Wang, J.; and Long, M. 2023. Solv-
+ing High-Dimensional PDEs with Latent Spectral Models.
+InInternational Conference on Machine Learning, 37417–
+37438. PMLR.
+Wu, H.; Luo, H.; Wang, H.; Wang, J.; and Long, M. 2024.
+Transolver: A Fast Transformer Solver for PDEs on Gen-
+eral Geometries. InInternational Conference on Machine
+Learning, 53681–53705. PMLR.
+Xiang, Y .; Li, C.; He, S.; and Chen, J. 2024. AGC-ODE:
+Adaptive Graph Controlled Neural ODE for Human Mobil-
+ity Prediction.IEEE Transactions on Intelligent Transporta-
+tion Systems, 25(11): 18449–18460.
+Xiong, W.; Xiang, Y .; Wu, H.; Zhou, S.; Sun, Y .; Ma, M.; and
+Huang, X. 2023. Ai-goms: Large Ai-driven Global Ocean
+Modeling System.arXiv preprint arXiv:2308.03152.
+Xu, W.; Ling, F.; Han, T.; Chen, H.; Ouyang, W.; and BAI, L.
+2024. Generalizing Weather Forecast to Fine-grained Tem-
+poral Scales via Physics-ai Hybrid Modeling.Advances in
+Neural Information Processing Systems, 37: 23325–23351.
+Appendix
+A.1 Initial Velocity Estimation
+DetailsWe first approximate the temporal derivative
+∂Y(t 0)
+∂tusing cubic spline interpolation over the pastpSST
+observations as proxy ground truth, yielding a smooth and
+differentiable estimate of local SST variation. We then pa-
+rameterize the latent velocity field ˆVθ(t0)∈R2×H×W
+as a learnable tensor with zonal and meridional compo-
+nents, whereθdenotes trainable neural network weights de-
+fined over the spatial grid. To estimateV(t 0), we jointly
+optimize ˆVθ(t0)by minimizing the residual of the advec-
+tion–diffusion equation along with anℓ 2regularization. The
+final estimateV(t 0)is selected by minimizing the MSE be-
+tween interpolated and those computed via ODE integration.
+For completeness, we restate equations here:
+ˆVθ(t0) = arg min
+Vθ(t)
+∥R(t 0)∥2+α∥V θ(t)∥2	
+,(10)
+R(t) =∂Y(t)
+∂t+V θ(t)· ∇Y(t)−κ∆Y(t). (11)
+The first term in Eq. 10 penalizes deviations from the
+advection–diffusion equation by the residualR(t)in Eq. 11,
+while the second term enforces spatial coherence throughℓ 2
+regularization, weighted by a hyperparameterα. To ensure
+physical plausibility and numerical stability, the diffusion
+coefficientκis modeled as a shared learnable scalar con-
+strained to be positive through a softplus activation. Addi-
+tionally,V θ(t)is regularized by a zero-mean Gaussian prior
+with a spatial covariance matrix defined by a radial basis
+function (RBF) kernelK ij=rbf(x i, xj;α). This prior en-
+courages spatial smoothness inV θ(t), with the kernel band-
+widthαcontrolling its strength. In implementation, we set
+α= 1e−7and optimize the objective for 200 epochs using
+Adam with a learning rate of 2.
+Initial Condition Robustness TestTo assess the impact
+of initial velocity estimation stability on final results, we
+perform a series of initial velocity estimations by varying
+the number of optimization epochs from 50 to 400 (i.i., 50,
+100, 200, 300, and 400). Each estimated velocity field is then
+used to perform downstream SST forecasting. Across these
+runs, we observe that convergence typically occurs within
+200 epochs. We report results on the OceanVP dataset un-
+der a 6-hour interval forecasting setting withq= 5steps in
+Table 5. The resulting MSE remains consistent across mul-
+tiple initializations, with an average of0.0542±0.0010.
+This slight drop of performance and low variance demon-
+strates the reliability and reproducibility of the estimated
+initial condition despite differences in optimization trajec-
+tories.
+A.2 SpatialTemporal Embedding
+We integrate a spatiotemporal embedding (ST Embedding)
+into SSTODE to encode spatial coordinates and temporal
+patterns as auxiliary inputs, enhancing the modeling of spa-
+tiotemporal dynamics through positional priors. The spatial
+embeddingϕ sencodes the latitude–longitude grid positionEpochs MSE↓
+50 0.0556
+100 0.0548
+200 0.0527
+300 0.0539
+400 0.0538
+Mean ± Std 0.0542 ± 0.0010
+Table 5: Robustness of initial velocity estimationV(t 0)
+across different optimization epochs on OceanVP (6-hour
+interval,q= 5). Reported values are MSE, MAE and ACC.
+The last row shows the mean and standard deviation.
+s= (x, y)of each spatial point using trigonometric and in-
+teraction functions:
+ϕs(s) ={sin(k),cos(k)} × {x, y, x·y}.(12)
+The temporal embeddingϕ tcaptures both daily and sea-
+sonal periodicity, leveraging trigonometric functions to
+model the cyclical nature of time:
+ϕt(t) =
+sin(2πt),cos(2πt),sin2πt
+365
+,cos2πt
+365
+.
+(13)
+We construct the final spatiotemporal embeddingϕ(s, t)
+by concatenating the spatial and temporal encodings, their
+element-wise interaction, and static geographic features:
+ϕ(s, t) = [ϕ s(s), ϕ t(t), ϕ s(s)⊙ϕ t(t), lsm(s), oro(s)].
+(14)
+Here,⊙denotes the element-wise product between the spa-
+tial and temporal embeddings. The termslsm(s)andoro(s)
+represent static land-sea mask and orography (elevation), re-
+spectively. The resulting embeddings are concatenated with
+raw physical variables and external data as additional inputs
+to the network.
+A.3 Implementation Details
+In the Initial Velocity Estimation module, we approximate
+the temporal derivative∂Y(t)
+∂tusingtorchcubicspline
+1, and compute spatial gradients viatorch.gradient.
+The initial velocityV(t 0)is estimated by minimizing the
+PDE residual loss, with RBF-based spatial regularization
+(α= 1e−7), optimized using Adam (lr=2, 200 epochs).
+We integrate the Neural ODEs using thetorchdiffeqli-
+brary2with the Euler solver and a time resolution ofτ= 1
+hour. The velocity dynamics networkf vconsists of three 2D
+ResNet blocks followed by a self-attention layer. The EEI
+module is implemented as a 3D ResNet, which takes con-
+catenated heat fluxes as inputs to predict ˆQ(t). The model
+is trained for 50 epochs using the AdamW optimizer with
+a learning rate of5×10−4, cosine decay scheduler, and
+batch size of 16. To balance computational cost and enable
+longer forecasting horizons, all variables are downsampled
+to5.625◦spatial resolution and aligned to 6-hour intervals,
+1https://github.com/patrick-kidger/torchcubicspline
+2https://github.com/rtqichen/torchdiffeq
+then standardized before training and evaluation. All exper-
+iments are conducted on 4 NVIDIA Tesla V100 GPUs.
+A.4 Metrics
+We assess model performance using Mean Squared Error
+(MSE), Mean Absolute Error (MAE), and Anomaly Corre-
+lation Coefficient (ACC). All predictions are de-normalized
+before evaluation. Metrics are computed over the entire test
+set across both spatial and temporal dimensions.
+MSE=1
+NNX
+i=1(ˆyi−yi)2(15)
+MAE=1
+NNX
+i=1|ˆyi−yi|(16)
+ACC=PN
+i=1 
+ˆyi−ˆy
+(yi−y)qPi= 1N 
+ˆyi−ˆy2qPi= 1N(yi−y)2
+(17)
+Here,ˆy iandy idenote the predicted and ground truth SST
+values at thei-th spatiotemporal grid point, respectively;N
+is the total number of evaluated points; and ˆy,yrepresent
+the sample means of the predicted and ground truth values
+over the test period.
+A.5 Evaluation on Regional Forecasting
+Table 6, Table 7, and Table 8 report detailed regional fore-
+casting metrics (MSE, MAE, ACC) over the Equatorial Pa-
+cific, Northwest Atlantic, and Southern Ocean, respectively.
+SSTODE consistently achieves the best performance across
+all regions and forecast horizons (q= 5 andq= 12) on the
+OceanVP benchmark. These results underscore the impor-
+tance of integrating advection-diffusion dynamics and en-
+ergy exchange modeling for robust regional forecasting.
+Modelq= 5 q= 12
+MSE↓MAE↓ACC↑ MSE↓MAE↓ACC↑
+ConvLSTM 0.5578 0.0170 0.9721 1.1256 0.0245 0.9487
+MAU 0.5590 0.0174 0.9715 0.8755 0.0214 0.9579
+PredRNNv2 0.9216 0.0226 0.9541 1.2223 0.0264 0.9398
+TAU 0.5736 0.0178 0.9714 0.9200 0.0227 0.9556
+SimVPv2 0.5160 0.0166 0.9745 0.9612 0.0229 0.9533
+COTERE 0.5736 0.0178 0.9714 0.8653 0.0218 0.9578
+ClimODE 0.6064 0.0174 0.9705 0.8466 0.0210 0.9596
+SSTODE 0.5157 0.0157 0.9748 0.7473 0.0193 0.9649
+Table 6: Regional forecasting results in the Equatorial Pa-
+cific (MSE×103↓, MAE↓, ACC↑) atq= 5 andq= 12.
+A.6 Evaluation on Longer Horizon and Sparse
+Sampling
+Table 9 reports detailed evaluation results under longer fore-
+casting horizons (7 days) with two different temporal res-
+olutions: 6-hour (q= 28) and 12-hour (q= 14) intervals
+on OceanVP. SSTODE also achieves remarkably stable re-
+sults across all metrics and settings, outperforming represen-
+tative baselines. This robustness stems from the integrationModelq= 5 q= 12
+MSE↓MAE↓ACC↑ MSE↓MAE↓ACC↑
+ConvLSTM 1.4052 0.0205 0.9971 2.9191 0.0305 0.9940
+MAU 1.1125 0.0183 0.9977 1.8058 0.0245 0.9962
+PredRNNv2 1.9601 0.0251 0.9959 2.6103 0.0297 0.9945
+TAU 1.0621 0.0175 0.9978 1.8038 0.0235 0.9962
+SimVPv2 1.1709 0.0177 0.9977 1.9543 0.0258 0.9959
+COTERE 1.1118 0.0175 0.9977 1.7515 0.0231 0.9963
+ClimODE 1.1234 0.0167 0.9977 1.7046 0.0217 0.9963
+SSTODE 0.9432 0.0152 0.9982 1.6445 0.0212 0.9964
+Table 7: Regional forecasting results in the Northwest At-
+lantic (MSE×103↓, MAE↓, ACC↑) atq= 5 andq= 12.
+Modelq= 5 q= 12
+MSE↓MAE↓ACC↑ MSE↓MAE↓ACC↑
+ConvLSTM 0.4766 0.0107 0.9987 1.1772 0.0167 0.9970
+MAU 0.3504 0.0093 0.9990 0.7103 0.0135 0.9980
+PredRNNv2 0.6236 0.0126 0.9983 0.9231 0.0153 0.9975
+TAU 0.3014 0.0083 0.9991 0.6135 0.0119 0.9982
+SimVPv2 0.3051 0.0083 0.9991 0.6946 0.0138 0.9980
+COTERE 0.3259 0.0082 0.9991 0.6183 0.0118 0.9983
+ClimODE 0.3098 0.0069 0.9991 0.5716 0.0100 0.9984
+SSTODE 0.2641 0.0063 0.9994 0.5597 0.0100 0.9984
+Table 8: Regional forecasting results in the Southern Ocean
+(MSE×103↓, MAE↓, ACC↑) atq= 5 andq= 12.
+of energy exchange and diffusion-aware dynamics, which
+improve temporal consistency and suppress long-term error
+propagation–crucial for real-world ocean forecasting.
+Model6h (q= 28) 12h (q= 14)
+MSE↓MAE↓ACC↑ MSE↓MAE↓ACC↑
+TAU 0.1847 0.2517 0.9968 0.1754 0.2344 0.9965
+SimVPv2 0.1800 0.2369 0.9966 0.1998 0.2789 0.9964
+COTERE 0.1619 0.2265 0.9969 0.1661 0.2334 0.9967
+ClimODE 0.1571 0.2144 0.9971 0.1645 0.2298 0.9967
+SSTODE 0.1528 0.2084 0.9971 0.1579 0.2170 0.9969
+Table 9: Temporal generalization results on OceanVP under
+6-hour (q= 28) and 12-hour (q= 14) settings over a 7-day
+horizon.
+A.7 Evaluation on Higher Spatial Resolution
+Table 10 reports SST forecasting performance at the2.8125◦
+spatial resolution on the ERA5 benchmark. SSTODE
+achieves the lowest MSE and MAE, confirming its ability to
+scale effectively to higher spatial resolutions. Due to compu-
+tational constraints, experiments are conducted at moderate
+resolution. Nevertheless, the results demonstrate the scala-
+bility of SSTODE and its potential for extension to finer spa-
+tial grids (e.g.,0.25◦), enabling more accurate modeling of
+mesoscale and submesoscale ocean dynamics.
+A.8 Evaluation on Model Parameters Comparison
+Table 11 compares model sizes across baselines under the
+same2.8125◦-resolution SST forecasting setting. Compared
+to both recurrent-based and recurrent-free baselines, our
+model demonstrates superior parameter efficiency. While
+Model MSE↓MAE↓ACC↑
+TAU 0.0250 0.0826 1.0000
+SimVPv2 0.0230 0.0810 1.0000
+COTERE 0.0278 0.0947 1.0000
+ClimODE 0.0210 0.0706 1.0000
+SSTODE 0.0190 0.0580 1.0000
+Table 10: Forecasting results on ERA5 (64×128grid, 6-
+hour interval,q= 5). SSTODE achieves the best accuracy
+across all metrics.
+SSTODE and ClimODE adopt the autoregressive formula-
+tion with comparable lightweight model sizes (4.62M vs
+3.67M), SSTODE achieves a significant∼10% improve-
+ment in forecasting accuracy (0.019 vs 0.021 in MSE),
+demonstrating a favorable trade-off between performance
+and model complexity.
+Models Params.
+MAU 11.75M
+PredRNNv2 23.59M
+TAU 9.39M
+SimVPv2 9.80M
+ClimODE 3.67M
+SSTODE (Ours) 4.62M
+Table 11: Comparison of model sizes in parameter counts.
+A.9 Comparison with Neural Operator Baselines.
+Models MSE↓MAE↓ACC↑
+FNO-based
+FNO 0.0750 0.1564 0.9987
+U-FNO 0.0745 0.1512 0.9987
+U-NO 0.1331 0.2361 0.9981
+F-FNO 0.0725 0.1469 0.9987
+LSM 0.0809 0.1643 0.9986
+Transformer-based
+Galerkin 0.0771 0.1528 0.9986
+Factformer 0.0857 0.1938 0.9986
+Transolver 0.0898 0.1953 0.9984
+SSTODE 0.0527 0.1107 0.9990
+Table 12: Comparison with neural operator baselines on
+OceanVP (5-step horizon). The best results are highlighted
+in bold.
+We further benchmarked our model against state-of-the-
+art neural operator approaches, including both Fourier-
+based and transformer-based architectures implemented in
+theNeural-Solver Library3. Specifically, we eval-
+uated Fourier Neural Operator (FNO) (Li et al. 2021), its
+variants U-FNO (Wen et al. 2022) and F-FNO (Tran et al.
+3https://github.com/thuml/Neural-Solver-Library2023), the U-shaped Neural Operator (U-NO) (Rahman,
+Ross, and Azizzadenesheli 2023), and the Latent Spectral
+Model (LSM) (Wu et al. 2023). For transformer-based op-
+erator learning, we included Galerkin Transformer (Cao
+2021), Factformer (Li, Shu, and Barati Farimani 2023), and
+Transolver (Wu et al. 2024). All models were trained and
+evaluated on the OceanVP dataset with a 5-step forecasting
+horizon using consistent data preprocessing and normaliza-
+tion.
+As shown in Table 12, our model achieves the best per-
+formance across all metrics (MSE, MAE, and ACC), out-
+performing both FNO- and transformer-based neural opera-
+tor baselines. This demonstrates the advantage of introduc-
+ing explicit advection–diffusion constraints and continuous-
+time dynamics within a Neural ODE framework, enabling
+better physical consistency and forecasting stability.

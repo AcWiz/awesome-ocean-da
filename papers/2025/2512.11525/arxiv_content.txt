@@ -1,0 +1,483 @@
+NeuralOGCM: Differentiable Ocean Modeling with Learnable Physics
+Hao Wu1†Yuan Gao1†Fan Xu2†Fan Zhang3Guangliang Liu1Yuxuan Liang4Xiaomeng Huang1
+Abstract
+High-precision scientific simulation faces a long-
+standing trade-off between computational effi-
+ciency and physical fidelity. To address this
+challenge, we propose NeuralOGCM , an ocean
+modeling framework that fuses differentiable pro-
+gramming with deep learning. At the core of
+NeuralOGCM is a fully differentiable dynamical
+solver, which leverages physics knowledge as its
+core inductive bias. The learnable physics integra-
+tion captures large-scale, deterministic physical
+evolution, and transforms key physical parame-
+ters (e.g., diffusion coefficients) into learnable
+parameters, enabling the model to autonomously
+optimize its physical core via end-to-end training.
+Concurrently, a deep neural network learns to
+correct for subgrid-scale processes and discretiza-
+tion errors not captured by the physics model.
+Both components work in synergy, with their
+outputs integrated by a unified ODE solver. Ex-
+periments demonstrate that NeuralOGCM main-
+tains long-term stability and physical consistency,
+significantly outperforming traditional numerical
+models in speed and pure AI baselines in accuracy.
+Our work paves a new path for building fast, sta-
+ble, and physically-plausible models for scientific
+computing. Our codes are available here.
+1. Introduction
+Climate change is one of the most severe global challenges
+of our time (Lee et al., 2025; Kochkov et al., 2024; Wu
+et al., 2025). Within this complex system, the ocean (Shi
+et al., 2024; Parasyris et al., 2025) plays a pivotal role as
+the Earth’s primary climate regulator and buffer, where
+its dynamics profoundly influence global weather patterns,
+ecosystems, and human societies. Accurate and efficient
+1Tsinghua University, Beijing, China2University of Science
+and Technology of China, Hefei, China3The Chinese University
+of Hong Kong, Hong Kong, China4Hong Kong University of
+Science and Technology (Guangzhou), Guangzhou, China. Corre-
+spondence to: Xiaomeng Huang<hxm@tsinghua.edu.cn>.
+Preprint. December 15, 2025.
+Figure 1.The motivation for our model, NeuralOGCM .(a)A
+dilemma exists between traditional GCMs, which are physically
+faithful but slow, and pure AI models, which are fast but prone
+to long-term instability.(b) NeuralOGCM bridges this gap by in-
+tegrating aDifferentiable Physics Corewith aNeural Corrector.
+Its key innovation is the learnable physics core, where physical
+parameters are optimized end-to-end from data, achieving both
+high fidelity and computational speed.
+simulation of ocean circulation is therefore crucial for ad-
+vancing our scientific understanding and informing future
+decisions (Madec et al., 1997; Parasyris et al., 2025). Cur-
+rently, Ocean General Circulation Models (OGCMs) serve
+as the core scientific tool for this purpose.
+However, existing ocean modeling approaches face a funda-
+mental dilemma: a sharp trade-off between computational
+efficiency and physical fidelity. On one hand, traditional
+GCMs (Madec et al., 1997; Smith et al., 1992; Grotch &
+MacCracken, 1991; Wilby & Wigley, 1997), based on first
+principles of physics, represent the gold standard for long-
+term stability and physical reliability. Yet, their compu-
+tational cost is prohibitively high, often requiring months
+of supercomputer time to simulate a single century-scale
+climate scenario. This severely limits the scope of sci-
+entific inquiry, such as performing large-scale ensemble
+forecasts or uncertainty quantification. On the other hand,
+pure data-driven models, particularly those based on deep
+learning, achieve orders-of-magnitude speedups (Wu et al.,
+2024a;d;e;c;b; Gao et al., 2025; Li et al., 2022). However,
+their black-box nature, lack of physical consistency, and
+tendency to accumulate errors during long-term autoregres-
+sive rollouts leading to numerical divergence or physically
+nonsensical ”hallucinations” make them difficult to trust
+for high-stakes scientific discovery (Wu et al., 2025). This
+1arXiv:2512.11525v1  [cs.LG]  12 Dec 2025
+NeuralOGCM
+creates an enduring gap between computational speed and
+physical fidelity that hinders progress in climate science, a
+dilemma we illustrate in Figure 1.
+To realize this vision, we propose NeuralOGCM , which,to
+the best of our knowledge, is the first hybrid ocean gen-
+eral circulation model to integrate differentiable physics
+programming with deep learning.Its concept is shown in
+Figure 1. The core of NeuralOGCM consists of two synergis-
+tic components: aDifferentiable Physics Corethat handles
+large-scale evolution based on fluid dynamics equations,
+with its key physical parameters being learnable (symbol-
+ized by the dial); and aNeural Correctorthat learns to
+amend for complex subgrid-scale processes and discretiza-
+tion errors not captured by the physics core. The tendencies
+produced by both components are integrated via a unified
+ODE solver (Kochkov et al., 2024; Wu et al., 2024c), en-
+abling the entire model to be trained end-to-end to achieve
+both high fidelity and high efficiency.
+Our main contributions are threefold:
+❶We propose and implement a new hybrid modeling
+paradigm oflearnable physics, where key physical parame-
+ters can be optimized from data via gradient descent.
+❷We design and build NeuralOGCM , the first end-to-end
+differentiable hybrid ocean general circulation model, suc-
+cessfully applying this paradigm to a complex real-world
+scientific problem.
+❸We demonstrate through extensive experiments on a
+benchmark dataset that NeuralOGCM achieves significant
+advantages in speed, accuracy, and long-term stability over
+existing methods.
+2. Methodology
+2.1. Problem Definition
+Our goal is to learn an efficient operator Mfor a spatio-
+temporal forecasting task, which maps the current state
+(yt,Ft)to a future state yt+∆t . Here, yt∈RCo×H×Wrep-
+resents the ocean’s internal variables andF t∈RCa×H×W
+denotes the external atmospheric forcings. The system’s
+evolution is governed by a set of partial differential equa-
+tions (PDEs), which we model by decomposing the tendency
+operatorGinto two synergistic components:
+∂y
+∂t=G(y,F)≈G phys(y;θ p)|{z}
+Differentiable Physics Core+G neural(y,F;θ n)|{z }
+Neural Network Corrector
+(1)
+TheDifferentiable Physics Core, Gphys, approximates
+known dynamics such as advection and diffusion, but its key
+physical parameters, θp, are learnable. TheNeural Network
+Corrector, Gneural, is a deep neural network parameterized
+byθnthat learns the residual dynamics, including subgrid-scale effects and model errors. Our central challenge is to
+learn the total parameter setΘ ={θ p, θn}end-to-end.
+2.2. TheNeuralOGCMFramework
+Building upon the problem definition, we construct
+NeuralOGCM , as shown in Figure 2, an end-to-end hybrid
+physics-AI framework. The core idea is to decompose the
+total tendency Ginto a learnable physics-guided component
+and a data-driven one. The evolution of the state yover a
+time interval ∆tcan be described by the integral form of its
+governing differential equation:
+yt+∆t =yt+Zt+∆t
+tG(y(τ),F(τ))dτ(2)
+In our framework, we approximate this integral using a
+single-step explicit Forward Euler scheme. This defines our
+model, NeuralOGCM , parameterized by Θ ={θ p, θn}, as
+the operator that performs this one-step integration:
+NeuralOGCM(y t,Ft; Θ) =y t+ ∆t·G phys(yt;θp)
++ ∆t·G neural(yt,Ft;θn)(3)
+This integration step seamlessly fuses the two branches.
+Crucially, since all components are fully differentiable, the
+entire model can be trained end-to-end by backpropagating
+the loss from the final prediction, which is the output of
+NeuralOGCM . The subsequent subsections detail the spe-
+cific designs ofG physandG neural.
+2.3. Differentiable Physics Core
+To embed physical knowledge within a deep learning frame-
+work, we construct a fully differentiable dynamical solver
+that approximates key processes from the ocean’s primi-
+tive equations. Our physics core explicitly simulates three
+primary dynamical processes:Advection, which describes
+how quantities are transported with the velocity field; the
+Coriolis Force, which accounts for deflection effects due to
+the Earth’s rotation; andHorizontal Diffusion, which rep-
+resents the effects of molecular viscosity and subgrid-scale
+turbulent mixing.
+We implement these differential operators using standard
+operations in deep learning frameworks. For instance, spa-
+tial gradients ∇are approximated via 2D convolutions with
+finite difference kernels. To handle the spherical grid, we
+incorporate latitude-dependent metric factors in our calcula-
+tions and apply periodic padding for boundaries in the lon-
+gitudinal direction. Traditionally, the horizontal diffusion
+coefficient νis a hyperparameter set manually by experts,
+which greatly influences the model’s energy dissipation and
+long-term stability, making it a major source of uncertainty.
+In our framework, we define these coefficients as learnable
+parameters of the model, θp={ν momentum , νtracer}. To en-
+sure physical plausibility (diffusion must be non-negative),
+2
+NeuralOGCM
+Figure 2.Architecture of the Hybrid Physics-AI Ocean Model. The model predicts the future ocean state by combining tendencies
+from two synergistic branches. A differentiablePhysics Solver, performing multi-step integration, computes the dynamic tendencies.
+Concurrently, a data-driven branch, featuring anEncoder-Decoderarchitecture and aSpatio-temporal Evolution (STE)module, learns a
+corrective tendency. Both tendencies are integrated by a finalODE Solverto produce the output. As indicated by flame icons, key physical
+parameters within the solver are learned end-to-end along with the neural network components.
+we apply asoftplusfunction to these parameters before their
+use in the solver. By exposing these physical parameters
+to the optimizer, NeuralOGCM can autonomously learn the
+effective diffusion from data, thereby partially correcting
+deficiencies in the subgrid-scale parameterization scheme.
+2.4. Neural Network Corrector
+The objective of the Neural Network Corrector, Gneural, is
+to learn the residual dynamics missed by the physics core.
+Its architecture is an Encoder-Decoder network featuring a
+Spatio-temporal Evolution (STE) module.
+First, the Encoder maps the concatenated state (yt,Ft)to
+a low-dimensional latent state ztthrough a series of con-
+volutions and downsampling operations, while extracting
+multi-scale feature mapss tfor skip-connections.
+zt,st=Encoder(concat(y t,Ft);θenc)(4)
+In the network’s bottleneck, the STE module processes
+the latent state ztusing a multi-head self-attention mecha-
+nism to capture long-range spatial dependencies. The input
+feature map zt∈RC×H×Wis flattened into a sequence
+X∈RN×d model, whereN=H×Wandd model=C.
+The module computes hattention heads in parallel. The
+query ( Qi), key ( Ki), and value ( Vi) for each head are
+obtained by linearly projecting the input sequenceX:
+Qi=XWQ
+i, K i=XWK
+i, V i=XWV
+i (5)
+The output of each head is computed using scaled dot-
+product attention:
+head i=Attention(Q i, Ki, Vi) =softmaxQiKT
+i√dk
+Vi(6)
+The outputs of all heads are concatenated and passed
+through a final linear projection to produce the module’soutput:
+MultiHead(X) =Concat(head 1, . . . ,head h)WO(7)
+This process yields the evolved latent statez′
+t:
+z′
+t=STE(z t;θste)(8)
+Finally, the Decoder takes the evolved latent state z′
+tand
+the skip-connection features stas input, reconstructing the
+correction tendency tensor Gneural via a series of transposed
+convolutions and upsampling operations.
+Gneural=Decoder(z′
+t,st;θdec)(9)
+The set of trainable parameters for the neural network cor-
+rector is thusθ n={θ enc, θste, θdec}.
+2.5. Training Details
+The model is trained by minimizing the mean squared error
+(MSE) between the single-step prediction and the ground
+truth. The physics core operates in physical space, while the
+neural network and loss are computed in a normalized space.
+This requires denormalizing the input for the physics core
+and re-normalizing its output before combining it with the
+neural network’s tendency during each forward pass. The
+loss function is defined as:
+L(Θ) =E (yt,Ft),yt+∆t∼D∥M(y t,Ft; Θ)−y t+∆t∥2
+2(10)
+where Drepresents the training dataset, and the loss is
+computed in the normalized space. We use the AdamW
+optimizer for end-to-end training with a learning rate of
+1e-4, a weight decay of 1e-5, and a batch size of 2.
+3
+NeuralOGCM
+3. Experiments
+3.1. Experimental Setup
+Datasets.We evaluate our proposed NeuralOGCM model
+on a large-scale global ocean simulation task. The study uti-
+lizes a dataset that fuses two authoritative reanalysis sources:
+GLORYS12 for oceanic state variables and ERA5 for atmo-
+spheric forcing fields. For the computational requirements
+of our experiments, all variables are resampled to a 1.5°
+spatial resolution, while maintaining a 24-hour (daily mean)
+temporal resolution. Our model is designed to predict five
+key oceanic state variables: sea temperature ( To), salinity
+(S), zonal velocity ( Uo), and meridional velocity ( Vo) across
+23 vertical levels, along with sea surface height (SSH) at
+a single level. The model is driven by four atmospheric
+variables. Furthermore, a static land-sea mask (LSM) is
+employed to define the ocean domain. Specific details of
+the dataset variables are summarized in Table 1.
+Data Partitioning and Implementation Details.The entire
+dataset spans the years 1993 to 2020. We follow a standard
+chronological split for time-series forecasting, using data
+from 1993–2017 for training, 2018–2019 for validation, and
+2020 for testing.
+Our model is implemented using the PyTorch framework,
+and all experiments are conducted on 8 NVIDIA A100
+GPUs using a data parallelism strategy. For training, we
+use the AdamW optimizer with a learning rate of 1e-4 and
+a weight decay of 1e-5. The batch size is set to 2 per GPU,
+resulting in an effective total batch size of 16.
+Table 1.Details of the dataset for the global ocean simulation task.
+Type Abbr. Layers Time Res. Spatial Res.
+Atmospheric U10M 1 24h 1.5°
+Atmospheric V10M 1 24h 1.5°
+Atmospheric T2M 1 24h 1.5°
+Atmospheric MSLP 1 24h 1.5°
+Oceanic S 23 24h 1.5°
+OceanicU o 23 24h 1.5°
+OceanicV o 23 24h 1.5°
+OceanicT o 23 24h 1.5°
+Oceanic SSH 1 24h 1.5°
+Static LSM — — 1.5°
+3.2. Baseline Models
+We test our NeuralOGCM against a series of advanced,
+purely data-driven spatio-temporal forecasting models.
+These baselines include the classic U-Net and ConvLSTM,
+the efficient general-purpose model SimVP, and leading
+large-scale weather forecasting models: FourCastNet. The
+comparison focuses on evaluating performance in terms of
+simulation accuracy and long-term autoregressive stability.Table 2.Comparison of autoregressive simulation performance
+using Root Mean Squared Error (RMSE). Lower values are better.
+The best-performing model is highlighted.
+MethodsLead Time (days)
+10 30 60 120
+U-Net0.923 0.012 1.436 0.018 1.719 0.026 1.886 0.024
+ConvLSTM0.979 0.017 1.565 0.030 2.053 0.036 2.840 0.046
+SimVP0.951 0.016 1.414 0.026 1.705 0.028 1.946 0.021
+FourCastNet0.959 0.018 1.424 0.030 2.433 0.141 3.332 0.066
+NeuralOGCM 0.919 0.015 1.280 0.020 1.439 0.027 1.574 0.037
+3.3. Main Results
+We evaluate the performance of NeuralOGCM against state-
+of-the-art baselines on the global ocean simulation task.
+Table 2 presents the quantitative comparison using Root
+Mean Squared Error (RMSE) across different lead times
+ranging from 10 to 120 days.
+As shown in the table, NeuralOGCM consistently outper-
+forms all baseline models. In short-term forecasting (10
+days), our model achieves the lowest RMSE of 0.919 ,
+demonstrating superior accuracy. The performance gap
+becomes increasingly pronounced in long-term simulations.
+At a lead time of 120 days, NeuralOGCM maintains a low
+RMSE of 1.574 , significantly surpassing the second-best
+model, U-Net ( 1.886 ). Notably, while large-scale pure AI
+models like FourCastNet suffer from severe error accumu-
+lation and instability in long-term rollouts ( 3.332 at 120
+days), NeuralOGCM remains stable and physically consis-
+tent. These results validate that integrating a differentiable
+physics core effectively mitigates the long-term divergence
+issues common in purely data-driven approaches.
+Figure 3 further illustrates the convergence behavior during
+training, where NeuralOGCM achieves lower validation loss
+compared to other methods.
+Figure 3.Validation loss curves of NeuralOGCM compared with
+baseline models during the training process, demonstrating faster
+convergence and lower final error.
+4
+NeuralOGCM
+Figure 4.Visualization of 90-day autoregressive rollout results for
+(I) Sea Surface Temperature (SST) Anomaly and (II) Sea Surface
+Salinity (SSS) Anomaly. Columns show: (a) Initial condition at
+Day 0, (b) Ground Truth at Day 90, (c) Prediction by NeuralOGCM ,
+and (d) Prediction by the U-Net baseline. While NeuralOGCM
+maintains high physical fidelity and structural coherence consistent
+with the ground truth, the pure AI baseline exhibits severe error
+accumulation, manifested as over-saturated values in SST and non-
+physical high-frequency artifacts in SSS.
+3.4. Long-term Autoregressive Rollout Analysis
+To intuitively evaluate the model’s capability in maintaining
+physical consistency over extended horizons, we conduct
+a 90-day autoregressive rollout experiment. Figure 4 visu-
+alizes the spatial distribution of Sea Surface Temperature
+(SST) and Sea Surface Salinity (SSS) anomalies at the 90th
+simulation day.
+As observed in panel (c), NeuralOGCM successfully pre-
+serves the complex spatial structures and accurate anomalymagnitudes compared to the Ground Truth (panel b). It
+accurately captures large-scale circulation patterns without
+exhibiting significant dissipation or non-physical drift. In
+sharp contrast, the purely data-driven baseline (U-Net, panel
+d) suffers from severe numerical instability. For SST (I), the
+baseline tends to overestimate extreme values, leading to sat-
+urated anomalies. More critically, in the SSS field (II), the
+baseline exhibits substantial high-frequency noise and grid-
+like artifacts, indicating a breakdown in physical realism
+due to error accumulation. These visual results corroborate
+that embedding the differentiable physics core effectively
+acts as a physical inductive bias, regularizing the long-term
+evolution and preventing the ”hallucinations” common in
+pure deep learning approaches.
+4. Conclusions
+In this work, we introduce NeuralOGCM , the first differen-
+tiable ocean model, to our knowledge, that seamlessly inte-
+grates a learnable physics core with a neural network correc-
+tor in an end-to-end framework. This pioneering approach
+directly addresses the long-standing trade-off between com-
+putational speed and physical fidelity. Our experiments
+demonstrate that NeuralOGCM maintains long-term physi-
+cal stability, significantly outperforms purely data-driven
+baselines in long-range accuracy, and operates orders of
+magnitude faster than traditional numerical models. Our
+work paves a new path for building fast, stable, and physi-
+cally plausible scientific models, showcasing the immense
+potential of fusing differentiable programming with deep
+learning to advance complex Earth system modeling.
+References
+Gao, Y ., Wu, H., Shu, R., Dong, H., Xu, F., Chen, R.,
+Yan, Y ., Wen, Q., Hu, X., Wang, K., et al. Oneforecast:
+A universal framework for global and regional weather
+forecasting.arXiv preprint arXiv:2502.00338, 2025.
+Grotch, S. L. and MacCracken, M. C. The use of general
+circulation models to predict regional climatic change.
+Journal of climate, pp. 286–303, 1991.
+Hersbach, H., Bell, B., Berrisford, P., Hirahara, S., Hor ´anyi,
+A., Mu ˜noz-Sabater, J., Nicolas, J., Peubey, C., Radu, R.,
+Schepers, D., et al. The era5 global reanalysis.Quarterly
+Journal of the Royal Meteorological Society, 146(730):
+1999–2049, 2020.
+Kochkov, D., Yuval, J., Langmore, I., Norgaard, P., Smith,
+J., Mooers, G., Kl ¨ower, M., Lottes, J., Rasp, S., D ¨uben,
+P., et al. Neural general circulation models for weather
+and climate.Nature, 632(8027):1060–1066, 2024.
+Lee, C., Song, H., Choi, Y ., Cho, A., and Marshall, J. Ob-
+5
+NeuralOGCM
+served multi-decadal increase in the surface ocean’s ther-
+mal inertia.Nature Climate Change, pp. 1–7, 2025.
+Li, Z., Huang, D. Z., Liu, B., and Anandkumar, A. Fourier
+neural operator with learned deformations for pdes on
+general geometries.arXiv preprint arXiv:2207.05209,
+2022.
+Madec, G., Delecluse, P., Imbard, M., and Levy, C. Ocean
+general circulation model reference manual.Note du P ˆole
+de mod ´elisation, 495, 1997.
+Parasyris, A., Metheniti, V ., Kampanis, N., and Darmaraki,
+S. Marine heatwaves in the mediterranean sea: A convolu-
+tional neural network study for extreme event prediction.
+Ocean Science, 21(3):897–912, 2025.
+Shi, Z., Zheng, H., and Dong, J. Oceanvp: A hycom based
+benchmark dataset and a relational spatiotemporal pre-
+dictive network for oceanic variable prediction.Ocean
+Engineering, 304:117748, 2024.
+Smith, R., Dukowicz, J., and Malone, R. Parallel ocean
+general circulation modeling.Physica D: Nonlinear Phe-
+nomena, 60(1-4):38–61, 1992.
+Wilby, R. L. and Wigley, T. M. Downscaling general circu-
+lation model output: a review of methods and limitations.
+Progress in physical geography, 21(4):530–548, 1997.
+Wu, H., Liang, Y ., Xiong, W., Zhou, Z., Huang, W., Wang,
+S., and Wang, K. Earthfarsser: Versatile spatio-temporal
+dynamical systems modeling in one model. InProceed-
+ings of the AAAI Conference on Artificial Intelligence,
+volume 38, pp. 15906–15914, 2024a.
+Wu, H., Wang, C., Xu, F., Xue, J., Chen, C., Hua, X.-S.,
+and Luo, X. Pure: Prompt evolution with graph ode for
+out-of-distribution fluid dynamics modeling.Advances
+in Neural Information Processing Systems, 37:104965–
+104994, 2024b.
+Wu, H., Wang, H., Wang, K., Wang, W., Ye, C., Tao, Y .,
+Chen, C., Hua, X.-S., and Luo, X. Prometheus: Out-of-
+distribution fluid dynamics modeling with disentangled
+graph ode. InProceedings of the 41st International Con-
+ference on Machine Learning, pp. PMLR 235, Vienna,
+Austria, 2024c. PMLR.
+Wu, H., Weng, K., Zhou, S., Huang, X., and Xiong, W.
+Neural manifold operators for learning the evolution of
+physical dynamics. InProceedings of the 30th ACM
+SIGKDD Conference on Knowledge Discovery and Data
+Mining, pp. 3356–3366, 2024d.
+Wu, H., Xu, F., Chen, C., Hua, X.-S., Luo, X., and Wang,
+H. Pastnet: Introducing physical inductive biases for
+spatio-temporal video prediction. InProceedings of the32nd ACM international conference on multimedia, pp.
+2917–2926, 2024e.
+Wu, H., Gao, Y ., Shu, R., Wang, K., Gou, R., Wu, C.,
+Liu, X., He, J., Cao, S., Fang, J., et al. Advanced long-
+term earth system forecasting by learning the small-scale
+nature.arXiv preprint arXiv:2505.19432, 2025.
+6
+NeuralOGCM
+A. Dataset Details
+A.1. Dataset
+In the large-scale global ocean simulation task, the atmosphere variables are sourced from ERA5 (Hersbach et al., 2020)
+dataset and the ocean variables are sourced from the GLOYRS12 dataset. ERA5 offers global atmosphere state, and the
+selected subset contains 4 variables (U10M, V10M, T2M, MSLP) with surface level, which can be downloaded from
+https://cds.climate.copernicus.eu . GlORYS12 offers daily mean data covering latitudes between -80° and
+90° from 1993 to the present, and the subset we use includes 4 depth level ocean variables (each with 23 depth levels,
+corresponding to 0.49 m, 2.65 m, 5.08 m, 7.93 m, 11.41 m, 15.81 m, 21.60 m, 29.44 m, 40.34 m, 55.76 m, 77.85 m, 92.32
+m, 109.73 m, 130.67 m, 155.85 m, 186.13 m, 222.48 m, 266.04 m, 318.13 m, 380.21 m, 453.94 m, 541.09 m and 643.57 m),
+Sea salinity (S), Sea stream zonal velocity ( Uo), Sea stream meridional velocity ( Vo), Sea temperature ( To), and 1 surface
+level variable Sea surface height (SSH), which can be downloaded from https://data.marine.copernicus.eu .
+For data partitioning, we use years from 1993 to 2020, which are 1993-2017 for training, 2018-2019 for validating, and
+2020 for testing. To improve computational efficiency, we use bilinear interpolation to downsample them to 1.5 degree
+(H=121, W=240) spatial resolution. And to better adapt to the input of different architecture models, we use the data with
+size 120 × 240. The temporal resolution is 24 hours, which corresponds to 12:00 UTC for atmosphere variables and daily
+mean state for ocean variables.
+A.2. Data Preprocessing
+Different atmosphere and ocean variables exhibit substantial variations in magnitude. To enable the model to concentrate
+on accurate simulation rather than learning the inherent magnitude discrepancies among variables, we normalize the input
+data prior to model ingestion. Specifically, for atmosphere variables, we calculate these statistics from an extended dataset
+covering the period 1993 to 2017. For ocean variables, we first compute the climatological mean of all periodic variables
+using data from 1993–2017 (the first 365 days of each year in the training set). The shape of the climatological mean is (365,
+47, 121, 240). Specifically, 365 denotes the days, 47 denotes the number of periodic variables (ie., 23 layers Sea salinity, 23
+layers Sea temperature, and Sea surface height). 121 denotes the height and 240 denotes the width. Based on this mean, Sea
+salinity, Sea temperature, and Sea surface height are converted into Sea salinity anomaly, Sea temperature anomaly, and Sea
+surface height anomaly, respectively. We then compute the mean and standard deviation of all variables (using the anomaly
+fields for periodic variables) over the same 1993–2017 training period, and use these statistics for subsequent normalization.
+Each variable thus possesses a dedicated mean and standard deviation. Before inputting data into the model, we normalize
+the data by subtracting the corresponding mean and dividing the respective standard deviation. For the ‘nan’ values of land,
+we fill them with zero before inputting the data into the model.
+7

@@ -1,0 +1,1104 @@
+Prediction of Sea Ice Velocity and Concentration in the
+Arctic Ocean using Physics-informed Neural Network
+Younghyun Kooa,b,c, Maryam Rahnemoonfara,b
+aDepartment of Computer Science and Engineering, Lehigh University, 27 Memorial Dr
+W, Bethlehem, 18015, PA, USA
+bDepartment of Civil and Environmental Engineering, Lehigh University, 27 Memorial
+Dr W, Bethlehem, 18015, PA, USA
+cNational Snow and Ice Data Center, Cooperative Institute for Research in
+Environmental Sciences, University of Colorado Boulder, 1540 30th
+St, Boulder, 80303, CO, USA
+Abstract
+As an increasing amount of remote sensing data becomes available in the
+Arctic Ocean, data-driven machine learning (ML) techniques are becom-
+ing widely used to predict sea ice velocity (SIV) and sea ice concentration
+(SIC). However, fully data-driven ML models have limitations in generaliz-
+ability and physical consistency due to their excessive reliance on the quan-
+tity and quality of training data. In particular, as Arctic sea ice entered a
+new phase with thinner ice and accelerated melting, there is a possibility
+that an ML model trained with historical sea ice data cannot fully represent
+the dynamically changing sea ice conditions in the future. In this study,
+we develop physics-informed neural network (PINN) strategies to integrate
+physical knowledge of sea ice into the ML model. Based on the Hierarchi-
+cal Information-sharing U-net (HIS-Unet) architecture, we incorporate the
+physics loss function and the activation function to produce physically plau-
+sible SIV and SIC outputs. Our PINN model outperforms the fully data-arXiv:2510.17756v1  [cs.LG]  20 Oct 2025
+driven model in the daily predictions of SIV and SIC, even when trained
+with a small number of samples. The PINN approach particularly improves
+SIC predictions in melting and early freezing seasons and near fast-moving
+ice regions.
+Keywords:Arctic Ocean, Convolutional neural network (CNN),
+Hierarchical Information-sharing U-net (HIS-Unet), Physics loss function,
+Activation function
+1. Introduction
+Dramatic declines in the Arctic sea ice extent (SIE) and sea ice thickness
+(SIT) have been observed for the last few decades along with a warming
+climate resulting from the anthropogenic CO2 emissions (Notz and Stroeve,
+2016). Arctic SIE has been reduced by more than 50,000 km2/year, and at
+the same time, Arctic SIT has decreased by more than 2 m in average, with
+more than a 50 % SIT reduction in thick multi-year ice (Kwok, 2018). With
+such dramatic changes in SIE and SIT, the thermodynamic and dynamic
+conditions of Arctic sea ice have entered a new phase (Wang et al., 2022;
+Stroeve and Notz, 2018). Given that sea ice plays a critical role in the
+physicalconditionsoftheatmosphereandocean(e.g.,heatexchange,salinity,
+etc.) (Haumann et al., 2016; Hirst, 1999; McPhee, 1992; Budikova, 2009),
+understanding sea ice dynamics is essential for understanding the future of
+the Arctic Ocean and global climate.
+A traditional way to predict the sea ice dynamics in the Arctic Ocean is
+using numerical models based on physics laws and equations that describe
+sea ice in terms of mass and momentum balances, as well as its interaction
+2
+with the atmosphere and ocean (Stark et al., 2008; Fritzner et al., 2019;
+Hibler, 1979; Parkinson and Washington, 1979). Although physics models
+have successfully explained general sea ice behaviors by assuming sea ice as
+viscous-plasticorelastic-viscous-plasticmaterial(HunkeandDukowicz,1997;
+Hibler, 1979), several challenges make it difficult to improve their fidelity
+and efficiency. First, since countless atmospheric, oceanic, and even biologi-
+cal variables are involved in sea ice dynamics, established physics equations
+have limitations in explaining every detailed mechanism of sea ice dynamics.
+If the sea ice dynamics are partially governed by any unknown mechanisms,
+physics models may not agree perfectly with the real observations. Second,
+uncertainties in the complicated parameterization of sea ice physical condi-
+tions, including initial and boundary conditions, can propagate through the
+modelpredictions(Blockleyetal.,2020;Hunkeetal.,2010). Sincerealobser-
+vations are not always available, physics models are often based on physical
+assumptions. Considering that numerical models are sensitive to initial con-
+ditions and physical assumptions, they can result in significant uncertainties
+and discrepancies with real observations (Blanchard-Wrigglesworth et al.,
+2015). Third, solving coupled and non-linear partial differential equations
+(PDEs) is computationally intensive and expensive. Although adding more
+complexitytoamodelorincreasingmodelresolutioncanenhancethemodel’s
+accuracy, it exponentially increases computational costs (Hunke et al., 2010;
+Li et al., 2023). Hence, this computational demand inhibits improving the
+model performance for higher spatial and temporal resolutions.
+Recently, machine learning (ML) techniques have emerged to predict sea
+ice behaviors with fewer complexities and a lower computational cost than
+3
+traditional numerical models. ML approaches have several benefits com-
+pared to numerical models. First, complex PDEs or parameterizations are
+not required for ML models because they need only observational data to be
+trained. ML models can learn complex non-linear patterns or relationships
+between multiple atmospheric and oceanic variables directly from observa-
+tional data without any explicit knowledge of physical processes. Second,
+ML models can be easily updated and trained continuously with new ob-
+servational data, and this data integration can make the model prediction
+more accurate and reliable. Finally, ML models require less computational
+cost than numerical models. While numerical models often require intensive
+computing resources (e.g., high-performance computing) to solve complex
+PDEs, ML models can be implemented relatively fast by leveraging the par-
+allel processing ability of graph processing units (GPUs).
+Based on such advantages, various machine learning models have been
+developed to predict sea ice concentration (SIC) and sea ice velocity (SIV),
+most of which rely on convolutional neural networks (CNN) (Ren and Li,
+2021; Liu et al., 2021; Yan and Huang, 2018; Hoffman et al., 2023; Petrou
+and Tian, 2019). As a deep learning algorithm specialized for image data,
+CNN propagates the input data through convolutional layers with multiple
+filters and extracts spatial patterns and features. Based on the ability of
+CNN to learn complex features in image datasets, CNNs have succeeded in
+various applications in environmental modeling (Wang et al., 2024; Jiang
+et al., 2023; Sadeghi et al., 2020). Since the SIC and SIV data for the entire
+Arctic Ocean are often provided from remote sensing data sources as grid
+formats, CNN has advantages in exploiting the spatial variability in those
+4
+sea ice data.
+However, the fidelity of fully data-driven ML models is highly dependent
+on the quantity and quality of training datasets, which leads to limitations in
+further improving the model performance. First and foremost, data-driven
+ML models require a large amount of data to ensure generalizability. If
+training samples are insufficient or their distribution is biased, the model can
+be overfitted and lack generalizability to out-of-training cases. Second, ML
+models are consideredblack-boxmodels and lack inherent interpretability in
+how the final predictions are derived. This lack of inherent interpretability
+makes it difficult to understand why the model predicts physically invalid
+values about sea ice conditions (e.g., negative SIC or SIC>100%).
+In order to address such issues of the fully data-driven ML models and
+improve the model’s generalizability, it is helpful to guide the learning pro-
+cess to agree with fundamental physical laws and domain knowledge. By
+integrating physics knowledge and constraints into ML training, the ML
+models can yield physically consistent predictions even in the presence of
+imperfect data, such as missing, noise, or outliers data (Karniadakis et al.,
+2021; Raissi et al., 2019; Maier et al., 2023). This integration of ML and
+physics knowledge is often referred to asphysics-informed machine learning
+(PIML), and has been proposed for various dynamic systems (Karniadakis
+et al., 2021; Maier et al., 2023). Recently, many studies have attempted this
+PIML framework for various applications including, but not limited to, flow
+dynamics, material sciences, molecular simulations, chemistry (Karniadakis
+et al., 2021). In particular, PIML based on well-known flow laws such as
+Stokes equation has shown great success in modeling the dynamics of ice
+5
+sheets and glaciers (i.e., land ice) (Teisberg et al., 2021; Riel et al., 2021; Riel
+and Minchew, 2023; Iwasaki and Lai, 2023; Jouvet and Cordonnier, 2023;
+He et al., 2023). In sea ice application, Liu et al. (2024) proposed dual-task
+neural network architecture and incorporated a loss function based on sea ice
+control equation. However, it remains unclear how this PIML concept and
+physics-informed loss function can contribute to future sea ice predictions
+under rapidly changing climate conditions.
+This study aims to improve the fidelity of deep learning models that
+predict sea ice dynamics by integrating physical knowledge into the model
+training. Inordertoenforcethedeeplearningmodel(neuralnetwork)tocon-
+verge into physically valid SIV and SIC values, we explicitly adopt a physics-
+informed neural network (PINN) approach based on loss function. We em-
+bed this physics-informed learning strategy in the hierarchical information-
+sharing U-net (HIS-Unet), a CNN model for SIV and SIC predictions (Koo
+and Rahnemoonfar, 2024). The main contributions of this research consist
+of the following.
+•We design physics loss functions and combine them with the data loss
+function to regulate physical validity of SIC and SIV.
+•We modify the output layer to guarantee the physically valid SIC val-
+ues.
+•Our extensive experiments show that the physics-informed deep learn-
+ing model can improve the performance in SIC and SIV predictions
+even with a small number of training samples.
+•We explore the spatiotemporal variability in the improved performance
+6
+of our physics-informed learning strategies compared to fully data-
+driven deep learning models that do not embed physics.
+The remainder of the paper is organized as follows. Section 2 provides a
+brief review of the physical background of sea ice modeling, machine learn-
+ing for sea ice prediction, and PIML. Section 3 explains details of remote
+sensing and meteorological data used in this study, and section 4 presents
+the architecture of our CNN model and physics-informed learning strategies.
+The performance and implication of our PINN are discussed in Section 5.
+2. Background
+2.1. Physics of sea ice dynamics
+In physical sea ice models, the volume and area of sea ice are determined
+by thermodynamic evolution and dynamic motion field. The spatiotemporal
+changes in SIT (h) and SIC (A) can be expressed by the following equations
+for mass conservation (Hibler, 1979; Holland and Kwok, 2012; Flato, 2004):
+∂h
+∂t+∇ ·(uh) =S h (1)
+∂A
+∂t+∇ ·(uA) =S A (2)
+whereuis the ice motion vector,S handS Aare the changes in SIT and SIC
+driven by thermodynamic sources (e.g., freezing or melting), respectively.
+Additionally, the following momentum equations have been used in var-
+ious numerous physical sea ice models to explain the balance of horizontal
+7
+forces on sea ice based on the most common assumption of elastic-viscous-
+plastic (EVP) properties of sea ice (Hibler, 1979):
+mDu
+Dt=−mfk×u+τ ai+τwi+F−mg∇H(3)
+whereD/Dt=∂/∂t+u·∇isthesubstantialtimederivative,mistheicemass
+perunitarea,kisaunitvectornormaltothesurface,uistheicevelocity,fis
+theCoriolisparameter,τ aiandτ wiaretheforcesduetoairandwaterstresses,
+His the elevation of the sea surface,gis the gravity acceleration, andFis
+the force due to variations in internal ice stress. Following this equation,
+many previous studies described SIV as interacting with wind and ocean
+forcings (Rampal et al., 2016; Wang et al., 2014; Timmermann et al., 2009;
+Salas Mélia, 2002). Particularly, wind velocity has been treated as a major
+variable in SIV, contributing to up to 70 % of the sea ice velocity variances
+(Thorndike and Colony, 1982) depending on season or region. Nevertheless,
+predicting sea ice dynamics based on physical models is still challenging due
+to the intrinsic complexity and dependency of physical models on numerous
+parameterizations.
+2.2. Neural network for sea ice prediction
+Convolutional neural networks (CNNs) have been used as the most pop-
+ular and efficient deep learning network for modeling SIC and SIV. First, in
+terms of SIC, Andersson et al. (2021) proposed a deep-learning sea ice fore-
+castingsystemnamedIceNettoforecastmonthlySICforthenextsixmonths.
+Grigoryev et al. (2022) used a U-Net architecture, a type of deep CNN, for
+daily SIC forecasts in several subsections of the Arctic Ocean, including the
+Barentsand Kara Seas, Labrador Sea, and LaptevSea. Kim etal. (2020)also
+8
+used CNN to predict monthly SIC from satellite-based SIC observations, sea
+surface temperature, air temperature, albedo, and wind velocity data from
+the previous months. Similarly, Fritzner et al. (2020) proposed a CNN that
+predicts weekly SIC from SIC, sea surface temperature, and air temperature
+from the previous six days. CNN models proposed by Ren and Li (2021) and
+Ren et al. (2022) used the sequences of satellite-derived SIC observations
+to make daily SIC predictions. In some studies, long short-term memory
+(LSTM), an advanced recurrent neural network (RNN), has been modified
+andinsertedintoCNNarchitecturetoobtainbetterperformanceinbothspa-
+tial and temporal SIC predictions (Liu et al., 2021). CNN and LSTM have
+also been used for SIV prediction in several studies. Zhai and Bitz (2021)
+and Hoffman et al. (2023) used CNN to predict daily SIV, and their model
+outperformed other statistical and physical models. Petrou and Tian (2019)
+showed that adding LSTM units to convolutional layers improves the per-
+formance of a model that predicts SIV. In this study, we adopt a multi-task
+neural network framework named HIS-Unet (Koo and Rahnemoonfar, 2024)
+and improve the predictability of SIV and SIC of this model by incorporating
+physics-informed training scheme.
+2.3. Physics-informed machine learning (PIML)
+Historically, PIML has been achieved by integrating physics knowledge
+into ML training in the form of: (i) data, (ii) model architecture, and (iii)
+optimization (Hao et al., 2023; Karniadakis et al., 2021). First, one of the
+straightforward methods to incorporate physics knowledge into ML is to gen-
+erate training data from the desired physics knowledge. Data-driven ML
+models that are trained with sufficient simulation data governed by certain
+9
+underlying physics laws can accurately represent these physics laws. Given
+that enough high-quality and labeled data is not always available for real-
+worldtasks, syntheticdataconstructedwithphysicalsimulationscanprovide
+a large amount of data with high quality. However, this approach can have
+limitations in perfectly reflecting real world because real-world data have
+different distributions from simulation data. In addition, the cost of data
+acquisition can be a critical issue, as simulation data is often generated via
+expensive experiments or large-scale simulations.
+The second way to implement PIML is to design neural network architec-
+tures that implicitly embed any prior knowledge and inductive biases associ-
+ated with a given task (e.g., symmetry, conservation laws, etc.) (Karniadakis
+et al., 2021). CNN is a popular example of this neural network architecture
+that achieves extensive applicability for image recognition by respecting in-
+variance and symmetry groups in natural images (Karniadakis et al., 2021;
+Mallat, 2016). Another example of this category is equivariant networks,
+which embed the dynamic changes in spatial coordinates to preserve the
+equivariance of data points to rotation and translation (Satorras et al., 2022;
+Schütt et al., 2017). Some neural network architectures also used Lagrangian
+and Hamiltonian mechanics to enforce the energy conservation property of
+the networks (Hao et al., 2023). Furthermore, in solving PDEs, there have
+been several attempts to modify neural network architecture to satisfy the
+required initial conditions (Hao et al., 2023). Although such a model ar-
+chitecture approach can be effective with relatively simple and well-defined
+physics or symmetry groups, this approach has limitations in extending to
+highly complex problems.
+10
+Lastly, physics knowledge can be integrated into the optimization and
+learning process by imposing constraints of prior physics knowledge into the
+form of loss functions. As a soft manner of penalizing the loss function
+instead of enforcing a specific condition directly, this approach can indirectly
+reshape the target spaces of NN output to converge to physically plausible
+solutions (Karniadakis et al., 2021; Hao et al., 2023); in this study, we will
+refer to this approach specifically asPINN. This approach can be regarded
+as a case of multi-task learning, balancing the loss functions for two tasks
+of fitting both the observation data and physical constraints. Although such
+a soft constraint approach is the most common and flexible way for PIML,
+balancing these two tasks can be challenging because they can counteract
+the convergence to each other’s solution.
+In the modeling of land ice, PIML has emerged as an effective way to pre-
+dict ice flow, and most previous studies employed the optimization approach
+by adding physics loss functions or regularization terms (i.e., PINN). Teis-
+berg et al. (2021) developed a PINN to predict ice thickness and velocity by
+adding a physics loss function based on the mass conservation of ice sheets.
+Riel et al. (2021) introduced a physics loss function derived from the gov-
+erning equations of ice flow to their PINN framework to infer spatially and
+temporally varying basal drag in ice sheets. Riel and Minchew (2023) pro-
+posed a PINN framework to predict the distribution of ice rigidity by adding
+the loss functions of ice flow and Kullback-Leibler divergence. Iwasaki and
+Lai (2023) proposed a physics loss function to fit the model results with
+physics laws regarding ice flows, and this physics loss function contributed
+to improving the model performance when the data was contaminated by
+11
+noise. Jouvet and Cordonnier (2023) optimized their PINN by minimizing
+the energy associated with high-order ice-flow equations. Cheng et al. (2024)
+employed a PINN to infer basal sliding while filling gaps in sparsely observed
+ice thickness data. In the regime of sea ice, there have been several attempts
+to integrate physics knowledge into machine learning by training the model
+with the data retrieved from physical models (Palerme and Muller, 2021;
+Palerme et al., 2024). Liu et al. (2024) used a dual-task CNN architecture
+and physics-informed loss function to enforce dynamic constraints of SIC and
+SIV. Despite such developments of PINN for cryosphere, it is still necessary
+to assess how PINN and physical constraints can help future predictions of
+sea ice conditions. Therefore, this study explicitly applies the concept of
+PINN to sea ice prediction and explore the how weights to physics-informed
+loss function and representability of training samples contribute to the model
+predictability for future unseen sea ice conditions.
+3. Data
+In this study, we use daily SIV and SIC data collected from satellite
+observation from 2009 to 2022. We use the SIV and SIC from previous three
+days (inputs of the model) to predict the next day’s SIV and SIC (output of
+the model) (Table 1). Besides satellite observations of SIV and SIC, we also
+use wind velocity and air temperature from reanalysis as additional input
+variables for the model. Additionally, we add X and Y coordinates as inputs
+to represent regional variability. The input datasets and their sources are
+summarized in Table 1. This section presents the details of these datasets.
+12
+Table 1: Input data sets for machine learning models
+Dataset NameSpatial
+resolution
+Sea ice velocity
+(u and v)NSIDC Polar Pathfinder Daily 25 km EASE-
+Grid Sea Ice Motion Vectors (Tschudi et al.,
+2020)25 km
+Sea Ice Concen-
+trationNOAA/NSIDC Climate Data Record of Pas-
+sive Microwave Sea Ice Concentration (Meier
+et al., 2021)25 km
+10 m wind veloc-
+ity (u and v)ECMWF Reanalysis v5 (ERA5) hourly data
+on single levels (Hersbach et al., 2020)0.25◦
+2 m air tempera-
+tureECMWF Reanalysis v5 (ERA5) hourly data
+on single levels (Hersbach et al., 2020)0.25◦
+13
+3.1. Sea ice velocity
+We use the NSIDC Polar Pathfinder Daily 25 km EASE-Grid Sea Ice
+Motion Vectors version 4 (Tschudi et al., 2019, 2020) as the input and output
+SIV. This product derives daily SIV from three primary types of sources: (1)
+gridded satellite images, (2) wind reanalysis data, and (3) buoy position data
+fromtheInternationalArcticBuoyProgram(Tschudietal.,2019,2020). The
+u component (along-x) and v component (along-y) of SIV are independently
+derived from each of these sources and optimally interpolated onto a 25 km
+Equal-Area Scalable Earth (EASE) grid. When SIV is derived from satellite
+images, a correlation coefficient is calculated between a small target area in a
+one-dayimageandasearchingareainthenext-dayimage. Then, thelocation
+inthenext-dayimagewiththehighestcorrelationcoefficientisdeterminedas
+the displacement of ice (Tschudi et al., 2019). The mean difference between
+the Polar Pathfinder and buoy measurements of SIV is approximately 0.1
+km/day and 0.3 km/day for u and v components, respectively (Tschudi et al.,
+2019). We note that the SIV of this product is valid over short distances
+away from the ice edge in areas where ice conditions are relatively stable,
+stationary, homogenous, and isotropic (Tschudi et al., 2020). In this study,
+we exclude SIV values close to the coastlines within 50 km (or 2 pixels) of
+distance.
+3.2. Sea ice concentration
+For the SIC data, we use NOAA/NSIDC Climate Data Record of Passive
+Microwave Sea Ice Concentration version 4 data (Meier et al., 2021). This
+datasetprovidesaClimateDataRecord(CDR)ofSIC(i.e., thearealfraction
+of ice within a grid cell) from passive microwave (PMW) data. The CDR
+14
+algorithm output is the combination of SIC estimations from two algorithms:
+the NASA Team algorithm (Cavalieri et al., 1984) and NASA Bootstrap
+algorithm (Comiso, 1986). These empirical algorithms estimate SIC from
+the PMW brightness temperatures at different frequencies and polarizations:
+verticalandhorizontalpolarizationsat19GHz, 22GHz, and37GHz. Several
+assessments showed that the error of this SIC estimation is approximately
+5 % within the consolidated ice pack during cold winter conditions (Meier,
+2005; Comiso et al., 1997; Ivanova et al., 2015). However, in the summer
+season, the error can rise to more than 20 % due to surface melt and the
+presence of melt ponds (Kern et al., 2020). Due to the data quality issue
+near coastal areas, we use the SIC data more than 50 km from the coastline.
+To match the coordinate systems of the SIC and SIV products, we reproject
+the NSIDC Sea Ice Polar Stereographic grid of the SIC product into the
+EASE grid of the SIV product using bilinear interpolation.
+3.3. ERA5 climate reanalysis
+As shown in Eq. 3, sea ice dynamics are largely associated with at-
+mospheric and oceanic circulation. Thus, we use the wind speed and air
+temperature as the input variables of the ML model. We use the fifth-
+generation ECMWF (European Centre for Medium-Range Weather Fore-
+casts) atmospheric reanalysis (ERA5) as the data sources for wind velocity
+and air temperature. ERA5 provides hourly estimates of atmospheric, land,
+and oceanic climate variables, covering the period from January 1940 to the
+present (Hersbach et al., 2020). We obtain the daily average wind velocity
+(zonal and meridional components) at 10 m height and 2 m air temperature
+from this hourly data. To co-locate this data with the SIV and SIC data, we
+15
+reproject the raw ERA5 latitude-longitude grid onto the 25 km EASE grid
+using bilinear interpolation.
+4. Methods
+In this study, we use a hierarchical information-sharing U-net (HIS-Unet)
+based on Koo and Rahnemoonfar (2024) as a backbone deep learning model
+(Fig. 1) to make daily predictions of SIC and SIV from inputs of SIC, SIV,
+wind, and atmospheric temperature from the previous three days. As a fully
+convolutional network, the HIS-Unet is designed to predict SIC and SIV
+simultaneously. By sharing SIC and SIV information during the propagation
+processes, the HIS-Unet achieves better fidelity than other neural networks
+and statistical approaches in predicting both SIC and SIV. In particular, this
+information sharing is proven to be useful for predicting sea ice conditions
+where and when SIV has impacts on SIC changes (Koo and Rahnemoonfar,
+2024). Since understanding sea ice dynamics requires both SIV and SIC
+information (e.g., Eq. 2), we use the multi-task prediction of SIV and SIC
+by the HIS-Unet to facilitate integrating the physics knowledge of sea ice
+dynamics. To embed fundamental knowledge of sea ice dynamics into the
+HIS-Unet architecture, we (1) introduce physics loss functions in the training
+phase and (2) add an additional activation function to the output layer.
+This section presents the details of the HIS-Unet architecture and physics-
+informed training strategies used in this study.
+4.1. Hierarchical information-sharing U-net (HIS-Unet)
+The HIS-Unet architecture consists of two separate task branches, each
+for predicting SIV and SIC (Fig. 1). The task branches are connected with
+16
+weighting attention modules (WAMS) that allow information sharing be-
+tween the SIV and SIC branches. SIC and SIV branches have U-net struc-
+tures (Ronneberger et al., 2015) with a series of encoders (contracting path)
+and decoders (expansive path). Each encoder path consists of repeated two
+3×3convolutions and a2×2max pooling operation with stride 2 for
+downsampling and doubling the number of features. The decoders conduct
+2×2up-convolution and half the number of feature channels, followed by a
+concatenationwiththecroppedfeaturemapandtwo3×3convolutions(Ron-
+neberger et al., 2015). The hyperbolic tangent (tanh) activation function is
+applied after each convolutional layer:
+Tanh(x) =ex−e−x
+ex+e−x(4)
+The separated U-net structures of SIV and SIC branches output SIV or
+SIC, respectively, but they share and transfer their information through six
+weighting attention modules (WAMs) during the propagation process. Six
+WAMs are inserted into 3 encoder steps and 3 decoder steps between SIC
+and SIV branches (Fig. 1).
+Each WAM first receives information from the SIV and SIC branches
+and calculates the weighted sum of them (Fig. 1b). Letting a WAM receive
+the SIV feature map (ξ in,SIV; heightH, widthW, channelsC) and SIC
+feature map (ξ in,SIC;H×W×C), the input shared information (ξ in,share)
+is determined by multiplying linear weights,A in,SIVandA in,SIC, toξ in,SIV
+andξ in,SIC, respectively (Fig. 1b). Then, this shared informationξ in,share
+passes through sequentially arranged channel attention (Fig. 1c) and spatial
+attention modules (Fig. 1d). The channel attention highlights what channel
+is meaningful, and the spatial attention highlights where an informative part
+17
+Figure 1: (a) Architecture of Hierarchical information-sharing U-net (HIS-Unet); (b)
+Weighting attention module (WAM) in HIS-Unet; (c) Channel attention module and (d)
+Spatial attention module in a WAM (Koo and Rahnemoonfar, 2024).
+18
+is spatially located (Woo et al., 2018). These channel and spatial attention
+modules are also applied to the input SIV and SIC feature maps (ξ in,SIVand
+ξin,SIC) (Fig. 1b). Then, the attention shared information is sent to the SIV
+and SIC branches after multiplying output weights (A out,SIVandA out,SIC)
+and adding attention SIV and SIC information, respectively. More details
+of how the WAMs enable sharing and highlighting SIC and SIV information
+are described in Koo and Rahnemoonfar (2024).
+4.2. Physics-informed training
+In order to make the HIS-Unet incorporate physics knowledge of sea ice,
+we embed two physics-informed regularizations: (1) include physics loss func-
+tions along with the data loss function and (2) insert the sigmoid activation
+function to the SIC branch to guarantee valid SIC values.
+The original HIS-Unet is optimized by the mean square error (MSE)
+objective loss function (L data). The MSE data loss term (L data) is calculated
+by the following equation:
+Ldata=X
+(|up−uo|2+|v p−vo|2+|A p−A o|2)(5)
+whereuandvdenote x-component and y-component of SIV, respectively,A
+denotes SIC, and the subscriptomeans observation andpmeans prediction
+by HIS-Unet. In addition to this MSE data loss function, we design physics
+loss functions that apply physical constraints: (i)L satconstraining valid SIV
+values and (ii)L thermconstraining thermodynamically valid ice growth.
+First, we regularize the valid SIV values associated with SIC values. Since
+the PMW-derived SIV can be only defined where sea ice presents with>15
+19
+% of SIC (Tschudi et al., 2019), SIV should be zero where SIC is less than
+15 %. Therefore, we design the first physics loss term as follows:
+Lsat=
+
+|u2
+p+v2
+p|,ifA p<0.15
+0,ifA p≥0.15(6)
+The next physics loss term (L therm) is based on Eq.2, which explains the
+thermodynamic and dynamic SIC changes. The thermodynamic SIC changes
+(SA), the right term in Eq. 2, can be calculated by temporal changes of SIC
+and the combination of advection and divergence of SIC. In the case of daily
+SIC prediction, the dailyS Acan be assumed not to exceed (-1, 1). That
+is, we assume that the thermodynamic freezing and melting of sea ice are
+unlikely to saturate SIC from 0 % to 100 % or remove the entire sea ice from
+100 % to 0 % within a day in most cases. Thus, based on this assumption,
+we design the second physics loss term as follows:
+Ltherm =ReLU(|∂Ap
+∂t+∇ ·(u pAp)| −1)(7)
+where the time derivative term (∂Ap
+∂t) is derived by subtracting the previous-
+day SIC from the output SIC, and the spatial derivative term (∇ ·(u pAp))
+is derived by calculating the spatial gradients in output SIV and SIC grids.
+By usingL therm, we can assign a linearly increasing penalty as the thermo-
+dynamic ice growth prediction exceeds 1.
+Consequently, the total physics loss term (L phy) and the final objective
+loss functions (L) are defined as follows:
+Lphy=λ satLsat+λthermLtherm (8)
+L=L data+L phy (9)
+20
+whereλ satandλ thermare the relative weights ofL satandL therm, respectively,
+to the data loss term. In this study, we conduct experiments with different
+λsatandλ thermof 0, 0.2, 1.0, and 5.0 and examine how this weight changes
+the model performance.
+As the second regularization, we enforce the output SIC to lie within the
+value range of 0 to 1 (0 to 100 %) by adding the sigmoid activation function
+to the last output layer of the SIC branch:
+Sigmoid(x) =1
+1 +e−x(10)
+This can constrain the valid range of SIC outputs, even for out-of-training
+samples.
+4.3. Traininig strategy
+InourHIS-Unet,weusetheprevious3daysofSIV(x-andy-components),
+SIC, air temperature, and wind velocity (x- and y- components) as the inputs
+to predict the next day’s SIV and SIC. Consequently, the input layer has 18
+channels of 256×256 grid size. All input values are normalized to -1 to 1
+based on the nominal maximum and minimum values that each variable can
+have. All the data is collected for 14 years from 2009 to 2022; the first seven
+years of data (2009-2015) are utilized as training data, and the remaining
+seven years of data (2016-2022) are utilized as test data. To examine how
+the model performance is changed by the number of training data, we train
+the model with three different training sample sizes: (1) using all 2009-2015
+data as training samples (i.e., 100 % sampling), (2) randomly selecting 50 %
+of2009-2015dataastrainingsamples(i.e., 50%sampling), and(3)randomly
+selecting 20 % of 2009-2015 data as training samples (i.e., 20 % sampling).
+21
+The total number of training samples is 2,177 for the 100 % sampling, 1,088
+for 50 % sampling, and 436 for the 20 % sampling. The HIS-Unet models
+trained with three different sample sizes are applied to the 2016-2022 test
+data. All models are optimized by the Adam stochastic gradient descent
+algorithm (Kingma and Ba, 2017) with 100 epochs and a 0.001 learning rate.
+All scripts are executed on eight NVIDIA RTX A5000 GPUs with 24 GB of
+memory.
+4.4. Model performance
+Themodelperformanceisassessedbytherootmeansquareerror(RMSE):
+RMSE(ˆy, y) =sPN
+i=1(ˆyi−yi)2
+N(11)
+whereˆydenotes predicted values,ydenotes true values,Nis the number
+of data points. In the case of SIV, we calculate RMSE for both x- and
+y-component SIV, and the average of x- and y-component RMSEs is deter-
+mined as the SIV RMSE to embrace the magnitude and angle error of SIV.
+We assess and compare the RMSEs from the HIS-Unet with three different
+training sample cases and four differentλ satandλ therm(i.e., 0, 0.2, 1.0, and
+5.0). We use the HIS-Unet without any physics-informed regularization (i.e.,
+trained only with the data lossL dataand without the sigmoid activation
+function to the SIC branch) as the baseline model, and this purely data-
+driven model is notated asNo-Phy. Meanwhile, we call the physics-informed
+HIS-Unet simply PINN. We compare the RMSE differences between PINN
+andNo-Phyfor different training sample sizes (20 %, 50 %, and 100 %).
+Additionally, we examine how these RMSE differences vary by month and
+region in seven test years (2019-2022). To assess the statistical significance
+22
+of RMSE improvement by PINN, we conduct paired t-tests between RM-
+SEs of PINN and RMSEs ofNo-Phy. If the p-value from the t-test is below
+0.05, we determine that the RMSE difference between PINN andNo-Phyis
+significant.
+InadditiontoRMSE,weusethemeanabsoluteerror(MAE)andanomaly
+correlation coefficient (ACC) to evaluate the predictive performance of PINN
+andNo-Phy.
+MAE(ˆy, y) =PN
+i=1|ˆyi−yi|
+N(12)
+ACC(ˆy, y) =PN
+i=1(ˆyi−¯ˆiy)(y i−¯yi)qPN
+i=1(ˆyi−¯ˆiy)2PN
+i=1(yi−¯yi)2(13)
+Lower RMSE and MAE values indicate higher prediction accuracy, while a
+higher ACC (i.e., approaching 1) reflects stronger agreement between pre-
+dicted and observed anomalies, indicating better predictive skill. We note
+that the performance ofNo-Phymodel trained with full training samples can
+be found in Koo and Rahnemoonfar (2024) in detail. TheNo-PhyHIS-Unet
+showed better performance than another simple statistical model (e.g., lin-
+ear regression), physical model (Hybrid Coordinate Ocean Model; HyCOM),
+simple convolutional network, and independent-branch U-nets. Since the
+HIS-Unet performance has already been assessed in the previous study, this
+study is focused on assessing the effect of using a physics-informed learning
+strategy rather than assessing the performance of the HIS-Unet architecture
+itself.
+23
+5. Results and discussion
+5.1. Performance of PINN
+We evaluate the predictive performance ofNo-Phyand PINNs with dif-
+ferentλ satandλ thermsettings, and check whether PINNs can improve the
+model performance compared toNo-Phy. Additionally, we investigate how
+this improvement pattern varies by different training sample sizes. Figure 2
+shows the SIV and SIC RMSE changes by PINNs as functions of different
+training sample sizes,λ sat, andλ therm. Table 2 shows the RMSE, MAE, and
+ACC ofNo-Phybaseline and PINN with 0.2λ thermand 0.2λ sat. According
+to Table 2, the errors of both SIV and SIC predictions decrease with more
+training samples.
+Regarding SIV, the integration of physics loss functions, including both
+λthermandλ sat, improves the model fidelity relative to theNo-Phybaseline
+model (Fig. 2a). The reduction in SIV RMSE by the physics loss term is
+observed in all sample sizes, but this effect is more significant in the 20 %
+sample size: SIV RMSE decreases by up to 0.10 km/day whenλ satis set to
+0.2. When 50 % and 100 % of training samples are used, the SIV RMSE
+decreases by up to 0.02 km/day and 0.05 km/day, respectively. We also find
+improvements of SIV MAE and ACC by PINN in all training sample cases
+(Table 2).
+On the other hand, regarding SIC, the PINNs show lower SIC RMSEs
+than theNo-Phybaseline model (Fig. 2), and the improvement of the PINN
+is more significant for smaller sample sizes. When 20 % of training samples
+are used, the PINNs show approximately 1.1 % lower SIC RMSE than the
+No-Phymodel. When the training samples are set to 50 % and 100 %, the
+24
+Figure 2: (a) The reduction of SIV RMSE by PINNs with different training sample sizes
+(20, 50, and 100 %) and combinations ofλ satandλ therm(0, 0.2, 1.0, and 5.0), relative
+to the SIV RMSE of theNo-Phymodel. (b) The reduction of SIC RMSE by PINNs with
+different training sample sizes and combinations ofλ satandλ therm, relative to the SIC
+RMSE of theNo-Phymodel. Cross markers indicate statistically significant reduction.
+25
+Table 2: Assessment of SIV and SIC predictions for PINN (λ therm = 0.2andλ sat= 0.2)
+andNo-Phywith different training sample sizes. The best accuracy is highlighted in bold.
+Sample size 20 % 50 % 100 %
+SIVModelRMSE
+(km/d)MAE
+(km/d)ACCRMSE
+(km/d)MAE
+(km/d)ACCRMSE
+(km/d)MAE
+(km/d)ACC
+PINN 2.778 1.954 0.853 2.732 1.915 0.859 2.629 1.844 0.867
+No-Phy 2.873 2.053 0.843 2.759 1.936 0.856 2.684 1.880 0.863
+SICModelRMSE
+(%)MAE
+(%)ACCRMSE
+(%)MAE
+(%)ACCRMSE
+(%)MAE
+(%)ACC
+PINN 6.687 3.441 0.975 6.222 3.118 0.978 5.854 2.917 0.981
+No-Phy 7.393 4.335 0.969 6.611 3.533 0.975 6.197 3.274 0.978
+SIC RMSEs are approximately 0.5 % and 0.3 % lower for the PINNs than the
+No-Phymodels, respectively. Besides the RMSE comparison, the MAE and
+ACC are also improved by PINN (Table 2). These results suggest that the
+incorporation of physics-informed architecture and optimization is beneficial
+for SIC predictability under limited training sample scenarios. However, the
+weightstothephysicslossfunctionarenotsosignificantfortheSICaccuracy:
+no consistent trend in SIC RMSE is observed with increasingλ thermorλ sat
+values.
+5.2. Temporal characteristics of model performance
+Figure 3 shows the monthly RMSE of SIV prediction for seven test years
+(2016-2022) with different sample sizes. For the PINN model, we setλ sat=
+0.2andλ therm = 0.2based on the optimal configuration identified in Figure
+2. In general, SIV prediction shows relatively lower errors in summer (June-
+August) due to the slow drift speed during these months (Fig. A.7c). The
+improvement of SIV RMSE by PINN (i.e., RMSE difference between PINN
+andNo-Phymodel) is evident in most months when the sample size is 20
+26
+Figure 3: Monthly SIV RMSE ofNo-Phymodel and PINN (λ sat= 0.2andλ therm = 0.2)
+for seven test years (2016-2022). On the top panel, the solid lines indicate monthly SIV
+RMSEs of PINN models, and the dashed lines indicateNo-Phymodels. The bottom panel
+shows the differences between each PINN model and theNo-Phymodel. Statistically
+significant decreases in RMSE by PINN are highlighted as circles in the bottom panel.
+Statistical significance of each month is determined by conducting a t-test on all daily
+RMSE results from PINN andNo-Phy. The shaded areas in the bottom panels show the
+25-75 % quantile of RMSE difference.
+%, and the RMSE reduction is relatively greater during the winter months
+(January to April) (Fig. 3). For the 50 % and 100 % sample sizes, no
+significant temporal trend in the SIV performance improvement is found.
+MonthlyRMSEsofSICfortestyearsaredepictedinFigure4. Incontrast
+to the SIV results, SIC exhibits relatively higher errors during the summer
+monthsfromJunetoJuly. WhileSICremainsconsistentlyhighfromJanuary
+to May, it decreases rapidly in these months (Fig. A.7d); the model could
+have difficulty capturing this trend. The most interesting finding is that SIC
+RMSEishighlydependentontrainingsamplesize: SICRMSEdecreaseswith
+a greater sample size. As a result, a more remarkable improvement in model
+accuracy by PINN is observed with fewer sample sizes. When the models are
+trained with 20 % of training samples, PINN reduces the SIC RMSE by>
+27
+Figure 4: Monthly SIC RMSE ofNo-Phymodel and PINN (λ sat= 0.2andλ therm = 0.2)
+for seven test years (2016-2022). On the top panel, the solid lines indicate monthly SIC
+RMSEs of PINN models, and the dashed lines indicateNo-Phymodels. The bottom panel
+shows the differences between each PINN model and theNo-Phymodel. Statistically
+significant decreases in RMSE by PINN are highlighted as circles in the bottom panel.
+Statistical significance of each month is determined by conducting a t-test on all daily
+RMSE results from PINN andNo-Phy. The shaded areas in the bottom panels show the
+25-75 % quantile of RMSE difference.
+0.5 % in all months, and such RMSE reduction is more significant in winter
+months from January to March.
+5.3. Spatial characteristics of model performance
+In this section, we examine where the PINN approach is more or less
+effective and discuss the implications of such spatial patterns. Herein, we
+discuss only the PINN withλ sat= 0.2andλ therm = 0.2configuration because
+(1) this PINN setting shows overall best RMSE in all sampling sizes and (2)
+the spatial patterns of PINN improvement appear similar for all differentλ sat
+andλ thermvalues. The spatial distributions of SIV RMSE for PINN andNo-
+Phymodels with different sample sizes are shown in Figure 5. As previously
+discussedinFigures2and3, themostsubstantialRMSEimprovementoccurs
+28
+with 20 % of training samples (Fig. 5h). When 20 % of training samples
+are used, the SIV RMSE improvement by PINN reaches up to 10 % near
+the central Arctic and northern Canadian Archipelago (Fig. 5g). When 50
+% of training samples are used, RMSE reductions are observed across the
+central Arctic, but it is not statistically significant, with less than 5 % SIV
+improvement in most regions (Fig. 5h). Similarly, when 100 % samples are
+used to train the model,<5 % of SIV RMSE reduction is observed across
+the Arctic Ocean except central Arctic (Fig. 5i).
+The spatial distribution of SIC RMSE improvement (Fig. 6) exhibits a
+different pattern from SIV. Above all, SIC RMSE improvement is observed
+across the Arctic Ocean. The PINN approach plays a particularly important
+role in improving SIC RMSE when only 20 % of training samples are used.
+When only 20 % of training samples are used to train the model, the baseline
+SIC RMSE of theNo-Phymodel exceeds 4 % across the Arctic Ocean (Fig.
+6a). However, by adopting PINN, SIC RMSE decreases significantly by up
+to 50 % in the central Arctic (Fig. 6g). The improvement of SIC RMSE
+by PINN is attenuated when more training samples are used. Although SIC
+RMSE improvement is not significant with 50 % and 100 % sample exper-
+iments, the effectiveness of PINN still appears widespread over the central
+Arctic with up to∼20 % (Fig. 6h and i).
+5.4. Implications to future Arctic sea ice prediction
+Given that many studies have shown the Arctic sea ice entered a new
+state in the 2010s with a dramatic loss of sea ice cover (Stroeve and Notz,
+2018; Meier et al., 2014; Guemas et al., 2016; Döscher et al., 2014), historical
+satellite-based sea ice observations spanning over more than 40 years since
+29
+Figure 5: The SIV RMSE map of the No-Phy model for (a) 20 % training samples, (b) 50
+% training samples, and (c) 100 % training samples. The SIV RMSE map of the PINN
+model (λ sat= 0.2andλ therm = 0.2) for (d) 20 % training samples, (e) 50 % training
+samples, and (f) 100 % training samples. The relative SIV RMSE difference map between
+PINN and No-Phy model for (g) 20 % training samples, (h) 50 % training samples, and (i)
+100 % training samples. On the bottom panels of the RMSE differences, the reddish color
+indicates the improvement in SIV RMSE by PINN over the No-Phy model (i.e., reduction
+in RMSE).
+30
+Figure 6: The SIC RMSE map of the No-Phy model for (a) 20 % training samples, (b) 50
+% training samples, and (c) 100 % training samples. The SIC RMSE map of the PINN
+model (λ sat= 0.2andλ therm = 0.2) for (d) 20 % training samples, (e) 50 % training
+samples, and (f) 100 % training samples. The relative SIC RMSE difference map between
+PINN and No-Phy model for (g) 20 % training samples, (h) 50 % training samples, and (i)
+100 % training samples. On the bottom panels of the RMSE differences, the reddish color
+indicates the improvement in SIC RMSE by PINN over the No-Phy model (i.e., reduction
+in RMSE).
+31
+the 1980s may no longer fully represent the recent and future non-stationary
+sea ice state in the Arctic. Moreover, considering that the Arctic Ocean is
+projected to be nearly ice-free during summer as early as 2030-2040 (Masson-
+net et al., 2012; Overland and Wang, 2013; Årthun et al., 2021), the future
+sea ice dynamics in the Arctic Ocean will likely be different from those in
+historical observations. Hence, this raises concerns about the reliability of
+purely data-driven deep learning models trained solely on historical records,
+as such models may struggle to generalize to recent and future non-stationary
+sea ice conditions under rapid climate change. However, our PINN strategy
+provides a more robust alternative to fully data-driven learning by integrat-
+ing physical principles directly into the learning process, thereby reducing
+reliance on historical data alone and enhancing model generalizability in a
+non-stationary climate regime.
+Inthisstudy, wetrainourPINNmodelswith2009-2015dataandevaluate
+them with 2016-2022 data. Compared to the training seven years, the test
+seven years are characterized as fast-moving sea ice and lower SIC (Fig. A.7).
+Despite these differences, our PINN indeed shows significant improvement
+in both SIV and SIC RMSEs compared to the fully data-drivenNo-Phy
+model. We highlight that our PINN models maintain consistent performance
+regardless of the number of training samples, whereas the performance of
+No-Phyis dependent on the number of training samples (Figs. 5 and 6).
+This suggests the potential of the PINN framework to guarantee significant
+predictive performance and generalizability even when the training data do
+not fully represent unseen sea ice conditions. Moreover, considering that the
+significant improvements by PINN are observed near multi-year ice (MYI)
+32
+regions in the central Arctic and Canadian Archipelago (Figs. 5 and 6), our
+findings suggest that PINNs can contribute to obtaining consistent model
+performance despite the ongoing reduction of MYI coverage.
+6. Conclusion
+In this study, we propose a physics-informed learning strategy to im-
+prove the fidelity of the existing deep learning model for the prediction of
+daily sea ice velocity (SIV) and sea ice concentration (SIC) retrieved from
+spaceborne remote sensing data. Our physics-informed learning strategy is
+achieved through two pathways: (1) design additional physics-informed loss
+functions that regularize SIV values based on SIC values and regularize SIC
+values based on the assumption of daily thermodynamic ice growth and melt-
+ing; (2) insert sigmoid activation function to restrict the output SIC values
+into the range of 0 to 1. We implement extensive experiments by employ-
+ing the Hierarchical information-sharing U-net (HIS-Unet), which predicts
+SIV and SIC through a series of information sharing between SIV and SIC
+branches. In order to investigate the impact of training samples on the model
+robustness, wetrainthephysics-informedneuralnetwork(PINN)andnormal
+data-driven neural network (No-Phy) separately with three different train-
+ing sample ratios (100 %, 50 %, and 20 %) and four different weights to the
+physics-informed loss terms (0.0, 0.2, 1.0, and 0.5).
+The results exhibit that the physics-informed learning strategy improves
+both SIC and SIV predictions. In particular, the improvement of SIC pre-
+diction by PINN is more obvious than SIV with a small number of samples.
+Physics-informed learning strategy helps achieve the benefits of HIS-Unet
+33
+even in the case of a lack of sufficient training datasets. Therefore, this
+physics-informed learning strategy can contribute to improving the perfor-
+mance of deep learning models for sea ice prediction, even if the past sea ice
+data cannot fully represent the future non-stationary sea ice conditions af-
+fected by rapid climate change. Additionally, this strategy can also be easily
+applied for a multi-day forecast of sea ice conditions combined with recurrent
+network architectures, such as LSTM.
+Software and data availability
+The codes that were used for the prediction of sea ice concentration and
+velocity using Python language (version 3.11) based on PyTorch library can
+befoundinGithub: https://github.com/BinaLab/PINN_seaice. Thisrepos-
+itory was created by Younghyun Koo (e-mail: kooala317@gmail.com) in 2023
+and contains program codes (111 MB) and training data (3.41 GB). The au-
+thors’ experimental environment was as follows:
+•OS: Windows 11 Pro
+•CPU: Intel(R) Core(TM) i7-11700F
+•RAM: 16.0 GB
+•GPU: NVIDIA GeForce RTX 3070
+The sea ice velocity and concentration data can be downloaded free of charge
+from NSIDC (Tschudi et al., 2019; Meier et al., 2021), and the ERA5 weather
+data can be downloaded free of charge from the Copernicus Climate Data
+Store (Hersbach et al., 2020).
+34
+CRediT authorship contribution statement
+Younghyun Koo: Software, Validation, Formal analysis, Data cura-
+tion, Visualization, Writing - Original Draft.Maryam Rahnemoonfar:
+Conceptualization, Methodology, Writing - Review & Editing, Supervision,
+Funding acquisition.
+Acknowledgments
+This work is supported by the U.S. National Science Foundation (NSF)
+BIGDATA(IIS-1838230, IIS-2308649)andNSFLeadershipClassComputing
+(OAC-2139536) awards.
+Appendix A. Arctic SIC and SIV conditions from 2016 to 2022
+Figures A.7a and b show the average SIV and SIC, respectively, over
+the Arctic Ocean in 2022. The Fram Strait in eastern Greenland shows the
+fastest ice movement. Figures A.7c and d show the monthly mean SIV and
+SIC,respectively, in2022. SIVdecreasedfromJanuarytoJuneandincreased
+again thereafter. SIC was consistent to 90 % from January to May, decreased
+to∼70 % until September, and increased again from October.
+References
+Andersson, T.R., Hosking, J.S., Pérez-Ortiz, M., Paige, B., Elliott, A., Rus-
+sell, C., Law, S., Jones, D.C., Wilkinson, J., Phillips, T., Byrne, J.,
+Tietsche, S., Sarojini, B.B., Blanchard-Wrigglesworth, E., Aksenov, Y.,
+Downie, R., Shuckburgh, E., 2021. Seasonal arctic sea ice forecasting with
+probabilistic deep learning. Nature Communications 12.
+35
+Figure A.7: Maps of (a) SIV anomaly and (b) SIC anomaly in the test years (2016-2022)
+compared tothetraining years(2009-2015). Monthlymean (c)SIV and(d)SICintraining
+years and test years.
+36
+Blanchard-Wrigglesworth, E., Cullather, R.I., Wang, W., Zhang, J., Bitz,
+C.M., 2015. Model forecast skill and sensitivity to initial conditions in the
+seasonal Sea Ice Outlook. Geophysical Research Letters 42, 8042–8048.
+doi:10.1002/2015GL065860.
+Blockley, E., Vancoppenolle, M., Hunke, E., Bitz, C., Feltham, D., Lemieux,
+J.F., Losch, M., Maisonnave, E., Notz, D., Rampal, P., Tietsche, S., Trem-
+blay, B., Turner, A., Massonnet, F., Ólason, E., Roberts, A., Aksenov, Y.,
+Fichefet, T., Garric, G., Iovino, D., Madec, G., Rousset, C., y Melia, D.S.,
+Schroeder, D., 2020. The future of sea ice modeling: Where do we go
+from here? Bulletin of the American Meteorological Society 101, E1304 –
+E1311. doi:10.1175/BAMS-D-20-0073.1.
+Budikova, D., 2009. Role of Arctic sea ice in global atmospheric cir-
+culation: A review. Global and Planetary Change 68, 149–163.
+doi:10.1016/j.gloplacha.2009.04.001.
+Cavalieri, D.J., Gloersen, P., Campbell, W.J., 1984. Determination of sea ice
+parameters with the NIMBUS 7 SMMR. Journal of Geophysical Research:
+Atmospheres 89, 5355–5369. doi:10.1029/JD089iD04p05355.
+Cheng, G., Morlighem, M., Francis, S., 2024. Forward and Inverse Modeling
+of Ice Sheet Flow Using Physics-Informed Neural Networks: Application
+to Helheim Glacier, Greenland. Journal of Geophysical Research: Machine
+LearningandComputation1, e2024JH000169. doi:10.1029/2024JH000169.
+Comiso, J.C., 1986. Characteristics of Arctic winter sea ice from satellite
+37
+multispectral microwave observations. Journal of Geophysical Research:
+Oceans 91, 975–994. doi:10.1029/JC091iC01p00975.
+Comiso, J.C., Cavalieri, D.J., Parkinson, C.L., Gloersen, P., 1997. Passive
+microwave algorithms for sea ice concentration: A comparison of two tech-
+niques. Remote Sensing of Environment 60, 357–384. doi:10.1016/S0034-
+4257(96)00220-9.
+Döscher, R., Vihma, T., Maksimovich, E., 2014. Recent advances in under-
+standing the Arctic climate system state and change from a sea ice per-
+spective: a review. Atmospheric Chemistry and Physics 14, 13571–13600.
+doi:10.5194/acp-14-13571-2014.
+Flato, G.M., 2004. Sea-ice modelling, in: Bamber, J.L., Payne, A.J. (Eds.),
+Mass Balance of the Cryosphere: Observations and Modelling of Con-
+temporary and Future Changes. Cambridge University Press, p. 367–390.
+doi:10.1017/CBO9780511535659.011.
+Fritzner, S., Graversen, R., Christensen, K.H., 2020. Assessment of high-
+resolution dynamical and machine learning models for prediction of sea ice
+concentration in a regional application. Journal of Geophysical Research:
+Oceans 125, e2020JC016277. doi:10.1029/2020JC016277.
+Fritzner, S., Graversen, R., Christensen, K.H., Rostosky, P., Wang, K., 2019.
+Impact of assimilating sea ice concentration, sea ice thickness and snow
+depth in a coupled ocean–sea ice modelling system. The Cryosphere 13,
+491–509. doi:10.5194/tc-13-491-2019.
+38
+Grigoryev, T., Verezemskaya, P., Krinitskiy, M., Anikin, N., Gavrikov, A.,
+Trofimov, I., Balabin, N., Shpilman, A., Eremchenko, A., Gulev, S., Bur-
+naev, E., Vanovskiy, V., 2022. Data-driven short-term daily operational
+sea ice regional forecasting. Remote Sensing 14. doi:10.3390/rs14225837.
+Guemas, V., Blanchard-Wrigglesworth, E., Chevallier, M., Day, J.J., Déqué,
+M., Doblas-Reyes, F.J., Fučkar, N.S., Germe, A., Hawkins, E., Keeley,
+S., Koenigk, T., Salas y Mélia, D., Tietsche, S., 2016. A review on
+Arctic sea-ice predictability and prediction on seasonal to decadal time-
+scales. QuarterlyJournaloftheRoyalMeteorologicalSociety142, 546–561.
+doi:10.1002/qj.2401.
+Hao, Z., Liu, S., Zhang, Y., Ying, C., Feng, Y., Su, H., Zhu, J., 2023.
+Physics-informed machine learning: A survey on problems, methods and
+applications. doi:10.48550/arXiv.2211.08064.
+Haumann, F.A., Gruber, N., Münnich, M., Frenger, I., Kern, S., 2016. Sea-
+ice transport driving Southern Ocean salinity and its recent trends. Nature
+537, 89–92. doi:10.1038/nature19101.
+He, Q., Perego, M., Howard, A.A., Karniadakis, G.E., Stinis, P.,
+2023. A hybrid deep neural operator/finite element method for
+ice-sheet modeling. Journal of Computational Physics 492, 112428.
+doi:10.1016/j.jcp.2023.112428.
+Hersbach, H., Bell, B., Berrisford, P., Hirahara, S., Horányi, A., Muñoz-
+Sabater, J., Nicolas, J., Peubey, C., Radu, R., Schepers, D., Simmons,
+A., Soci, C., Abdalla, S., Abellan, X., Balsamo, G., Bechtold, P., Biavati,
+39
+G., Bidlot, J., Bonavita, M., De Chiara, G., Dahlgren, P., Dee, D., Dia-
+mantakis, M., Dragani, R., Flemming, J., Forbes, R., Fuentes, M., Geer,
+A., Haimberger, L., Healy, S., Hogan, R.J., Hólm, E., Janisková, M., Kee-
+ley, S., Laloyaux, P., Lopez, P., Lupu, C., Radnoti, G., de Rosnay, P.,
+Rozum, I., Vamborg, F., Villaume, S., Thépaut, J.N., 2020. The ERA5
+global reanalysis. Quarterly Journal of the Royal Meteorological Society
+146, 1999–2049. doi:10.1002/qj.3803.
+Hibler, W.D., 1979. A dynamic thermodynamic sea ice model. Jour-
+nal of Physical Oceanography 9, 815 – 846. doi:10.1175/1520-
+0485(1979)009<0815:ADTSIM>2.0.CO;2.
+Hirst, A.C., 1999. The Southern Ocean response to global warming in the
+CSIRO coupled ocean-atmosphere model. Environmental Modelling &
+Software 14, 227–241. doi:10.1016/S1364-8152(98)00075-9.
+Hoffman, L., Mazloff, M.R., Gille, S.T., Giglio, D., Bitz, C.M., Heimbach, P.,
+Matsuyoshi, K., 2023. Machine learning for daily forecasts of Arctic sea-
+ice motion: an attribution assessment of model predictive skill. Artificial
+Intelligence for the Earth Systems , 1 – 45doi:10.1175/AIES-D-23-0004.1.
+Holland, P.R., Kwok, R., 2012. Wind-driven trends in Antarctic sea-ice drift.
+Nature Geoscience 5, 872–875. doi:10.1038/ngeo1627.
+Hunke, E.C., Dukowicz, J.K., 1997. An elastic–viscous–plastic model for
+sea ice dynamics. Journal of Physical Oceanography 27, 1849 – 1867.
+doi:10.1175/1520-0485(1997)027<1849:AEVPMF>2.0.CO;2.
+40
+Hunke, E.C., Lipscomb, W.H., Turner, A.K., 2010. Sea-ice models for cli-
+mate study: retrospective and new directions. Journal of Glaciology 56,
+1162–1172. doi:10.3189/002214311796406095.
+Ivanova, N., Pedersen, L.T., Tonboe, R.T., Kern, S., Heygster, G., Lavergne,
+T., Sørensen, A., Saldo, R., Dybkjær, G., Brucker, L., Shokr, M., 2015.
+Inter-comparison and evaluation of sea ice algorithms: towards further
+identification of challenges and optimal approach using passive microwave
+observations. The Cryosphere 9, 1797–1817. doi:10.5194/tc-9-1797-2015.
+Iwasaki, Y., Lai, C.Y., 2023. One-dimensional ice shelf hardness in-
+version: Clustering behavior and collocation resampling in physics-
+informed neural networks. Journal of Computational Physics 492, 112435.
+doi:10.1016/j.jcp.2023.112435.
+Jiang, W., Qiao, Y., Su, G., Li, X., Meng, Q., Wu, H., Quan, W., Wang,
+J., Wang, F., 2023. WFNet: A hierarchical convolutional neural network
+for wildfire spread prediction. Environmental Modelling & Software 170,
+105841. doi:10.1016/j.envsoft.2023.105841.
+Jouvet, G., Cordonnier, G., 2023. Ice-flow model emulator based
+on physics-informed deep learning. Journal of Glaciology ,
+1–15doi:10.1017/jog.2023.73.
+Karniadakis, G.E., Kevrekidis, I.G., Lu, L., Perdikaris, P., Wang, S., Yang,
+L., 2021. Physics-informed machine learning. Nature Reviews Physics 3.
+doi:10.1038/s42254-021-00314-5.
+41
+Kern, S., Lavergne, T., Notz, D., Pedersen, L.T., Tonboe, R., 2020. Satel-
+lite passive microwave sea-ice concentration data set inter-comparison for
+arctic summer conditions. The Cryosphere 14, 2469–2493. doi:10.5194/tc-
+14-2469-2020.
+Kim, Y.J., Kim, H.C., Han, D., Lee, S., Im, J., 2020. Prediction of
+monthly Arctic sea ice concentrations using satellite and reanalysis data
+based on convolutional neural networks. The Cryosphere 14, 1083–1104.
+doi:10.5194/tc-14-1083-2020.
+Kingma, D.P., Ba, J., 2017. Adam: A method for stochastic optimization.
+doi:10.48550/arXiv.1412.6980,arXiv:1412.6980.
+Koo, Y., Rahnemoonfar, M., 2024. Hierarchical information-sharing convo-
+lutional neural network for the prediction of Arctic sea ice concentration
+and velocity. IEEE Transactions on Geoscience and Remote Sensing 62,
+1–13. doi:10.1109/TGRS.2024.3501094.
+Kwok, R., 2018. Arctic sea ice thickness, volume, and multiyear ice coverage:
+lossesandcoupledvariability(1958-2018). EnvironmentalResearchLetters
+13, 105005. doi:10.1088/1748-9326/aae3ec.
+Li, T., Gelb, A., Lee, Y., 2023. Improving numerical accuracy for the viscous-
+plastic formulation of sea ice. Journal of Computational Physics 487,
+112184. doi:10.1016/j.jcp.2023.112184.
+Liu, Q., Wang, Y., Zhang, R., Zhang, L., Yan, H., Liu, K., 2024.
+Physics-informed deep convolutional network for combined sea ice con-
+42
+centration and velocity prediction. Ocean Engineering 313, 119440.
+doi:10.1016/j.oceaneng.2024.119440.
+Liu, Q., Zhang, R., Wang, Y., Yan, H., Hong, M., 2021. Daily prediction
+of the Arctic sea ice concentration using reanalysis data based on a con-
+volutional LSTM network. Journal of Marine Science and Engineering 9.
+doi:10.3390/jmse9030330.
+Maier, H.R., Galelli, S., Razavi, S., Castelletti, A., Rizzoli, A., Athanasiadis,
+I.N., Sànchez-Marrè, M., Acutis, M., Wu, W., Humphrey, G.B., 2023. Ex-
+ploding the myths: An introduction to artificial neural networks for pre-
+diction and forecasting. Environmental Modelling & Software 167, 105776.
+doi:10.1016/j.envsoft.2023.105776.
+Mallat, S., 2016. Understanding deep convolutional networks. Philosophical
+Transactions of the Royal Society A: Mathematical, Physical and Engi-
+neering Sciences 374, 20150203. doi:10.1098/rsta.2015.0203.
+Massonnet, F., Fichefet, T., Goosse, H., Bitz, C.M., Philippon-Berthier, G.,
+Holland, M.M., Barriat, P.Y., 2012. Constraining projections of summer
+Arctic sea ice. The Cryosphere 6, 1383–1394. doi:10.5194/tc-6-1383-2012.
+McPhee, M.G., 1992. Turbulent heat flux in the upper ocean under
+sea ice. Journal of Geophysical Research: Oceans 97, 5365–5379.
+doi:doi.org/10.1029/92JC00239.
+Meier, W., 2005. Comparison of passive microwave ice concentration
+algorithm retrievals with AVHRR imagery in arctic peripheral seas.
+43
+IEEE Transactions on Geoscience and Remote Sensing 43, 1324–1337.
+doi:10.1109/TGRS.2005.846151.
+Meier, W.N., Fetterer, F., Windnagel, A.K., Stewart, J.S., 2021.
+NOAA/NSIDC Climate Data Record of Passive Microwave Sea Ice Con-
+centration, Version 4. doi:10.7265/efmz-2t65.
+Meier, W.N., Hovelsrud, G.K., van Oort, B.E., Key, J.R., Kovacs, K.M.,
+Michel, C., Haas, C., Granskog, M.A., Gerland, S., Perovich, D.K., Mak-
+shtas, A., Reist, J.D., 2014. Arctic sea ice in transformation: A review
+of recent observed changes and impacts on biology and human activity.
+Reviews of Geophysics 52, 185–217. doi:10.1002/2013RG000431.
+Notz, D., Stroeve, J., 2016. Observed Arctic sea-ice loss di-
+rectly follows anthropogenic CO2 emission. Science 354, 747–750.
+doi:10.1126/science.aag2345.
+Overland, J.E., Wang, M., 2013. When will the summer Arctic be
+nearly sea ice free? Geophysical Research Letters 40, 2097–2101.
+doi:10.1002/grl.50316.
+Palerme, C., Lavergne, T., Rusin, J., Melsom, A., Brajard, J., Kvanum, A.F.,
+Macdonald Sørensen, A., Bertino, L., Müller, M., 2024. Improving short-
+term sea ice concentration forecasts using deep learning. The Cryosphere
+18, 2161–2176. doi:10.5194/tc-18-2161-2024.
+Palerme, C., Muller, M., 2021. Calibration of sea ice drift forecasts using
+random forest algorithms. The Cryosphere 15, 3989–4004. doi:10.5194/tc-
+15-3989-2021.
+44
+Parkinson, C.L., Washington, W.M., 1979. A large-scale numerical model
+of sea ice. Journal of Geophysical Research: Oceans 84, 311–337.
+doi:10.1029/JC084iC01p00311.
+Petrou, Z.I., Tian, Y., 2019. Prediction of sea ice motion with convolutional
+long short-term memory networks. IEEE Transactions on Geoscience and
+Remote Sensing 57, 6865–6876. doi:10.1109/TGRS.2019.2909057.
+Raissi, M., Perdikaris, P., Karniadakis, G., 2019. Physics-informed neural
+networks: A deep learning framework for solving forward and inverse prob-
+lems involving nonlinear partial differential equations. Journal of Compu-
+tational Physics 378, 686–707. doi:10.1016/j.jcp.2018.10.045.
+Rampal, P., Bouillon, S., Ólason, E., Morlighem, M., 2016. neXtSIM: a new
+Lagrangian sea ice model. The Cryosphere 10, 1055–1073. doi:10.5194/tc-
+10-1055-2016.
+Ren, Y., Li, X., 2021. Predicting Daily Arctic Sea Ice Concentration in the
+Melt Season Based on a Deep Fully Convolution Network Model, in: 2021
+IEEE International Geoscience and Remote Sensing Symposium IGARSS,
+pp. 5540–5543. doi:10.1109/IGARSS47720.2021.9554118.
+Ren, Y., Li, X., Zhang, W., 2022. A Data-Driven Deep Learning Model
+for Weekly Sea Ice Concentration Prediction of the Pan-Arctic During the
+Melting Season. IEEE Transactions on Geoscience and Remote Sensing
+60, 1–19. doi:10.1109/TGRS.2022.3177600.
+Riel, B., Minchew, B., 2023. Variational inference of ice shelf rheology with
+45
+physics-informed machine learning. Journal of Glaciology 69, 1167–1186.
+doi:10.1017/jog.2023.8.
+Riel, B., Minchew, B., Bischoff, T., 2021. Data-driven inference of the me-
+chanics of slip along glacier beds using physics-informed neural networks:
+Case study on Rutford Ice Stream, Antarctica. Journal of Advances in
+Modeling Earth Systems 13, e2021MS002621. doi:10.1029/2021MS002621.
+Ronneberger, O., Fischer, P., Brox, T., 2015. U-Net: Convolutional networks
+for biomedical image segmentation, in: Navab, N., Hornegger, J., Wells,
+W.M., Frangi, A.F. (Eds.), Medical Image Computing and Computer-
+Assisted Intervention – MICCAI 2015, Springer International Publishing,
+Cham. pp. 234–241.
+Sadeghi, M., Nguyen, P., Hsu, K., Sorooshian, S., 2020. Improving near real-
+time precipitation estimation using a U-Net convolutional neural network
+and geographical information. Environmental Modelling & Software 134,
+104856. doi:10.1016/j.envsoft.2020.104856.
+Salas Mélia, D., 2002. A global coupled sea ice–ocean model. Ocean Mod-
+elling 4, 137–172. doi:10.1016/S1463-5003(01)00015-4.
+Satorras, V.G., Hoogeboom, E., Welling, M., 2022. E(n) equivariant graph
+neural networks. doi:10.48550/arXiv.2102.09844,arXiv:2102.09844.
+Schütt, K.T., Kindermans, P.J., Sauceda, H.E., Chmiela, S., Tkatchenko, A.,
+Müller, K.R., 2017. SchNet: A continuous-filter convolutional neural net-
+work for modeling quantum interactions. doi:10.48550/arXiv.1706.08566,
+arXiv:1706.08566.
+46
+Stark, J.D., Ridley, J., Martin, M., Hines, A., 2008. Sea ice concentration
+and motion assimilation in a sea ice-ocean model. Journal of Geophysical
+Research: Oceans 113, 1–19. doi:10.1029/2007JC004224.
+Stroeve, J., Notz, D., 2018. Changing state of Arctic sea ice across all
+seasons. Environmental Research Letters 13, 103001. doi:10.1088/1748-
+9326/aade56.
+Teisberg, T.O., Schroeder, D.M., MacKie, E.J., 2021. A machine learning
+approach to mass-conserving ice thickness interpolation, in: 2021 IEEE
+International Geoscience and Remote Sensing Symposium IGARSS, pp.
+8664–8667. doi:10.1109/IGARSS47720.2021.9555002.
+Thorndike, A.S., Colony, R., 1982. Sea ice motion in response to
+geostrophic winds. Journal of Geophysical Research: Oceans 87, 5845–
+5852. doi:10.1029/JC087iC08p05845.
+Timmermann, R., Danilov, S., Schröter, J., Böning, C., Sidorenko, D., Rol-
+lenhagen, K., 2009. Ocean circulation and sea ice distribution in a fi-
+nite element global sea ice–ocean model. Ocean Modelling 27, 114–129.
+doi:10.1016/j.ocemod.2008.10.009.
+Tschudi, M., Meier, W. N. Stewart, J.S., Fowler, C., Maslanik, J., 2019.
+Polar Pathfinder Daily 25 km EASE-Grid Sea Ice Motion Vectors, Version
+4. doi:10.5067/INAWUWO7QH7B.
+Tschudi, M.A., Meier, W.N., Stewart, J.S., 2020. An enhancement to sea
+ice motion and age products at the National Snow and Ice Data Center
+(NSIDC). The Cryosphere 14, 1519–1536. doi:10.5194/tc-14-1519-2020.
+47
+Wang, Q., Danilov, S., Sidorenko, D., Timmermann, R., Wekerle, C., Wang,
+X., Jung, T., Schröter, J., 2014. The Finite Element Sea Ice-Ocean Model
+(FESOM) v.1.4: formulation of an ocean general circulation model. Geo-
+scientific Model Development 7, 663–693. doi:10.5194/gmd-7-663-2014.
+Wang, X., Liu, Y., Key, J.R., Dworak, R., 2022. A new perspective on four
+decades of changes in Arctic sea ice from satellite observations. Remote
+Sensing 14. doi:10.3390/rs14081846.
+Wang, Y., Shen, Y., Salahshour, B., Cetin, M., Iftekharuddin, K., Tahvildari,
+N., Huang, G., Harris, D.K., Ampofo, K., Goodall, J.L., 2024. Urban flood
+extent segmentation and evaluation from real-world surveillance camera
+images using deep convolutional neural network. Environmental Modelling
+& Software 173, 105939. doi:10.1016/j.envsoft.2023.105939.
+Woo, S., Park, J., Lee, J.Y., Kweon, I.S., 2018. CBAM: Convolutional Block
+Attention Module, in: Ferrari, V., Hebert, M., Sminchisescu, C., Weiss, Y.
+(Eds.), Computer Vision – ECCV 2018, Springer International Publishing,
+Cham. pp. 3–19. doi:10.1007/978-3-030-01234-2_1.
+Yan, Q., Huang, W., 2018. Sea ice sensing from GNSS-R data using convo-
+lutional neural networks. IEEE Geoscience and Remote Sensing Letters
+15, 1510–1514. doi:10.1109/LGRS.2018.2852143.
+Zhai, J., Bitz, C.M., 2021. A machine learning model of Arctic sea ice
+motions. doi:10.48550/arXiv.2108.10925,arXiv:2108.10925.
+Årthun, M., Onarheim, I.H., Dörr, J., Eldevik, T., 2021. The Seasonal and
+48
+Regional Transition to an Ice-Free Arctic. Geophysical Research Letters
+48, e2020GL090825. doi:10.1029/2020GL090825.
+49

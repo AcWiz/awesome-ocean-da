@@ -1,0 +1,1578 @@
+arXiv:1108.0168v1  [physics.data-an]  31 Jul 2011Particle Kalman Filtering: A Nonlinear Bayesian 1
+Framework for Ensemble Kalman Filters 2
+Ibrahim Hoteit1,∗, Xiaodong Luo1, and Dinh-Tuan Pham2
+1King Abdullah University of Sciences and Technology, Thuwa l, KSA
+2Centre National de la Recherche Scientiﬁque, Grenoble, Fra nce
+Submitted to Monthly Weather Review3
+October 20, 2018 4
+∗Email: ibrahim.hoteit@kasut.edu.sa; Tel: +966-544700033
+Abstract 5
+This paper investigates an approximation scheme of the opti mal nonlinear 6
+Bayesian ﬁlter based on the Gaussian mixture representatio n of the state prob- 7
+ability distribution function. The resulting ﬁlter is simi lar to the particle ﬁlter, 8
+but is diﬀerent from it in that, the standard weight-type corr ection in the par- 9
+ticle ﬁlter is complemented by the Kalman-type correction w ith the associated 10
+covariance matrices in the Gaussian mixture. We show that th is ﬁlter is an 11
+algorithm in between the Kalman ﬁlter and the particle ﬁlter , and therefore is 12
+referred to as the particle Kalman ﬁlter (PKF). 13
+In the PKF, the solution of a nonlinear ﬁltering problem is ex pressed as the 14
+weighted average of an “ensembleof Kalman ﬁlters”operatin ginparallel. Run- 15
+ning an ensemble of Kalman ﬁlters is, however, computationa lly prohibitive for 16
+realistic atmospheric and oceanic data assimilation probl ems. For this reason, 17
+we consider the construction of the PKF through an “ensemble ” of ensem- 18
+ble Kalman ﬁlters (EnKFs) instead, and call the implementat ion the particle 19
+EnKF (PEnKF). We show that diﬀerent types of the EnKFs can be co nsidered 20
+as special cases of the PEnKF. Similar to the situation in the particle ﬁlter, 21
+we also introduce a re-sampling step to the PEnKF in order to r educe the 22
+risk of weights collapse and improve the performance of the ﬁ lter. Numerical 23
+experiments with the strongly nonlinear Lorenz-96 model ar e presented and 24
+discussed. 25
+0
+1 Introduction26
+Estimating the state of the atmosphere and the ocean has long bee n one of the main 27
+goals of modern science. Data assimilation, which consists of combinin g data and dy- 28
+namicalmodelstodeterminethebestpossibleestimateofthestate ofasystem, isnow 29
+recognized as the best approach to tackle this problem (Ghil and Ma lanotte-Rizzoli, 30
+1991). The strongly nonlinear character of the atmospheric and o ceanic models, com- 31
+bined with their important computational burden, makes data assim ilation in these 32
+systems quite challenging.33
+Based on the Bayesian estimation theory, the optimal solution of th e nonlinear 34
+data assimilation problem can be obtained from the optimal nonlinear ﬁ lter (ONF) 35
+(Doucet et al., 2001). This involves the estimation of the conditional probability 36
+distribution function ( pdf) (not necessarily Gaussian) of the system state given all 37
+available measurements up to the estimation time. Knowledge of the s tatepdfallows 38
+determining diﬀerentestimatesofthestate, suchastheminimumva rianceestimateor 39
+the maximum a posteriori estimate (Todling, 1999). The ONF recurs ively operates 40
+as a succession of a correction (or analysis) step at measurement times to correct 41
+the state (predictive) pdfusing the Bayes’ rule, and a prediction step to propagate 42
+the state (analysis) pdfto the time of the next available observation. Although 43
+conceptually simple, the numerical implementation of the optimal non linear ﬁlter can 44
+be computationally prohibitive, even for systems with few dimensions (Doucet et al., 45
+2001). Its use with atmospheric and oceanic data assimilation proble ms is therefore 46
+not possible because of the huge dimension of these systems.47
+In recent years, two approximation schemes of the ONF have attr acted the at- 48
+tention of researchers for their potentials to tackle nonlinear and non-Gaussian data 49
+assimilation problems. One is based on the point-mass representatio n (mixture of 50
+Dirac functions) of the state pdf, and leads to the celebrated particle ﬁlter (PF) 51
+(Doucet et al., 2001; Pham, 2001; Nakano et al., 2007; Van Leeuwe n, 2003, 2009). 52
+1
+TheotherisbasedontheGaussianmixturerepresentationofthes tatepdf, andresults 53
+inaﬁlterthatisinbetweentheKalmanﬁlterandtheparticleﬁlter(And erson and Anderson, 54
+1999;Bengtsson et al.,2003;Chen and Liu,2000;Hoteit et al.,2008 ;Luo et al.,2010; 55
+Sorenson and Alspach, 1971), as to be shown later. For this reaso n, we refer to this 56
+ﬁlter as the particle Kalman ﬁlter (PKF).57
+In terms of computational eﬃciency, the particle ﬁlter needs to ge nerate large 58
+samples for a good approximation of the state pdf. In certain circumstances, in order 59
+to avoid weights collapse, the number of samples needs to scale expo nentially with 60
+the dimension of the system in assimilation (Bengtsson et al., 2008), w hich may be 61
+infeasible for high-dimensional systems (Snyder et al., 2008). On th e other hand, 62
+in some comparison studies (Han and Li, 2008; Nakano et al., 2007), it has been 63
+reported that the ensemble Kalman ﬁlter (EnKF) and its variants (A nderson, 2001; 64
+Bishop et al., 2001; Burgers et al., 1998; Evensen, 1994; Evensen a nd van Leeuwen, 65
+1996; Houtekamer and Mitchell, 1998; Whitaker and Hamill, 2002) ca n achieve lower 66
+estimation errors than the particle ﬁlter given a small ensemble size. To save space, 67
+in this paper we conﬁne ourselves to the PKF, and make performanc e comparison 68
+only between the PKF and the EnKF.69
+Using a Gaussian mixture representation of the state pdf, the resulting PKF con- 70
+sistsofanensembleofparallelnonlinearKalmanﬁlters(Hoteit et al.,2 008;Luo et al., 71
+2010). Diﬀerent variants of the Kalman ﬁlter (KF), including the ext ended Kalman 72
+ﬁlter (Chen and Liu, 2000; Sorenson and Alspach, 1971), the redu ced-rank Kalman 73
+ﬁlter(Hoteit et al.,2008;Luo et al.,2010),theEnKF(Anderson and Anderson,1999; 74
+Bengtsson et al., 2003), can be used to construct the PKF. The fo cus of this paper 75
+is to investigate the PKF that is constructed by an ensemble of para llel EnKFs. 76
+Common to all the implementations of the PKF, the mixture of normal distributions 77
+(MON) – a more general pdfrepresentation than the single Gaussian pdfapproxi- 78
+mation in the EnKF – can be used to tackle nonlinearity and non-Gauss ianity in 79
+data assimilation. On the other hand, choosing the EnKF to constru ct the PKF is 80
+2
+based on the consideration of computational eﬃciency, since the E nKF itself is a very 81
+eﬃcient algorithm for data assimilation in high dimensional systems. In this regard, 82
+this work is very similar to the earlier works of Anderson and Anderso n (1999) and 83
+Bengtsson et al. (2003), but is diﬀerent from them mainly in the follow ing aspect. 84
+In Anderson and Anderson (1999) and Bengtsson et al. (2003), t he PKF was con- 85
+structed without a re-sampling step. As a result, the PKF may suﬀe r from weights 86
+collapse as in the particle ﬁlter. To overcome this problem, Bengtsso n et al. (2003) 87
+considered ahybridoftheEnKFandthePKF,which, however, involv es thecomputa- 88
+tionoftheinverses ofsamplecovariancematricesinthe“global-to- local”adjustments. 89
+In doing so, it is not only computationally intensive, but also encounte rs singularities 90
+in computing the inverses when the ensemble size is smaller than the sy stem dimen- 91
+sion, such that the sample covariances themselves are rank deﬁcie nt. Therefore, it 92
+is not clear how the hybrid scheme in Bengtsson et al. (2003) can be a pplied to the 93
+scenario with the ensemble size smaller than the system dimension. Fo r the imple- 94
+mentation of the PKF scheme in this work, we introduce a re-sampling step similar 95
+to those in Musso et al. (2001) and Stavropoulos and Titterington ( 2001) to tackle 96
+weights collapse. Our experience shows that, with this re-sampling s tep, the PKF 97
+becomes much more stable and can conduct data assimilation in the sm all ensemble 98
+scenario, as to be demonstrated through the numerical experime nts presented in this 99
+work.100
+Asmaybeofparticularinterest fortheensemble ﬁlteringcommunity , wewill show 101
+that diﬀerent EnKFs can be considered as special cases of the PEn KF following our 102
+implementation. This point of view allows for a better understanding o f the EnKFs’ 103
+behaviors and/or their diﬀerences.104
+The paper is organized as follows. The optimal nonlinear ﬁlter is ﬁrst d escribed 105
+in section 2. The PKF and its ensemble implementation are discussed in s ection 3. 106
+Results of numerical experiments with the Lorenz-96 model are pr esented in section 107
+4. A summary of the main results and a general discussion on the pot ential of the 108
+3
+PEnKF for tackling realistic atmospheric and oceanic data assimilation problems 109
+concludes the paper in section 5.110
+2 The Optimal Nonlinear Filter111
+Starting from a random initial condition with a known probability densit y function, 112
+the optimal nonlinear ﬁlter provides the conditional density functio n of the system 113
+state given all available measurements up to the estimation time. To d escribe the 114
+algorithm of the optimal nonlinear ﬁlter, consider the nonlinear stoc hastic discrete- 115
+time dynamical system116
+xk=Mk(xk−1)+ηk, (1)
+yk=Hk(xk)+ǫk, (2)
+wherexkis the state vector (to be estimated), of dimension n,ykis the observa- 117
+tion vector, of dimension p,MkandHkare two continuously diﬀerentiable maps 118
+from IRnto IRnand from IRnto IRprespectively representing the transition and the 119
+observational operators, and ηkandǫkdenote the dynamical and the observational 120
+noise, respectively. We assume that ηkandǫkare Gaussian with zero mean and non- 121
+singular covariance matrices QkandRk, respectively, and are independent of the 122
+system state at any time instant. Under this setting, the dynamica l system Eq. (1) 123
+is Markovian.124
+The optimal nonlinear ﬁlter recursively operates with a succession o f prediction 125
+and correction steps as summarized below. The reader is referred to Doucet et al. 126
+(2001) for an extensive description of the ﬁlter. To simplify the not ation,y1:kis 127
+deﬁned as a shorthand for the set of all observations y1,...,ykup to and including 128
+timetk. Letpf
+k(· |y1:k−1) be the conditional (predictive) pdfofxkgiveny1:k−1and 129
+pa
+k(· |y1:k) be the conditional (analysis) pdfofxkgiveny1:k, both determined at 130
+timetk. The ﬁlter steps are described as follows. 131
+4
+•Prediction step : Given the analysis pdfpa
+k−1(· |y1:k−1) at time tk−1, the pre- 132
+dictivepdfpf
+k(· |y1:k−1) is obtained by integrating pa
+k−1(· |y1:k−1) with the 133
+model (1) to the time of the next available observation tk. Under the assump- 134
+tions made on the model noise ηk, the likelihood function for the state vector 135
+xk−1to transit to xkat the next time instant is described by the Gaussian 136
+pdfN(xk:Mk(xk−1),Qk), where N(x:µ,Σ) denotes the Gaussian pdfwith 137
+meanµand covariance Σ. Thus, 138
+pf
+k(xk|y1:k−1) =/integraldisplay
+IRnN(xk:Mk(xk−1),Qk)pa
+k−1(xk−1|y1:k−1)dxk−1.(3)
+•Correction step : After a new observation ykhas been made, the analysis pdf 139
+pa
+k(· |y1:k) at time tkis updated from pf
+k(· |y1:k−1) using Bayes’ rule, i.e., 140
+pa
+k(xk|y1:k) =1
+bkpf
+k(xk|y1:k−1)N(yk:Hk(xk),Rk). (4)
+The analysis pdfis therefore obtained by multiplying the predictive pdfby the 141
+observationlikelihoodfunction N(yk:Hk(xk),Rk),andthenbeingnormalized 142
+bybk=/integraltext
+IRnpf
+k(xk|y1:k−1)N(yk:Hk(xk),Rk)dxk. 143
+While the expressions of the state pdfs can be obtained conceptually, determining 144
+the exact values of them at each point of the state space is practic ally infeasible in 145
+high dimensional systems (Doucet et al., 2001). For instance, the d etermination of 146
+thepredictive pdfrequires theevaluationofthemodel Mk(x)foraprohibitively large 147
+number of x, given that one single evaluation might already be computationally ver y 148
+expensive in realistic atmospheric and oceanic applications.149
+5
+3 The Particle Ensemble Kalman Filter150
+3.1 Particle Kalman Filtering and Its Ensemble Implemen-151
+tation 152
+GivenNindependent samples x1,...,xNfrom a (multivariate) density p, an esti- 153
+mator ˆpofpcan be obtained by the kernel density estimation method (Silverman , 154
+1986), in the form of a mixture of NGaussian pdfs: 155
+ˆp(x) =1
+NN/summationdisplay
+i=1N(x:xi,P), (5)
+wherePis a positive deﬁnite matrix. Inspired from this estimator, the partic le 156
+Kalman ﬁlter (PKF) approximates the conditional state pdfs in the optimal nonlinear 157
+ﬁlter by mixtures of NGaussian densities of the form 158
+ps
+k(xk|y1:k) =N/summationdisplay
+i=1wi
+kN(xk:xs,i
+k,Ps,i
+k). (6)
+The subscript sreplaces aat the analysis time and fat the prediction time. The 159
+parameters of the mixture are the weights wi
+k, the centers of the distributions xs,i
+k, 160
+and the covariance matrices Ps,i
+k. In particular, if N= 1,ps
+k(xk|y1:k) reduces to a 161
+single Gaussian pdf, so that the PKF reduces to the Kalmanﬁlter (KF) or its variants 162
+trivially (a non-trivial simpliﬁcation will also be discussed below). Conse quently, the 163
+KF and its variants can be considered special cases of the PKF.164
+Two special cases of Eq. (6) may be of particular interest. In the ﬁ rst case, 165
+Ps,i
+k→0, such that the Gaussian pdfsN(xk:xs,i
+k,Ps,i
+k) tend to a set of Dirac func- 166
+tionsδ(xs,i
+k), with the mass points at xs,i
+k. In this case, the Gaussian mixture Eq. (6) 167
+reduces to the Monte Carlo approximation used in the particle ﬁlter ( Doucet et al., 168
+2001). In the second case, all Gaussian pdfsN(xk:xs,i
+k,Ps,i
+k) have (almost) identical 169
+centers and covariances, such that the Gaussian mixture Eq. (6) tends to a (sin- 170
+gle) Gaussian approximation, an assumption often used in various no nlinear Kalman 171
+ﬁlters (including the EnKF). In this sense, the PKF can be considere d as a ﬁlter 172
+6
+in between the Kalman ﬁlter and the particle ﬁlter (Hoteit et al., 2008; Luo et al., 173
+2010).174
+The main procedures of the PKF are summarized as follows. Without lo ss of 175
+generality, suppose that at time instant k−1, the analysis pdf, after a re-sampling 176
+step, is given by ˜ pk−1(xk−1|y1:k−1) =/summationtextN
+i=1˜wi
+k−1N(xk−1:θi
+k−1,Φi
+k−1). Then by 177
+applying Eq. (3) at the prediction step, one obtains the backgroun dpdf, in terms of 178
+a new MON179
+pf
+k(xk|y1:k−1)≈N/summationdisplay
+i=1˜wi
+k−1N/parenleftBig
+xk:ˆxf,i
+k,ˆPf,i
+k/parenrightBig
+, (7)
+whereˆxf,i
+kandˆPf,i
+kare the propagations of the mean θi
+k−1and the covariance Φi
+k−1180
+of the Gaussian component N(xk−1:θi
+k−1,Φi
+k−1) through the system model Eq. (1), 181
+respectively.182
+Given an incoming observation yk, one applies Eq. (4) to update pf
+k(x|y1:k−1) 183
+to the analysis pdf, also in the form of an MON 184
+pa
+k(xk|y1:k) =N/summationdisplay
+i=1wi
+kN/parenleftbig
+xk:ˆxa,i
+k,ˆPa,i
+k/parenrightbig
+, (8)
+whereˆxa,i
+kandˆPa,i
+kare updated from ˆxf,i
+kandˆPf,i
+kthrough the Kalman ﬁlter or its 185
+variants, and the new weights186
+wi
+k=˜wi
+k−1N/parenleftbig
+yk:Hk(ˆxf,i
+k),Σi
+k/parenrightbig
+/summationtextN
+j=1˜wi
+k−1N/parenleftbig
+yk:Hk(ˆxf,i
+k),Σi
+k/parenrightbig, (9)
+whereΣi
+kis the innovation matrix. If evaluated through the extended Kalman ﬁl- 187
+ter,Σi
+k=Hi
+kˆPf,i
+k(Hi
+k)T+Rk, withHi
+kbeing the gradient of Hkevaluated at 188
+ˆxf,i
+k. Alternatively, if evaluated in the context of the EnKF, Σi
+kcan be expressed 189
+as the covariance of the projected background ensemble onto th e observation space 190
+plus the observation covariance Rk(Evensen, 1994; Whitaker and Hamill, 2002). Fi- 191
+nally, a re-sampling step can be introduced to improve the performa nce of the PKF 192
+(Hoteit et al.,2008; Luo et al., 2010), so thattheanalysis pdfbecomes ˜ pk(xk|y1:k) = 193
+/summationtextN
+i=1˜wi
+kN(xk:θi
+k,Φi
+k). Suchare-samplingalgorithmispresentedinthenext section. 194
+7
+The PKF correction step can be interpreted as composed of two ty pes of correc- 195
+tions: a Kalman-type correction used to update ˆxf,i
+kandˆPf,i
+ktoˆxa,i
+kandˆPa,i
+k, and 196
+aparticle-type correction used to update the weights ˜ wi
+k−1towi
+k. In the PKF, the 197
+Kalman correction reduces the risk of weights collapse by allocating t he estimates 198
+ˆxf,i
+k(whose projections onto the observation space) far away from t he observation yk199
+relatively more weights than in the particle ﬁlter (Hoteit et al., 2008; V an Leeuwen, 200
+2009). Indeed, Eq. (9) has the same form as in the PF (Doucet et a l., 2001), but uses 201
+the innovation matrices Σi
+kto normalize the model-data misﬁt, rather than Rk. As 202
+Σi
+kare always greater than Rk, the estimates that are close to the observation will 203
+receive relatively less weights thaninthePF, while thosefar fromthe observationwill 204
+receive relatively more weights. This means that the support of the local predictive 205
+pdfand the observation likelihood function will be more coherent than in t he PF. 206
+Re-sampling will therefore be needed less often, so that Monte Car lo ﬂuctuations are 207
+reduced.208
+The main issue with the PKF is the prohibitive computational burden as sociated 209
+with running an ensemble of KFs, knowing that running a Kalman ﬁlter ( KF) or an 210
+extended KF in high dimensional systems is already a challenge. To red uce compu- 211
+tational cost, we use an ensemble of EnKFs, rather than the KF or the extended KF, 212
+to construct the PKF. We refer to this approach as the Particle En semble Kalman 213
+Filter (PEnKF). In the PEnKF, the (analysis) ensembles represent ing the Gaussian 214
+components are propagated forward in time to obtain a set of back ground ensembles 215
+at the next assimilation cycle. Then for each background ensemble, a stochastic or 216
+deterministic EnKF is used to update the background ensemble to its analysis coun- 217
+terpart. This amounts to simultaneously running a weighted ensemb le of EnKFs, and 218
+the ﬁnal state estimate is the weighted average of all the EnKFs so lutions. 219
+8
+3.2 A Re-sampling Algorithm220
+Weadoptare-samplingalgorithmthatcombinesthoseinHoteit et al.( 2008);Luo et al. 221
+(2010); Pham (2001). The main idea is as follows: Given a MON, we ﬁrst employ an 222
+information-theoretic criterion used in Hoteit et al. (2008) and Pha m (2001) to check 223
+if it needs to conduct re-sampling. If there is such a need, we then r e-approximate 224
+the MON by a new MON, based on the criterion that the mean and cova riance of 225
+the new MON match those of the original MON as far as possible Luo et al. (2010). 226
+More concretely, let p(x) be the pdfof then-dimensional random vector x, ex- 227
+pressed in terms of an MON with NGaussian pdfs so that 228
+p(x) =N/summationdisplay
+i=1wiN(x:µi,Σi), (10)
+wherewiare the set of normalized weights of the Gaussian pdfsN(x:µi,Σi) with 229
+meanµiand covariance Σi, satisfying wi≥0 fori= 1,···,Nand/summationtextN
+i=1wi= 1. To 230
+decide whether to conduct re-sampling or not, the entropy Ewof the weights wiis 231
+computed, which reads (Hoteit et al., 2008; Pham, 2001)232
+Ew=−N/summationdisplay
+i=1wilogwi. (11)
+Ideally, when the distribution ofthe weights wiisuniform, which yields themaximum 233
+weight entropy Eu
+w= logN, there is no need to conduct re-sampling. Thus, as a 234
+criterion, if Ewis within a certain distance dtoEu
+w, i.e., 235
+Eu
+w−Ew= logN+N/summationdisplay
+i=1wilogwi≤d, (12)
+wheredis a user-deﬁned threshold, then we choose not to conduct re-sa mpling. In 236
+this work we set the threshold d= 0.25 following Hoteit et al. (2008). 237
+In case that there is a need to conduct re-sampling, we follow the pr ocedure 238
+similar to that in Luo et al. (2010). Here the idea is to treat re-samplin g as apdf 239
+approximation problem, in which we seek a new MON240
+˜p(x) =1
+qq/summationdisplay
+i=1N(x:θi,Φi), (13)
+9
+withqequally weighted Gaussian pdfs, to approximate the original p(x) in Eq. (10). 241
+In approximation, we require that the mean and covariance of ˜ p(x) be as close as 242
+possible to those of p(x). To this end, we need to choose proper values of θiandΦi243
+in order to achieve this objective.244
+The means and covariances of p(x) and ˜p(x), denoted by ¯xand¯P, and˜xand˜P,
+respectively, are given by
+¯x=N/summationdisplay
+i=1wiµi,and¯P=N/summationdisplay
+s=1wi/parenleftBig
+Σi+(µi−¯x)(µi−¯x)T/parenrightBig
+,(14a)
+˜x=1
+qq/summationdisplay
+i=1θi,and˜P=1
+qq/summationdisplay
+i=1/parenleftBig
+Φi+(θi−˜x)(θi−˜x)T/parenrightBig
+. (14b)
+Thus our objective is equivalent to balancing the above equation suc h that 245
+˜x=¯x,and˜P≈¯P. (15)
+In the trivial case with q=N= 1, Eq. (15) can be satisﬁed by letting θ1=µ1and 246
+Φ1=Σ1, and the PEnKF reduces to an EnKF. In non-trivial cases, for simp licity 247
+in solving Eq. (15) and reducing computational cost (as to be shown later), one may 248
+choose the covariances Φito be constant, say Φi=Φ, fori= 1,···,q, so that 249
+1
+qq/summationdisplay
+i=1θi=¯x,andΦ+1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T≈¯P. (16)
+When an EnKF is used to construct the PKF, one needs to represen t the solution 250
+of Eq. (16) in terms of some ensembles {Xi
+en,i= 1,···,q}, whereXi
+enis a matrix 251
+containing the (analysis) ensemble of the ith Gaussian component in Eq. (13), with 252
+meanθiand covariance Φ. For simplicity, we assume that Xi
+enare all of dimension 253
+n×m, with the ensemble size mfor eachi. Similar results can be easily obtained in 254
+the case with non-uniform ensemble sizes.255
+We then deﬁne a constant c, calledfraction coeﬃcient hereafter, which satisﬁes 256
+that 0≤c≤1. We let Φ≈c2¯P, so that Eq. (16) is reduced to 257
+1
+qq/summationdisplay
+i=1θi=¯x,and1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T≈(1−c2)¯P. (17)
+10
+In other words, the centers {θi,i= 1,···,q}can be generated as a set of state vectors 258
+whose sample mean and covariance are ¯xand (1−c2)¯P, respectively. After obtaining 259
+θi, one can generate the corresponding ensembles Xi
+en, with the sample means and 260
+covariances being θiandΦ≈c2¯P, respectively. How θiandXi
+encan be generated is 261
+discussed with more details in the support material.262
+From the above discussion, we see that cis a coeﬃcient that decides how to 263
+divide¯PamongΦand1
+q/summationtextq
+i=1(θi−¯x)(θi−¯x)T, so that the constraints in Eq. (16) 264
+are satisﬁed. When c→0, we have Φ→0so that ˜p(x) in Eq. (13) approaches 265
+the Monte Carlo approximation in the particle ﬁlter, with the mass poin ts equal to 266
+θi. On the other hand, when c→1, we have1
+q/summationtextq
+i=1(θi−¯x)(θi−¯x)T→0, so that 267
+allθiapproach ¯xandΦapproaches ¯P. As a result, ˜ p(x) in Eq. (13) approaches 268
+the Gaussian pdfN(x:¯x,¯P), which is essentially the assumption used in the EnKF. 269
+In this sense, when equipped with the re-sampling algorithm, the PEn KF is a ﬁlter 270
+in between the particle ﬁlter and the EnKF, with an adjustable param etercthat 271
+inﬂuences its behavior.272
+We note that, when c→0, under the constraint of matching the ﬁrst two mo- 273
+ments, our re-sampling scheme is very close to the posterior Gauss ian re-sampling 274
+strategy used in the Gaussian particle ﬁlter (Kotecha and Djuri´ c , 2003; Xiong et al., 275
+2006), in which one generates particles from a Gaussian distribution with mean and 276
+covariance equal tothose of theposterior pdfof thesystem states. Asa result, thereis 277
+no guarantee that higher order moments of the new MON match tho se of the original 278
+MON in our re-sampling scheme. If matching higher-order moments is a concern, 279
+one may adopt alternative criteria, for instance, the one that aims to minimize the 280
+distance (in certain metric) between the new MON and the original on e, so that the 281
+re-sampling procedure is recast as an optimization problem, in which o ne aims to 282
+choose appropriate parameters, i.e., means and covariances of th e new MON, that 283
+satisfy the chosen criterion as far as possible. In principle, this typ e of parameter 284
+estimation problem may be solved by the expectation-maximization (E M) algorithm 285
+11
+(Redner and Walker, 1984; Smith, 2007). But in practice, it is often computationally 286
+very intensive in doing so, due to the slow convergence rate of the E M algorithm 287
+and the high dimensionality of the parameter space in constructing t he new MON. 288
+Therefore we do not consider this type of more sophisticated re-s ampling strategy in 289
+this study.290
+For the purpose of pdf re-approximation, it is clear that the MON is n ot the 291
+only choice. A few alternatives are developed in the context of kern el density es- 292
+timation (KDE) (Silverman, 1986), and in principle all of them can be ap plied for 293
+pdf re-approximation. For instance, KDE is adopted at the re-sam pling step in the 294
+regularized particle ﬁlter (RPF) (Musso et al., 2001; Stavropoulos a nd Titterington, 295
+2001) to construct a continuous pdf with respect the particles be fore re-sampling, 296
+and to draw a number of new particles from the continuous pdf afte rwards. In this 297
+regard, the PEnKF is similar to the RPF, especially if the Gaussian kern el is adopted 298
+in the RPF for density estimation. However, there also exist diﬀeren ces. We list some 299
+of them as follows.300
+•The RPF ﬁrst constructs a continuous pdf, and then draws a numb er of new 301
+particles with equal weights from the resulting pdf. In contrast, t he PEnKF 302
+aims to directly approximate a MON by a new MON with equal weights. 303
+•In the RPF, various kernels can be adopted for the purpose of con structing the 304
+continuous pdf. However, in the PEnKF, we are conﬁned to use the MON, 305
+since we aim to build the PEnKF consisting of a set of parallel EnKFs. 306
+•The pdf re-approximation criterion used in the PEnKF only captures the ﬁrst 307
+two moments of the underlying pdf. In contrast, KDE used in the RP F in 308
+principle can yield a very good pdf estimate, provided that there are suﬃcient 309
+particles. In certain circumstances, though, the number of requ ired particles 310
+may also suﬀer from the “curse-of-dimensionality” (Silverman, 198 6, ch. 4). 311
+12
+3.3 Outline of the PEnKF Algorithm312
+To facilitate the comprehension of the PEnKF, here we provide an ou tline of the 313
+main steps of its algorithm. To avoid distraction, we will discuss the init ialization of 314
+the PEnKF in the next section. Throughout this paper, we assume t hat the number 315
+qof Gaussian components at the re-sampling step and the number Nof Gaussian 316
+components at the prediction and correction steps are time invaria nt. This implies 317
+the choice q=N. 318
+Without loss of generality, we also assume that at time instant k−1, the posterior 319
+pdfpa
+k−1(xk−1|y1:k−1)isre-approximated, throughthere-samplingstep, byamixture 320
+model321
+˜pk−1(xk−1|y1:k−1) =q/summationdisplay
+i=1˜wi
+k−1N(xk−1:θk−1,i,Φk−1).
+Moreover, the re-approximated analysis ensembles {Xk−1,i
+approx,i= 1,···,q}represent- 322
+ing the Gaussian components N(xk−1:θk−1,i,Φk−1) are also generated. The proce- 323
+dures at the next assimilation cycle are outlined as follows.324
+•Prediction step : Fori= 1,···,q, propagate the ensembles Xk−1,i
+approxforward 325
+through Eq. (1) to obtain the corresponding background ensemb lesXk,i
+bgat 326
+instantk. Accordingly, the background pdfbecomes 327
+pb
+k(xk|y1:k−1) =q/summationdisplay
+i=1˜wi
+k−1N/parenleftBig
+xk:ˆxb
+k,i,ˆPb
+k,i/parenrightBig
+,
+withˆxb
+k,iandˆPb
+k,ibeing the sample mean and covariance of the ensemble Xk,i
+bg, 328
+respectively. 329
+•Correction step : With an incoming observation yk, for each background ensem- 330
+bleXk,i
+bg,i= 1,···,q, apply an EnKF to obtain the analysis mean ˆxa
+k,iand the 331
+analysis ensemble Xk,i
+ana. During the correction, covariance inﬂation and local- 332
+ization (cf. §4.2.2) can be conducted on the EnKF. In addition, update the 333
+associated weights ˜ wi
+k−1towi
+kaccording to Eq (9). After the corrections, the 334
+13
+analysispdfbecomes 335
+pa
+k(xk|y1:k) =q/summationdisplay
+i=1wi
+kN/parenleftBig
+xk:ˆxa
+k,i,ˆPa
+k,i/parenrightBig
+,
+wherewi
+kare computed according to Eq. (9) in the context of the EnKF, and 336
+ˆPa
+k,iare the sample covariances of Xk,i
+ana. 337
+•Re-sampling step : Use the criterion in (12) to determine whether to conduct 338
+re-sampling or not. 339
+(1) Ifthereisnoneed forre-sampling, thenassign ˜ pk(xk|y1:k) =pa
+k(xk|y1:k), 340
+andXk,i
+approx=Xk,i
+anafori= 1,···,q; 341
+(2) Otherwise, ˜ pk(xk|y1:k) =1
+qq/summationtext
+i=1N(xk:θk,i,Φk), where parameters θk,i342
+andΦkare computed following the method in §3.2, and the associated 343
+weights become 1 /q. The ensembles Xk,i
+approxare produced accordingly. 344
+4 Numerical Experiments345
+4.1 Experiment Design346
+Inthepresentwork, wefocusontwodiﬀerentimplementationsoft hePEnKF:theﬁrst 347
+is based on the stochastic EnKF (SEnKF) of Evensen (1994) and th e second based 348
+on the ensemble transform Kalman ﬁlter (ETKF) of Bishop et al. (200 1). These two 349
+implementations are referred to as the PSEnKF and the PETKF, res pectively. 350
+The strongly nonlinear 40-dimensional system model due to Lorenz and Emanuel 351
+(1998) (LE98 model hereafter) was chosen as the testbed to ev aluate and study the 352
+performance of these two ﬁlters. This model mimics the time-evolut ion of a scalar 353
+atmospheric quantity. It is governed by the following set of equatio ns: 354
+dxi
+dt= (xi+1−xi−2)xi−1−xi+8, i= 1,···,40, (18)
+14
+wherethenonlinearquadratictermssimulateadvectionandthelinea rtermrepresents 355
+dissipation. Boundary conditions are cyclic, i.e. we deﬁne x−1=x39,x0=x40, and 356
+x41=x1. The model was numerically integrated using the Runge-Kutta four th order 357
+scheme from time t= 0 tot= 35 with a constant time step ∆ t= 0.05 (which 358
+corresponds to 6 hours in real time). To eliminate the impact of tran sition states, the 359
+model trajectory between times t= 0 and t= 25 was discarded. The assimilation 360
+experiments were carried out during the period t= 25.05 tot= 35 where the model 361
+trajectory was considered to be the ’truth’. Reference states w ere then sampled 362
+from the true trajectory and a ﬁlter performance is evaluated by how well it is able 363
+to estimate the reference states using a perturbed model and as similating a set of 364
+(perturbed) observations that was extracted from the refere nce states. 365
+In this work we consider two scenarios: one with a linear observation operator and 366
+the other with a nonlinear operator. The concrete forms of these two observational 367
+operators will be given in the relevant sections below.368
+The time-averaged root mean squared error (rmse for short) is u sed to evaluate 369
+the performance of a ﬁlter. Given a set of n-dimensional state vectors {xk:xk= 370
+(xk,1,···,xk,n)T,k= 0,···,kmax}, withkmaxbeingthemaximum timeindex ( kmax= 371
+199 in our experiments), then the rmse ˆ eis deﬁned as 372
+ˆe=1
+kmax+1kmax/summationdisplay
+k=0/radicaltp/radicalvertex/radicalvertex/radicalbt1
+nn/summationdisplay
+i=1(ˆxa
+k,i−xk,i)2, (19)
+whereˆxa
+k= (ˆxa
+k,1,···,ˆxa
+k,n)Tis the analysis state of xk. 373
+A possible problem in directly using ˆ eas the performance measure is that ˆ eitself 374
+may depend on some intrinsic parameters of the ﬁlters, for instanc e, the covariance 375
+inﬂation factor and localization length scale as to be discussed later. This may lead 376
+to inconsistent conclusions at diﬀerent parameter values. To avoid this problem, we 377
+adopted the following strategy: we relate a ﬁlter’s best possible per formance to the 378
+minimumrmse ˆ emin, whichistheminimumvalueof ˆ ethattheﬁltercanachievewithin 379
+the chosen ranges of the ﬁlter’s intrinsic parameters. In perform ance comparison, if 380
+15
+the minimum rmse ˆ eA
+minof ﬁlterAis less than the minimum rmse ˆ eB
+minof ﬁlterB, 381
+ﬁlterAis said to perform better than ﬁlter B. 382
+4.2 Implementation Details383
+4.2.1 Filter Initialization384
+ToinitializethePEnKF, weﬁrstestimatethemeanandcovarianceoft heLE98model 385
+over some time interval following Hoteit et al. (2008). These statist ics are then used 386
+to produce the pdfpf
+0(x0) of the background at the ﬁrst assimilation cycle as a MON. 387
+Concretely, the LE98 model was ﬁrst integrated for a long period ( between t= 0 388
+andt= 1000) starting from an initial state that has been drawn at rando m. The 389
+trajectory that falls between t= 50.05 andt= 1000 was used to estimate the mean 390
+ˆxdsand covariance ˆPdsof the dynamical system. To initialize pf
+0(x0) as a mixture of 391
+NGaussian distributions 392
+pf
+0(x0) =1
+NN/summationdisplay
+i=1N(x0:xf,i
+0,Pcom), (20)
+wherexf,i
+0are the means, and Pcomthe common covariance matrix of the Gaussian 393
+distributions in the mixture, we draw Nsamplesxf,i
+0from the Gaussian distribution 394
+N(x0:ˆxds,ˆPds), and set Pcom=ˆPds. Ifˆxf
+0=1
+NN/summationtext
+i=1xf,i
+0denotes the sample mean of 395
+xf,i
+0, then the covariance Pf
+0ofpf
+0(x0) is given by 396
+Pf
+0=ˆPds+1
+NN/summationdisplay
+i=1(xf,i
+0−ˆxf
+0)(xf,i
+0−ˆxf
+0)T, (21)
+which is always larger than ˆPds. The rationale behind this choice is not far from the 397
+covariance inﬂation technique (Anderson and Anderson, 1999; Wh itaker and Hamill, 398
+2002). In practice, a data assimilation system is often subject to v arious errors, 399
+such as poorly known model and observational errors, sampling er rors, etc. In such 400
+circumstances, an inﬂated background covariance would allocate m ore weights to the 401
+incoming observation when updating the background to the analysis , making the 402
+ﬁlter more robust (Jazwinski, 1970; Simon, 2006).403
+16
+4.2.2 Covariance Inﬂation and Localization404
+Covarianceinﬂation(Anderson and Anderson,1999;Whitaker and Hamill,2002)and 405
+localization (Hamill et al., 2001) are two popular techniques that are u sed to improve 406
+the stability and performance of the EnKF (Hamill et al., 2009; Van Le euwen, 2009), 407
+especially in the small ensemble scenario. In our experiments, these two techniques 408
+are implemented for each EnKF in the PEnKF.409
+More concretely, to introduce covariance inﬂation to the ith EnKF at instant k, 410
+we multiply the analysis covariance ˆPa
+k,i(before the re-sampling step) by a factor 411
+(1+δ)2, where the scalar δ≥0, called covariance inﬂation factor , is introduced as 412
+an intrinsic parameter of the EnKF. On the other hand, we follow the method in 413
+Hamill et al. (2001) to conduct covariance localization on the backgr ound covariance 414
+and its projection onto the observation space, with the tapering f unction (for smooth- 415
+ing out spuriously large values in covariance matrices) being the ﬁfth order function 416
+deﬁned in Eq. (4.10) of Gaspari and Cohn (1999). In doing so, anot her intrinsic 417
+scalar parameter lc>0, called length scale (Hamill et al., 2001), is introduced to 418
+the EnKF. Roughly speaking, lcis a parameter that determines the critical distance 419
+beyond which the tapering function becomes zero.420
+4.3 Experiments Results with a Linear Observation Opera-421
+tor 422
+In the ﬁrst scenario, we let the (synthetic) observations be gene rated every day (4 423
+model time steps) from the reference states using the following line ar observation 424
+system425
+yk= (xk,1,xk,3,···,xk,39)T+vk, (22)
+where only the odd state variables xk,i(i= 1,3,···,39) of the system state xk≡ 426
+(xk,1,···,xk,40)Tat time index kare observed. The observation noise vkfollows the 427
+20-dimensional Gaussian distribution N(vk:0,I20) withI20being the20 ×20identity 428
+17
+matrix.429
+4.3.1 Eﬀect of the Number of Gaussian Distributions430
+In the ﬁrst experiment we examine the eﬀect of the number of Gaus sian distributions 431
+on the performance of the PSEnKF and the PETKF. The experiment settings are as 432
+follows.433
+We initialize the pdf pf
+0(x0) withNGaussian pdfs. In our experiments we let N 434
+take values between 1 and 60. Since it is costly to carry out the comp utation for 435
+each integer in this interval, we choose to let Nincrease from 1 to 10, with an even 436
+increment of 1 each time, and then increase it from 15 to 60, with a lar ger incre- 437
+ment of 5 each time, as Nbecomes larger. For convenience, we denote this choice 438
+byN∈ {1 : 1 : 10 ,15 : 5 : 60 }, where the notation vmin:vinc:vmaxrepresents a 439
+set of values increasing from vmintovmax, with an even increment of vinceach time. 440
+If there is a need to conduct re-sampling, we re-approximate the a nalysis MON by 441
+a new MON with equal weights and with the same number of normal dist ributions. 442
+In doing so, we introduce a new parameter, i.e., the fraction coeﬃcie ntcdeﬁned in 443
+§3.2, to the PSEnKF/PETKF. To examine its eﬀect on the performanc e of the 444
+ﬁlter, we let c∈ {0.05 : 0.1 : 0.95}. The ensemble size is set to m= 20 in each 445
+SEnKF/ETKF, which is relatively small compared to the system dimens ion 40. In 446
+this case, it is customary to conduct covariance inﬂation (Anderso n and Anderson, 447
+1999; Whitaker and Hamill, 2002) and localization (Hamill et al., 2001) to improve 448
+the robustness and performance of the ﬁlters (Hamill et al., 2009; Van Leeuwen, 449
+2009). The impacts of covariance inﬂation and localization on the per formance of the 450
+EnKF have been examined in many works, see, for example, Whitaker and Hamill 451
+(2002). In our experiments we let the covariance inﬂation factor δ= 0.02. We follow 452
+the settings in Luo et al. (2010, §7.2.3) to conduct covariance localization and choose 453
+the length scale lc= 50. To reduce statistical ﬂuctuations, we repeat the experimen ts 454
+for 20 times, each time with a randomly drawn initial background ense mble, but the 455
+18
+same truetrajectoryandthecorresponding observations. The same repetitionsetting 456
+is adopted in all the other experiments.457
+In Fig. 1 we show the rms errors of both the PSEnKF and PETKF as fu nctions 458
+of the fraction coeﬃcient cand the number Nof Gaussian pdfs. First, we examine 459
+how the rmse of the PSEnKF changes with cwhenNis ﬁxed. In Fig. 1(a), if N 460
+is relatively small (say N <40), the rmse tends to decrease as cincreases. For 461
+largerN(sayN= 55), the rmse of the ﬁlter exhibits the bell-shape behavior: at 462
+the beginning it increases when cgrows from 0; after cbecomes relatively large 463
+(sayc= 0.4), further increasing creduces the rmse instead. Next, we examine the 464
+behavior of the rmse of the PSEnKF with respect to Nwhencis ﬁxed. When cis 465
+relatively small (say c= 0.1), thermse exhibits theU-turnbehavior: atthebeginning 466
+it intends to decrease as Ngrows; after Nbecomes relatively large (say N= 45), 467
+further increasing Nincreases the rmse instead. When cis larger, say, c= 0.6, the 468
+rmse appears less sensitive to the change of N. However, for even larger values of c, 469
+say,c= 0.9, the rmse appears to monotonically decrease with N. 470
+The behavior of the PETKF (cf. Fig. 1(b)) with respect to the chan ges ofNand 471
+cis similar to that of the PSEnKF. Therefore we do not repeat its desc ription here. 472
+To examine the minimum rms errors ˆ eminof the PSEnKF and the PETKF within 473
+the tested values of candN, we plot ˆ eminof both ﬁlters as functions of Nin Fig. 2. 474
+The ˆeminof both ﬁlters tends to decrease as the number Nof Gaussian distributions 475
+increases, though there also exhibit certain local minima. The PSEnK F achieves its 476
+lowest ˆeminatN= 60, while the PETKF at N= 50. As Ngrows, both the PSEnKF 477
+and the PETKF tend to have lower ˆ eminthan their corresponding base ﬁlters, the 478
+SEnKF and the ETKF (corresponding to the PSEnKF and the PETKF w ithN= 1, 479
+asdiscussed in §3.2), respectively. Thisconﬁrmsthebeneﬁt ofaccuracyimprovem ent 480
+by using the PEnKF instead of an EnKF. A comparison between the PS EnKF and 481
+the PETKF shows that the PETKF performs better than the PSEnK F when the 482
+numberNof Gaussian distributions is relatively small (say, N≤7). However, as 483
+19
+Nbecomes larger, the PSEnKF outperforms its ETKF-based counte rpart instead. 484
+Similar phenomena can also be observed in other experiments, as to b e shown later. 485
+4.3.2 Eﬀect of the Ensemble Size486
+Inthesecondexperimentweexaminetheeﬀectoftheensemblesize ofeachSEnKF/ETKF 487
+in the PEnKF, on the performance of the PSEnKF/PETKF. For refe rence, we also 488
+examine the performance of the SEnKF and the ETKF under various ensemble sizes. 489
+The experiment settings are as follows. For the PSEnKF and the PET KF, we let the 490
+ensemblesize mofeachEnKFtakevaluesfromtheset {20,40,80,100,200,400,800,1000}. 491
+For a single SEnKF/ETKF, we let m∈ {20,40,60,80,100,200,400,600,800,1000}, 492
+with two more values at 60 and 600.493
+In the PSEnKF and the PETKF, we also vary the fraction coeﬃcient csuch that 494
+c∈ {0.05 : 0.1 : 0.95}. We ﬁx the number Nof Gaussian pdfs, i.e., the number of 495
+ensemble ﬁlters, to be 3. To conduct covariance inﬂation, we let the inﬂation factor 496
+δ= 0.02. We choose to conduct covariance localization, and set the lengt h scale 497
+lc= 50, only if the ensemble size mis not larger than the dimension 40 of the LE98 498
+model. No covariance localization was conducted if m >40. Our experience shows 499
+that, for m >40, the beneﬁt of conducting localization is not signiﬁcant even if the 500
+length scale lcis properly chosen, while an improper value of lcis more likely to 501
+deteriorate the ﬁlter performance. To reduce statistical ﬂuctu ations, the experiments 502
+are again repeated for 20 times.503
+In Fig. 3 we show the rms errors of the SEnKF and the ETKF as funct ions of 504
+the ensemble size m. The rmse of the ETKF exhibits a U-turn behavior. The rmse 505
+of the ETKF monotonically decreases as long as m <100. Beyond that, the rmse 506
+monotonically increases instead as mincreases. On the other hand, the SEnKF 507
+exhibits a diﬀerent behavior. Its rmse decreases for m≤200, and then reaches a 508
+plateau where the rmse remains almost unchanged as mfurther increases. 509
+Fig. 4 plots the rms errors of the PSEnKF and the PETKF as function s of the 510
+20
+fraction coeﬃcient c, and the ensemble size min the SEnKF and the ETKF used to 511
+construct the corresponding PEnKFs. The rms errors, as funct ions of the ensemble 512
+sizem(with ﬁxed c), are consistent with our observations in Fig. 3. On the other 513
+hand, for both PEnKFs, their rms errors tend to decrease as the fraction coeﬃcient 514
+cincreases. 515
+Per analogy to the ﬁrst experiment, Fig. 5 plots the minimum rms erro rs ˆeminof 516
+thePSEnKFandthePETKF withinthetestedfractioncoeﬃcient candtheensemble 517
+sizem. A comparison between Figs. 5 and 3 shows that, the minimum rms err ors 518
+ˆeminof the PEnKFs behave very similarly to the rms errors of their corre sponding 519
+EnKFs in Fig. 3. Moreover, the values of ˆ eminin Fig. 5 tends to be lower than the 520
+corresponding rms errors in Fig. 3, indicating the beneﬁt of accura cy improvement 521
+in using the PEnKFs. Again, a comparison between the PSEnKF and th e PETKF 522
+shows that the PETKF performs better than the PSEnKF when the ensemble size 523
+mis relatively small (say, m≤40). However, as mbecomes larger, the PSEnKF 524
+outperforms the PETKF instead.525
+4.4 Experiments Results with a Nonlinear Observation Op-526
+erator 527
+In the second scenario, we introduce nonlinearity to the observat ion system. To this 528
+end, we let the observations be generated by the following nonlinear process 529
+yk= 0.05(x2
+k,1,···,x2
+k,39)T+vk (23)
+for every 4 model time steps. In Eq. (23), again only the odd state variables xk,i(i= 530
+1,3,···,39) of the system state xk≡(xk,1,···,xk,40)Tat time index kare observed. 531
+Theobservationnoise vkalsofollowsthe20-dimensionalGaussiandistribution N(vk: 532
+0,I20). We conduct the same experiments as those in the case of linear ob servation 533
+operator.534
+21
+4.4.1 Eﬀect of the Number of Gaussian Distributions535
+We ﬁrst examine the eﬀect of the number of Gaussian distributions. The experiment 536
+settings are the same as those in §4.3.1. Concretely, For either the PSEnKF or the 537
+PETKF, the number of Gaussian distributions N∈ {1 : 1 : 10 ,15 : 5 : 60 }, the 538
+fraction coeﬃcient c∈ {0.05 : 0.1 : 0.95}. For each individual SEnKF/ETKF in 539
+the PEnKF, the ensemble size m= 20, the covariance inﬂation factor δ= 0.02 and 540
+the length scale lc= 50 for covariance localization. As before, the experiments are 541
+repeated for 20 times to reduce statistical ﬂuctuations.542
+Fig. 6 plots the rms errors of both the PSEnKF and the PETKF as fun ctions of 543
+the fraction coeﬃcient cand the number Nof Gaussian pdfs. When candNchanges, 544
+both the PSEnKF and the PETKF behave very similar to their counter parts in the 545
+linear case. The rms errors of the ﬁlters tend to decrease as Nincreases, meaning 546
+that the PSEnKF/PETKF with N >1 in general performs better thanthe stochastic 547
+EnKF /ETKF (corresponding to the case N= 1 in the PEnKF), consistent with the 548
+results obtained in the linear observer case.549
+We also examine the minimum rms errors ˆ eminof the PSEnKF and the PETKF 550
+within the tested values of candN. Fig. 7 plots ˆ eminas functions of N. For the 551
+PSEnKF, the lowest ˆ eminis achieved at N= 50. And for the PETKF, its ˆ emintends 552
+to decrease within the tested range of N, and achieves its minimum at N= 60. The 553
+PEnKF with more than one Gaussian distributions ( N >1) performs better than 554
+the corresponding EnKF ( N= 1). In addition, a comparison between the PSEnKF 555
+and the PETKF shows again that the PETKF performs better than t he PSEnKF 556
+when the number Nof Gaussian distributions is relatively small, but tends to become 557
+worse as Nincreases. 558
+A comparison between Figs. 2 and 7 shows that the rmse of a ﬁlter (e .g. the 559
+PSEnKF at N= 2) with a nonlinear observer sometimes may be lower than that 560
+of the same ﬁlter with a linear observer1. This seemingly counter-intuitive result 561
+1The result of comparison would also depend on the ﬁlter in use, its con ﬁguration, the system in
+22
+happens possibly because in such situations, the eﬀect of sampling e rror due to the 562
+relatively small ensemble size dominates the eﬀect of nonlinearity in th e observation 563
+system. However, as the number Nof Gaussian distributions increases, the eﬀect 564
+of nonlinearity becomes more prominent so that the rmse with a nonlin ear observer 565
+tends to behigher thanthat with a linear one. Similar phenomenon can also be found 566
+by comparing Figs. 3 and 5 with Figs. 8 and 10 (to be shown below), res pectively, at 567
+diﬀerent ensemble sizes.568
+4.4.2 Eﬀect of the Ensemble Size569
+In the second experiment we examine the eﬀect of the ensemble size in each en- 570
+semble ﬁlter on the performance of the corresponding PEnKF. For reference, we 571
+also examine the performance of the SEnKF and the ETKF under var ious ensemble 572
+sizes. The experiment settings are the same as those in §4.3.2. In the PSEnKF and 573
+PETKF, we choose the fraction coeﬃcient c∈ {0.05 : 0.1 : 0.95}. We also choose 574
+the number of ensemble ﬁlters in each PEnKF to be 3. For each individu al EnKF 575
+in the corresponding PEnKF, we let the ensemble size mtake values from the set 576
+{20,40,80,100,200,400,800,1000}, and for the experiments on the single EnKF, we 577
+letm∈ {20,40,60,80,100,200,400,600,800,1000}. To conduct covariance inﬂation 578
+and localization in each individual EnKF, we choose the inﬂation factor δ= 0.02, 579
+and the length scale lc= 50. As in §4.3.2, covariance localization is conducted only 580
+if the ensemble size mis no larger than the dimension 40. 581
+Fig. 8 shows the rms errors of the SEnKF and the ETKF as functions of the 582
+ensemble size m. For both ﬁlters, their rms errors decrease as the ensemble size m 583
+increases. The ETKF performs better than the SEnKF in the small s ample scenario 584
+withm= 20. But as mincreases, the SEnKF outperforms the ETKF instead. In 585
+particular, divergence in the ETKF occurs if m >400, which did not happen in the 586
+linear observer case (cf. Fig. 3). On the other hand, the rmse of t he SEnKF appears 587
+assimilation, and so on, and therefore may change from case to cas e.
+23
+to reach a plateau for m >400, similar to the linear observer case. Comparing Fig. 8 588
+with Fig. 3, it is easy to see that, except for the stochastic EnKF at m= 20, the 589
+presence of nonlinearity in the observer deteriorates the perfor mance of the ensemble 590
+ﬁlters.591
+Fig. 9 plots the rms errors of the PSEnKF and the PETKF as function s of the 592
+fraction coeﬃcient c, and the ensemble size min the corresponding SEnKF and the 593
+ETKF, respectively. In the PSEnKF (cf. Fig. 9(a)), the rmse tend s to decrease as 594
+bothcandmincreaseswhentheensemblesize m≤800. However, when m >800,the 595
+impact of mon the ﬁlter performance is not signiﬁcant, which is consistent with t he 596
+results in Fig. 8. On the other hand, in the PETKF (cf. Fig. 9(b)), ﬁlt er divergence 597
+occurs for m >200, which is why we only report its rmse with m≤200 in Fig. 9(b), 598
+where the rmse of the PETKF appears to be a monotonically decreas ing function of 599
+mandc. 600
+In analogy to the ﬁrst experiment, Fig. 10 plots the minimum rms erro rs ˆeminof 601
+the PSEnKF and the PETKF within the tested fraction coeﬃcient cand ensemble 602
+sizem. One may observe that, similar to the SEnKF and the ETKF themselve s, the 603
+ˆeminof both the PSEnKF and the PETKF decrease as mincreases. However, for the 604
+PETKF, divergence occurs if m >200, rather than m >400 as in Fig. 8, but overall 605
+its rmse is closer to that obtained in the PSEnKF. Meanwhile, a compar ison between 606
+Fig. 8 and Fig. 10 shows that the PEnKFs perform better than the c orresponding 607
+EnKFs. Also,acomparisonbetweenFig. 5and10showsthat,excep tforthePSEnKF 608
+atm= 20, the nonlinearity in the observer again deteriorates the perfo rmance of the 609
+ensemble ﬁlters.610
+5 Discussion611
+This paper presented a discrete solution of theoptimal nonlinear ﬁlt er, called thepar- 612
+ticle Kalman ﬁlter (PKF), based on the Gaussian mixture representa tion of the state 613
+24
+pdfgiven the observations. The PKF solves the nonlinear Bayesian corr ection step by 614
+complementing the Kalman ﬁlter-like correction step of the particles with a particle 615
+ﬁlter-like correction step of the weights. The PKF simultaneously ru ns a weighted 616
+ensemble of the Kalman ﬁlters in parallel. This is far beyond our comput ing capabil- 617
+ities when dealing with computationally demanding systems, as the atm ospheric and 618
+oceanic models. Therefore, to reduce computational cost, one m ay instead consider 619
+a low-rank parametrization of the Gaussian mixture covariance mat rices of the state 620
+pdfs. An eﬃcient way to do that is to resort to the ensemble Kalman ﬁlter (EnKF) 621
+and use an EnKF-like method to update each component of the Gaus sian mixture 622
+pdfs. This amounts to running a weighted ensemble of the EnKFs. In this work, the 623
+PKF was implemented using the stochastic EnKF and a deterministic En KF, the 624
+ensemble transform Kalman ﬁlter (ETKF). We call this type of impleme ntation the 625
+particle ensemble Kalman ﬁlter (PEnKF).626
+The PEnKF sets a nonlinear Bayesian ﬁltering framework that encom passes the 627
+EnKF methods as a special case. As in the EnKF, the Kalman correct ion in the 628
+PEnKF attenuates the degeneracy of the ensemble by allocating th e ensemble mem- 629
+bers far away from the incoming observation relatively more weights than in the 630
+particle ﬁlter, so that the ﬁlter can operate with reasonable size en sembles. To fur- 631
+ther improve the performance of the PEnKF, we also introduced to the PEnKF a 632
+re-sampling step similar to that used in the regularized particle ﬁlter ( Musso et al., 633
+2001; Stavropoulos and Titterington, 2001).634
+The stochastic EnKF and ETKF-based PEnKFs, called the PSEnKF an d the 635
+PETKF, respectively, were implemented and their performance was investigated with 636
+the strongly nonlinear Lorenz-96 model. These ﬁlters were tested with both linear 637
+and nonlinear observation operators. Experiments results sugge st that the PSEnKF 638
+and the PETKF outperform their corresponding EnKFs. It was also found that the 639
+ETKF outperforms the stochastic EnKF for small size ensembles wh ile the stochas- 640
+tic EnKF exhibits better performance for large size ensembles. We a rgued that this 641
+25
+happens because the EnKF endures less observational sampling er rors when the en- 642
+semble size is large. Another reason would also be the better approx imation of the 643
+PEnKF distributions provided by the stochastic EnKF compared to t he ETKF. This 644
+was also true for their PEnKF counterparts. Overall, the conclusio ns from the nu- 645
+merical results obtained with the linear and nonlinear observation op erators were 646
+not fundamentally diﬀerent, except that in general better estima tion accuracy was 647
+achieved with the linear observer when the sampling error is not the d ominant factor. 648
+The results also suggest that the PEnKFs could more beneﬁt from t he use of more 649
+components in the mixture of normals (MON) and larger ensembles in t he EnKFs in 650
+the nonlinear observations case.651
+Future work will focus on developing and testing new variants of the PEnKF that 652
+applies more eﬃcient approximations, in term of computational cost , to update the 653
+mixture covariance matrices. Another direction for improvement w ould be also to 654
+work on localizing the correction step of the particle weights (Van Le euwen, 2009). 655
+Our ﬁnal goal is to develop a set of computationally feasible suboptim al PEnKFs 656
+that can outperform the EnKF methods at reasonable computatio nal cost. As stated 657
+by Anderson (2003), developing ﬁlters in the context of the optima l nonlinear ﬁl- 658
+tering problem, rather than starting from the Kalman ﬁlter, should lead to a more 659
+straightforward understanding of their capabilities.660
+The paper further discussed how the PEnKF can also be used as a ge neral frame- 661
+work to simultaneously run several assimilation systems. We believe t hat this ap- 662
+proach provides a framework to merge the solutions of diﬀerent En KFs, or to develop 663
+hybrid EnKF-variational methods. Work in this direction is under inve stigation. 664
+Acknowledge665
+We would like to thank the three anonymous reviewers for their valua ble comments 666
+and suggestions. Ibrahim Hoteit was partially supported by ONR gra nt N00014-08- 667
+26
+1-0554.668
+References669
+Anderson, J., 2003: Alocalleast squares frameworkforensemble ﬁltering. Mon. Wea. 670
+Rev.,131 (4), 634–642. 671
+Anderson, J. L., 2001: An ensemble adjustment Kalman ﬁlter for da ta assimilation. 672
+Mon. Wea. Rev. ,129, 2884–2903. 673
+Anderson, J. L. and S. L. Anderson, 1999: A Monte Carlo implement ation of the 674
+nonlinear ﬁltering problem to produce ensemble assimilations and fore casts.Mon. 675
+Wea. Rev. ,127, 2741–2758. 676
+Bengtsson, T., P. Bickel, and B. Li, 2008: Curse-of-dimensionality r evisited: Collapse 677
+of the particle ﬁlter in very large scale systems. IMS Collections ,2, 316–334. 678
+Bengtsson, T., C. Snyder, and D. Nychka, 2003: Toward a nonlinea r ensemble ﬁlter 679
+for high-dimensional systems. J. Geophys. Res. ,108, 8775. 680
+Bishop, C. H., B. J. Etherton, and S. J. Majumdar, 2001: Adaptive sampling with 681
+ensemble transform Kalman ﬁlter. Part I: theoretical aspects. Mon. Wea. Rev. , 682
+129, 420–436. 683
+Burgers, G., P. J. van Leeuwen, and G. Evensen, 1998: On the ana lysis scheme in 684
+the ensemble Kalman ﬁlter. Mon. Wea. Rev. ,126, 1719–1724. 685
+Chen, R. and J. Liu, 2000: Mixture Kalman ﬁlters. Journal of the Royal Statistical 686
+Society: Series B (Statistical Methodology) ,62 (3), 493–508. 687
+Doucet, A., N. De Freitas, and N. Gordon, (Eds.) , 2001: Sequential Monte Carlo 688
+methods in practice . Springer Verlag. 689
+27
+Evensen, G., 1994: Sequential data assimilation with a nonlinear quas i-geostrophic 690
+model using Monte Carlo methods to forecast error statistics. J. Geophys. Res. , 691
+99(C5), 10143–10162. 692
+Evensen, G. and P. J. van Leeuwen, 1996: Assimilation of geosat alt imeter data 693
+for the aghulas current using the ensemble Kalman ﬁlter with a quasi- geostrophic 694
+model.Mon. Wea. Rev. ,124, 85–96. 695
+Gaspari, G. and S. E. Cohn, 1999: Construction of correlation fun ctions in two and 696
+three dimensions. Quart. J. Roy. Meteor. Soc. ,125, 723 – 757. 697
+Ghil, M. and P. Malanotte-Rizzoli, 1991: Data assimilation in meteorolog y and 698
+oceanography. Adv. Geophys ,33, 141–266. 699
+Hamill, T. M., J. S. Whitaker, J. L. Anderson, and C. Snyder, 2009: C omments 700
+on “Sigma-point Kalman ﬁlter data assimilation methods for strongly n onlinear 701
+systems”. Journal of the Atmospheric Sciences ,66, 3498–3500. 702
+Hamill, T. M., J. S. Whitaker, and C. Snyder, 2001: Distance-depend ent ﬁltering of 703
+background error covariance estimates in an ensemble Kalman ﬁlter .Mon. Wea. 704
+Rev.,129, 2776–2790. 705
+Han, X. and X. Li, 2008: An evaluation of the nonlinear/non-Gaussia n ﬁlters for the 706
+sequential data assimilation. Remote Sensing of Environment ,112, 1434 – 1449. 707
+Hoteit, I., D. T. Pham, and J. Blum, 2002: A simpliﬁed reduced order K alman 708
+ﬁltering and application to altimetric data assimilation in Tropical Paciﬁc .Journal 709
+of Marine Systems ,36, 101–127. 710
+Hoteit, I., D. T. Pham, G. Triantafyllou, and G. Korres, 2008: A new approximate 711
+solution of the optimal nonlinear ﬁlter for data assimilation in meteoro logy and 712
+oceanography. Mon. Wea. Rev. ,136, 317–334. 713
+28
+Houtekamer, P. L. and H. L. Mitchell, 1998: Data assimilation using an ensemble 714
+Kalman ﬁlter technique. Mon. Wea. Rev. ,126, 796–811. 715
+Jazwinski, A. H., 1970: Stochastic Processes and Filtering Theory . Academic Press. 716
+Kotecha, J. and P. Djuri´ c, 2003: Gaussian particle ﬁltering. Signal Processing, IEEE 717
+Transactions on ,51 (10), 2592–2601. 718
+Lorenz, E. N. and K. A. Emanuel, 1998: Optimal sites for supplemen tary weather 719
+observations: Simulation with a small model. J. Atmos. Sci. ,55, 399–414. 720
+Luo, X., I. M. Moroz, and I. Hoteit, 2010: Scaled unscented trans form Gaussian sum 721
+ﬁlter: Theory and application. Physica D ,239, 684–701. 722
+Musso, C., N. Oudjane, and F. L. Gland, 2001: Improving regularize d particle ﬁl- 723
+ters.Sequential Monte Carlo methods in practice , A. Doucet, N. de Freitas, and 724
+N. Gordon, Eds., Springer-Verlag, chap. 12, 247–271. 725
+Nakano, S., U. G., and T. Higuchi, 2007: Merging particle ﬁlter for seq uential data 726
+assimilation. Nonlin. Processes Geophys. ,14, 395–408. 727
+Pham, D. T., 2001: Stochastic methods for sequential data assimila tion in strongly 728
+nonlinear systems. Mon. Wea. Rev. ,129, 1194–1207. 729
+Redner, R. and H. Walker, 1984: Mixture densities, maximum likelihood and the em 730
+algorithm. SIAM review ,26 (2), 195–239. 731
+Silverman, B. W., 1986: Density Estimation for Statistics and Data Analysis . Chap- 732
+man & Hall. 733
+Simon, D., 2006: Optimal State Estimation: Kalman, H-Inﬁnity, and Nonlinea r 734
+Approaches . Wiley-Interscience, 552 pp. 735
+Smith, K. W., 2007: Cluster ensemble Kalman ﬁlter. Tellus,59A, 749–757. 736
+29
+Snyder, C., T. Bengtsson, P. Bickel, and J. Anderson, 2008: Obst acles to high- 737
+dimensional particle ﬁltering. Mon. Wea. Rev. ,136, 4629–4640. 738
+Sorenson, H. W. and D. L. Alspach, 1971: Recursive Bayesian estim ation using 739
+Gaussian sums. Automatica ,7, 465 – 479. 740
+Stavropoulos, P. and D. M. Titterington, 2001: Improved particle ﬁlters and smooth- 741
+ing.Sequential Monte Carlo methods in practice , A. Doucet, N. de Freitas, and 742
+N. Gordo, Eds., Springer-Verlag, chap. 14, 295–317. 743
+Todling, R., 1999: Estimation theory and foundations of atmospher ic data assimila- 744
+tion. 187 pp., DAO Oﬃce Note. 745
+Van Leeuwen, P. J., 2003: A variance minimizing ﬁlter for large-scale a pplications. 746
+Mon. Wea. Rev. ,131, 2071–2084. 747
+Van Leeuwen, P. J., 2009: Particle ﬁltering in geophysical systems. Mon. Wea. Rev. , 748
+137, 4089–4114. 749
+Whitaker, J. S. and T. M. Hamill, 2002: Ensemble data assimilation witho ut per- 750
+turbed observations. Mon. Wea. Rev. ,130, 1913–1924. 751
+Xiong, X., I. Navon, and B. Uzunoglu, 2006: A note on the particle ﬁlt er with 752
+posterior Gaussian resampling. Tellus A,58 (4), 456–460. 753
+30
+List of Figures754
+1 RMS errors (over 20 experiments) of the stochastic EnKF- and E TKF- 755
+basedPEnKFs(withaﬁxedensemble sizeof20ineachensemble ﬁlter) 756
+as the functions of the fraction coeﬃcient and the number of Gaus sian 757
+it pdfs in the MON. . . . . . . . . . . . . . . . . . . . . . . . . . . . . 33 758
+2 Minimumrmserrors ˆ emin(over20experiments) ofthestochasticEnKF- 759
+and ETKF-based PEnKFs (with a ﬁxed ensemble size of 20 in each 760
+ensemble ﬁlter) as the function of the number of Gaussian pdfs in the 761
+MON. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 34 762
+3 RMS errors (over 20 experiments) of the stochastic EnKF and th e 763
+ETKF as the functions of the ensemble size. . . . . . . . . . . . . . . 35 764
+4 RMS errors (over 20 experiments) of the stochastic EnKF- and E TKF- 765
+basedPEnKFs(withaﬁxednumberofGaussian pdfsof3ineachPKF) 766
+as the functions of the fraction coeﬃcient and the ensemble size of the 767
+ensemble ﬁlter. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 36 768
+5 Minimumrmserrors ˆ emin(over20experiments) ofthestochasticEnKF- 769
+and ETKF-based PEnKFs (with a ﬁxed number of Gaussian pdfs of 770
+3 in each PKF) as the function of the ensemble size in each ensemble 771
+ﬁlter. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 37 772
+6 RMS errors (over 20 experiments) of the stochastic EnKF- and E TKF- 773
+basedPEnKFs(withaﬁxedensemble sizeof20ineachensemble ﬁlter) 774
+as the functions of the fraction coeﬃcient and the number of Gaus sian 775
+pdfs in the MON. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 38 776
+7 Minimumrmserrors ˆ emin(over20experiments) ofthestochasticEnKF- 777
+and ETKF-based PEnKFs (with a ﬁxed ensemble size of 20 in each 778
+ensemble ﬁlter) as the function of the number of Gaussian pdfs in the 779
+MON. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 39 780
+31
+8 RMS errors (over 20 experiments) of the stochastic EnKF and th e 781
+ETKF as the functions of the ensemble size. . . . . . . . . . . . . . . 40 782
+9 RMS errors (over 20 experiments) of the stochastic EnKF- and E TKF- 783
+basedPEnKFs(withaﬁxednumberofGaussian pdfsof3ineachPKF) 784
+as the functions of the fraction coeﬃcient and the ensemble size of the 785
+ensemble ﬁlter. In Fig. 9(b) the ensemble size in each ensemble ﬁlter 786
+is only up to 200. Divergence occurs in the ETKF-based PKF with 787
+ensemble sizes in each ensemble ﬁlter larger than 200. . . . . . . . . . 41 788
+10 Minimumrmserrors ˆ emin(over20experiments) ofthestochasticEnKF- 789
+and ETKF-based PEnKFs (with a ﬁxed number of Gaussian pdfs of 790
+3 in each PKF) as the function of the ensemble size in each ensemble 791
+ﬁlter. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 42 792
+32
+510152025303540455055600.10.20.30.40.50.60.70.80.91.822.22.42.4
+2.62.6
+2.82.8
+33
+3.23.2
+3.43.4
+3.43.63.63.6
+3.63.83.83.83.8
+4
+44444
+4.2
+4.24.2 4.24.24.2
+4.44.4
+4.44.44.4 4.4
+4.44.4
+4.4
+4.6
+4.64.6
+4.64.64.6
+4.6
+4.64.84.8
+4.8
+Number of Gaussian pdfsFraction coefficient
+  
+PSEnKF
+(a) Stochastic EnKF-based PKF
+510152025303540455055600.10.20.30.40.50.60.70.80.93.3
+3.33.53.5
+3.53.73.7
+3.73.9 3.93.9
+3.9
+3.93.9
+4.14.14.14.1
+4.14.14.1
+4.1
+4.3 4.34.3 4.34.3
+4.3
+4.34.54.54.54.54.5
+4.5
+4.54.5
+4.74.74.7
+4.7
+4.74.7
+4.94.9
+Number of Gaussian pdfsFraction coefficient
+  
+PETKF
+(b) ETKF-based PKF
+Figure1: RMSerrors(over20experiments) ofthestochasticEnK F-andETKF-based
+PEnKFs (with a ﬁxed ensemble size of 20 in each ensemble ﬁlter) as the functions of
+the fraction coeﬃcient and the number of Gaussian it pdfs in the MON .33
+0 10 20 30 40 50 601.522.533.544.55
+Number of Gaussian pdfsMinimum rmse
+  
+PSEnKF
+PETKF
+Figure 2: Minimum rms errors ˆ emin(over 20 experiments) of the stochastic EnKF-
+and ETKF-based PEnKFs (with a ﬁxed ensemble size of 20 in each ense mble ﬁlter)
+as the function of the number of Gaussian pdfs in the MON.
+34
+010020030040050060070080090010000.511.522.533.544.5
+Ensemble sizeRMSE
+  
+Stochastic EnKF
+ETKF
+Figure 3: RMS errors (over 20 experiments) of the stochastic EnK F and the ETKF
+as the functions of the ensemble size.
+35
+10020030040050060070080090010000.10.20.30.40.50.60.70.80.9
+0.80.80.80.8
+1111
+1.21.21.21.2
+1.41.41.41.4
+1.61.61.61.6
+1.81.81.81.8
+1.8
+2222
+2
+2.22.22.22.2
+2.2
+2.42.42.42.4
+2.4
+2.62.62.62.62.6
+2.82.82.82.82.8
+3 33333
+3.23.23.23.2
+3.43.43.4
+3.63.63.6
+3.83.83.8
+444
+4.24.24.2
+4.44.44.4
+4.64.64.6
+4.8
+4.84.8
+5
+Ensemble size in each SEnKFFraction coefficient
+  
+PSEnKF
+(a) Stochastic EnKF-based PKF
+10020030040050060070080090010000.10.20.30.40.50.60.70.80.9
+1.6
+1.61.6
+1.8
+1.8
+1.8
+1.8
+2
+2
+222
+2.2
+2.2
+2.22.2 2.2
+2.4
+2.42.42.4 2.4
+2.6
+2.6 2.62.62.6
+2.8
+2.82.82.82.8
+33333
+3.23.23.23.2
+3.43.43.4
+3.63.63.6
+3.83.83.8
+444
+4.24.24.2
+4.44.44.4
+4.64.64.6
+4.8 4.84.8
+Ensemble size in each ETKFFraction coefficient
+  
+PETKF
+(b) ETKF-based PKF
+Figure4: RMSerrors(over20experiments) ofthestochasticEnK F-andETKF-based
+PEnKFs (with a ﬁxed number of Gaussian pdfs of 3 in each PKF) as the functions
+of the fraction coeﬃcient and the ensemble size of the ensemble ﬁlte r. 36
+010020030040050060070080090010000.511.522.533.544.5
+Ensemble size in each filterMinimum rmse
+  
+PSEnKF
+PETKF
+Figure 5: Minimum rms errors ˆ emin(over 20 experiments) of the stochastic EnKF-
+and ETKF-based PEnKFs (with a ﬁxed number of Gaussian pdfs of 3 in each PKF)
+as the function of the ensemble size in each ensemble ﬁlter.
+37
+510152025303540455055600.10.20.30.40.50.60.70.80.9
+3.6 3.63.6
+3.83.83.8
+444
+44
+4.24.24.2
+4.24.2
+4.44.4
+4.4
+4.44.64.64.6
+4.64.8
+Number of Gaussian pdfsFraction coefficient
+  
+PSEnKF
+(a) Stochastic EnKF-based PKF
+510152025303540455055600.10.20.30.40.50.60.70.80.9
+3.63.6
+3.8 3.83.8
+3.83.8
+44
+4
+44
+4.24.2
+4.2
+4.24.44.4
+4.4
+4.44.6
+4.64.6
+4.6
+4.8
+Number of Gaussian pdfsFraction coefficient
+  
+PETKF
+(b) ETKF-based PKF
+Figure6: RMSerrors(over20experiments) ofthestochasticEnK F-andETKF-based
+PEnKFs (with a ﬁxed ensemble size of 20 in each ensemble ﬁlter) as the functions of
+the fraction coeﬃcient and the number of Gaussian pdfs in the MON.38
+0 10 20 30 40 50 603.23.33.43.53.63.73.83.944.14.2
+Number of Gaussian pdfsMinimum rmse
+  
+PSEnKF
+PETKF
+Figure 7: Minimum rms errors ˆ emin(over 20 experiments) of the stochastic EnKF-
+and ETKF-based PEnKFs (with a ﬁxed ensemble size of 20 in each ense mble ﬁlter)
+as the function of the number of Gaussian pdfs in the MON.
+39
+010020030040050060070080090010002.833.23.43.63.844.2
+Ensemble sizeRMSE
+  
+stochastic EnKF
+ETKF
+Filter divergence occurs 
+for larger ensemble sizes
+Figure 8: RMS errors (over 20 experiments) of the stochastic EnK F and the ETKF
+as the functions of the ensemble size.
+40
+10020030040050060070080090010000.10.20.30.40.50.60.70.80.9
+2.82.82.8
+2.82.8
+2.852.852.852.852.85
+2.92.92.92.9
+2.92.9
+2.952.952.952.952.952.95
+33333
+33
+3.05
+3.053.053.053.053.13.1
+3.13.13.13.1
+3.15
+3.153.153.153.2
+3.23.23.2 3.25
+3.253.253.25
+3.3
+3.33.33.3
+Ensemble size in each SEnKFFraction coefficient
+  
+PSEnKF
+(a) Stochastic EnKF-based PKF
+204060801001201401601802000.10.20.30.40.50.60.70.80.92.9
+2.95
+33
+3.053.05
+3.13.13.1
+3.153.153.15
+3.23.23.2
+3.253.253.253.25
+3.33.33.33.3
+3.353.353.353.35
+3.43.43.4
+3.4
+3.453.453.453.45
+3.53.53.53.5
+3.553.553.553.55
+3.63.63.63.6
+3.653.653.65
+3.73.73.7
+3.753.753.75
+3.83.83.8
+Ensemble size in each ETKFFraction coefficient
+  
+PETKF
+(b) ETKF-based PKF
+Figure9: RMSerrors(over20experiments) ofthestochasticEnK F-andETKF-based
+PEnKFs (with a ﬁxed number of Gaussian pdfs of 3 in each PKF) as the functions
+of the fraction coeﬃcient and the ensemble size of the ensemble ﬁlte r. In Fig. 9(b)
+the ensemble size in each ensemble ﬁlter is only up to 200. Divergence o ccurs in the
+ETKF-based PKF with ensemble sizes in each ensemble ﬁlter larger tha n 200.41
+010020030040050060070080090010002.833.23.43.63.84
+Ensemble size in each filterMinimum rmse
+  
+PSEnKF
+PETKF
+Filter divergence occurs
+for larger ensemble sizes
+Figure 10: Minimum rms errors ˆ emin(over 20 experiments) of the stochastic EnKF-
+and ETKF-based PEnKFs (with a ﬁxed number of Gaussian pdfs of 3 in each PKF)
+as the function of the ensemble size in each ensemble ﬁlter.
+42
+Support Material: The Full Re-sampling 793
+Algorithm 794
+Here we discuss how to construct the ensemble set {Xi
+en,i= 1,···,q}in the PEnKF. 795
+We note that the relative positions of the dimension nof the random vector x, the 796
+numberqof the Gaussian pdfs in the MON Eq. (13), and the ensemble size mof each 797
+EnKF in the PKF determines our re-sampling strategies. In certain c ircumstances, 798
+a singular value decomposition (SVD) may be required on the covarian ce matrix ¯P 799
+in Eq. (14) such that800
+¯P=VDVT=n/summationdisplay
+i=1σ2
+ieieT
+i, (S.1)
+whereVisthematrixconsistingoftheeigenvectors eiof¯P, andD≡diag(σ2
+1,···,σ2
+n) 801
+the diagonal matrix consisting of the corresponding eigenvalues σ2
+i(we also assume 802
+σi≥0 without loss of generality). Depending on the values of q,mandn, one may 803
+avoid computing the full spectra of ¯P, as to be shown below. 804
+Case I: q≤nandm≤n 805
+In this case the number qof (re-approximation) Gaussian distributions and the en- 806
+semble size mare both less than the dimension nof the system state. We consider 807
+two possibilities below.808
+1. q≤m≤n 809
+Here we choose
+1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T= (1−c2)q−1/summationdisplay
+i=1σ2
+ieieT
+i, (S.2a)
+Φ=c2q−1/summationdisplay
+i=1σ2
+ieieT
+i+m−1/summationdisplay
+i=qσ2
+ieieT
+i. (S.2b)
+1
+The reason to choose the superscripts q−1 andm−1 on the right hand side of 810
+Eqs. (S.2a) and (S.2b) will be made clear soon. We also note that the s um 811
+Φ+1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T=n−1/summationdisplay
+i=1σ2
+ieieT
+i (S.3)
+is not equal to ¯Pexactly. Instead, it only adds up to the ﬁrst ( m−1) terms of σ2
+ieieT
+i. 812
+LetΘ= [θ1,···,θq] be the collection of the means θiin the MON ˜ p(x), and 813
+Sµ=√
+1−c2[σ1e1,···,σq−1eq−1]
+be the square root of (1 −c2)q−1/summationtext
+i=1σ2
+ieieT
+iin Eq. (S.2a), then it can be veriﬁed that 814
+Θ=¯x1T
+q+√qSµCq−1,q (S.4)
+yields a set of the means θithat satisfy Eq. (S.2a), where 1T
+qdenotes the transpose 815
+of theq×1 column vector 1qwith all its elements being one (so that ¯x1T
+qconsists 816
+ofNidentical column vectors ¯x), andCq−1,qis a (q−1)×qmatrix satisfying that 817
+Cq−1,q(Cq−1,q)T=Iq−1, withIq−1being the ( q−1)-dimensional identity matrix, 818
+and that Cq−1,q1q=0q−1, with0q−1being a ( q−1)×1 column vector with all its 819
+elements being zero. The ﬁrst constraint, Cq−1,q(Cq−1,q)T=Iq−1guarantees that the 820
+sample covariance of Θsatisﬁes the constraint in Eq. (S.2a), and the second one, 821
+Cq−1,q1q=0q−1guarantees that the sample mean of Θis equal to ¯x, as is required 822
+in Eq. (16). For the generation of such a matrix Cq−1,q, readers are referred to, 823
+for example, Hoteit et al. (2002); Pham (2001). In addition, since t he dimension of 824
+Cq−1,qis (q−1)×q, we require that the dimension of the square root matrix Sµis 825
+n×(q−1). Therefore, on the right hand side of Eq. (S.2a), the superscr ipt shall be 826
+(q−1), rather than q. The reason to use the superscript ( m−1) in Eq. (S.2b) is 827
+similar, as can be seen below.828
+To generate the ensembles Xi
+en(i= 1,···,q), withθiandΦbeing their sample 829
+means and covariances, we ﬁrst construct the square root matr ix 830
+Sφ= [cσ1e1,···,cσq−1eq−1,σqeq,···,σn−1em−1] (S.5)
+2
+ofΦ, and generate Xi
+enby 831
+Xi
+en=θi1T
+m+√mSφCm−1,m,fori= 1,···,q, (S.6)
+whereCm−1,mis a matrix similar to Cq−1,qin Eq. (S.4). We note that the term 832
+√mSφCm−1,mis common to all EnKFs, and thus only needs to be calculated once. 833
+This is direct implication from the choice of the uniform covariance Φin ˜p(x), as we 834
+have pointed out previously, which leads to computational savings in comparison to 835
+the non-uniform choice.836
+2. m < q≤n 837
+Here we choose
+1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T= (1−c2)m−1/summationdisplay
+i=1σ2
+ieieT
+i+q−1/summationdisplay
+i=mσ2
+ieieT
+i,(S.7a)
+Φ=c2m−1/summationdisplay
+i=1σ2
+ieieT
+i. (S.7b)
+Now deﬁne the square root matrix 838
+Sµ= [√
+1−c2σ1e1,···,√
+1−c2σm−1em−1,σmem,···,σq−1eq−1] (S.8)
+of the term on right hand side of Eq. (S.7a), and the square root ma trix 839
+Sφ=c[σ1e1,···,σn−1em−1] (S.9)
+ofΦin Eq. (S.7b). Then θiandXi
+encan be generated through Eqs. (S.4) and (S.6), 840
+respectively.841
+3
+Case II: q≤nandm > n 842
+In this case the number qof Gaussian distributions is less than the dimension nof
+the system state, but the ensemble size mis larger than n. We choose
+1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T= (1−c2)q−1/summationdisplay
+i=1σ2
+ieieT
+i, (S.10a)
+Φ=c2q−1/summationdisplay
+i=1σ2
+ieieT
+i+n/summationdisplay
+i=qσ2
+ieieT
+i=¯P−(1−c2)q−1/summationdisplay
+i=1σ2
+ieieT
+i. (S.10b)
+The last equality in Eq. (S.10b) implies that one does not need to compu te the full 843
+spectra of ¯Pand the corresponding eigenvectors. Instead, one only needs to compute 844
+the ﬁrst ( q−1) terms of σ2
+ieieT
+i. 845
+Now deﬁne the square root matrix 846
+Sµ=√
+1−c2[σ1e1,···,σq−1eq−1], (S.11)
+so that one can again adopt Eq. (S.4) to generate θi(i= 1,···,q). To generate the 847
+ensembles Xi
+en, the situation here is diﬀerent from that in the previous case, in tha t 848
+the ensemble size mis larger than the dimension n, so that one cannot obtain enough 849
+ensemble members through Eq. (S.6). As a result, one may instead c hoose to draw 850
+(m−1) samples δxφ
+j(j= 1,···,m−1) from the distribution N(δx:0n,Φ) to form 851
+a matrix ∆ Xφ≡[δxφ
+1,···,δxφ
+m−1]. Then the ensemble Xi
+enis produced via 852
+Xi
+en=θi1T
+m+∆XφCm−1,m,fori= 1,···,q. (S.12)
+Eq.(S.12)issimilartothepartialre-samplingschemeinHoteit et al.(2 008),although 853
+here the perturbation term ∆ XφCm−1,mcan be common to all EnKFs, and thus can 854
+be drawn only once to reduce computational cost.855
+4
+Case III: q > nandm≤n 856
+In this case the ensemble size mis no larger than the dimension nof the system state,
+but the number qof Gaussian distributions is. We choose
+1
+qq/summationdisplay
+i=1(θi−¯x)(θi−¯x)T= (1−c2)m−1/summationdisplay
+i=1σ2
+ieieT
+i+n/summationdisplay
+i=mσ2
+ieieT
+i=¯P−c2m−1/summationdisplay
+i=1σ2
+ieieT
+i,
+(S.13a)
+Φ=c2m−1/summationdisplay
+i=1σ2
+ieieT
+i. (S.13b)
+Sinceq > n, we choose to draw ( q−1) samples δxµ
+jfrom the distribution N(δx: 857
+0n,¯P−c2m−1/summationtext
+i=1σ2
+ieieT
+i) to form a matrix ∆ Xµ≡[δxµ
+1,···,δxµ
+q−1], whileθiare gener- 858
+ated by859
+Θ=¯x1T
+q+∆XµCq−1,q. (S.14)
+Let 860
+Sφ=c[σ1e1,···,σn−1em−1], (S.15)
+thenXi
+encan be generated through Eq. (S.6). 861
+Case IV: q > nandm > n 862
+In this case both the number qof Gaussian distributions and the ensemble size m 863
+are larger than the dimension nof the system state. We let Φ=c2¯Pand deﬁne 864
+Pn= (1−c2)¯P. Togenerate θi, weﬁrst draw( q−1)samples δxµ
+jfromthedistribution 865
+N(δx:0n,Pn) to form a matrix ∆ Xµ= [δxµ
+1,···,δxµ
+q−1], and then apply Eq. (S.14). 866
+Meanwhile, we also draw ( m−1) samples δxφ
+jfrom the distribution N(δx:0n,Φ) to 867
+form a matrix ∆ Xφ≡[δxφ
+1,···,δxφ
+m−1], and then apply Eq. (S.12) to generate the 868
+ensembles Xi
+en. 869
+5
+510152025303540455055600.10.20.30.40.50.60.70.80.91.822.22.42.4
+2.62.6
+2.82.8
+33
+3.23.2
+3.43.4
+3.43.63.63.6
+3.63.83.83.83.8
+4
+44444
+4.2
+4.24.2 4.24.24.2
+4.44.4
+4.44.44.4 4.4
+4.44.4
+4.4
+4.6
+4.64.6
+4.64.64.6
+4.6
+4.64.84.8
+4.8
+Number of Gaussian pdfsFraction coefficient
+  
+PSEnKF
+510152025303540455055600.10.20.30.40.50.60.70.80.9
+3.6 3.63.6
+3.83.83.8
+444
+44
+4.24.24.2
+4.24.2
+4.44.4
+4.4
+4.44.64.64.6
+4.64.8
+Number of Gaussian pdfsFraction coefficient
+  
+PSEnKF

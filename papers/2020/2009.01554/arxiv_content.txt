@@ -1,0 +1,182 @@
+arXiv:2009.01554v1  [cs.SE]  3 Sep 2020Automated identiﬁcation of metamorphic test scenarios for an
+ocean-modeling application
+Dilip J. Hiremath∗†, Martin Claus∗†, Wilhelm Hasselbring†and Willi Rath∗
+∗GEOMAR, Helmholtz Centre for Ocean Research, Kiel, Germany
+†Kiel University, Software Engineering Group, Kiel, German y
+Abstract —Metamorphic testing seeks to validate software in
+the absence of test oracles. Our application domain is ocean
+modeling, where test oracles often do not exist, but where
+symmetries of the simulated physical systems are known. In
+this short paper we present work in progress for automated
+generation of metamorphic test scenarios using machine lea rning.
+Metamorphic testing may be expressed as f(g(X))=h(f(X)) wi th
+f being the application under test, with input data X, and
+with the metamorphic relation (g, h). Automatically genera ted
+metamorphic relations can be used for constructing regress ion
+tests, and for comparing different versions of the same soft ware
+application.
+Here, we restrict to h being the identity map. Then, the task
+of constructing tests means ﬁnding different g which we tack le
+using machine learning algorithms. These algorithms typic ally
+minimize a cost function. As one possible g is already known t o
+be the identity map, for ﬁnding a second possible g, we constr uct
+the cost function to minimize for g being a metamorphic relat ion
+and to penalize for g being the identity map. After identifyi ng
+the ﬁrst metamorphic relation, the procedure is repeated wi th
+a cost function rewarding g that are orthogonal to previousl y
+found metamorphic relations.
+For experimental evaluation, two implementations of an oce an-
+modeling application will be subjected to the proposed meth od
+with the objective of presenting the use of metamorphic rela tions
+to test the implementations of the applications.
+Keywords -Metamorphic testing, Ocean-modeling application
+testing, Oracle problem, Metamorphic relation, Test case g en-
+eration, Software testing
+I. M OTIVATION
+Ocean-modeling applications often build on legacy codes
+that usually do not feature any systematic approach to softw are
+testing [1]. Establishing tests for such complex systems is
+a challenge that is complicated further by the fact that the
+exploratory nature of scientiﬁc software often makes it im-
+possible to have test oracles for speciﬁc results. Alternat ively,
+symmetries of the physical system that is modeled can be used
+to formulate necessary conditions to check for the correctn ess
+of the software. These correctness measure will not be based
+on results, but on the software’s behaviour under changes to
+the input data.
+Metamorphic testing is an approach to the generation of
+test cases and the veriﬁcation of test results. The central
+element of Metamorphic testing is a set of metamorphic
+relations. Metamorphic relations are necessary propertie s of
+the target application in relation to multiple inputs and th eir
+corresponding outputs [2]. We intend to use machine learnin g
+for identifying metamorphic relations and derive metamorp hic
+tests to validate the ocean system models [3]. Here, weuse a simple but realistic Ocean-modelling application to
+demonstrate our approach.
+Once identiﬁed, metamorphic relations can not only be
+used to construct regression tests for software that is unde r
+development but also for validating different implementat ions
+of the same software. Further, since the underlying physica l
+symmetries are constant, metamorphic relations identiﬁed in
+one ocean-modeling application might be transferred to oth er
+applications representing the same physical system.
+In Section II, we formulate the problem to be solved,
+before introducing the example application in Section III. In
+Section IV, we restrict the problem to ﬁnding metamorphic
+relations that are afﬁne transformations for which we sketc h
+solutions employing machine learning in Section V. Section VI
+concludes the paper with an outlook to future work.
+II. F ORMULATION OF THE PROBLEM
+Metamorphic testing may be written as
+f(g(X)) =h(f(X)) (1)
+withXdenoting all input data to the application under test
+fand with the pair of functions (g,h)as the metamorphic
+relation, we seek. As an initial step, we assume hto be
+the identity map and we are left with ﬁnding g, or at least
+approximations to g. Here we propose to use machine learning
+algorithms for ﬁnding possible g. These algorithms typically
+minimize a cost function. Assuming we start from a known set
+of metamorphic relations {g0,g1,...,g n−1}, we select a cost
+function that rewards gnwhich minimizes |f(gn(X))−f(X)|
+and penalizes if gnis already known:
+cost(gn,{g0,...,g n−1},X) =|f(gn(X))−f(X)|/producttextn−1
+i=0|gn(X)−gi(X)|2
+(2)
+We start the iteration with g0being the identity map and deﬁne
+the norm |X|to be the square root of the sum of the squares
+of the atomic data points X.
+III. E XAMPLE APPLICATION
+We provide an example application as an artifact [4] that can
+be directly used on Binder [5]. This example shows how to use
+metamorphic relations derived from the equations describi ng
+the applications to uncover bugs in the implementation.
+As an example application, we will use the calculation of a
+time series of the kinetic energy of the surface ocean
+e(t,y,x) =1
+2/integraltextdydx(u(t,y,x)2+v(t,y,x)2)/integraltext
+dydx(3)
+wheretindicates time, yandxare spatial coordinates, and
+horizontal surface-velocities uandvare calculated from sea-
+levelsshusing
+(u,v)(t,y,x) =G
+F/parenleftbigg
+−∂
+∂y,∂
+∂x/parenrightbigg
+ssh(t,y,x) (4)
+The coordinate system is chosen to have a cyclic boundary
+condition in both yandxand there are the physical constants
+GandF. From Equations (3) and (4), it is straightforward
+to ﬁnd metamorphic relations based on symmetries of the
+physical system. Among these symmetries are sign changes
+of any of ssh,y,x,G, orF, scaling of GandFthat does
+not change the ratio G/F , or linear transformations of the
+coordinate system that leave nearest-neighbor relations i ntact
+(transposition, translation).
+In our example application, there are two implementations
+of Equation (3) one of which is not respecting cyclic boundar y
+condition. The two implementations can be found in the
+artifact [4].
+To numerically implement Equation (3), we discretize the
+integral in (3) and the partial derivatives in (4) by applyin g the
+method of ﬁnite differences. Linking back to Equation (1), t he
+input data Xcontain all discretized values of sea level ssh,
+of all coordinates t,y,x, and the physical constants GandF.
+A metamorphic transformation g(x)would change all or part
+of the atomic data points in Xsuch that all e(g(X)) =e(X)
+for all discrete values of time t.
+IV. M ETAMORPHIC RELATIONS AS AFFINE
+TRANSFORMATIONS
+We propose to formulate the metamorphic relation gas an
+afﬁne transformation relating all the atomic data points in X
+to all the atomic data points in g(X)
+X′=g(X) (5)
+with
+X′
+k=/summationdisplay
+mαk,mXm+βk (6)
+where the αk,mrepresents a linear mapping from Xandβk
+add arbitrary offsets to the atomic data points. Identiﬁyin g
+metamorphic relations then amounts to ﬁnding αk,mandβk
+such that the cost function (2) becomes zero for arbitrary in put
+dataX.
+V. S OLUTION EXPLORATION
+Existing machine learning methods are explored to solve
+Equation (6) optimized for the cost function (2). A modiﬁed
+algorithm loosely based on genetic algorithms with Monte
+Carlo optimization can be explored. The initial values for
+{α,β}are chosen randomly and in each step a mutation
+δ{α,β}is proposed. Probability of acceptance of the mutation
+(p) is speciﬁed and iterative mutations applied to solve for the
+deﬁned cost function (2). On converging to a local minimum,
+{α,β}values are recorded and randomly reset to identify other
+solutions for equation (6).VI. C HALLENGES AND FUTURE WORK
+The challenge with these methods would be to explain the
+metamorphic relations in terms of physical symmetries that
+hold in the real Ocean. Nonetheless, we believe that even
+metamorphic relations which do not reﬂect symmetries of the
+physical system can still be used to construct regression te sts.
+Further work is to relax the restriction to h(1) being
+the identity map and to allow for gnot being an afﬁne
+transformation. This, however, would generalize gandhto
+be any non-linear map of the atomic data points which would
+be challenging to formalize.
+REFERENCES
+[1] A. Johanson and W. Hasselbring, “Software Engineering f or Com-
+putational Science: Past, Present, Future,” Computing in Science and
+Engineering , pp. 1–31, 2018.
+[2] T. Y . Chen, F.-C. Kuo, H. Liu, P.-L. Poon, D. Towey, T. H. Ts e,
+and Z. Q. Zhou, “Metamorphic Testing: A Review of Challenges and
+Opportunities,” ACM Computing Surveys , 2018.
+[3] U. Kanewala and J. M. Bieman, “Using machine learning tec hniques to
+detect metamorphic relations for programs without test ora cles,” 2013
+IEEE 24th International Symposium on Software Reliability Engineering,
+ISSRE 2013 , pp. 1–10, 2013.
+[4] W. Rath, “Artifacts for: Automated generation of metamo rphic test
+scenarios for an ocean-modeling application,” 12 2019. [On line].
+Available: https://doi.org/10.5281/zenodo.3566954
+[5] Project Jupyter, M. Bussonnier, J. Forde, J. Freeman, B. Granger, T. Head,
+C. Holdgraf, K. Kelley, G. Nalvarte, A. Osheroff, M. Pacer, Y . Panda,
+F. Perez, B. Ragan-Kelley, and C. Willing, “Binder 2.0 - Repr oducible, In-
+teractive, Sharable Environments for Science at Scale.” 10 .25080/Majora-
+4af1f417-011, Tech. Rep., 2018.

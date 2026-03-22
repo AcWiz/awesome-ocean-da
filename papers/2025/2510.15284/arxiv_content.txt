@@ -1,0 +1,609 @@
+O R I G IN A L A RT IC L E
+Small Ensemble-based Data Assimilation: A
+Machine Learning-Enhanced Data Assimilation
+Method with Limited Ensemble Size
+Zhilin Li1| Yao Zhou1| Xianglong Li1| Zeng Liu2|
+Zhaokuan Lu3| Shanlin Xu4| Seungnam Kim5|
+Guangyao Wang1,6,7
+1Centre for Regional Oceans & Department
+of Ocean Science and Technology, Faculty
+of Science and Technology, University of
+Macau, Macau
+2School of Naval Architecture and Ocean
+Engineering, Huazhong University of
+Science and Technology, Wuhan, Hubei,
+China
+3Ningbo Institute of Dalian University of
+Technology, Ningbo, Zhejiang, China
+4College of Civil Engineering, Zhejiang
+University of Technology, Hangzhou,
+Zhejiang, China
+5Department of Naval Architecture and
+Ocean Engineering, Hongik University,
+Sejong, Republic of Korea
+6State Key Laboratory of Internet of Things
+for Smart City, University of Macau, Macau
+7Zhuhai UM Science and Technology
+Research Institute, Zhuhai, Guangdong,
+China
+Correspondence
+Guangyao Wang, PhD
+Email: wanggy@um.edu.mo
+Funding information
+National Natural Science Foundation of
+China (52301336), Science and Technology
+Development Fund of Macau S.A.R.
+(0048/2025/ITP1), and University of
+Macau (SRG2025-00004-FST)Ensemble-based data assimilation (DA) methods have be-
+come increasingly popular due to their inherent ability to
+address nonlinear dynamic problems. However, these meth-
+ods often face a trade-oﬀ between analysis accuracy and
+computational eﬃciency, as larger ensemble sizes required
+for higher accuracy also lead to greater computational cost.
+In this study, we propose a novel machine learning-based
+data assimilation approach that combines the traditional en-
+semble Kalman ﬁlter (EnKF) with a fully connected neural
+network (FCNN). Speciﬁcally, our method uses a relatively
+small ensemble size to generate preliminary yet suboptimal
+analysis states via EnKF. A FCNN is then employed to learn
+and predict correction terms for these states, thereby mit-
+igating the performance degradation induced by the lim-
+ited ensemble size. We evaluate the performance of our
+proposed EnKF–FCNN method through numerical experi-
+ments involving Lorenz systems and nonlinear ocean wave
+ﬁeld simulations. The results consistently demonstrate that
+the new method achieves higher accuracy than traditional
+EnKF with the same ensemble size, while incurring negli-
+gible additional computational cost. Moreover, the EnKF-
+FCNN method is adaptable to diverse applications through
+1arXiv:2510.15284v1  [cs.LG]  17 Oct 2025
+2 Li et al.
+coupling with diﬀerent models and the use of alternative
+ensemble-based DA methods.
+K E Y W O R D S
+Data Assimilation, Machine Learning, Lorenz Systems, Ocean
+Wave
+1|INTRODUCTION
+By solving a Bayesian estimation problem, data assimilation (DA) is a mathematical technique that combines model
+predictions and observations to obtain the optimal state estimate of dynamic systems [1]. Also, with the advancement
+of computation and observation technologies in the past few decades, DA methods have been commonly applied in
+various ﬁelds, such as meteorology [2, 3], physical oceanography [4, 5, 6], land surface processes [7, 8], and so on.
+With the inherent ability to describe the evolution of state error covariance, ensemble-based methods have become
+increasingly popular in addressing nonlinear problems, among which the ensemble Kalman ﬁlter (EnKF) is probably
+the most famous one with the non-intrusive nature and sequential DA capability [9, 10].
+Despite their wide applications, ensemble-based DA methods are still facing one intractable problem, which is
+the trade-oﬀ between the analysis accuracy and computational eﬃciency [11, 12]. Speciﬁcally, a relatively large
+ensemble provides a better representation of the uncertainty, particularly the covariance matrices, leading to more
+accurate state estimations and vice versa. But it should be noted that the computational cost scales (almost) linearly
+with the ensemble size. Consequently, the computational burden can become unsustainable or impractical for high-
+dimensional nonlinear systems. Therefore, it is an inevitable problem to balance the desire for high accuracy with
+the practical limitations of available computational resources. From a statistical perspective, a limited ensemble size
+can lead to a rank-deﬁciency issue of the estimated covariance matrices, often resulting in spurious correlations and
+underestimation and eventually causing divergence. In this regard, two ad hoc methods have been developed to
+address the rank deﬁciency problem, i.e. localization [13] and inﬂation [14]. While these methods, along with their
+advanced variants, e.g. adaptive localization and inﬂation [15], can mitigate performance degradation induced by a
+limited ensemble size, substantial eﬀorts are still required to optimize their conﬁgurations [16], which would inevitably
+increase the overall computational complexity.
+The purpose of this paper is to show that the dilemma of ensemble-based DA methods can be signiﬁcantly mit-
+igated by machine learning (ML) methods, particularly neural networks (NNs). NNs are characterized by their ability
+to automatically learn and extract useful information from datasets, employing the composition of linear transfor-
+mations with nonlinear activation functions to model complex relationships between inputs and outputs. Currently,
+NNs have shown potential to contribute to both the forecast and analysis steps involved in the DA-based simulations,
+although related research remains limited. In the forecast step, NNs are primarily used to build surrogate models
+that approximate the traditional, computationally expensive physical models, thereby accelerating the computational
+process [17, 18]. However, this approach can suﬀer from reduced accuracy and limited generalization ability when
+encountering new or extreme scenarios not well represented in the training dataset. Regarding the analysis step, NNs
+are mainly applied to learn the update process (e.g. EnKF formula) for handling missing or low-quality data [19, 20].
+However, these methods rely on accurate estimates of covariance matrices, which typically depend on either a rela-
+tively large ensemble, ad hoc operations, or both.
+In this study, we propose a novel small ensemble-based DA framework with machine learning, which can over-
+Li et al. 3
+come the systematic biases induced by a limited ensemble size eﬀectively. Speciﬁcally, we develop the machine
+learning-enhanced DA framework on the basis of EnKF, initialized with a limited ensemble size. Then, a fully connected
+neural network (FCNN) is employed to learn a correction term for the analysis state, which is aimed at mitigating the
+suboptimal state estimation caused by the limited ensemble size. Consequently, the EnKF-FCNN coupled algorithm
+can oﬀer both favorable computational eﬃciency and accuracy simultaneously. To evaluate the performance of the
+EnKF–FCNN coupled algorithm, we perform a set of numerical experiments based on the simulations of Lorenz sys-
+tems (Lorenz-63 and Lorenz-96) and nonlinear ocean wave ﬁelds, which consistently demonstrate higher accuracy
+with negligible additional computational cost compared to traditional EnKF when using the same limited ensemble
+size. Moreover, the EnKF-FCNN method is highly adaptable across various applications by integrating with diﬀerent
+models and employing alternative ensemble-based DA methods.
+The paper is organized as follows.§2 introduces the traditional EnKF and EnKF-FCNN coupled algorithms. The
+validation and benchmark of the EnKF-FCNN coupled algorithm based on the simulations of Lorenz systems and
+nonlinear ocean wave ﬁelds are presented in§3. Finally,§4 brieﬂy summarizes this work.
+2|METHODS
+2.1|Ensemble Kalman ﬁlter
+In this study, we use EnKF as the basis to develop the small ensemble-based DA method with machine learning,
+which basically includes the forecast and analysis steps as shown in Fig. 1. At the beginning time of the simulation
+t=t 0, an ensemble of initial conditions is ﬁrst generated, usually based on the prescribed distribution information of
+measurements [4],
+Sm,0=h
+s(1)
+m,0,s(2)
+m,0, . . .s(n)
+m,0, . . .s(N−1)
+m,0,s(N)
+m,0i
+,(1)
+wheresrepresents the state vector andSis the corresponding ensemble with sizeNand indexn=1 ,2,. . .N. Then
+with the forward model from timet jtotj+1,M j+1:j, the forecast step is performed by conductingNsimulations (here
+j=0)
+s(n)
+f,1=M 1:0(s(n)
+m,0),(2)
+which results in the ensemble of forecast results att=t 1,
+Sf,1=h
+s(1)
+f,1,s(2)
+f,1, . . .s(n)
+f,1, . . .s(N−1)
+f,1,s(N)
+f,1i
+.(3)
+Afterwards the analysis step is initialized by evaluating the forecast mean
+¯sf,1=1
+NΣN
+n=1s(n)
+f,1,(4)
+and forecast error covariance matrix
+Pf,1=C(S f,1),(5)
+4 Li et al.
+whereCis a covariance operator deﬁned as
+C(S) =1
+N−1S′(S′)T,(6)
+S′= [s(1)−¯s,s(2)−¯s, . . .s(n)−¯s, . . .s(N−1)−¯s,s(N)−¯s].(7)
+In the meantime, the ensemble of measurements is obtained (in the same way asS m,0, i.e. by sampling from the
+prescribed distribution of measured state variables)
+Sm,1=h
+s(1)
+m,1,s(2)
+m,1, . . .s(n)
+m,1, . . .s(N−1)
+f,1,s(N)
+m,1i
+,(8)
+and the measurement covariance matrix is evaluated by applyingConS m,1
+R1=C(S m,1).(9)
+Finally, the analysis step is completed by combining the forecast and measurement as
+Sa,1=S f,1+K 1 
+Sm,1−HS f,1
+,(10)
+where
+Kj=P f,jHT
+HP f,jHT+R j−1
+(11)
+is the Kalman gain (withj=1at the current step).His the mapping operator from the model space to the measure-
+ment space. Afterwards, both the forecast and analysis steps are repeated for all future time instantst=t 2,t3,. . .,
+until certain criteria are satisﬁed (e.g. reaching the desired forecast timet max).
+2.2|EnKF-FCNN coupled algorithm
+We consider a relatively small ensemble sizeN, with which the analysis results (speciﬁcally analysis mean¯sN
+a,j) while
+are better than the forecasts, but still show considerable deviations from the truths t,j. Our goal is to utilize FCNN
+to build a function with the output being a correction term∆s a,jas shown in Fig. 2, and the ﬁnal amended analysis
+mean given by the EnKF-FCNN algorithm¯sN
+a,j⇐¯sN
+a,j+∆s a,jrepresents a more accurate approximation ofs t,j. Given
+that the truth is usually unknown in practical applications, the analysis mean¯sN
+a,jgiven by a relatively large ensemble
+sizeN(≫N) is assumed to be a precise surrogate. Therefore, the correction term, namely the output of FCNN, is
+deﬁned as
+∆sa,j=¯sN
+a,j−¯sN
+a,j.(12)
+Li et al. 5
+TimeStates
+𝑡0 𝑡1 𝑡2Measurements
+Forecast
+AnalysisForecast step
+Analysis step Analysis stepForecast step
+𝑺𝐟,𝟏(𝑵)
+𝑺𝐦,𝟏(𝟏)
+𝑺𝐦,𝟏(𝒏)
+𝑺𝐦,𝟏(𝑵)𝑺𝐚,𝟏(𝟏)𝑺𝐟,𝟐(𝟏)
+𝑺𝐟,𝟐(𝒏)
+𝑺𝐟,𝟐(𝑵)
+𝑺𝐚,𝟐(𝟏)
+𝑺𝐚,𝟐(𝒏)
+𝑺𝐚,𝟐(𝑵)
+𝑺𝐦,𝟐(𝟏)
+𝑺𝐦,𝟐(𝒏)
+𝑺𝐦,𝟐(𝑵)𝑺𝐦,𝟎(𝟏)
+𝑺𝐦,𝟎(𝒏)
+𝑺𝐦,𝟎(𝑵)𝑺𝐟,𝟏(𝒏)𝑺𝐟,𝟏(𝟏)
+𝑺𝐚,𝟏(𝒏)
+𝑺𝐚,𝟏(𝑵)
+Truth
+FIGURE 1Schematic illustration of EnKF (reproduced with modiﬁcations from [4]). The size of ellipses
+represents the level of uncertainty. We use the notations(n)
+∗,jto represent then th(n=1,2, . . .N) ensemble member
+state at timet=t j,j=0,1,2. . ., with∗=m,f,afor measurement, forecast, and analysis.
+In addition, the input variables of the proposed FCNN-based function includeSN
+a,j,¯sm,j, and¯s a,j−1. That is to say, our
+primary goal is to build a function via FCNN as
+∆sa,j=F(SN
+a,j, ¯sm,j, ¯sa,j−1;θ),(13)
+whereθrepresents the parameters. We remark that, although the EnKF formula Eq. (10) only includes the current
+forecast ensemble and the current observations (i.e., the previous state is not explicitly considered), its derivation
+depends on the ﬂow dependence assumption, namely the Markov chain assumption. Therefore,¯s a,j−1 is included as
+one input to consider the inﬂuence of the immediately preceding state.
+With the correction term∆s a,jgiven by Eq. (13), each ensemble member is updated as
+s(n)
+a,j⇐s(n)
+a,j+∆s a,j,n=1,2. . .N,(14)
+before performing the next forecast step. Finally, a pseudocode for the complete EnKF-FCNN coupled algorithm is
+shown in Algorithm 1.
+3|NUMERICAL EXPERIMENTS AND RESULTS
+In this study, we perform a set of numerical experiments to demonstrate the feasibility of the proposed EnKF-FCNN
+coupled algorithm by applying it to the simulations of Lorenz systems [21, 22] and the evolution of nonlinear ocean
+wave ﬁelds. Featured with the chaotic nature, the Lorenz systems are classic “toy” problems in the ﬁeld of data
+assimilation; speciﬁcally, both Lorenz-63 and Lorenz-96 are tested in this study. In addition, the evolution of nonlinear
+ocean wave ﬁelds has also been shown to be highly sensitive to the model input and parameters, i.e. a small deviation,
+6 Li et al.
+TimeStates
+𝑡0 𝑡1 𝑡2Measurements
+Forecast
+Analysis with small ensemble sizeForecast step
+Analysis step Analysis stepForecast step
+TruthΔ𝑠𝑎,1
+Δ𝑠𝑎,2Analysis after FCNN correction 
+FIGURE 2Schematic illustration of the EnKF-FCNN coupled algorithm. For the purpose of brevity, only the
+ensemble mean is shown, omitting individual members.
+say, of initial conditions and physical parameters could induce signiﬁcant forecast errors. Recent studies have shown
+that DA methods can be conveniently applied to realize the high-accuracy nonlinear wave ﬁeld simulation [4, 5, 23],
+which while depends on the relatively large ensemble size (∼O(102)), ad-hoc operations (covariance inﬂation and
+localization), or both. Here we adopt the Pseudospectral-Fourier-Legendre (PFL) wave model to simulate the nonlinear
+wave ﬁeld evolution and evaluate the EnKF-FCNN algorithm by extending the EnKF-PFL computational framework
+developed in [23].
+3.1|Lorenz-63 and Lorenz-96 systems
+In this study, we ﬁrst perform a set of numerical experiments based on the Lorenz-63 and Lorenz-96 systems. The
+Lorenz-63 system is expressed as
+dχ
+dt=σ (υ−χ ),(15)
+dυ
+dt=χ(ρ−ζ)−υ,(16)
+dζ
+dt=χυ−βζ,(17)
+whereχ,υ, andζrepresent the system states.σ,ρ, andβare the model parameters, which are set to10,28, and8/3,
+respectively, in this study. With a higher dimension than Lorenz-63, Lorenz-96 system is formulated as
+dχ(i)
+dt= (χ(i+1)−χ(i−2))χ(i−1)−χ(i)+F,i=1,2. . .L,(18)
+Li et al. 7
+Algorithm 1Algorithm for the EnKF-FCNN coupled method
+1:Input:SN
+m,0(initial conditions);F(pretrained function)
+2:Begin:
+3:initialize:
+4:t=t 0,j=0,SN
+a,0=SN
+m,0
+5:time loop:
+6:whilet≤t maxdo
+7:SN
+f,j+1=M j+1:j(SN
+a,j)
+8:CalculateSN
+a,j+1with (10)
+9:Calculate∆s a,j+1 with (13)
+10:UpdateSN
+a,j+1withs(n)
+a,j+1⇐s(n)
+a,j+1+∆s a,j+1,n=1,2. . .N
+11:Output¯sN
+a,j(corrected ensemble mean)
+12:j⇐j+1;t⇐t j
+13:end
+14:end
+whereχ(i)represents thei−th state variable withLvariables in total. In this study, we consider a case ofL=10,
+and the periodic boundary condition is applied.Fis a constant external forcing term, which is set to beF=8. In
+addition, both Lorenz-63 and Lorenz-96 systems are solved using a ﬁrst-order forward diﬀerence scheme with a time
+step∆t=0.01.
+At the analysis step, the measurements are needed, which can approximate the truth yet with some noise. In this
+study, we ﬁrst produce the (synthetic) truths t,jby running a set of reference simulations with presumed exact initial
+conditions. Then an errorδrandomly sampled from a given distribution is superposed on top ofs t,jto produce¯s m,j,
+i.e.
+¯sm,j=s t,j+δ.(19)
+Here we assume thatδfollows a normal distribution with zero mean and covariance matrixΣ. Particularly, we set
+Σ=AI, withAbeing the magnitude andIbeing an identity matrix. Finally, the observation ensemble members are
+generated as
+s(n)
+m,j=¯s m,j+δ(n)
+e,(20)
+whereδ(n)
+eis also a random error and assumed to follow the same distribution asδ. For the Lorenz-63 system, we
+assume that the measurements for all three variables are available; while for the Lorenz-96 system, we consider that
+the observations are only available for5variables, i.e.χ(i)withi={1 ,3,5,7,9}. In addition, the data assimilation
+interval is set to beT DA=8∆tandT DA=5∆tfor Lorenz-63 and Lorenz-96, respectively. Here we remark that a
+relatively small data assimilation interval is adopted for Lorenz-96 given its more pronounced chaotic behavior.
+To generate the datasets needed to build FCNN, we considerK=100uniformly distributed initial conditions for
+both Lorenz-63 and Lorenz-96 with the train/test split ratio being80−20. Then the traditional EnKF-based simula-
+tions (i.e. without FCNN) are performed withN=100andN=7, and the results for a period of80T DAare adopted
+as the datasets. Figs. 3-4 show the results for one particular initial condition obtained withN=100andN=7, as
+8 Li et al.
+well as the truth, for Lorenz-63 and Lorenz-96, respectively. For the Lorenz-63 system, it can be found that when
+usingN=100, the analysis results are always closely following the truth. In contrast, when reducing the ensemble
+size toN=7, signiﬁcant discrepancies between the analysis results and truth can be observed. The overall trend
+is similar for the Lorenz-96 system, as shown in Fig. 4. Therefore, it is reasonable to deﬁne the correction term in
+Eq. (12), i.e. the output of FCNN, withN=100andN=7.
+To build FCNNs predicting the correction terms for Lorenz-63 and Lorenz-96, we use the rectiﬁed linear unit
+(ReLU) as the activation function and mean squared error (MSE) as the loss function, and the detailed conﬁguration
+of other hyperparameters is shown in Tab. 1.
+TABLE 1Hyperparameters of FCNN for diﬀerent numerical simulations
+Lorenz-63 Lorenz-96 2D Wave 3D Wave
+size of input layer 27 115 5384 21514
+size of hidden layer 1 60 200 10000 8000
+size of hidden layer 2 15 100 2500 4000
+size of hidden layer 3 7 40 500 2000
+size of output layer 3 10 256 1024
+TABLE 2Computational time for diﬀerent calculations on a single Intel Core Ultra 9 CPU
+Cases A single simulation forT DA(s) FCNN function(s)
+Lorenz-63 6.15e-4 7.68e-5
+Lorenz-96 2.62e-3 2.91e-4
+2D wave 4.69e-1 8.62e-4
+3D wave 2.72 1.90e-3
+Figures 5-6 present the results of¯sN
+aproduced by the EnKF-FCNN algorithm in comparison with¯sN
+agiven by
+the traditional EnKF, for Lorenz-63 and Lorenz-96, respectively. It can be found that for Lorenz-63, with the FCNN-
+based correction term,¯sN
+acan always closely follow¯sN
+a, which indicates that the proposed EnKF-FCNN algorithm
+can eﬀectively ameliorate the ﬁlter divergence issue suﬀered by the traditional EnKF in the scenario with a limited
+ensemble size. In terms of the Lorenz-96 system, the proposed EnKF-FCNN can also remedy the analysis results given
+byNsubstantially, although the overall performance is inferior to that in the case with Lorenz-63 system to some
+extent. This degraded performance is likely due to the Lorenz-96 system’s higher nonlinearity and dimensionality,
+which may lead to a more complex relationship between the input and output. Although it is possible to address this
+issue through hyperparameter optimization, the objective and scope of this paper are speciﬁcally to demonstrate the
+potential of machine learning methods to aid DA. Therefore, a comprehensive analysis of hyperparameter impacts is
+not undertaken here.
+In addition, an error metric is deﬁned to quantitatively evaluate the overall performance of the proposed EnKF-
+Li et al. 9
+0 20 40 60 80
+t/T DA−20−1001020χ
+(a)χ
+0 20 40 60 80
+t/T DA−30−20−100102030υ
+(b)υ
+0 20 40 60 80
+t/T DA01020304050ζ
+(c)ζ
+FIGURE 3Analysis results obtained with the traditional EnKF usingN=100( ) andN=7( ), as well as
+the true solution (– – –), for Lorenz-63
+10 Li et al.
+0 20 40 60 80
+t/T DA−50510χ(1)
+(a)χ(1)
+0 20 40 60 80
+t/T DA−10−50510χ(5)
+(b)χ(5)
+0 20 40 60 80
+t/T DA−10−5051015χ(9)
+(c)χ(9)
+FIGURE 4Analysis results obtained with the traditional EnKF usingN=100( ) andN=7( ), as well as
+the true solution (– – –), for Lorenz-96
+Li et al. 11
+0 20 40 60 80
+t/T DA−20−1001020χ
+(a)χ
+0 20 40 60 80
+t/T DA−20−1001020υ
+(b)υ
+0 20 40 60 80
+t/T DA10203040ζ
+(c)ζ
+FIGURE 5Analysis results given by the EnKF-FCNN algorithm withN=7(– – –) and traditional EnKF with
+N=100( ) for Lorenz-63
+12 Li et al.
+0 20 40 60 80
+t/T DA−10−50510χ(1)
+(a)χ(1)
+0 20 40 60 80
+t/T DA−10−50510χ(5)
+(b)χ(5)
+0 20 40 60 80
+t/T DA−10−5051015χ(9)
+(c)χ(9)
+FIGURE 6Analysis results given by the EnKF-FCNN algorithm withN=7(– – –) and traditional EnKF with
+N=100( ) for Lorenz-96
+Li et al. 13
+0 20 40 60 80
+t/T DA100101ǫ
+(a) Lorenz-63
+0 20 40 60 80
+t/T DA101ǫ
+(b) Lorenz-96
+FIGURE 7ϵ(t)of traditional EnKF ( ) and EnKF-FCNN ( ) withN=7for Lorenz systems
+FCNN algorithm
+ϵ(tj) =1
+KtΣKt
+k=1||¯sN
+a,j−¯sN
+a,j||(k)
+2,(21)
+whereK tis the number of initial conditions in the test dataset, withkbeing the index. Here we evaluateϵ(t)using
+both the traditional EnKF and EnKF-FCNN with the same limited ensemble sizeN=7, for which the results are
+shown in Fig 7. It can be found that for Lorenz-63, after applying the ML-based correction,ϵ(t)is reduced by one
+order of magnitude. For Lorenz-96, the improvement is less signiﬁcant, but still with the error reduced by a factor of
+approximately3.
+Finally, we evaluate the computational time of the FCNN function, as compared to that of performing a single
+simulation forT DA. As shown in Tab. 2, for both Lorenz-63 and Lorenz-96, the computational time consumed by imple-
+menting the FCNN-based correction is approximately one order of magnitude lower than running a single simulation
+forT DA, which means that the additional computational cost induced by the former is practically negligible.
+14 Li et al.
+3.2|Nonlinear ocean wave simulation
+To further demonstrate the performance of the developed EnKF-FCNN algorithm, we apply it on the nonlinear ocean
+wave simulation with the PFL method.
+The governing equations for the ocean wave ﬁeld are formulated as
+∂η(x,t)
+∂t+∂ψ(x,t)
+∂x·∂η(x,t)
+∂x−
+1+∂η(x,t)
+∂x·∂η(x,t)
+∂x
+w(x,t) =0(22)
+∂ψ(x,t)
+∂t+1
+2∂ψ(x,t)
+∂x·∂ψ(x,t)
+∂x+gη(x,t)−1
+2
+1+∂η(x,t)
+∂x·∂η(x,t)
+∂x
+w(x,t)2=0,(23)
++2ϕ=0,(24)
+whereη(x ,t)is the free surface elevation,ϕis the velocity potential,ψ=ϕ| z=ηis the velocity potential on the free
+surface,w= (∂ϕ/∂z)| z=ηis the surface vertical velocity, andgis the gravity acceleration. The key procedure in
+PFL is to solve Eq. (24) by assuming an artiﬁcial boundary condition at one particular depth, with details included in
+multiple papers such as [24, 25]. In particular, we directly adopt the PFL-EnKF framework developed by Wang et
+al. [23] as the basis to test the performance of the EnKF-FCNN coupled algorithm. Both two-dimensional (2D) and
+three-dimensional (3D) irregular wave ﬁelds are considered in this study, with the same case conﬁgurations in [23].
+To produce the dataset, we ﬁrst randomly generate100initial conditions from a JONSWAP spectrum with the peak
+steepnessAk p=0.12and an enhance factorγ=3 .3, and then run the original PFL-EnKF simulations withN=100
+andN=20. Fig. 8 presents the time histories of surface elevation at three locations (x/L=0 .15,0.50,and0 .85
+withLbeing the simulation domain length) of the 2D wave ﬁeld obtained with the two ensemble sizes, as well as
+the truth, for one particular initial condition. It can be found that, withN=100, the PFL-EnKF framework can give
+a good approximation of the truth. In contrast, when usingN=20, the analysis results diﬀer signiﬁcantly from the
+truth, especially at the wave crests and troughs. A similar trend can be observed for the 3D wave ﬁeld, as shown
+in Fig. 9. To build the FCNN, we use the same activation and loss functions as the Lorenz problems, with all other
+hyperparameters shown in Tab. 1.
+Figures 10-11 show the analysis results ¯ηN
+agiven by the EnKF-FCNN algorithm for both 2D and 3D wave ﬁelds,
+respectively, in comparison with ¯ηN
+aproduced by the traditional EnKF. It can be found that, for both 2D and 3D wave
+ﬁelds, the EnKF-FCNN algorithm withN=20can always demonstrate comparable performance to the traditional
+EnKF withN=100, which again conﬁrms the EnKF-FCNN’s capability of overcoming the ﬁlter divergence issue
+induced by the limited ensemble size. Fig. 12 compares the results ofϵ(t)obtained with the traditional EnKF and
+EnKF-FCNN, in which the ensemble size is alwaysN=20, for both 2D and 3D wave ﬁelds. It can be observed that,
+by applying the FCNN correction at each analysis step,ϵ(t)can be consistently reduced by more than50 %for both
+2D and 3D wave ﬁelds. Similar to the Lorenz systems, we also compare the computational time induced by running
+the FCNN function with that of running a single simulation forT DA, with the former approximately three orders of
+magnitude lower than the latter as shown in Tab. 2, which again conﬁrms the computational eﬃciency of the proposed
+EnKF-FCNN algorithm.
+Li et al. 15
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(a)x/L=0.15
+0 10 20 30 40 50
+t/T DA−3−2−101234η(m)
+(b)x/L=0.50
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(c)x/L=0.85
+FIGURE 8Analysis results ofη(t)obtained with the traditional EnKF usingN=100( ) andN=20( ), as
+well as the true solution (– – –), for the 2D wave ﬁeld
+16 Li et al.
+0 10 20 30 40 50
+t/T DA−4−3−2−101234η(m)
+(a)(x/L,y/L) = (0.15,0.50)
+0 10 20 30 40 50
+t/T DA−4−3−2−101234η(m)
+(b)(x/L,y/L) = (0.50,0.50)
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(c)(x/L,y/L) = (0.85,0.50)
+FIGURE 9Analysis results ofη(t)obtained with the traditional EnKF usingN=100( ) andN=20( ), as
+well as the true solution (– – –), for the 3D wave ﬁeld
+Li et al. 17
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(a)x/L=0.15
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(b)x/L=0.50
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(c)x/L=0.85
+FIGURE 10Analysis results ofη(t)given by the EnKF-FCNN algorithm withN=20(– – –) and traditional EnKF
+withN=100( ) for the 2D wave ﬁeld
+18 Li et al.
+0 10 20 30 40 50
+t/T DA−3−2−101234η(m)
+(a)(x/L,y/L) = (0.15,0.50)
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(b)(x/L,y/L) = (0.50,0.50)
+0 10 20 30 40 50
+t/T DA−3−2−10123η(m)
+(c)(x/L,y/L) = (0.85,0.50)
+FIGURE 11Analysis results ofη(t)given by the EnKF-FCNN algorithm withN=20(– – –) and traditional EnKF
+withN=100( ) for the 3D wave ﬁeld
+Li et al. 19
+0 10 20 30 40 50
+t/T DA101ǫ(m)
+(a) 2D wave ﬁeld
+0 10 20 30 40 50
+t/T DA100ǫ(m)
+(b) 3D wave ﬁeld
+FIGURE 12ϵ(t)of traditional EnKF ( ) and EnKF-FCNN ( ) withN=20for wave ﬁelds
+20 Li et al.
+4|CONCLUSION
+In this study, we develop a novel EnKF-FCNN coupled algorithm, which aims at improving the robustness of the tra-
+ditional EnKF method in the scenario of a limited ensemble size. The developed EnKF-FCNN algorithm is validated
+and tested through a set of numerical experiments based on the numerical simulations of Lorenz systems and non-
+linear ocean wave ﬁelds. As indicated by the numerical results, the proposed EnKF-FCNN approach enhances the
+analysis accuracy signiﬁcantly when working with limited ensemble sizes while introducing minimal additional compu-
+tational cost. In addition, the developed EnKF-FCNN method can be easily adapted to diverse practical applications,
+by coupling with diﬀerent numerical models and substituting the EnKF with other ensemble-based DA methods.
+Acknowledgements
+This research is ﬁnancially supported by the National Natural Science Foundation of China (52301336), the Science
+and Technology Development Fund of Macau S.A.R. (0048/2025/ITP1), the University of Macau (SRG2025-00004-
+FST), and Zhejiang Provincial Natural Science Foundation of China (LQN25E090004).
+Data Availability
+The data that support the ﬁndings of this study are available from the corresponding author upon reasonable request.
+Conﬂict of interest
+The authors have no conﬂicts of interest to declare.
+references
+[1] Carrassi A, Bocquet M, Bertino L, Evensen G, Data assimilation in the geosciences: An overview of methods, issues, and
+perspectives, WIREs Climate Change, 9, e535; 2018.
+[2] Bocquet M, Elbern H, Eskes H, Hirtl M, Žabkar R, Carmichael G, et al. Data assimilation in atmospheric chemistry
+models: current status and future prospects for coupled chemistry meteorology models. Atmospheric chemistry and
+physics 2015;15(10):5325–5358.
+[3] Eyre J, Bell W, Cotton J, English S, Forsythe M, Healy S, et al. Assimilation of satellite data in numerical weather prediction.
+Part II: Recent years. Quarterly Journal of the Royal Meteorological Society 2022;148(743):521–556.
+[4] Wang G, Pan Y. Phase-resolved ocean wave forecast with ensemble-based data assimilation. Journal of Fluid Mechanics
+2021;918:A19.
+[5] Wang G, Zhang J, Ma Y, Zhang Q, Li Z, Pan Y. Phase-resolved ocean wave forecast with simultaneous current estimation
+through data assimilation. Journal of Fluid Mechanics 2022;949:A31.
+[6] Martin MJ, Hoteit I, Bertino L, Moore AM. Data assimilation schemes for ocean forecasting: state of the art. State of
+the Planet 2025;5:1–12.
+[7] Li X, Liu F, Ma C, Hou J, Zheng D, Ma H, et al. Land data assimilation: Harmonizing theory and data in land surface
+process studies. Reviews of Geophysics 2024;62(1):e2022RG000801.
+Li et al. 21
+[8] Felsberg A, De Lannoy GJ, Girotto M, Poesen J, Reichle RH, Stanley T. Global soil water estimates as landslide predictor:
+the eﬀectiveness of SMOS, SMAP, and GRACE observations, land surface simulations, and data assimilation. Journal of
+Hydrometeorology 2021;22(5):1065–1084.
+[9] Evensen G. Sequential data assimilation with a nonlinear quasi-geostrophic model using Monte Carlo methods to fore-
+cast error statistics. Journal of Geophysical Research: Oceans 1994;99(C5):10143–10162.
+[10] Evensen G. The ensemble Kalman ﬁlter: Theoretical formulation and practical implementation. Ocean dynamics
+2003;53:343–367.
+[11] Petrie RE, Dance SL. Ensemble-based data assimilation and the localisation problem. Weather 2010;65(3):65–69.
+[12] Whitaker JS, Hamill TM. Evaluating methods to account for system errors in ensemble data assimilation. Monthly
+Weather Review 2012;140(9):3078–3089.
+[13] Buehner M, Charron M. Spectral and spatial localization of background-error correlations for data assimilation. Quarterly
+Journal of the Royal Meteorological Society: A journal of the atmospheric sciences, applied meteorology and physical
+oceanography 2007;133(624):615–630.
+[14] Kang JS, Kalnay E, Miyoshi T, Liu J, Fung I. Estimation of surface carbon ﬂuxes with an advanced data assimilation
+methodology. Journal of Geophysical Research: Atmospheres 2012;117(D24).
+[15] Evensen G, Vossepoel FC, Van Leeuwen PJ. Data assimilation fundamentals: A uniﬁed formulation of the state and
+parameter estimation problem. Springer Nature; 2022.
+[16] Choi B, Lee Y. Sampling error mitigation through spectrum smoothing: First experiments with ensemble transform
+Kalman ﬁlters and Lorenz models. Physica D: Nonlinear Phenomena 2025;472:134436.
+[17] Brajard J, Carrassi A, Bocquet M, Bertino L. Combining data assimilation and machine learning to emulate a dynamical
+model from sparse and noisy observations: A case study with the Lorenz 96 model. Journal of computational science
+2020;44:101171.
+[18] Sun H, Lei L, Liu Z, Ning L, Tan ZM. An online paleoclimate data assimilation with a deep learning-based network. Journal
+of Advances in Modeling Earth Systems 2025;17(6):e2024MS004675.
+[19] Arcucci R, Zhu J, Hu S, Guo YK. Deep data assimilation: integrating deep learning with data assimilation. Applied
+Sciences 2021;11(3):1114.
+[20] Wu P, Chang X, Yuan W, Sun J, Zhang W, Arcucci R, et al. Fast data assimilation (FDA): Data assimilation by machine
+learning for faster optimize model state. Journal of Computational Science 2021;51:101323.
+[21] Lorenz EN. Deterministic nonperiodic ﬂow. Journal of atmospheric sciences 1963;20(2):130–141.
+[22] Lorenz EN. Predictability: A problem partly solved. In: Proc. Seminar on predictability, vol. 1 Reading; 1996. p. 1–18.
+[23] Wang S, Zhang L, Liu Z, Sun J, Yang X, Wang G. Nonlinear phase-resolved ocean wave simulation with ensemble Kalman
+ﬁlter. Phys Rev Fluids 2025 Aug;.
+[24] Klahn M, Madsen PA, Fuhrman DR. On the accuracy and applicability of a new implicit Taylor method and the high-order
+spectral method on steady nonlinear waves. Proceedings of the Royal Society A 2020;476(2243):20200436.
+[25] Klahn M, Madsen PA, Fuhrman DR. Simulation of three-dimensional nonlinear water waves using a pseudospec-
+tral volumetric method with an artiﬁcial boundary condition. International Journal for Numerical Methods in Fluids
+2021;93(6):1843–1870.

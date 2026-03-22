@@ -1,0 +1,765 @@
+ENSEMBLEGRAPHNEURALNETWORKS FORPROBABILISTIC
+SEASURFACETEMPERATUREFORECASTING VIAINPUT
+PERTURBATIONS
+Alejandro J. González-Santana
+Centro de Tecnologías de la Imagen
+Instituto Universitario de Cibernética,
+Empresas y Sociedad (IUCES)
+University of Las Palmas de Gran
+Canaria, Spain
+alejandro.gonzalez147@alu.ulpgc.esGiovanny A. Cuervo-Londoño
+Oceanografía Física y Geofísica
+Aplicada
+Instituto Universitario en Acuicultura
+Sostenible y Ecosistemas Marinos
+(ECOAQUA)
+University of Las Palmas de Gran
+Canaria, Spain
+giovanny.cuervo@ulpgc.es
+Javier Sánchez
+Centro de Tecnologías de la Imagen
+Instituto Universitario de Cibernética,
+Empresas y Sociedad (IUCES)
+University of Las Palmas de Gran
+Canaria, Spain
+jsanchez@ulpgc.es
+ABSTRACT
+Accurate regional ocean forecasting requires models that are both computationally efficient and
+capable of representing predictive uncertainty. This work investigates ensemble learning strategies
+for sea surface temperature (SST) forecasting using Graph Neural Networks (GNNs), with a focus
+on how input perturbation design affects forecast skill and uncertainty representation. We adapt a
+GNN architecture to the Canary Islands region in the North Atlantic and implement a homogeneous
+ensemble approach inspired by bagging, where diversity is introduced during inference by perturbing
+initial ocean states rather than retraining multiple models. Several noise-based ensemble generation
+strategies are evaluated, including Gaussian noise, Perlin noise, and fractal Perlin noise, with sys-
+tematic variation of noise intensity and spatial structure. Ensemble forecasts are assessed over a
+15-day horizon using deterministic metrics (RMSE and bias) and probabilistic metrics, including the
+Continuous Ranked Probability Score (CRPS) and the Spread–skill ratio. Results show that, while
+deterministic skill remains comparable to the single-model forecast, the type and structure of input per-
+turbations strongly influence uncertainty representation, particularly at longer lead times. Ensembles
+generated with spatially coherent perturbations, such as low-resolution Perlin noise, achieve better
+calibration and lower CRPS than purely random Gaussian perturbations. These findings highlight
+the critical role of noise structure and scale in ensemble GNN design and demonstrate that carefully
+constructed input perturbations can yield well-calibrated probabilistic forecasts without additional
+training cost, supporting the feasibility of ensemble GNNs for operational regional ocean prediction.arXiv:2603.06153v1  [cs.LG]  6 Mar 2026
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+1 Introduction
+The increasing relevance of the blue economy [ 23], the accelerating impacts of climate change, and the objectives
+defined within the Sustainable Development Goals have intensified the demand for accurate and timely ocean forecasting
+systems [ 35]. Reliable predictions of oceanographic variables, such as sea surface temperature (SST), are essential for
+maritime operations, ecosystem monitoring, fisheries management, and climate-related decision-making. Traditionally,
+these forecasts have relied on numerical ocean models that explicitly solve the physical equations governing ocean
+dynamics. While physically grounded and robust, such models are computationally expensive and often restricted to
+large operational centers, limiting their accessibility and adaptability to regional and high-resolution applications [ 14].
+Recent advances in machine learning (ML) have introduced an alternative paradigm for geophysical prediction,
+enabling data-driven models to learn complex spatiotemporal relationships directly from observations and reanalysis
+products [ 31]. Leveraging modern hardware accelerators, ML-based models offer orders-of-magnitude faster inference
+compared to numerical solvers, making them particularly attractive for operational and near–real-time forecasting.
+Although many state-of-the-art ML climate models operate at global scales, recent work has demonstrated their growing
+potential for regional applications, where higher spatial resolution is required to capture localized ocean processes such
+as coastal upwelling and mesoscale variability.
+Within this context, Graph Neural Networks (GNNs) have emerged as a powerful framework for modeling geophysical
+systems defined over irregular spatial domains [ 2]. By representing spatial locations as nodes and their physical
+relationships as edges, GNNs naturally handle complex geometries such as coastlines and bathymetry, which are
+difficult to model using regular grids. Architectures such as GraphCast [ 21] and its regional adaptations [ 25] have
+demonstrated that GNNs can achieve competitive or superior performance to traditional numerical models in medium-
+range forecasting while maintaining high computational efficiency. Recent works [16, 10, 11] extend this approach to
+regional ocean prediction through a hierarchical encoder–processor–decoder GNN tailored to oceanographic data.
+Despite these advances, a major limitation of most deep learning–based forecasting systems is their deterministic nature,
+which hampers their ability to represent forecast uncertainty—an essential component for operational oceanography and
+climate services [ 15]—. Ensemble forecasting [ 42] is the standard approach for uncertainty quantification in numerical
+weather and ocean prediction, typically achieved through perturbed initial conditions or stochastic parameterizations.
+Recently, ensemble methodologies have also been adopted in machine learning–based forecasting systems, including
+AIFS ENS [ 1], GenCast [ 28], NeuralGCM [ 18], and Pangu-Weather [ 4], demonstrating that ML ensembles can provide
+calibrated probabilistic forecasts at a fraction of the computational cost of traditional ensemble systems.
+Ensemble learning relies fundamentally on diversity among its members: individual forecasts must differ sufficiently
+so that their errors are weakly correlated, allowing aggregation to improve robustness and reliability [ 12,19]. In the
+context of deep learning, diversity can be introduced through heterogeneous architectures, multiple independently
+trained models, or perturbations applied to inputs, parameters, or latent representations. However, training multiple
+high-capacity models is often computationally prohibitive, particularly for regional GNNs operating on high-resolution
+meshes.
+This work explores a computationally efficient ensemble strategy for regional ocean forecasting using GNNs, imple-
+mented through input perturbation during inference rather than repeated training. Building on SeaCast [ 16], we adapt
+the model to the Canary Islands region in the North Atlantic—an area characterized by strong upwelling dynamics
+and high spatiotemporal variability—and investigate how different noise-based perturbation strategies affect ensemble
+performance. Specifically, we compare Gaussian noise and spatially structured perturbations based on Perlin and fractal
+Perlin noise, systematically analyzing the influence of noise intensity and spatial resolution.
+The ensemble forecasts are evaluated using both deterministic metrics (RMSE and bias) and probabilistic metrics from
+WeatherBench [ 29], including the Continuous Ranked Probability Score (CRPS) and the spread–skill ratio. These
+metrics allow us to assess not only forecast accuracy but also ensemble calibration and uncertainty representation across
+multiple lead times. By focusing on inference-time perturbations and ensemble design choices, this study aims to clarify
+how uncertainty can be effectively represented in GNN-based regional ocean forecasts under realistic computational
+constraints.
+In contrast to recent generative or multi-model ensemble approaches, our focus is deliberately on lightweight ensemble
+construction suitable for regional, high-resolution GNN deployments under constrained computational budgets. Rather
+than retraining multiple networks or introducing stochasticity during training, we investigate how carefully designed
+perturbations of the initial ocean state at inference time can induce meaningful forecast diversity. This design choice
+enables rapid ensemble generation from a single trained model while preserving operational feasibility.
+The main contributions of this work are threefold: First, we present an efficient ensemble framework for regional SST
+forecasting based on inference-time input perturbations applied to a hierarchical GNN; Second, we provide a detailed
+2
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+comparison of unstructured (Gaussian) versus spatially coherent (Perlin and fractal Perlin) noise, demonstrating that the
+latter yields more reliable uncertainty estimates at longer lead times; Third, we offer empirical guidance on noise scale
+and structure for ensemble GNN design in regional ocean applications.
+The remainder of the paper is organized as follows: Section 2 reviews related work on ML-based geophysical forecasting
+and ensemble methods; Section 3 describes the dataset, GNN architecture, and ensemble generation strategies; Section 4
+outlines the experimental setup and evaluation metrics; Section 5 presents the results; and Section 6 discuss the
+implications of our findings and conclude with directions for future research.
+2 Related Work
+Ensemble forecasting is central to uncertainty quantification in numerical weather prediction (NWP), where diversity is
+typically introduced through perturbed initial conditions and stochastic parameterizations. As ML models increasingly
+complement or replace traditional solvers in atmospheric and ocean forecasting, ensemble methodologies have been
+adapted to neural architectures [ 20] to provide probabilistic predictions. Recent work in ML-based geophysical
+forecasting can be organized into four principal ensemble paradigms: (i) independently trained multi-model ensembles,
+(ii) generative probabilistic models, (iii) hybrid physics–ML systems with stochastic components, and (iv) inference-time
+perturbation ensembles.
+Operational AI systems such as AIFS ENS [ 1] follow the classical ensemble paradigm by training or fine-tuning
+multiple model instances. Diversity arises from independent optimization trajectories, initialization differences, or data
+subsampling, consistent with ensemble theory [ 12,33,40]. This strategy benefits from strong variance reduction and
+often yields well-calibrated forecasts. However, it requires substantial computational resources, limiting scalability for
+regional, high-resolution domains where training multiple large neural models is prohibitive.
+A second paradigm is represented by diffusion-based systems such as GenCast [ 28]. These models learn the conditional
+distribution of future states and directly generate multiple coherent forecast trajectories. By optimizing distributional
+objectives, they achieve competitive CRPS performance relative to operational ensemble systems. Nevertheless,
+generative approaches [ 7,5,22] introduce considerable training complexity, high computational costs, and reduced
+interpretability, as uncertainty is encoded implicitly in latent representations rather than explicitly through physically
+motivated perturbations.
+NeuralGCM [ 18] exemplifies a hybrid strategy in which neural components are embedded within a physically inspired
+dynamical core. Stochastic perturbations are applied to learned tendencies, and probabilistic losses such as CRPS
+guide training. This approach enhances physical consistency and uncertainty representation but increases architectural
+complexity and coupling between model components, complicating adaptation to irregular regional meshes and
+ocean-specific geometries.
+Recent work highlights the importance of spatially coherent perturbations. Pangu-Weather [ 4] demonstrated that
+structured Perlin noise [ 27] applied to initial states can generate meaningful ensemble diversity while preserving spatial
+smoothness. Compared to spatially independent Gaussian perturbations, structured noise better respects geophysical
+correlation scales, reducing artificial high-frequency artifacts. However, prior studies have primarily focused on
+global atmospheric forecasting and have not systematically examined how perturbation resolution and scale influence
+probabilistic skill, particularly in regional ocean contexts.
+In parallel, Graph Neural Networks (GNNs) [ 34,39] have emerged as powerful tools for geophysical prediction [ 2,17]
+on irregular domains [ 32,9]. Systems such as GraphCast [ 21] demonstrate that encoder–processor–decoder GNN
+architectures achieve state-of-the-art medium-range forecasting skill with high computational efficiency. Yet these
+models are predominantly deterministic, and ensemble strategies for GNN-based geophysical forecasting remain
+underexplored. Broader GNN ensemble approaches introduce diversity via architectural variation or subgraph sampling
+[36, 38], but these strategies typically require retraining and are not tailored to probabilistic forecasting metrics.
+Existing ensemble paradigms reveal a trade-off: generative and multi-model systems offer strong probabilistic calibration
+but incur high computational cost, while simple perturbation schemes are inexpensive but may lack physical realism.
+This work occupies a computationally efficient middle ground. We investigate homogeneous ensembles for hierarchical
+GNNs [ 25,24] in regional sea surface temperature forecasting [ 16,8,11], introducing diversity exclusively at inference
+time through controlled perturbations of the initial ocean state. Unlike prior studies, we provide a systematic comparison
+between unstructured Gaussian noise and spatially coherent Perlin-based perturbations, explicitly analyzing the impact
+of noise structure and resolution on CRPS and spread–skill ratio [ 41,29,30]. Our results demonstrate that spatial
+coherence, rather than perturbation complexity, is the dominant factor in achieving well-calibrated medium-range
+forecasts.
+3
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+By focusing on structured inference-time perturbations within a regional GNN framework, this study establishes a
+lightweight and operationally feasible pathway toward probabilistic ocean forecasting, bridging deterministic neural
+models and resource-intensive generative ensemble systems.
+3 Methods and Data
+3.1 Dataset
+This study relies on three primary data types: oceanographic, atmospheric forcing, and bathymetry. Oceanographic
+data were obtained from the Copernicus Marine Service (CMEMS), specifically the European North-West Shelf /
+Iberia-Biscay-Irish Seas High-Resolution L4 Sea Surface Temperature Reprocessed product. This Level 4 reanalysis
+merges satellite observations with quality control and gap-filling, providing consistent daily SST data from January 1,
+1982, to December 31, 2023, at 0.05°×0.05° resolution over the North Atlantic, Bay of Biscay, Irish Sea, and part of the
+western Mediterranean. The spatial domain is bounded by the coordinates listed in Table 1. SST is measured at 20 cm
+depth, with an accompanying error field (not used for model training). Data were processed into daily matrices. Figure
+1 shows SST for January 1, 2018, in our domain.
+Table 1: Coordinates delimiting the area of study.
+Parameter Value
+Maximum latitude 34.525º
+Minimum latitude 19.55º
+Maximum longitude -5.975º
+Minimum longitude -20.97º
+Figure 1: Sea Surface Temperature (SST) data in Kelvin for January 1, 2018, in the north-west African coast.
+Atmospheric forcing data were obtained from the Copernicus Climate Data Store (C3S) ERA5 hourly data on single
+levels (1940–present). Two variables were selected: the east–west ( u10) and north–south ( v10) components of 10 m
+wind speed. Data were aggregated to daily means and interpolated to the CMEMS SST grid, stored as daily arrays of
+ocean points. Figure 2 showsuandvwinds for January 1, 2018.
+Bathymetry data were obtained from NOAA’s ETOPO Global Relief Model 2022, providing ocean depth and land
+elevation at 0.0083° resolution. Depths were extracted for the study area, resampled to the SST grid, and land values
+were set to zero. Figure 3 shows the processed bathymetry.
+3.2 Graph Neural Network: Adapting to the North-Atlantic Subregion
+SeaCast is a Graph Neural Network (GNN) designed for high-resolution, medium-term ocean predictions. The model
+leverages the complex geometry of the oceans through an autoregressive approach, combining historical oceanographic
+4
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+Figure 2: Wind components (uandv) at 10 meters above the surface for January 1, 2018.
+Depth
+Figure 3: Processed bathymetry downloaded from ETOPO.
+states, external forcings, and static information to predict future states. Originally developed for the Mediterranean Sea,
+it has been adapted in this study to the North Atlantic region.
+It formalizes the prediction problem using temporal windows. Let the historical states of the oceanographic variables be
+denoted as
+X−h:0= (X−h, . . . , X0),
+whereX−hrepresents the statehdays in the past andX0the current state. The future prediction window is
+X1:T= (X1, . . . , XT),
+whereTdenotes the prediction horizon in days. Forcing factors are defined analogously as
+F1:T= (F1, . . . , FT).
+The prediction relies on four components: initial and target states, forcings, and static data. The initial states consist
+of the previous day and the current value, while the target states correspond to the oceanographic variables over the
+Tforecasted days. In this study, we set T= 1 for training and validation, and T= 15 for testing. During training,
+5
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+the model only requires one day of forcing information, as it is trained to predict one time step ahead. Thanks to its
+autoregressive design, predictions can be extended to any length Tby sequentially generating states ˆX1:T, starting
+fromX0. Figure 4 illustrates the autoregressive process.
+Figure 4: Diagram of autoregressive operation.
+The SeaCast GNN uses an encoder–processor–decoder architecture applied to a hierarchical mesh graph [ 25]. Each
+stage uses an independent GNN, known as an interaction network [ 3], designed to capture relationships between nodes
+and external influences. Latent representations are updated through message passing, MLPs with Swish activation, and
+layer normalization.
+Hierarchical Mesh Graph.The mesh graph represents the spatial domain at multiple resolutions. Each node connects
+to its eight nearest neighbors (except boundary nodes) and hierarchically communicates with lower-resolution nodes.
+This design allows the network to capture both local and regional patterns efficiently.
+Encoder.The encoder maps the inputs from the latitude-longitude grid onto the hierarchical mesh graph. A bipartite
+graph connects the grid to the mesh nodes, propagating information sequentially through the hierarchy. At the end of
+the encoding phase, all nodes contain enriched latent representations suitable for processing.
+Processor.In the processing stage, the latent representations are updated sequentially across mesh levels. Multiple
+processing layers can be used to deepen representation learning, allowing the model to capture complex spatiotemporal
+patterns. The model predicts the residual change as:
+ˆXt
+r=f 
+Xt−2:t−1, Ft
+r=Xt−1
+r+MLPpred(vG
+r),(1)
+where vG
+rrepresents the latent graph representation of grid cell robtained from the mesh-to-grid connections. This
+residual formulation improves training stability and prediction accuracy.
+Decoder.The decoder maps the updated representations back from the hierarchical mesh to the latitude-longitude
+grid. A downward sweep through the hierarchy generates the predicted states for each grid cell.
+To adapt the model to the North Atlantic, we made the following changes:
+•Input constants were modified to accommodate new data sources, grid dimensions, and the number of
+oceanographic and atmospheric variables.
+• The mesh was adapted to the north-west African coast, including the Canary Islands.
+• Training was run on a single GPU instead of the original 32-GPU parallel configuration.
+• A noise module was introduced to generate diverse ensemble predictions.
+6
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+• Evaluation tools from WeatherBench were modified to handle the custom data format.
+These modifications allow efficient operation in the North Atlantic while maintaining the core GNN architecture and
+autoregressive prediction capabilities. The model was trained to minimize the Mean Squared Error (MSE), considering
+the sequence of states generated by autoregressive steps, also known as rollout. The loss function is given by:
+L=1
+TrolloutTrolloutX
+t=1CX
+i=1LiX
+l=11
+|Gl|X
+v∈G l(i)avλi
+ˆXt
+v,i−Xt
+v,i2
+, (2)
+where Trollout is the number of autoregressive steps, Cis the total number of variables, Liis the number of depth levels
+of feature i, and Glrepresents the number of grid points in the ocean at level l. The term avrepresents the weighting
+according to cell size, calculated as the cosine of latitude for each cell vand depth level l. Finally, λiis the inverse of
+the variance of the estimates for variablei[16].
+3.3 Ensemble Method
+Our ensemble learning strategy combines multiple models to generate a prediction during inference. This approach,
+inspired by thewisdom of the crowd, relies on the expectation that individual model errors will partially cancel out,
+yielding more accurate predictions than a single model. The outputs are combined using an aggregation function [ 33].
+For an ensemble to outperform an individual model, base models must be better than random, and their errors should be
+as independent as possible [ 12]. Diversity among models is crucial: heterogeneous ensembles use different architectures
+(e.g., Stacking), while homogeneous ensembles use identical architectures with variations in inputs or parameters.
+In this study, we adopted a bagging-inspired homogeneous ensemble strategy. Instead of retraining multiple models on
+bootstrapped datasets, a single GNN model is employed, and diversity is introduced at inference time by perturbing
+the oceanographic input data with noise. Predictions generated from perturbed initial states are aggregated through
+their mean to produce the final forecast. The types of noise and their characteristics are described in the following
+subsections.
+3.3.1 Gaussian
+The simplest approach to introducing variability into the data is by adding random perturbations drawn from a normal
+distribution. Gaussian noise is widely used due to its prevalence in natural processes and favorable statistical properties.
+The distribution is given by:
+p(x) =1√
+2πσ2e−(x−µ)2
+2σ2,(3)
+where µdenotes the mean and σ2the variance. Gaussian noise has been employed in several state-of-the-art climate
+modeling frameworks included in performance benchmarks [ 30], such as ArchesWeatherGen [ 7], NeuralGCM [ 18],
+FuXi [6], and FourCastNet [26].
+Figure 5 illustrates the effect of varying the standard deviation of the sampling distribution on noise intensity, assuming
+zero mean in all cases. A standard deviation of 1 yields perturbations that can reach values close to 4 in the distribution
+tails, whereas a standard deviation of 0.5 produces noticeably lower-amplitude noise due to reduced dispersion. When
+the standard deviation is set to 0.1, the perturbations become barely perceptible at the shared visualization scale. Despite
+these differences in magnitude, all realizations exhibit a spatially uncorrelated structure, resulting in uniformly scattered
+patterns across the domain.
+3.3.2 Perlin Noise
+In the context of ensemble construction, Perlin noise [ 27] offers a structured approach to promoting diversity while
+preserving spatial correlations. In contrast to Gaussian noise, which introduces spatially independent perturbations,
+Perlin noise generates smooth variations with controllable correlation lengths determined by the selected spatial
+resolution. This property enables the creation of ensemble members that differ in a physically consistent manner,
+maintaining large-scale coherence while introducing localized variability. Consequently, this type of noise facilitates
+diversification without injecting spurious high-frequency artifacts, making it particularly suitable for perturbing
+geophysical variables characterized by strong spatial dependencies. Perlin noise has been notably applied in Pangu-
+Weather [4] to generate random perturbations .
+7
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+Figure 5: Examples of Gaussian noise added to SST, generated with different standard deviations.
+To generate the noise, a three-dimensional grid is first considered, whose points have integer coordinates. These
+points, which act as the vertices of the grid cubes, are assigned pseudo-random values and gradient vectors through a
+hash function H, which produces four mutually independent real values. For a point with coordinates (x, y, z) , this
+assignment is represented by the following equation:
+[a, b, c, d] =H(x, y, z),(4)
+wherea,bandcrepresent the gradient anddthe value of the function at the point(x, y, z).
+If the evaluated point (x, y, z) coincides with a grid point, then the noise value equals d. Otherwise, if the point lies
+within the volume bounded by the vertices of a cube, the noise is computed through smooth interpolation (e.g., a cubic
+polynomial) using the values and gradients of the surrounding vertices. This interpolation is performed first along the
+x-axis (between edges), then along the y-axis (across cube faces), and finally along the z-axis (between planes). This
+procedure allows the generation of noise with a spatial component.
+Figure 6 shows two different Perlin noise configurations that differ in the spatial resolution applied. In the case of higher
+spatial resolution on the latitude and longitude axes (2, 12, 12), a greater number of noise patterns can be observed,
+while in the low-resolution configuration (2, 3, 3), the patterns are larger and it is clearer to see how the interpolation
+smooths the transitions within each cell. Another important feature is that the higher resolution noise has a slightly
+higher intensity.
+Figure 6: Examples of Perlin noise added to SST, generated with different spatial resolutions.
+3.3.3 Fractal Perlin Noise
+Another alternative for generating noise is the fractal Perlin noise. This function is distinguished by the use of three
+additional parameters. The first isoctaves, which represent the number of iterations of the noise. Then there is
+8
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+persistence, which acts as the scaling factor for the noise amplitude between consecutive octaves. Finally,lacunarityis
+the factor of increase in frequency between two octaves. Its equation is given as:
+F(x, y, z) =α·O−1X
+i=0ai·H(x, y, z;f i), (5)
+where αrepresents the noise scale, Orepresents the number of octaves, aiis the noise amplitude, and fiis the frequency
+that modifies the resolution. The lacunarity, persistence, and resolution evolve as follows:
+resolution i=fi·resolution 0;fi=lacunarity·f i−1;ai=persistence·a i−1. (6)
+The noise resolution applied in each octave must always be an exact divisor of the dimensions of the desired noise
+shape.
+Figure 6 shows two different configurations of fractal Perlin noise that differ only in the spatial resolution applied. Three
+octaves are used in the noise iteration, with a persistence of 0.5, which means that the intensity decreases progressively
+with each iteration. The lacunarity is two, which means that as the octaves progress, smaller and smaller patterns are
+used, resulting in more detailed and complex noise. In addition, a noise scalability coefficient ( α= 0.2 ) is applied to
+the noise resulting after the last octave.
+Figure 7: Examples of Perlin Fractal noise with three octaves added to the SST, generated with different spatial
+resolutions and the same noise scalability. The rest of parameters correspond to default values.
+4 Experimental Setup
+4.1 Evaluation Metrics
+Two sets of metrics are used in this study: probabilistic metrics to evaluate the ensemble predictions generated from
+noisy inputs, and classical deterministic metrics, such as RMSE or Bias, to compare predictions against a single model
+without noise. This section focuses on the probabilistic metrics. Table 2 summarizes the notation used throughout the
+metric definitions.
+Table 2: Notation used in the metrics [30].
+Symbol Rank Description
+f- Prediction
+o- Observation
+t1, . . . , TVerification time
+l1, . . . , LPrediction horizon
+i1, . . . , ILatitude index
+j1, . . . , JLongitude index
+m1, . . . , MSet member index
+9
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+The Continuous Ranked Probability Score (CRPS) evaluates the accuracy of ensemble predictions, balancing the error
+against the internal dispersion of the set. For individual membersXand observationY, the CRPS is given by:
+CRPS skill=E|X−Y|,(7)
+CRPS spread =E[X−X′],(8)
+CRPS=CRPS skill−1
+2CRPS spread =E|X−Y| −1
+2E|X−X′|.(9)
+The CRPS used in this study accounts for all set members and verification times [41] and is calculated as:
+CRPS l:=1
+TTX
+t
+1
+MMX
+m=1f(m)−o
+t,l−1
+2M(M−1)MX
+m=1MX
+n=1
+n̸=mf(m)−f(n)
+t,l
+. (10)
+The first term of the metric measures the average error of ensemble members relative to observations, and the second
+term provides an unbiased estimate of internal dispersion to correct for finite ensemble size.
+The Spread-Skill Ratio evaluates ensemble calibration by comparing the ensemble dispersion to the RMSE of the
+ensemble mean. The spread is defined as:
+Spreadl=vuut1
+TIJTX
+tIX
+iJX
+jvarm 
+ft,l,i,j,m
+,(11)
+with the variance of ensemble members given by:
+varm 
+ft,l,i,j,m
+=1
+M−1MX
+m=1 
+ft,l,i,j,m −¯ft,l,i,j2.(12)
+The spread-skill ratio is calculated as follows:
+Rl=Spreadl
+RMSE l(¯f).(13)
+A value of Rl≈1indicates good calibration, where ensemble dispersion reflects the actual prediction error. Values
+greater than one indicate overestimated uncertainty, while values below one indicate insufficient ensemble variability.
+Unlike CRPS, which balances error and dispersion, the spread-skill ratio directly measures the calibration of the
+ensemble [13, 37].
+In this work, a bias-corrected RMSE is used to reduce systematic errors when calculating the spread-skill ratio, providing
+a more reliable estimate of ensemble calibration.
+4.2 Training Procedure
+We employed a training period spanning 21 years of data with the dataset divided as follows: training data from 2003
+to 2019 (17 years), validation data from 2020 to 2021 (2 years), and test data from 2022 to 2023 (2 years). This
+corresponds to approximately 81% of the data for training and 9.5% for validation and testing.
+The model was trained using the AdamW optimizer with parameters β1= 0.9 ,β2= 0.95 , and weight decay λ= 0.1 .
+The initial learning rate was set to 1×10−5, with five warm-up epochs and a cosine decay schedule to progressively
+adjust the learning rate.
+Network hyperparameters were selected as follows: hidden layers of 128 neurons, resulting in 128-dimensional vector
+representations within the GNNs and associated MLPs; four processing layers in the model processor; and a hierarchical
+10
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+mesh with three uniform levels at resolutions of 81, 27, and 9, respectively. Training was conducted for 150 epochs
+without autoregressive steps due to computational constraints.
+The training environment consisted of a desktop workstation with an Intel Core i9-9900K processor (3.60 GHz, 8 cores,
+16 threads), 32 GB of RAM, and an NVIDIA GeForce RTX 3060 GPU with 12 GB of VRAM, which enabled efficient
+handling of large datasets and accelerated computation.
+Before training, static features, such as bathymetry, coordinates, and normalization statistics, were computed, and
+differences between consecutive states were normalized to facilitate residual learning. The structure of the hierarchical
+mesh and bipartite connections were generated and stored for efficient access.
+During training, the model learns to predict one-step-ahead oceanographic states. For evaluation, ensemble predictions
+are generated by introducing diversity in the initial states through noise perturbations (Gaussian, Perlin, and Perlin
+fractal). The ensemble predictions are then aggregated via daily averages, enabling both probabilistic and deterministic
+assessment of model performance.
+4.3 Test Configurations
+Inference tests were initially performed using a single day of input to generate 15 future predictions. This preliminary
+phase aimed to identify noise types that performed poorly, which were discarded, while promising configurations were
+retained for full evaluation. Both Gaussian and Perlin-based noises were tested, with parameter settings summarized in
+Tables 3, 4, and 5.
+Gaussian noise tests are defined by a mean ( µ) and standard deviation ( σ). Standard deviations above 1 were avoided,
+as they degraded prediction quality. Table 3 shows the configurations used:
+Table 3: Gaussian noise configurations used during the tests.
+Noise type Mean (µ) Standard deviation (σ)
+Gaussian (µ=0,σ=0.1) 0.0 0.1
+Gaussian (µ=0,σ=0.05) 0.0 0.05
+Gaussian (µ=0,σ=0.01) 0.0 0.01
+Perlin noise tests included classic and fractal variants. Table 4 shows classic Perlin noise configurations with different
+spatial resolutions, ensuring temporal consistency via thetileableparameter.
+Table 4: Classic Perlin noise configurations used during the tests.
+Noise type Resolution Repeatable
+P_res_2x3x3(2, 3, 3) (T, F, F)
+P_res_2x12x12(2, 12, 12) (T, F, F)
+Fractal Perlin noise was used with a spatial resolution of 15x15, three octaves, persistence of 0.5, lacunarity of 2, and a
+weighting factor of 0.2. Variants were generated by modifying a single parameter while keeping the recommended
+lacunarity and persistence, as shown in Table 5.
+Table 5: Fractal Perlin noise configurations used during the tests. The IDs correspond to: A) PF_res_15x15 ; B)
+PF_res_5x5 ; C)PF_res_15x15_without_tileable ; D)PF_res_15x15 (α=0.05); and E) PF_res_15x15 (α=0.4).
+ID Resolution Repeatable Persistence Octaves Scale Lacunarity
+A (15, 15) (F, T) 0.5 3 0.2 2.0
+B (5, 5) (F, T) 0.5 3 0.2 2.0
+C (15, 15) (F, F) 0.5 3 0.2 2.0
+D (15, 15) (F, T) 0.5 3 0.05 2.0
+E (15, 15) (F, T) 0.5 3 0.4 2.0
+5 Results
+In this section, we compare ensemble prediction with the deterministic forecast. Then we analyze the differences
+observed in preliminary experiments using Gaussian and Perlin noise, emphasizing how specific noise parameters
+influence performance when initial conditions are perturbed.
+11
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+Table 6 reports the RMSE averaged over 1, 5, and 15 days, relative to the deterministic forecast without noise. None of
+the ensemble configurations consistently outperforms the deterministic model across all horizons, which is expected
+given that the model was trained under deterministic conditions.
+RMSE increases with forecast horizon due to the autoregressive formulation. Ensemble predictions also exhibit higher
+RMSE at short lead times because the input observations are explicitly perturbed. The largest initial degradations are
+observed for P_res_2x12x12 ,P_res_2x3x3 , and Gaussian ( µ= 0 ,σ= 0.1 ), reflecting their higher input variability.
+However, this effect decreases with lead time, and performance converges toward stable values by the final forecast day.
+Overall, these results indicate that introducing diversity in the initial conditions helps compensate for forecast errors
+and promotes exploration of alternative future states, which becomes increasingly important as uncertainty grows
+in autoregressive predictions. The primary objective of this work was not to improve deterministic accuracy, but to
+evaluate how different ensemble strategies and input perturbations impact uncertainty characterization.
+Table 6: Comparison of the increase RMSE over different time horizons for each noise configuration, with respect to a
+deterministic prediction without noise.
+Configuration 1 day 5 days 15 days
+Deterministic (ref) 0.109 0.308 0.586
+Gaussian (µ=0,σ= 0.01) 0.55% 0.03% 0.00%
+Gaussian (µ=0,σ= 0.1) 28.96% 5.36% 0.43%
+P_res_15x15 (α= 0.05) 1.56% 0.16% 0.02%
+P_res_2x12x12 64.01% 15.90% 1.62%
+P_res_2x3x3 61.17% 14.83% 1.47%
+Figure 8 shows the bias on prediction day 1 for different members of the ensemble and their mean value. The members
+show greater variability while the mean of the set is more accurate.
+Member 1 Member 2 Member 3 Ensemble mean Member 4 Member 5
+Figure 8: SST bias maps for one-day forecasts starting on 2 January 2022. Each row corresponds to a different input
+noise configuration, and each column represents a member of the ensemble, with the last column showing the ensemble
+mean.
+5.1 Comparison of Gaussian noise configurations
+Figure 9 shows the CRPS (10) and its components, CRPS skill (7) and CRPS spread (8), for the selected Gaussian
+noise configurations. Values closer to zero indicate better performance of the set, as they reflect a balance between
+accuracy (low error of the predicted distribution) and adequate dispersion among the predictions of the set, which favors
+prediction sets that explore more alternatives with controlled error.
+12
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+In this configuration, the CRPS is higher at the beginning of the forecast horizon when the first two entries correspond
+to noisy initial states. The figure shows that the CRPS skill curve reflects greater disagreement with actual observations
+in the early steps. Although the contribution of the CRPS spread helps to mitigate the error, it is not sufficient to achieve
+the values obtained with lower noise levels. In the latter cases, the lower disturbance of the initial conditions results in
+better performance in the first days of the forecast.
+However, these configurations show a change in trend over the time horizon, reaching their worst performance at the end.
+This can be understood by analyzing the CRPS skill graph, where the differences in error between the configurations
+are minimal at the end of the time horizon. As their dispersion (CRPS spread) is lower, these errors are not corrected
+adequately. Therefore, although the dispersion between the members decreases slightly from the sixth day onwards, the
+model with the highest noise ends up being the one that best represents the predicted distribution compared to the actual
+observations.
+Lead time (days) Lead time (days)Lead time (days)(K)(K)
+(K)
+Figure 9: CRPS and its components, averaged for each prediction horizon, comparing the different sets of predictions
+with Gaussian noise.
+Figure 10 depicts the evolution of the spread-skill ratio (13) and its components: the standard deviation (11) and the
+unbiased RMSE. The horizontal line at value 1 on the y-axis represents the reference threshold. This would be the case
+when the dispersion of the predictions of the set with respect to their mean can completely explain the errors of that
+mean, indicating perfect calibration.
+In this case, the configuration with standard deviation equal to 0.01 presents a subdispersed behaviour throughout the
+entire prediction horizon, with insufficient dispersion with respect to the error committed by its mean. This can be
+verified by comparing the graph of standard deviation with respect to RMSE, where it is always a lower value. The
+other two configurations are overdispersed, with greater dispersion with respect to their mean. However, a common
+pattern is detected in the evolution of the spread-skill ratios, as they begin to stabilize from the sixth day onwards.
+This is consistent with the fact that the standard deviation of the sets grows until day 6, followed by a progressive
+decline. Furthermore, at this point it is also detected that the RMSE exceeds the standard deviation, which explains
+13
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+the coefficient less than one in the case of standard deviation equal to 0.1. It should be noted that this inflection
+point coincides with the moment when this configuration crosses the reference line, where the set would be perfectly
+calibrated. Therefore, although all configurations end up being underdispersed, it can be deduced that with a slightly
+larger but controlled disturbance, it would be possible to achieve a calibration of the set close to one at the end.
+Lead time (days)Unbiased RMSE (K)
+(Unbiased) Unbiased RMSE (K)Unbiased Spread–Skill Ratio
+Lead time (days)Standard Deviation (K)
+Lead time (days) Lead time (days)
+Figure 10: Graph of the unbiased spread-skill ratio and its components, averaged for each prediction horizon, comparing
+different sets of predictions with Gaussian noise introduced.
+5.2 Comparison of Perlin noise configurations
+The Perlin noise results corresponding to the first days of prediction for CRPS are shown in Figure 11. The configurations
+with base Perlin noise (P_res_2x3x3 and P_res_2x12x12) show lower initial performance. However, these experiments
+end up being the best at the end of the time horizon compared to the fractal Perlin configurations, following a similar
+trend to Gaussian noise ( µ=0,σ2=0.1). The configurations with Perlin fractal noise start with initial CRPS values close
+to the ideal, but their performance deteriorates over time.
+One of the differences between the two groups is the complexity of the noise. Perlin fractal noise uses multiple iterations
+to refine the pattern, each with a higher resolution. However, the influence of these last octaves is minor, so only fine
+details are added. In contrast, base Perlin noise is simpler, as it generates the noise only once with the input resolution.
+Furthermore, fractal Perlin noise configurations incorporate a noise scalability factor, represented by α, which is applied
+to the output to attenuate its impact.
+The magnitude of the Perlin fractal noise with a scalability of 0.4 is comparable to the base Perlin noise. However, the
+dispersion between members is lower in this case, despite using a similar noise intensity. This suggests that fractal
+Perlin noise is not beneficial due to noise refinement through octaves, which generates complex spatial patterns with
+less structural coherence, thus affecting uncertainty.
+14
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+(K)
+(K)
+Lead time (days) Lead time (days)Lead time (days)(K)
+Figure 11: CRPS and its components, averaged for each prediction horizon, comparing the predictions with Perlin noise
+introduced.
+Regarding the unbiased spread-kill ratio, Figure 12 shows that the basic Perlin configurations stand out once again.
+Although they exhibit overdispersion over the time horizon, on the 15th day of prediction, they reach a value close to
+one, indicating an almost perfect calibration. Furthermore, it can be seen that in all sets, the standard deviation begins to
+decrease from the sixth day, as was already the case with Gaussian noise. This decrease, together with a less pronounced
+increase in unbiased RMSE, causes the spread-skill ratio to stabilize. On the contrary, due to the low intensity of the
+initial noise, most fractal Perlin configurations end up being underdispersed during most of the prediction period.
+The P_res_2x3x3 configuration shares a very similar initial value, since, although its standard deviation is higher,
+its unbiased RMSE is also higher, especially at the beginning, compared to the other sets. This behavior of the
+unbiased RMSE highlights the importance of spatial resolution applied to noise, since the worst results tend to occur in
+configurations with lower resolutions, such as P_res_2x3x3 and PF_res_5x5.
+Regarding the RMSE in the unification of predictions, Figure 13 shows that higher noise again performs worse over the
+time horizon. However, the observation made with the unbiased RMSE is confirmed, since the resolution of the applied
+noise directly influences the model loss. Configurations with lower resolution generate fewer spatial patterns, which
+reduces the diversity of the set in different areas.
+5.3 Comparison between types of noise
+The most promising noises underwent an additional test in which predictions were made starting on the same day as
+the previous ones, but with the set size increased to 10. However, in this case, the results did not show significant
+differences, with minimal changes relative to prior trends. In the final evaluation, the noises with the best performance
+according to the previous metrics for each group analyzed were selected, along with one representative of each type of
+noise with the worst results for comparison purposes.
+15
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+Unbiased Spread–Skill Ratio
+Lead time (days)
+Lead time (days) Lead time (days)Standard Deviation (K)
+Unbiased RMSE (K)
+Figure 12: Unbiased spread-skill ratio and its components, averaged for each prediction horizon, comparing the different
+sets of predictions with Perlin noise introduced.
+Figure 14 corroborates the results observed in the preliminary tests, where the controlled intensity of the noise was a
+relevant factor for the set to be sufficiently diverse (for example, in the case of a Gaussian standard deviation of 0.1).
+Compared to those graphs, when we average over a large number of prediction start days, the metrics deteriorate overall,
+and the differences are smaller. Nevertheless, Perlin noise outperforms Gaussian noise configurations.
+Despite the difference in the statistical distribution of noise between the configurations of both groups, the noise
+intensities are similar in those with comparable performance (e.g., Gaussian noise σ= 0.1 and Perlin base P_res_12x12).
+This suggests that the models benefit from initial perturbations that combine adequate noise intensity with some spatial
+structure.
+6 Discussion
+While deterministic error remains comparable to the single-model forecast, the predictions reveal important patterns in
+ensemble performance and uncertainty, providing a basis for further investigation.
+The analysis of the initial perturbations reveals clear differences depending on their structure and intensity. Perturbations
+generated with moderate noise and structured spatial patterns (such as Perlin noise) proved more beneficial than those
+generated with scattered noise (e.g., Gaussian noise), which lack a clear spatial component. Furthermore, iterating
+over spatial noise patterns by introducing finer-scale details in successive steps (as in Perlin fractal noise) did not yield
+significant improvements. Among spatial patterns, higher-resolution configurations—characterized by a large number
+of spatial features—tended to produce better results. This may indicate that such perturbations enhance diversity at
+smaller spatial scales.
+16
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+Lead time (days)(K)
+Figure 13: RMSE averaged by prediction horizon, comparing the performance of unifying Perlin noise configurations.
+(K)
+Lead time (days) Lead time (days)
+Lead time (days)
+Unbiased RMSE (K)Unbiased Spread–Skill Ratio
+Figure 14: CRPS, unbiased RMSE, and spread-skill ratio averaged by prediction horizon, comparing the different sets
+of predictions with added noise, evaluated on the complete test data set.
+17
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+In addition to these findings, the characteristics of the base model provide important context for interpreting the results.
+The model used was relatively simple, both in terms of the number of variables and its training procedure, and it was
+trained deterministically. Despite this simplicity, several predictions generated from perturbed initial states achieved
+performance comparable to that of the noise-free model. This is a promising outcome, suggesting that large modified
+datasets, complex architectures, or highly sophisticated ensembles may not be strictly necessary to match the long-term
+performance of the base model. Although ensemble predictions tended to perform worse during the early stages, the
+diversity of errors among models appears to compensate over time, resulting in an average prediction similar to the
+deterministic one.
+This study has identified several issues for further research beyond the exclusive perturbation of initial oceanographic
+data during inference. One possible direction is to train the model with autoregressive steps, which could improve the
+accuracy of long-term predictions. In this work, noise was added exclusively to the initial oceanographic states of the
+model. Considering that only one variable was used, this diversity may not be sufficient to capture complex phenomena
+such as coastal upwelling, which probably requires a greater number of variables to explain adequately. This scenario
+would also allow us to validate the conclusions drawn in this work regarding the types of noise that are most beneficial
+for creating larger-scale prediction sets.
+Similarly, other types of ensemble learning techniques could be used for comparison, including the use of lagged
+predictions, the perturbation of initial forcing states, or the modification of the model’s parameters. One of the
+advantages of ensemble learning techniques is their great flexibility, so future work could focus on introducing diversity
+in the training phase rather than inference, provided the necessary computational resources are available. Although no
+significant improvements were obtained in this work by increasing the number of ensemble members, this is likely due
+to the small number of predictions used, conditioned by computational limitations. This deficiency was evident in the
+analysis of the unbiased RMSE, where in several scenarios the results changed dramatically.
+Therefore, this work aims to serve as an initial reference in the study of the types of noise applied during the inference
+phase as a mechanism for introducing diversity into prediction sets. However, as discussed throughout this section, the
+possibilities for configuring and incorporating diversity in this type of technique are extensive. As a result, future lines
+of research could focus on improving the results obtained in this work using the same techniques or exploring any of
+the other options mentioned.
+References
+[1] Mihai Alexe, Simon Lang, Mariana Clare, Martin Leutbecher, Christopher Roberts, Linus Magnusson, Matthew
+Chantry, Rilwan Adewoyin, Ana Prieto-Nemesio, Jesper Dramsch, Florian Pinault, and Baudouin Raoult. Data-
+driven ensemble forecasting with the AIFS. Technical Report 181, ECMWF, 10/2024 2024.
+[2]Peter Battaglia, Jessica Blake Chandler Hamrick, Victor Bapst, Alvaro Sanchez, Vinicius Zambaldi, Mateusz
+Malinowski, Andrea Tacchetti, David Raposo, Adam Santoro, Ryan Faulkner, Caglar Gulcehre, Francis Song,
+Andy Ballard, Justin Gilmer, George E. Dahl, Ashish Vaswani, Kelsey Allen, Charles Nash, Victoria Jayne
+Langston, Chris Dyer, Nicolas Heess, Daan Wierstra, Pushmeet Kohli, Matt Botvinick, Oriol Vinyals, Yujia Li,
+and Razvan Pascanu. Relational inductive biases, deep learning, and graph networks. Technical report, Cornell
+University, 2018.
+[3]Peter Battaglia, Razvan Pascanu, Matthew Lai, Danilo Jimenez Rezende, and Koray Kavukcuoglu. Interaction
+networks for learning about objects, relations and physics. InProceedings of the 30th International Conference
+on Neural Information Processing Systems, NIPS’16, page 4509–4517, Red Hook, NY , USA, 2016. Curran
+Associates Inc.
+[4]Kaifeng Bi, Lingxi Xie, Hengheng Zhang, Xin Chen, Xiaotao Gu, and Qi Tian. Accurate medium-range global
+weather forecasting with 3D neural networks.Nature, 619(7970):533–538, 2023.
+[5]Cristian Bodnar, Wessel P. Bruinsma, Ana Lucic, Megan Stanley, Anna Allen, Johannes Brandstetter, Patrick
+Garvan, Maik Riechert, Jonathan A. Weyn, Haiyu Dong, Jayesh K. Gupta, Kit Thambiratnam, Alexander T.
+Archibald, Chun-Chieh Wu, Elizabeth Heider, Max Welling, Richard E. Turner, and Paris Perdikaris. A foundation
+model for the Earth system.Nature, May 2025.
+[6]Lei Chen, Xiaohui Zhong, Feng Zhang, Yuan Cheng, Yinghui Xu, Yuan Qi, and Hao Li. FuXi: A cascade machine
+learning forecasting system for 15-day global weather forecast.npj Climate and Atmospheric Science, 6(1):190,
+2023.
+[7]Guillaume Couairon, Renu Singh, Anastase Charantonis, Christian Lessig, and Claire Monteleoni. Archesweather
+& Archesweathergen: a deterministic and generative model for efficient ML weather forecasting.arXiv preprint
+arXiv:2412.12971, 2024.
+18
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+[8]Giovanny A. Cuervo-Londoño, Javier Sánchez, and Ángel Rodríguez-Santana. Forecasting sea surface temperature
+from satellite images with graph neural networks. In Modesto Castrillón-Santana, Carlos M. Travieso-González,
+Oscar Deniz Suarez, David Freire-Obregón, Daniel Hernández-Sosa, Javier Lorenzo-Navarro, and Oliverio J.
+Santana, editors,Computer Analysis of Images and Patterns, pages 329–339, Cham, 2026. Springer Nature
+Switzerland.
+[9]Giovanny A. Cuervo-Londoño, José G. Reyes, Ángel Rodríguez-Santana, and Javier Sánchez. V oronoi-induced
+artifacts from grid-to-mesh coupling and bathymetry-aware meshes in graph neural networks for sea surface
+temperature forecasting.Electronics, 14(24), 2025.
+[10] Giovanny A. Cuervo-Londoño, Javier Sánchez, and Ángel Rodríguez-Santana. Deep learning weather models for
+subregional ocean forecasting: A case study on the Canary Current upwelling system. Technical report, Cornell
+University, 2025.
+[11] Giovanny A. Cuervo-Londoño, Javier Sánchez, and Ángel Rodríguez-Santana. Deep learning weather models for
+subregional ocean forecasting: A case study on the Canary Current upwelling system.Ocean Modelling, Preprint,
+2026.
+[12] Thomas G Dietterich. Ensemble methods in machine learning. InInternational Workshop on Multiple Classifier
+Systems, pages 1–15, Berlin, Heidelberg, 2000. Springer Berlin Heidelberg.
+[13] Vincent Fortin, Mabrouk Abaza, Francois Anctil, and Raphael Turcotte. Why should ensemble spread match the
+RMSE of the ensemble mean?Journal of Hydrometeorology, 15(4):1708–1713, 2014.
+[14] Baylor Fox-Kemper, Alistair Adcroft, Claus W. Böning, Eric P. Chassignet, Enrique Curchitser, Gokhan Danaba-
+soglu, Carsten Eden, Matthew H. England, Rüdiger Gerdes, Richard J. Greatbatch, Stephen M. Griffies, Robert W.
+Hallberg, Emmanuel Hanert, Patrick Heimbach, Helene T. Hewitt, Christopher N. Hill, Yoshiki Komuro, Sonya
+Legg, Julien Le Sommer, Simona Masina, Simon J. Marsland, Stephen G. Penny, Fangli Qiao, Todd D. Ringler,
+Anne Marie Treguier, Hiroyuki Tsujino, Petteri Uotila, and Stephen G. Yeager. Challenges and prospects in ocean
+circulation models.Frontiers in Marine Science, 6, 2019.
+[15] Tilmann Gneiting and Matthias Katzfuss. Probabilistic forecasting.Annual Review of Statistics and Its Application,
+1(V olume 1, 2014):125–151, 2014.
+[16] Daniel Holmberg, Emanuela Clementi, Ilaria Epicoco, and Teemu Roos. Accurate Mediterranean Sea forecasting
+via graph-based deep learning.Scientific Reports, 15:45051, 2025.
+[17] Ryan Keisler. Forecasting global weather with graph neural networks.arXiv preprint arXiv:2202.07575, 2022.
+[18] Dmitrii Kochkov, Janni Yuval, Ian Langmore, Peter Norgaard, Jamie Smith, Griffin Mooers, Milan Klöwer, James
+Lottes, Stephan Rasp, Peter Düben, Sam Hatfield, Peter Battaglia, Alvaro Sanchez-Gonzalez, Matthew Willson,
+Michael P. Brenner, and Stephan Hoyer. Neural general circulation models for weather and climate.Nature,
+632(8027):1060–1066, 2024.
+[19] Ludmila I Kuncheva and Christopher J Whitaker. Measures of diversity in classifier ensembles and their
+relationship with the ensemble accuracy.Machine learning, 51(2):181–207, 2003.
+[20] Balaji Lakshminarayanan, Alexander Pritzel, and Charles Blundell. Simple and scalable predictive uncertainty
+estimation using deep ensembles. InAdvances in Neural Information Processing Systems, volume 30. Curran
+Associates, Inc., 2017.
+[21] Remi Lam, Alvaro Sanchez-Gonzalez, Matthew Willson, Peter Wirnsberger, Meire Fortunato, Ferran Alet, Suman
+Ravuri, Timo Ewalds, Zach Eaton-Rosen, Weihua Hu, Alexander Merose, Stephan Hoyer, George Holland, Oriol
+Vinyals, Jacklynn Stott, Alexander Pritzel, Shakir Mohamed, and Peter Battaglia. Learning skillful medium-range
+global weather forecasting.Science, 382(6677):1416–1421, 2023.
+[22] Víctor Medina, Giovanny A. Cuervo-Londoño, and Javier Sánchez. Leveraging an atmospheric foundational
+model for subregional sea surface temperature forecasting. Technical report, Cornell University, 2025.
+[23] Antonio Novellino, Alain Arnaud, Andreas Schiller, and Liying Wan. End user applications for ocean forecasting:
+present status description.State of the Planet Discussions, 2024:1–6, 2024.
+[24] Joel Oskarsson, Tomas Landelius, Marc Peter Deisenroth, and Fredrik Lindsten. Probabilistic weather forecasting
+with hierarchical graph neural networks. In A. Globerson, L. Mackey, D. Belgrave, A. Fan, U. Paquet, J. Tomczak,
+and C. Zhang, editors,Advances in Neural Information Processing Systems, volume 37, pages 41577–41648.
+Curran Associates, Inc., 2024.
+[25] Joel Oskarsson, Tomas Landelius, and Fredrik Lindsten. Graph-based neural weather prediction for limited area
+modeling. InNeurIPS 2023 Workshop on Tackling Climate Change with Machine Learning, 2023.
+19
+Ensemble GNN for Probabilistic SST Forecasting via Input Perturbations
+[26] Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani,
+Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and
+Animashree Anandkumar. FourCastNet: A global data-driven high-resolution weather model using adaptive
+Fourier neural operators. Technical report, Cornell University, 2022.
+[27] Ken Perlin. An image synthesizer.ACM Siggraph Computer Graphics, 19(3):287–296, 1985.
+[28] Ilan Price, Alvaro Sanchez-Gonzalez, Ferran Alet, Tom R. Andersson, Andrew El-Kadi, Dominic Masters, Timo
+Ewalds, Jacklynn Stott, Shakir Mohamed, Peter Battaglia, Remi Lam, and Matthew Willson. Probabilistic weather
+forecasting with machine learning.Nature, 637:84–90, 2025.
+[29] Stephan Rasp, Peter D Dueben, Sebastian Scher, Jonathan A Weyn, Soukayna Mouatadid, and Nils Thuerey.
+WeatherBench: a benchmark data set for data-driven weather forecasting.Journal of Advances in Modeling Earth
+Systems, 12(11):e2020MS002203, 2020.
+[30] Stephan Rasp, Stephan Hoyer, Alexander Merose, Ian Langmore, Peter Battaglia, Tyler Russell, Alvaro Sanchez-
+Gonzalez, Vivian Yang, Rob Carver, Shreya Agrawal, Matthew Chantry, Zied Ben Bouallegue, Peter Dueben,
+Carla Bromberg, Jared Sisk, Luke Barrington, Aaron Bell, and Fei Sha. WeatherBench 2: A benchmark for
+the next generation of data-driven global weather models.Journal of Advances in Modeling Earth Systems,
+16(6):e2023MS004019, 2024.
+[31] Markus Reichstein, Gustau Camps-Valls, Bjorn Stevens, Martin Jung, Joachim Denzler, Nuno Carvalhais, and
+F Prabhat. Deep learning and process understanding for data-driven Earth system science.Nature, 566(7743):195–
+204, 2019.
+[32] José G. Reyes, Giovanny A. Cuervo-Londoño, and Javier Sánchez. Adaptive meshes in graph neural networks for
+predicting sea surface temperature through remote sensing. In Modesto Castrillón-Santana, Carlos M. Travieso-
+González, Oscar Deniz Suarez, David Freire-Obregón, Daniel Hernández-Sosa, Javier Lorenzo-Navarro, and
+Oliverio J. Santana, editors,Computer Analysis of Images and Patterns, pages 361–372, Cham, 2026. Springer
+Nature Switzerland.
+[33] Omer Sagi and Lior Rokach. Ensemble learning: A survey.WIREs Data Mining and Knowledge Discovery,
+8(4):e1249, 2018.
+[34] Benjamin Sanchez-Lengeling, Emily Reif, Adam Pearce, and Alexander B Wiltschko. A gentle introduction to
+graph neural networks.Distill, 6(9):e33, 2021.
+[35] J. Veitch, E. Alvarez-Fanjul, A. Capet, S. Ciliberti, M. Cirano, E. Clementi, F. Davidson, G. el Serafy, G. Franz,
+P. Hogan, S. Joseph, S. Liubartseva, Y . Miyazawa, H. Regan, and K. Spanoudaki. A description of ocean
+forecasting applications around the globe.State of the Planet, 5-opsr:6, 2025.
+[36] Wenqi Wei, Mu Qiao, and Divyesh Jadav. GNN-ensemble: Towards random decision graph neural networks. In
+2023 IEEE International Conference on Big Data (BigData), pages 956–965. IEEE, 2023.
+[37] DS Wilks. On the reliability of the rank histogram.Monthly Weather Review, 139(1):311–316, 2011.
+[38] Zhen Hao Wong, Ling Yue, and Quanming Yao. Ensemble learning for graph neural networks. Technical report,
+Cornell University, 2023.
+[39] Zonghan Wu, Shirui Pan, Fengwen Chen, Guodong Long, Chengqi Zhang, and Philip S Yu. A comprehensive
+survey on graph neural networks.IEEE transactions on neural networks and learning systems, 32(1):4–24, 2020.
+[40] Yongquan Yang, Haijun Lv, and Ning Chen. A survey on ensemble learning under the era of deep learning.
+Artificial Intelligence Review, 56(6):5545–5589, 2023.
+[41] Michaël Zamo and Philippe Naveau. Estimation of the continuous ranked probability score with limited informa-
+tion and applications to ensemble weather forecasts.Mathematical Geosciences, 50(2):209–234, 2018.
+[42] Zhi-Hua Zhou, Jianxin Wu, and Wei Tang. Ensembling neural networks: Many could be better than all.Artificial
+Intelligence, 137(1):239–263, 2002.
+20

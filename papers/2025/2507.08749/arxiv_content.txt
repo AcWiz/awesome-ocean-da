@@ -1,0 +1,1592 @@
+Modeling Partially Observed Nonlinear Dynamical Systems and
+Efficient Data Assimilation via Discrete-Time Conditional
+Gaussian Koopman Network
+Chuanqi Chena, Zhongrui Wangb, Nan Chenb, Jin-Long Wua,∗
+aDepartment of Mechanical Engineering, University of Wisconsin–Madison, Madison, WI 53706
+bDepartment of Mathematics, University of Wisconsin–Madison, Madison, WI 53706
+Abstract
+A discrete-time conditional Gaussian Koopman network (CGKN) is developed in this work to
+learn surrogate models that can perform efficient state forecast and data assimilation (DA) for
+high-dimensional complex dynamical systems, e.g., systems governed by nonlinear partial differ-
+ential equations (PDEs). Focusing on nonlinear partially observed systems that are common in
+many engineering and earth science applications, this work exploits Koopman embedding to dis-
+cover a proper latent representation of the unobserved system states, such that the dynamics of the
+latent states are conditional linear, i.e., linear with the given observed system states. The modeled
+system of the observed and latent states then becomes a conditional Gaussian system, for which the
+posterior distribution of the latent states is Gaussian and can be efficiently evaluated via analytical
+formulae. The analytical formulae of DA facilitate the incorporation of DA performance into the
+learning process of the modeled system, which leads to a framework that unifies scientific machine
+learning (SciML) and data assimilation. The performance of discrete-time CGKN is demonstrated
+on several canonical problems governed by nonlinear PDEs with intermittency and turbulent fea-
+tures, including the viscous Burgers’ equation, the Kuramoto-Sivashinsky equation, and the 2-D
+Navier-Stokes equations, with which we show that the discrete-time CGKN framework achieves
+comparable performance as the state-of-the-art SciML methods in state forecast and provides effi-
+cient and accurate DA results. The discrete-time CGKN framework also serves as an example to
+illustrate unifying the development of SciML models and their other outer-loop applications such
+as design optimization, inverse problems, and optimal control.
+Keywords: Scientific machine learning, Data assimilation, Spatiotemporal dynamical systems,
+Computational mechanics, Uncertainty quantification, Koopman theory
+∗Corresponding author
+Email addresses: cchen656@wisc.edu (Chuanqi Chen), wang3262@wisc.edu (Zhongrui Wang),
+chennan@math.wisc.edu (Nan Chen), jinlong.wu@wisc.edu (Jin-Long Wu)
+Preprint submitted to Elsevier August 16, 2025arXiv:2507.08749v1  [cs.LG]  11 Jul 2025
+1. Introduction
+Complex dynamical systems are ubiquitous across a wide range of science and engineering disci-
+plines, including solid mechanics, fluid dynamics, geophysics, neuroscience, and material science
+[1, 2, 3, 4, 5, 6]. Many of those systems are described by partial differential equations (PDEs)
+or their stochastic extensions and characterized by complex features such as nonlinearity, mul-
+tiscale dynamics, chaos, turbulence, shock behavior, intermittency, and non-Gaussian statistics
+[7, 8, 9, 10, 11, 12]. Deriving governing equations for these spatiotemporal dynamical systems
+from first principles is a conventional way of modeling and understanding these systems. The
+advantages of having explicit governing equations include adherence to physical laws and inter-
+pretability. However, deriving the governing equations usually requires a deep understanding of
+the underlying physics, extensive domain knowledge, and strong prior assumptions. Additionally,
+computationally expensive numerical simulation is typically necessary to understand and predict
+most of these systems, which can further increase the burden of downstream applications such as
+data assimilation (DA), uncertainty quantification (UQ), and decision-making. As a result, data-
+driven methods, including closure models [13, 14, 15], sparse identification [16, 17], reduced order
+models [18, 19, 20], causality-based models [21, 22, 23], and Gaussian processes [24] have become
+increasingly promising and practical for studying spatiotemporal dynamical systems and carrying
+out many of the tasks mentioned above.
+As one of these data-driven methods, neural-network-based models in deep learning [25, 26, 27, 28,
+29] have promoted the field of scientific machine learning (SciML) and have shown promise in the
+study of spatiotemporal dynamical systems with the rapid growth of available data and computing
+resources [30, 31, 32, 33, 34]. Based on the universal approximation theorem [35, 36, 37], neural
+networks can approximate any nonlinear functions and operators. Consequently, they demonstrate
+significant capability in discovering unknown dynamics and making predictions. For example, as a
+continuous-in-time version of ResNet [38], the neural ODE [39] is proposed to learn the dynamics
+of systems with efficient memory usage. Physics-informed neural networks [40], which integrate
+physical laws into the neural networks, are developed to solve forward and inverse PDE-governed
+problems. Designed to learn mappings between infinite-dimensional function spaces, neural oper-
+ators [41, 42, 43, 44, 45, 46] have been widely used to approximate solution operators and build
+spatiotemporal models. Recently, generative models [47, 48, 49, 50, 51] have been utilized to con-
+struct stochastic nonlocal models [52], generate spatiotemporal turbulence [53], capture extreme
+event statistics [54] and learn PDE solutions [55]. Additionally, active learning [56, 57] has been
+considered for identifying informative data [58, 59], simulating nonlinear systems [60], estimating
+model parameters [61], and learning model discrepancies [62].
+In recent years, leveraging online observational data to improve the performance of data-driven
+models has become a critical component of reliably deploying those models in real-world appli-
+cations, which motivates the joint study of SciML and DA. DA integrates observational data with
+computational models to enhance state estimation [63, 64, 65, 66]. It is extensively applied in
+real-time forecasting, parameter estimation, imputation, and optimal control [67, 68, 69, 70, 71].
+The governing equations of the underlying dynamics are utilized as computational models for
+short-term statistical prediction, known as the prior distribution. Through Bayesian inference, the
+prior distribution is updated with the observational data to form the so-called posterior distribu-
+2
+tion, which is the solution of DA. To handle general nonlinear dynamical systems, the ensemble
+DA methods [72, 73, 74, 75, 76] that utilize samples to approximate probabilistic distributions have
+become commonly used techniques. However, the direct application of ensemble DA methods to
+high-dimensional spatiotemporal systems is often computationally intractable, primarily due to the
+substantial computational cost incurred by the curse of dimensionality in sampling processes and
+the numerical simulations of PDEs. Although the adoption of efficient computational models, such
+as data-driven surrogate models [77, 78, 79, 80], reduced order models [81, 82], and stochastic pa-
+rameterizations [83, 84, 85, 86], coupled with various DA techniques like localization [87, 88] and
+empirical tunings of ensemble sizes and covariances matrix, can mitigate costs and facilitate the
+implementation of DA, the DA process still demands significant computational resources, and may
+suffer from sampling and approximation errors. Recently, deep learning has been employed to sup-
+port DA for spatiotemporal systems [89], assisting the construction of computational models by
+neural networks that enhance forecast capability within DA [90, 91, 92]. Additionally, statistical
+variational DA methods have been proposed to generate observations in scenarios where observa-
+tional data is scarce [93]. Using encoder-decoder networks in latent DA has proven effective in
+utilizing multi-domain data for high-dimensional systems [94]. Deep learning can also facilitate
+using data-driven ensembles at a low computational cost to accelerate ensemble DA [95]. Further-
+more, end-to-end deep learning methods have been developed to streamline the entire DA process
+[96, 97].
+While these existing methods have facilitated the implementation of DA with affordable compu-
+tational costs and demonstrated successes in many applications, efficient DA methods for spa-
+tiotemporal dynamical systems still require further exploration and development, especially for
+incorporating DA into the training of SciML models to enhance their performance. Several recent
+works have started to explore how to incorporate DA into the training of a machine learning model
+from various perspectives, e.g., using ensemble Kalman filter to enhance the learning of structural
+errors for non-ergodic systems via derivative-free optimization [14], developing auto-differentiable
+ensemble Kalman filter [98, 99], exploiting analytical formulae of DA for a conditional Gaussian
+neural stochastic differential equation [100]. Importantly, developing a unified modeling frame-
+work that can handle both efficient state forecast and DA for spatiotemporal dynamical systems,
+with a low training cost and robust testing results for problems with high-dimensional (or even
+infinite-dimensional) system states, can significantly strengthen the joint study of SciML models
+and their data assimilation performance, potentially advancing the reliable deployment of SciML
+models in real-world applications.
+To establish a unified deep learning framework for SciML modeling and efficient DA, the continuous-
+time conditional Gaussian Koopman network (CGKN) was proposed in [101], aiming to perform
+efficient state forecast and DA for the modeling and simulation of spatiotemporal dynamical sys-
+tems. In contrast to the standard usage of Koopman theory [102], which fully linearizes nonlinear
+dynamical systems [103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113], CGKN leverages the
+Koopman embedding to discover a proper latent representation for the unobserved system states
+and employs a conditional linear structure to construct the data-driven model architecture. The
+resulting system is still highly nonlinear. Nevertheless, it leads to a conditional Gaussian system
+[114, 115, 116, 100, 101], which encompasses numerous nonlinear models across various disci-
+plines with wide-ranging applications in natural science and engineering [117, 118, 119, 120].
+3
+One desirable feature of the conditional Gaussian system is that it allows analytical DA formulae
+and thus avoids the need for ensemble DA methods. Together with a lower-dimensional latent
+representation for unobserved states, significantly improved efficiency can be achieved for the DA
+process in both the training and testing phases. In this work, we establish a discrete-time CGKN
+framework, which avoids numerical integration with small step sizes for the continuous CGKN
+framework in [101] and thus significantly enhances the efficiency of handling problems with high-
+dimensional or even infinite-dimensional state variables. The effectiveness and efficiency of the
+discrete-time CGKN framework are demonstrated through several PDE-governed problems, in-
+cluding the viscous Burgers’ equation, the Kuramoto–Sivashinsky equation, and the 2-D Navier-
+Stokes equations.
+The rest of this paper is organized as follows. Section 2 presents the discrete-time CGKN frame-
+work. Three numerical examples are presented in Section 3 to demonstrate the performance of the
+proposed framework. Section 4 concludes the paper.
+2. Methodology
+Considering a spatiotemporal dynamical system including partial differential equations (PDEs) of
+the general form
+∂tu=M(u), (2.1)
+where u(x, t)∈Rduis the system state, with spatial variable x∈Dx⊂Rdxand temporal variable
+t∈[0, Lt], andMis a nonlinear operator. When discretized in both spatial and temporal domains,
+Eq. (2.1) can be written as a discrete dynamical system:
+un+1=G 
+un
+, (2.2)
+where un:=u(·, tn)|D(M)
+x∈Rddenotes the system state variables evaluated at time tnandM-
+point spatial discretization D(M)
+x={x(1),x(2),···,x(M)}of the bounded domain Dx.Gis the
+solution map for this discrete system over time interval tn+1−tn= ∆t. This map Gis also referred
+to as the state transition map. It should be noted that the temporal resolution of the data, dictated
+by the choice of ∆t, is often larger than the numerical integration time step δt, which is required by
+the numerical simulation of Eq. (2.1) and is typically small to ensure accuracy and stability of the
+simulation. Therefore, learning and applying the solution map Gat a coarser temporal resolution
+∆tcan significantly reduce the computational cost.
+In this work, we focus on the situation with partial observations, which means the online obser-
+vational data only contain a subset of the system states of the discrete dynamical system (2.2).
+The observed states and unobserved states are denoted as un
+1∈Rd1andun
+2∈Rd2, respectively,
+withun={un
+1,un
+2}. For instance, un
+1andun
+2can be interpreted as the spatial partition of un.
+Consequently, the system in Eq. (2.2) can be rewritten as follows:
+un+1
+1=G1 
+un
+1,un
+2
+,
+un+1
+2=G2 
+un
+1,un
+2
+,(2.3)
+4
+where the two maps G1andG2are often both nonlinear for many real-world applications. These
+nonlinear maps pose challenges to data assimilation (DA), e.g., preventing the direct use of the
+analytical formulae and thus demanding methods developed for general nonlinear problems such
+as ensemble Kalman filter or even particle filters that involve the evaluation of high-dimensional
+quadratures [121].
+The goal of this work is to learn a surrogate model that embeds a conditional Gaussian structure,
+which is capable of performing two tasks for systems governed by Eq. (2.3): efficient state forecast
+and DA. The task of DA aims to the conditional distribution p(un
+2|{ui
+1}n
+i=0), while the task of state
+forecast is to predict the future states unwithout assuming the knowledge for the exact initial
+unobserved states u0
+2.
+More specifically, to achieve efficient DA via the analytical formulae from the conditional Gaus-
+sian structure, we choose to avoid directly dealing with the nonlinearity of the unobserved state u2.
+According to the Koopman theory [102], a nonlinear dynamical system can be linearized by mod-
+eling the evolution the observation function of the system states, where the observation function
+his in a Hilbert space on the system state unof the discrete system in Eq. (2.2). The Koopman
+operator is defined as an operator Kthat evolves the observation function in that Hilbert space,
+i.e.,Kh:=h◦ G, where ◦denotes function composition. In practice, it can often be character-
+ized (or approximated) by a finite-dimensional dynamical system in the form v(un+1) =Av(un),
+where vis a vector function on the space of un,v(un)∈Rdvis a finite-dimensional vector, and
+A∈Rdv×dvis a matrix. Obtaining such a finite-dimensional linear dynamical system for a general
+nonlinear system in Eq. (2.2) involves the identification of the subspace spanned by eigenvectors
+of the Koopman operator K, which has been studied in [107] via a deep learning perspective. More
+details on Koopman theory can be found in Appendix A.
+In this work, instead of directly applying the Koopman theory to the nonlinear dynamical system
+in Eq. (2.2), we exploit the linear embedding enabled by the Koopman theory on the partially
+observed system in Eq. (2.3) to obtain a conditional linear system, i.e., the governing equations
+become conditionally linear with respect to a latent representation vof the unobserved states u2,
+while the nonlinearity of observed states u1is preserved. More details of generalized application
+of Koopman theory can be found in Appendix B. The resulting modeled system is written as
+follows:
+un+1
+1=F1 
+un
+1
++G1 
+un
+1
+vn+σ1ϵn
+1,
+vn+1=F2 
+un
+1
++G2 
+un
+1
+vn+σ2ϵn
+2,(2.4)
+where v∈Rdvdenotes a latent representation of unobserved states u2in Eq. (2.3) and is referred
+to as latent states. In this modeled system, F1,G1,F2, andG2are four (potentially nonlinear)
+maps of observed states u1. The ϵ1∈Rd1andϵ2∈Rdvare independent Gaussian white noises
+withσ1∈Rd1×d1andσ2∈Rdv×dvas the noise coefficients. The two noise terms represent model
+errors that quantify the approximation quality of the surrogate model to the true underlying system.
+Despite the use of Gaussian white noises, it is worth highlighting that the nonlinearity in the model
+can still capture highly non-Gaussian features, thereby compensating for model errors arising from
+various approximations. In this work, the four nonlinear maps F1,G1,F2, andG2, together with
+the nonlinear maps between unobserved states u2and the latent states v, are parameterized by
+neural networks and calibrated based on data of the original dynamical system in Eq. (2.3). The
+5
+modeled system in Eq. (2.4) belongs to a class of dynamical systems called conditional Gaussian
+nonlinear system (CGNS), i.e., the conditional distribution p(vn|{ui
+1}n
+i=0)is Gaussian, which fa-
+cilitates efficient analytical formulae of DA (see Appendix C). Another advantage of the surrogate
+model is the latent space embedding, which exploits the possible intrinsic lower-dimensional struc-
+ture of the unobserved states u2and thus can further facilitate the computational efficiency of state
+forecast and DA. A schematic overview of the surrogate model is shown in Fig. 2.1(a).
+It is worth noting that vis constructed as a latent representation of u2, and its interaction with u1is
+facilitated by the conditional Gaussian structure in Eq. (2.4), to allow for the use of analytical DA
+formulae. The modeled system in Eq. (2.4) is related to the CGKN framework proposed in [101]
+and can be viewed as a discrete version of the original CGKN framework. Unlike the continuous
+form of CGKN framework studied in [101], the discrete form in Eq. (2.4) avoids the numerical
+integration along time with a small step size and thus enables the exploration of its performance on
+PDE-governed problems with high-dimensional (or even infinite-dimensional) system states. The
+choice of temporal step size involves a trade-off: a smaller step enables high temporal resolution
+capture of fine-scale dynamics, whereas a larger step is more suitable for modeling coarse-grained
+or long-term behaviors. The remainder of this section introduces the architecture of CGKN in its
+discrete-in-time form, the application of CGKN to state forecast and DA, the training of CGKN
+based on offline data, and the uncertainty quantification for the results of CGKN.
+2.1. CGKN Architecture
+As illustrated in Fig. 2.1, the CGKN is developed to construct a surrogate model in Eq. (2.4) to
+approximate the discrete dynamical system in Eq. (2.3). The CGKN comprises an encoder φ, a
+decoder ψ, and sub-networks ηto construct the nonlinear maps F1,G1,F2, andG2. The encoder
+φis a nonlinear mapping for transforming the unobserved states u2to the latent states v, i.e.,
+v=φ(u2), while the decoder ψis its inverse, i.e., u2=ψ(v).
+6
+vn=φ(un2)Encoder:un2=ψ(vn)Decoder:Neural Conditional Gaussian Nonlinear Systemun+11=F1(un1)+G1(un1)vn+σ1ϵn1vn+1=F2(un1)+G2(un1)vn+σ2ϵn2Discrete Dynamical Systemun+11=𝒢1(un1,un2)un+12=𝒢2(un1,un2)NonlinearConditional LinearGeneralized Koopman Theorya
+tn
+tn+1
+tn+mCGKN for   Data AssimilationCGKN for   State ForecastData of Observed StatesInference of CGKNc: Observed Statesu1: Unobserved Statesu2: Observed Statesu1: Latent Statesv
+t1
+t2
+tn
+bun{μnvRnvun1}}}}F1G1F2G2ηun2vnφμnv=F2+G2μn−1v+Kn−1(un1−F1−G1μn−1v)Σnv=G2Σn−1vG𝚃2+σ2σ𝚃2−Kn−1G1Σn−1vG𝚃2,Data Assimilationun+11=F1+G1vnvn+1=F2+G2vn(Efficient Analytical Formulae)ψμnvvn+1ψ(μnv)=μn[vn+1]un+11State Forecastun+12ψ(vn+1)=Figure 2.1: Schematic diagram of the architecture and application of the conditional Gaussian Koopman network
+(CGKN). a, Overview of the transformation from discrete dynamical systems to surrogate models following condi-
+tional Gaussian structure via generalized application of Koopman theory. b, The architecture and workflow of CGKN.
+The CGKN, consisting of an encoder φ, a decoder ψand sub-networks η, is developed to learn the surrogate model
+for performing efficient DA via analytical formulae and state forecast for original dynamical systems. c, An applica-
+tion of CGKN to Navier-Stokes equations for data assimilation and state forecast.
+2.2. CGKN for Forecast and DA of Discrete Dynamical Systems
+2.2.1. CGKN for State Forecast
+Assuming that the values of current states are known, the modeled system in Eq. (2.4) can be used
+to forecast the future states of spatiotemporal dynamical systems. Here we denote the data of the
+state variables at time tnasun⋆={un⋆
+1,un⋆
+2}, where the superscript ⋆indicates the data from the
+true system in Eq. (2.3). Firstly, the unobserved states un⋆
+2are transformed into latent states vn⋆by
+the encoder φ, formalizing the current state of the modeled system un⋆
+CG:
+un⋆
+CG:=un⋆
+1
+vn⋆
+=un⋆
+1
+φ 
+un⋆
+2
+. (2.5)
+The forecast states uCGafter time tncan then be obtained from Eq. (2.4) by solving an initial value
+7
+problem. It is worth noting that the predictive latent states vin the forecast states uCGneed to be
+transformed back to the original unobserved states u2, which is achieved via the decoder ψ.
+In practice, the data of the latent states vn⋆is often not available due to the lack of unobserved
+states data un⋆
+2, which accounts for a key motivation of performing DA. Generally speaking, DA
+is a commonly used technique to leverage the data of observed states u1to improve the estimation
+ofv, by obtaining the posterior distribution p(vn|{ui
+1}n
+i=0), and its maximum posterior point can
+serve as an estimation of the unknown latent states vn⋆. If the Gaussian assumption is adopted in
+the DA methods, e.g., Kalman filters, the maximum posterior point becomes the mean value µvof
+the posterior distribution.
+Instead of merely employing DA methods (e.g., ensemble Kalman filter) as a separate task to im-
+prove the state estimation of nonlinear models, an important contribution of this work is to exploit
+the conditional linear structure of the modeled system in Eq. (2.4) and to adopt the analytical
+formulae of DA that facilitate an efficient evaluation of the DA performance, which allows the
+incorporation of the DA performance into the training of a scientific machine learning model and
+thus enables a unified framework for scientific machine learning and data assimilation. More de-
+tails of the analytical formulae of DA and the incorporation of DA performance into the model
+training are discussed in Sections 2.2.2 and 2.3, respectively.
+2.2.2. CGKN for DA
+A key feature of the CGKN is that the conditional distribution p(vn|{ui
+1}n
+i=0)is Gaussian, whose
+mean µvand covariance Σvcan be solved by the analytical formulae:
+µn+1
+v=F2+G2µn
+v+Kn 
+un+1
+1−F1−G1µn
+v
+,
+Σn+1
+v=G2Σn
+vGT
+2+σ2σT
+2−KnG1Σn
+vGT
+2,(2.6)
+where Kn=G2Σn
+vGT
+1 
+σ1σT
+1+G1Σn
+vGT
+1−1is an analog to the Kalman gain. The mean µv
+of the latent states vcan be transformed to the posterior mean µof unobserved states u2by the
+decoder ψ, i.e.,µ=ψ(µv). It is worth noting that such a transformation of the estimated mean
+µvgenerally does not hold, but the DA loss term used to train the CGKN model can ensure
+the validity of the posterior mean µ. More discussions about the DA loss term can be found in
+Section 2.3. On the other hand, the posterior covariance Σof the unobserved states u2can be
+estimated through residual analysis, and additional information on the uncertainty quantification
+can be found in Section 2.4.2. It should be noted that the initial condition of Eq. (2.6) is typically
+unknown. Therefore, a warm-up period is required to mitigate initialization discrepancy.
+The analytical formulae in Eq. (2.6), together with the lower dimensionality of latent state ( dv≪
+d2) when an intrinsic lower-dimensional representation of unobserved states is possible, account
+for two key features of CGKN that enable efficient DA compared with ensemble DA methods (e.g.,
+ensemble Kalman filter). The computational complexity of CGKN for DA is O(d3
+v), where dvis
+the dimension of the latent states, while that of ensemble DA methods is O(Jd2
+2), where Jis the
+ensemble size and d2is the dimension of unobserved states. To mitigate the sampling errors in
+ensemble DA methods, a large ensemble size may be needed to well characterize the covariance
+8
+structure, and thus we often have Jd2
+2≫d3
+v, making the proposed CGKN framework a more
+efficient choice for DA than ensemble-based methods. It is worth noting that a small ensemble
+sizeJis often employed in practice even for large-scale problems, e.g., numerical weather pre-
+diction (NWP) commonly uses an ensemble size on the order of 102, despite the dimension of
+system state being several orders of magnitude larger. The use of a small ensemble size for large-
+scale problems, together with various techniques such as localization [122, 123] or damping small
+correlations [124], is still an active research area for ensemble DA methods.
+2.3. Learning CGKN from Data
+For the training of CGKN model, we assume that offline data {un⋆}N
+n=0of both observed states u1
+and unobserved ones u2are available from the true system in Eq. (2.2). The encoder parameters
+θφ, decoder parameters θψand sub-networks parameters θηof the CGKN model illustrated in
+Fig. 2.1(b) are optimized by minimizing a total loss function:
+min
+θφ,θψ,θηL(θφ,θψ,θη), (2.7)
+which includes autoencoder loss LAE, forecast loss of original states Lu, forecast loss of latent
+states Lv, and DA loss LDA:
+L(θφ,θψ,θη) :=λAELAE(θφ,θψ)+λuLu(θφ,θψ,θη)+λvLv(θφ,θη)+λDALDA(θψ,θη),(2.8)
+where
+LAE:=Eu⋆
+2∥u⋆
+2−ψ 
+φ(u⋆
+2)
+∥2, (2.9)
+Lu:=Eu0⋆1
+NsNsX
+n=1∥un⋆−un∥2, (2.10)
+Lv:=Eu0⋆1
+NsNsX
+n=1∥vn⋆−vn∥2, (2.11)
+LDA:=Eu0⋆1
+Nl−NbNlX
+n=Nb+1∥un⋆
+2−µn∥2, (2.12)
+with λAE,λu,λv,λDAbeing the weights for each loss term. ∥ · ∥ denotes the standard vector
+ℓ2-norm. The Ns,Nl, and Nbare three hyper-parameters in the training settings which stand for
+forecast steps, DA steps, and DA warm-up steps, respectively. The unandvnare the n-th step
+state predictions which is described in Section 2.2.1, and µnisn-th step DA posterior mean which
+is detailed in Section 2.2.2. In this work, the weights is set as λAE= 1/d2,λu= 1/d,λv= 1/dv,
+andλDA= 1/d2, which scale each loss function by a factor of the inverse of the respective vector’s
+dimension. This results in loss functions expressed as the mean squared error (MSE) between the
+true and approximated data. In practice, the weights can also be treated as hyper-parameters or
+manually adjusted based on the domain knowledge.
+9
+The autoencoder loss LAEin Eq. (2.9) is used to minimize the reconstruction discrepancy between
+the unobserved states un⋆
+2(as the input of autoencoder) and ψ 
+φ(un⋆
+2)
+(as the output of autoen-
+coder). The loss LAEpromotes the inverse relationship between the encoder and decoder, which
+helps identify latent states v=φ(u2)which can be regarded as embeddings of unobserved states.
+It is worth noting that the latent space to approximately embed unobserved states is usually not
+unique, and the joint usage of LAEand other loss terms facilitate the discovery of a proper latent
+space that is favored by the goals of having good performance in the forecast and DA results of
+the CGKN model. More specifically, the forecast loss of original states Luand forecast loss of
+latent states in Lvin Eqs. (2.10) and (2.11) are incorporated to ensure that CGKN makes accurate
+state forecast, while the DA loss LDAin Eq. (2.12), made affordable by the efficient DA formulae
+in Eq. (2.6), is critical to ensure the accuracy of DA results from CGKN. It should be noted that
+the magnitude of vandG1in Eq. (2.4) could be scaled without impacting system states u1, and a
+corresponding scaling of the autoencoder can leave system states u2unaffected. In this work, such
+a scale invariance of vwould not lead to any issue, as vis only a latent representation, and the
+system states u1andu2are of actual interest. In practice, the magnitude of vis also impacted by
+the choice of σ2in Eq. (2.4).
+The forecast loss of original states Luand forecast loss of latent states Lvdefined in Eq. (2.10) and
+Eq. (2.11) is incorporated to enable CGKN to make accurate state forecast for dynamical systems.
+From the true states {un⋆}Ns
+n=0withun⋆={un⋆
+1,un⋆
+2}, the corresponding latent states {vn⋆}Ns
+n=0
+can be obtained from unobserved states via encoder: vn⋆=φ 
+un⋆
+2
+. Based on the initial states
+{u0⋆
+1,v0⋆}, the predictive states {un
+1,vn}can be obtained by recursively evaluating the surrogate
+model as illustrated in Section 2.2.1. The predictive unobserved states are transformed from the
+predictive latent states via decoder: un
+2=ψ 
+vn
+.Lumeasures the discrepancy between true states
+{un⋆}Ns
+n=0and predictive states {un}Ns
+n=0.Lvmeasures the discrepancy between true latent states
+{vn⋆}Ns
+n=0and predictive latent sates {vn}Ns
+n=0. The Nsis the forecast horizon, which can be set as
+a hyper-parameter in the training setting.
+The DA loss LDAin Eq. (2.12), which is made affordable by the efficient DA formulae in Eq. (2.6),
+is critical to ensure the accuracy of DA results from CGKN. Based on the data of observed states
+{un⋆
+1}Nl
+n=0, the posterior mean of the latent states {µn
+v}Nl
+n=0are calculated by applying the analytical
+DA formulae in Eq. (2.6). The posterior mean of unobserved states {µn}Nl
+n=0is obtained by the
+decoder: µn=ψ 
+µn
+v
+. The DA loss LDAquantifies the discrepancy between the true unobserved
+states{un⋆
+2}Nl
+n=0and DA posterior mean {µn}Nl
+n=0, excluding the first Nbsteps. Nlrepresents the
+number of DA steps, and Nbdenotes the DA warm-up steps, both of which are hyper-parameters
+in the training setting. The role of DA loss has been investigated in [100].
+It should be noted that the analytical DA formulae in Eq. (2.6) require the value of σ1andσ2in the
+surrogate model in Eq. (2.4). Therefore, prior to incorporating the DA loss into the target loss func-
+tion to train CGKN, the σ1, which is assumed to be a diagonal matrix, is estimated by root mean
+squared error (RMSE) between the true observed states and one-step predictive observed states via
+a trained CGKN without DA loss. On the other hand, the σ2, which is the noise coefficient of latent
+states, is on the bias term in the analytical DA formulae in Eq. (2.6). In practice, σ2can be set
+either manually or as a trainable parameter jointly learned with all the trainable maps in the CGKN
+model. We have studied different choices of σ2, and the results of the learned CGKN models are
+10
+robust based on those numerical tests. The detailed results are omitted here for simplicity. A brief
+algorithm about the procedures of learning CGKN from data is summarized in Algorithm 1. More
+details about the uncertainty quantification are introduced in the following section.
+2.4. Uncertainty Quantification
+This section discusses the uncertainty quantification (UQ) for state forecast and DA results of
+CGKN. The task of UQ for state forecast focuses on the estimation of σ1, which is the noise
+coefficient of the observed states u1andσ2, which is the noise coefficient of the latent states
+v. The task of UQ for DA is to estimate the posterior covariance of the conditional distribution
+p(un
+2|{ui
+1}n
+i=0), which is generally non-Gaussian. Both UQ tasks are post-processes of pre-trained
+CGKN models: the task of UQ for DA is based on the CGKN model trained with the DA loss
+term, while the task of UQ for state forecast relies on the CGKN model trained without the DA
+loss term. More details are introduced in the following sections.
+2.4.1. Uncertainty Quantification for State Forecast
+To perform the task of UQ for state forecast, a CGKN model with the total loss in the form of
+Eq. (2.8) while excluding the DA loss term needs to be trained, i.e., the weight of DA loss LDA
+in the target loss function Lin Eq. (2.8) is set as λDA= 0. Once having the pre-trained CGKN
+model without DA loss, the noise coefficient σ1of observed states and noise coefficient σ2of
+latent states are assumed to be diagonal matrices. The diagonal elements are estimated by the root
+mean squared error (RMSE) between the true states and one-step predictive states of the pre-trained
+CGKN model:
+diag(σ1) =vuut1
+NNX
+n=1 
+un⋆
+1−un
+1
+⊙ 
+un⋆
+1−un
+1
+,
+diag(σ2) =vuut1
+NNX
+n=1 
+vn⋆−vn
+⊙ 
+vn⋆−vn
+,(2.13)
+where the notation ⊙is element-wise multiplication. Additionally, the estimated σ1andσ2in
+Eq. (2.13) can be utilized to calculate the DA loss through analytical DA formulae in Eq. (2.6),
+which facilitates unifying the training of the CGKN model and the tuning of its DA performance
+based on the total loss in Eq. (2.8) with all loss terms included. It is worth noting that an accurate
+a priori estimation of those noise coefficients may not be necessary to ensure a good tuning of DA
+performance, since there are other trainable maps in the analytical DA formulae in Eq. (2.6). In
+practice, the noise coefficients can also be empirically set or jointly learned with those trainable
+maps of the CGKN model.
+2.4.2. Uncertainty Quantification for Data Assimilation
+As introduced in Section 2.3, the DA loss term measures the discrepancy between the true unob-
+served states u2and the posterior mean µ, which promotes the performance of DA in terms of
+11
+mean estimation. However, the posterior covariance of the unobserved states u2, which quantifies
+the uncertainty of the associated posterior mean, is still unaddressed. Since true covariance data
+for the unobserved states does not exist for many real-world applications, especially for those only
+with experimental data available, it is not feasible to apply a supervised learning framework to
+estimate the posterior covariance in a similar fashion as being done for the posterior mean.
+Therefore, residual analysis is exploited as a post-processing method for a trained CGKN, to effi-
+ciently quantify the uncertainties associated with the posterior mean of the unobserved states u2.
+Residual analysis is commonly used to evaluate the goodness of a statistical model with respect
+to observed data. With a trained CGKN model, the DA can be performed for the training data
+via analytical formulae in Eq. (2.6) to obtain the posterior mean µv. With the trained decoder ψ,
+we can further obtain posterior mean µof unobserved states u2. The residual ris defined as the
+absolute difference between true data u⋆
+2and its DA posterior mean µ:
+r:=|u⋆
+2−µ|,
+which indicates the desired uncertainties associated with the posterior mean µand is assumed to
+be a function of observed states u1. This function is then approximated by an auxiliary neural
+network trained via a standard regression task from the pairwise dataset { 
+un⋆
+1,rn
+}N
+n=Nb+1, with
+the first Nbsteps as the warm-up period of DA.
+With the trained auxiliary neural network for UQ, the residual associated with the posterior mean
+can be estimated, using the corresponding observed states as input and evaluating the output of
+the auxiliary neural network. This residual, derived from the trained auxiliary neural network,
+can be regarded as the estimated standard deviation of the associated posterior mean, i.e., the
+standard deviation of diagonal elements of the posterior covariance, based on maximum likelihood
+estimation under the Gaussian assumption.
+Algorithm 1 Learning CGKN from data
+Input :{un⋆}N
+n=0 ▷Training data
+θ(1)
+φ,θ(1)
+ψ,θ(1)
+η= arg min
+λAELAE+λuLu+λvLv	
+▷Train CGKN without DA loss
+diag(σ) ={diag(σ1),diag(σ2)}=RMSE (u⋆
+CG,uCG) ▷UQ for state forecast
+θ(2)
+φ,θ(2)
+ψ,θ(2)
+η= arg min
+λAELAE+λuLu+λvLv+λDALDA	
+▷Train CGKN with DA loss
+θ∗
+UQ= arg min MSE 
+r,NN(u⋆
+1;θUQ)
+▷UQ for DA
+Output :θ(2)
+φ,θ(2)
+ψ,θ(2)
+η,σ,θ∗
+UQ ▷Trained parameters
+3. Numerical Experiments
+The effectiveness and efficiency of CGKN in state forecast and DA for spatiotemporal dynami-
+cal systems are demonstrated through numerical experiments on several PDE-governed canonical
+examples and benchmarks against other models. The examples include the viscous Burgers’ equa-
+tion, the Kuramoto-Sivashinsky equation, and the Navier-Stokes equations. The methods that have
+been tested for each system are summarized as follows:
+12
+(i) CGKN. It is the deep learning framework proposed in this work, which formalizes the sur-
+rogate model in Eq. (2.4) to perform state forecast and DA for spatiotemporal dynamical
+systems.
+(ii) Ensemble Kalman filter (EnKF) [72, 87]. EnKF is a classical method for applying DA to
+nonlinear dynamical systems. The localization strategy and empirical tunings [125, 126]
+are often used to enhance the EnKF’s performance. The comparison of DA results with the
+CGKN model highlights the accuracy and efficiency of the CGKN model.
+(iii) Direct spatial interpolation. Based on the values of observed states across the spatial domain,
+interpolation can be utilized to estimate the missing values of unobserved states, recovering
+the entire fields. It can be viewed as a naive approach to estimate the full-field informa-
+tion based on spatially sparse observations, and it serves as a baseline reference solution for
+comparing the DA results from CGKN and EnKF.
+(iv) Deep neural network (DNN). The model of DNN with fully-connected layers is calibrated to
+approximate the unknown map Gon the right-hand side in Eq. (2.2), and it serves as one of
+the baseline benchmarks for the performance of state forecast.
+(v) Convolutional neural network (CNN) [28, 29]. The unknown map Gon the right-hand side
+in Eq. (2.2) is approximated using a CNN model, which serves as one of the baseline bench-
+marks for the performance of state forecast.
+(vi) Fourier neural operator (FNO). FNO has been demonstrated in [42] with superior perfor-
+mance than classical machine learning methods (e.g., fully-connected networks and CNN)
+for PDE-governed problems whose system states are spatiotemporal fields. In this work, the
+unknown map Gon the right-hand side in Eq. (2.2) is approximated by an FNO to predict fu-
+ture states. Although it is expected that FNO can outperform all the previous neural-network-
+based models (including CGKN) for the performance of state forecast, the key advantage of
+CGKN is its efficient DA.
+To compare the performance of the methods above, the mean squared error (MSE) is used to
+evaluate the performance of state forecast and DA:
+MSE :=1
+MNMX
+m=1NX
+n=1 
+xn⋆
+m−xn
+m2, (3.1)
+where xn⋆
+mis the true value of the m-th variable at the n-th time step, for m= 1, ..., M and
+n= 1, ..., N , andxn
+mis its corresponding approximated value. The DA error is defined as the MSE
+between the true unobserved states and their posterior mean from DA, while the forecast error is
+defined as the MSE between true states and the predictive ones. Both DA error and forecast error
+are calculated based on test data. Additionally, the forecast error is calculated based on one-step
+prediction. while the DA error is calculated over the whole time range of the test dataset. The test
+results of all methods across all examples are summarized in Table 3.1. For a fair comparison, a
+comparable number of parameters is used in all those deep-learning-based models.
+13
+Table 3.1: Test results of all methods in each numerical example. The errors are mean squared errors (MSE) between
+true values and approximated values. For a fair comparison, a comparable number of parameters is used in different
+deep learning models.
+MethodsExamples Viscous Burgers Equation Kuramoto–Sivashinsky Equation Navier–Stokes Equations
+Forecast Error DA Error Forecast Error DA Error Forecast Error DA Error
+CGKN 7.5683e-04 7.5037e-04 1.1042e-02 2.4927e-02 1.9754e+01 6.0940e+01
+EnKF — 5.8125e-04 — 2.4882e-02 — 6.9010e+01
+Interpolation — 1.3514e-02 — 4.3097e-01 — 1.2844e+02
+DNN 6.4816e-03 — 4.7332e-02 — 1.0936e+02 —
+CNN 2.3727e-03 — 2.6111e-02 — 3.0600e+01 —
+FNO 3.9715e-04 — 5.4859e-03 — 1.7129e+01 —
+3.1. Viscous Burgers’ Equation: 1-D PDE with Shock Behavior
+The 1-D Burgers’ equation is a fundamental nonlinear PDE from fluid mechanics, with many
+applications in various fields such as gas dynamics, traffic flow, and acoustics. It is widely used for
+studying complex fluid behaviors, particularly notable for modeling shock waves and Burgulence
+phenomena. The form of the viscous Burgers’ equation is:
+∂u
+∂t=−u∂u
+∂x+ν∂2u
+∂x2, (3.2)
+where x∈[0, Lx]with periodic boundary conditions, t∈[0, Lt],νis the viscosity coefficient, and
+u(x,0)is a given initial condition. The simulation settings are Lx= 1, Lt= 2, ν= 10−3,∆x=
+1/1024,∆t= 10−3. Under these conditions, the viscous Burgers’ equation displays shock behav-
+ior due to the formation of steep gradients in the evolution. We perform 1000 simulations as train
+data and another 100 simulations as test data. The initial conditions u(x,0)of these simulations
+are randomly sampled from Gaussian process N(0,625(−∆ + 25 I)−2)with periodic boundary
+conditions where ∆is a Laplace operator and Iis an identity operator. The resolution of both the
+train and the test dataset is sub-sampled to ∆t= 0.1and∆x= 1/64. Among the 64 states, 4
+states which are uniformly distributed across the spatial domain are set as observed, and the rest
+60 states are set as unobserved. More specifically, the indices of observed states are 1, 17, 33, 49.
+The CGKN has been used to learn a surrogate model for i) estimating the 60 unobserved states
+from the trajectory of the sparse 4 observations via efficient DA and ii) forecasting the future state
+of the system given any initial state.
+To approximate the state transition map of the viscous Burgers’ equation from data using the
+surrogate model in Eq. (2.4), the CGKN including an encoder φ, a decoder ψ, and sub-networks η
+that output F1,G1,F2,G2has been constructed. With the dimension of latent states dvset to 10,
+the encoder, which takes the unobserved states u2∈R60as input and output latent states v∈R10,
+become φ:R607→R10, and its inverse, the decoder, become ψ:R107→R60. Consequently,
+the observed states u1∈R4and latent states vformalize the new system states of the surrogate
+model in Eq. (2.4). Furthermore, the nonlinear components F1∈R4,G1∈R4×10,F2∈R10,
+G2∈R10×10in the surrogate model are output by the sub-networks η:R47→R128, which take
+observed states u1as input. For each component of CGKN, the number of parameters θφ,θψ, and
+θηare 17066, 17116, 34330, respectively. To learn the CGKN from data, the training parameters
+14
+are set as follows: state forecast horizon tNs= 2time units (20 steps), the DA horizon tNl= 1000
+time units (1000 steps), and a warm-up period tNb= 0.8time units (8 steps). The weights in the
+target loss function in Eq. (2.8) are set as λAE= 1/d2,λu= 1/d,λv= 1/dv, and λDA= 1/d2.
+The test results of state forecast and DA from all methods for the viscous Burgers’ equation are
+summarized in Table 3.1 under the column viscous Burgers’ equation. The EnKF is applied on
+the governing equations of viscous Burgers’ equation in Eq. (3.2) with the prior knowledge of
+the initial distribution of Gaussian process. The ensemble size of EnKF is set as J= 100 and
+the initial ensembles are randomly sampled from the same Gaussian process that generates the
+initial conditions for training data. To ensure stability and accuracy in the numerical simulation
+of the governing equations, a temporal resolution of ∆t= 0.01has been employed and a spatial
+resolution of ∆x= 1/256has been linearly interpolated from the data. Based on the empirical
+tunings from training data, neither inflation nor localization strategies are needed when applying
+the EnKF for the test data in this example.
+The CGKN can achieve the same level of accuracy in DA as the EnKF, which applies to the true
+governing equation, and both methods significantly outperform simple interpolation. Regarding
+time cost, the CGKN requires 0.02 seconds to perform DA for a single simulation (20 steps), com-
+pared to 12 seconds for the EnKF. Although these time costs are based on this numerical example
+and the computing device used in this work, the CGKN is expected to be more computationally
+efficient in data assimilation than EnKF for a much wider range of problems and computing de-
+vices. It should be noted that the numerical simulation for each ensemble member of the viscous
+Burgers’ equation is sequential. While the time cost of EnKF could be reduced through parallel
+computing, it would require more memory resources. The time usage confirms the speed advan-
+tages of CGKN, which are attributed to the efficient DA formulae, the reduced dimensionality of
+the latent states, and fast forecast through the approximation of the state transition map. Addition-
+ally, as a data-driven method, the DA from CGKN does not require any empirical tunings and any
+prior knowledge such as the initial distribution of Gaussian process and the governing equation.
+As for the performance of state forecast, the DNN is the worst mainly because the fully-connected
+layer is less effective at leveraging spatial information. The CGKN outperforms the CNN in state
+forecast and approaches the results achieved by the FNO, which demonstrates the effectiveness
+of embedding-based learning in CGKN. It is worth highlighting that all general nonlinear neural-
+network-based models, including DNN, CNN, and FNO, are not able to perform efficient and
+accurate DA due to their black-box nature and lack of the constraint of DA loss in the training
+stage. The numerical results demonstrate that the CGKN is effective in both state forecast and
+efficient DA for the viscous Burger’s equation.
+Figure 3.1 shows the spatiotemporal plot of the true simulation of the viscous Burgers’ equation,
+DA posterior means from CGKN and EnKF, and the interpolation result. In the results from the true
+system, the shock behavior is characterized by the horizontal line in the middle part that indicates
+a dramatic change in the values of the system state within a small spatial distance. Starting with
+an initial guess, both the flows of CGKN and EnKF can gradually adjust to match the true flow
+by assimilating observations from the four observed states. In contrast, the pattern of interpolation
+results deviates significantly from the truth. Additionally, the position of shock behavior can be
+15
+well-captured by both CGKN and EnKF, while it is not explicit from the interpolation.
+Figure 3.1: Spatiotemporal evolution of the DA results for the viscous Burgers’ equation. The spatiotemporal plots of
+true simulation, DA posterior mean from CGKN, DA posterior mean from EnKF, and interpolation result are shown
+in each sub-figure. EnKF is applied to the true governing equation with the knowledge of the prior initial distribution.
+The results of the state forecast from various neural-network-based models and the true simulation
+are shown in Fig. 3.2, using three different initial conditions from the test dataset. To evaluate the
+performance of state forecast of those models, we assume the initial condition is known and then
+numerically simulate the modeled systems for a certain amount of time. The predictions from DNN
+and CNN display noticeable deviations from the true spatial functions, while the CGKN and FNO
+can match the truth well and capture the shock behavior. This figure illustrates the comparable
+state forecast performance of CGKN and FNO, highlighting CGKN’s capability in state forecast.
+Compared to all the general nonlinear neural-network-based models, the key advantage of CGKN
+is its capability of efficient DA, which achieves similar performance as applying EnKF to the
+true governing equations, while demanding much less computational resources in both tuning and
+performing DA.
+16
+0.0 0.5 1.0−0.50.00.5
+ut= 0.0
+0.0 0.5 1.0−0.50.00.5t= 0.4
+0.0 0.5 1.0−0.50.00.5t= 0.8
+0.0 0.5 1.0−0.50.00.5t= 1.2
+0.0 0.5 1.0−0.50.00.5t= 1.6
+0.0 0.5 1.0−0.30.00.3
+u
+0.0 0.5 1.0−0.30.00.3
+0.0 0.5 1.0−0.30.00.3
+0.0 0.5 1.0−0.30.00.3
+0.0 0.5 1.0−0.30.00.3
+0.0 0.5 1.0
+x−0.50.00.5
+u
+0.0 0.5 1.0
+x−0.50.00.5
+0.0 0.5 1.0
+x−0.50.00.5
+0.0 0.5 1.0
+x−0.50.00.5
+0.0 0.5 1.0
+x−0.50.00.5Truth CGKN DNN CNN FNOFigure 3.2: Results of state forecast for the viscous Burger’s equation. Starting from three different initial conditions
+in test data, the evolution of true spatial functions is compared with predictive spatial functions from various models,
+including CGKN, DNN, CNN, and FNO.
+In many real-world applications, the initial condition is often unknown or only partially known,
+which accounts for a key motivation of performing DA. Figure 3.3 displays the DA results of
+unobserved states at the locations x= 0.375,0.624, and 0.875in the spatial domain. The posterior
+means with uncertainties characterized by two standard deviations from CGKN and EnKF are
+compared with the true signals in the first two rows, while the interpolation result is compared with
+the true signals in the last row. The uncertainty from CGKN is derived from the method of residual
+analysis, while that from EnKF is obtained from the empirical standard deviation estimated from
+ensemble samples. Starting from the initial guess, the posterior means from both CGKN and EnKF
+can match the true signal after about 0.2 time units (2 steps). Though both the uncertainty areas
+can cover the true signals, the uncertainty area from CGKN is wider than that from EnKF. For the
+interpolation results, there is a significant deviation from the true signals throughout the entire time
+range of flow evolution.
+17
+0.0 0.5 1.0 1.50.00.20.40.6u(0.375,t)
+0.0 0.5 1.0 1.5−0.6−0.4−0.20.00.2u(0.625,t)
+0.0 0.5 1.0 1.5−0.4−0.20.0u(0.875,t)
+0.0 0.5 1.0 1.50.00.20.40.6u(0.375,t)
+0.0 0.5 1.0 1.5−0.6−0.4−0.20.00.2u(0.625,t)
+0.0 0.5 1.0 1.5−0.4−0.20.0u(0.875,t)
+0.0 0.5 1.0 1.5
+t0.00.20.40.6u(0.375,t)
+0.0 0.5 1.0 1.5
+t−0.6−0.4−0.20.00.2u(0.625,t)
+0.0 0.5 1.0 1.5
+t−0.4−0.20.0u(0.875,t)Truth
+InterpolationCGKN
+UncertaintyEnKFFigure 3.3: Time series of the DA results for the viscous Burgers’ equation. True signals, DA posterior means from
+CGKN and EnKF together with uncertainty areas, and interpolation results for three unobserved states are shown in
+the figure. The uncertainties of the two standard deviations are indicated by the gray-colored regions associated with
+the posterior mean.
+Figure 3.4 compares the entire solution profile evolving over time with the DA results obtained
+from EnKF and CGKN, as well as the interpolation result. It can be seen that a quick adaptation
+of the DA results to the true signal is achieved via applying EnKF to the true system. At the time
+t= 0.2, the posterior mean from EnKF can almost match the true signal, while there are still
+some deviations from that of CGKN. The CGKN results gradually align with the true signal in
+subsequent time steps. It is expected that applying EnKF to the true system can lead to almost
+perfect state estimation results in subsequent time steps. On the other hand, it is worth mentioning
+that the posterior mean from CGKN may not always precisely match the true signal at some points,
+mainly due to the trade-off between fitting a data-driven model and ensuring its generalization
+capability, especially in regions close to the steep gradient in space. Nevertheless, the uncertainty
+area still encompasses the true signal for most of those regions, thereby enhancing the reliability
+of the prediction results.
+18
+0.0 0.5 1.0−0.50.00.5
+ut= 0
+0.0 0.5 1.0−0.50.00.5t= 0.2
+0.0 0.5 1.0−0.50.00.5t= 0.4
+0.0 0.5 1.0−0.50.00.5t= 0.6
+0.0 0.5 1.0−0.50.00.5t= 0.8
+0.0 0.5 1.0
+x−0.50.00.5
+u
+0.0 0.5 1.0
+x−0.50.00.5
+0.0 0.5 1.0
+x−0.50.00.5
+0.0 0.5 1.0
+x−0.50.00.5
+0.0 0.5 1.0
+x−0.50.00.5Truth
+ObservedCGKN
+InterpolationEnKF
+UncertaintyFigure 3.4: Spatial profiles of the DA results for the viscous Burgers’ equation. Starting from a random guess, the DA
+results from CGKN are compared with the true spatial functions in the first row, while those from EnKF are displayed
+in the second row. The interpolation result is shown in both rows as a reference.
+3.2. Kuramoto-Sivashinsky Equation: 1-D Chaotic PDE
+The Kuramoto–Sivashinsky (K-S) equation is a fourth-order nonlinear PDE that was originally
+developed to model diffusive-thermal instabilities in a laminar flame front and appears in various
+areas of physics and engineering such as reaction-diffusion systems. It has been extensively studied
+for its wave-like dynamics and chaotic behavior, serving as a prototypical example of a system that
+exhibits spatiotemporal chaos. The form of the Kuramoto–Sivashinsky equation is:
+∂u
+∂t=−u∂u
+∂x−∂2u
+∂x2−∂4u
+∂x4, (3.3)
+where x∈[0, Lx]with periodic boundary conditions and t∈[0, Lt]. The simulation settings
+areLx= 22 , Lt= 5000 ,∆x= 22 /2048,∆t= 0.025and the initial condition is u(x,0) =
+0.1×cos(x/16)×(1 + 2 sin( x/16)). Under the settings, the K-S equation displays a strong
+chaotic behavior, making it a good testbed for the proposed method. In the simulation of 5000
+time units, the first 80% of the simulation (4000 time units) is used as train data and the remaining
+20% (1000 time units) is used as test data. Both train and test data are sub-sampled to resolution
+∆t= 1 and∆x= 22 /128. To simulate the real scenarios and demonstrate the robustness of
+the proposed method, the observational noise following N(0,0.22)has been independently and
+identically added to the true states, including both train and test datasets. The observed states are
+located at 8 points uniformly distributed across the 1-D spatial domain, whereas the remaining 120
+points are unobserved. More specifically, the indices of observed states are 1, 17, 33, 49, 65, 81,
+97, 113. The application of CGKN for this 1-D chaotic spatiotemporal system aims to i) estimate
+the128states across the spatial domain from a trajectory data of 8observed states and ii) forecast
+the128states in the future given any initial 128states.
+With an encoder φ, a decoder ψ, and sub-networks ηthat output F1,G1,F2,G2, the surrogate
+model in Eq. (2.4) is constructed to approximate the state transition map of the K-S equation
+19
+based on the data resolution. The dimension of latent state dvis selected as 12 in this example.
+Consequently, the encoder, which take unobserved states u2∈R120as input and output latent states
+v∈R12, becomes φ:R1207→R12and decoder becomes ψ:R127→R120. The observed states
+u1∈R8and latent state vformalize the system state of the surrogate model in Eq. (2.4). The sub-
+networks η:R87→R260takes observed states u1as input and outputs the nonlinear components
+F1∈R8,G1∈R8×12,F2∈R12,G2∈R12×12in the surrogate model. The number of parameters
+θφ,θψ, and θηof each component in CGKN are 18422, 18530, and 37956, respectively. The
+training settings for the CGKN include: state forecast horizon tNs= ∆t= 1time unit which is the
+temporal resolution of data (i.e., one-step prediction) and the DA horizon tNl= 1000 time units
+(1000 steps) with the warm-up period set as tNb= 5time units (5 steps). The weights in the target
+loss function are set as λAE= 1/d2,λu= 1/d,λv= 1/dv, and λDA= 1/d2.
+The test results for state forecast and DA from different methods are summarized in Table 3.1 under
+the column Kuramoto-Sivashinsky equation. The DA error is based on 1000-time-unit (1000 steps)
+horizon, and the forecast error is calculated by one-step prediction. The interpolation serves as a
+basic reference model for the DA results from CGKN and EnKF. The EnKF is applied to the true
+governing equation of K-S equation in Eq. (3.3). The ensemble size of EnKF is set as J= 100 with
+the initial ensemble randomly sampled from the training data, in contrast to the initial distribution
+of Gaussian noise used by DA of CGKN. The constant multiplicative covariance inflation [125]
+and the localization strategy [126] are used to mitigate sampling errors. Based on the empirical
+tunings for training data, the inflation and localization parameters are set as 1.05 and 16. The
+numerical simulation of the governing equations for the forecast step in EnKF employs a smaller
+temporal resolution of ∆t= 0.025than the data temporal resolution to ensure numerical stability
+and accuracy.
+For the DA performance, the CGKN is comparable to applying EnKF on the true governing equa-
+tions, and both methods are significantly superior to the interpolation. Based on the same comput-
+ing device, the CGKN completes 1000 steps of DA for test data in about 0.8 seconds, while EnKF
+requires about 100 seconds to accomplish the same task. Although the EnKF can be accelerated
+via parallel computing for the numerical simulation of ensemble members, it will cost more mem-
+ory resources. The efficiency of DA from CGKN compared to EnKF stems from the analytical
+DA formulae, dimension reduction of the latent state, and fast forecast of the approximated state
+transition map. Therefore, even though the DA performance of CGKN is comparable to that of
+EnKF, it can significantly reduce computational costs or require fewer computing resources.
+For the state forecast, the FNO outperforms all other models and the DNN performs the worst. The
+performance of CGKN is better than that of CNN and is only slightly less effective than the FNO,
+a neural-operator-based architecture specifically designed for learning mappings between infinite-
+dimensional spaces. It should be emphasized that, due to their black-box nature and the absence of
+DA loss in the training stage, general nonlinear neural network models—including DNNs, CNNs,
+and FNOs—are not specifically designed for efficient and accurate DA tasks. This highlights the
+advantage of CGKN.
+Figure 3.5 displays the spatiotemporal plot of the true simulation of the K-S equation, posterior
+DA means from CGKN and EnKF, and interpolation result for 500 time units. The result from
+20
+CGKN closely resembles that of EnKF, with both methods aligning well with the truth. Both
+DA methods can effectively capture chaotic patterns and wave-like behaviors. Conversely, the
+result from interpolation is noticeably different from the true values, although it does manage to
+qualitatively recover some wave-like patterns.
+Figure 3.5: Spatiotemporal evolution of the DA results for the Kuramoto-Sivashinsky equation. The spatiotemporal
+plots of true simulation, DA posterior mean from CGKN, DA posterior mean from EnKF, and interpolation result are
+displayed in each sub-figure.
+Figure 3.6 illustrates the state forecast performance of various models by displaying the evolution
+of spatial functions of both the true and predictive results starting at 4000 time units, which is in
+the test dataset. For the one-step prediction, all models accurately match the true spatial func-
+tion. However, for larger forecast steps, all models gradually diverge from the truth, with CGKN
+maintaining the closest approximation over the longest forecast horizon in this example. The com-
+parable state forecast capability of CGKN to FNO stems from their similar modeling frameworks:
+CGKN models the state transition map in latent space, while FNO models that in Fourier space.
+The effectiveness of CGKN in state forecast primarily benefits from the informative embeddings
+it learns from data, a feature that is absent in the architectures of DNN and CNN. Similar to the
+previous numerical example, the key advantage of CGKN over those general nonlinear neural-
+network-based models is efficient DA, which achieves comparable performance as applying EnKF
+to the true governing equations but demands significantly fewer computational resources and does
+not require empirical tunings.
+21
+0 11 22−202
+ut= 4000
+0 11 22−202t= 4001
+0 11 22−202t= 4002
+0 11 22−202t= 4003
+0 11 22−202t= 4004
+0 11 22−202
+ut= 4005
+0 11 22−202t= 4006
+0 11 22−202t= 4007
+0 11 22−202t= 4008
+0 11 22−202t= 4009
+0 11 22
+x−202
+ut= 4010
+0 11 22
+x−202t= 4011
+0 11 22
+x−202t= 4012
+0 11 22
+x−202t= 4013
+0 11 22
+x−202t= 4014Truth CGKN DNN CNN FNOFigure 3.6: Results of state forecast for the Kuramoto-Sivashinsky equation. The evolution of true spatial functions is
+compared with predictive spatial functions from various models including CGKN, DNN, CNN, and FNO.
+Figure 3.7 presents the time series of the unobserved state at the location x= 9.625in the spatial
+domain [0,22]. The true signal of the unobserved state is compared with the DA posterior means
+obtained from CGKN and EnKF, as well as with the interpolation result. For both DA methods, the
+uncertainty area corresponding to two standard deviations is shown around the respective posterior
+means. The uncertainty from CGKN is derived through residual analysis, while that from EnKF
+is the empirical standard deviation estimated from ensemble samples. The trajectories of the DA
+means from both CGKN and EnKF closely match the true signal, significantly outperforming the
+interpolation results. The uncertainty area provided by CGKN is similar to that of EnKF and covers
+most of the true signals. Additionally, the DA results from both CGKN and EnKF rapidly adjust to
+the system and accurately estimate the unobserved state from the initial guess, indicating that only
+a short warm-up time is required for this spatiotemporal chaotic system.
+22
+4000 4100 4200 4300 4400 4500−202u(9.625,t)
+4000 4100 4200 4300 4400 4500−202u(9.625,t)
+4000 4100 4200 4300 4400 4500
+t−202u(9.625,t)Truth
+InterpolationCGKN
+UncertaintyEnKFFigure 3.7: Time series of the DA results for the Kuramoto-Sivashinsky equation. True signal, DA posterior mean
+from CGKN and EnKF together with uncertainty area, and interpolation results for the unobserved state at spatial
+position 9.625 are presented. The uncertainties of the two standard deviations are indicated by the gray-colored
+regions associated with the posterior mean.
+The initial phases of the DA processes from CGKN and EnKF are illustrated in Fig. 3.8, which also
+includes the true spatial functions and interpolation results. The figure shows the spatial profiles
+corresponding to the spatiotemporal evolution presented in Fig. 3.5 for the first 10 time units. It
+is evident that both posterior means align well with the true spatial functions after approximately
+6 time units, whereas the interpolation result continues to serve only as a baseline reference. Both
+Figs 3.7 and 3.8 confirm that CGKN achieves DA performance comparable to using EnKF with
+the true system.
+23
+0 11 22−202
+ut= 4000
+0 11 22−202t= 4002
+0 11 22−202t= 4004
+0 11 22−202t= 4006
+0 11 22−202t= 4008
+0 11 22−202t= 4010
+0 11 22
+x−202
+u
+0 11 22
+x−202
+0 11 22
+x−202
+0 11 22
+x−202
+0 11 22
+x−202
+0 11 22
+x−202Truth
+ObservedCGKN
+InterpolationEnKF
+UncertaintyFigure 3.8: Spatial profiles of the DA results for the Kuramoto-Sivashinsky equation. Starting from a random guess,
+the DA results from CGKN are compared with the true spatial functions in the first row, while those from EnKF are
+presented in the second row. The interpolation results are provided as references in both rows.
+3.3. Navier-Stokes Equations: 2-D Turbulent PDE
+The Navier-Stokes (N-S) equations are a set of nonlinear PDEs that describe the motion of fluids.
+These equations are fundamental in the field of fluid dynamics and are used in a wide range of ap-
+plications in both natural and engineering, including weather patterns, ocean currents, and airflow.
+The velocity form of the Navier–Stokes equations for incompressible fluid is:
+∂u
+∂t=−u· ∇u+ν∇2u−1
+ρ∇p+f,
+∇ ·u= 0,(3.4)
+where u(x, t)∈R2is a 2-D velocity vector defined over the spatial domain x∈Ω⊂R2and
+temporal domain t∈[0, Lt]. Here, νis the kinematic viscosity, ρis the density, pis the pressure
+field, and fis the forcing function. The state of interest in this example is the vorticity, which is
+the curl of velocity ω:=∇ ×u. The simulations settings for the system are ν= 10−4,ρ= 1,
+f= [100 sin(8 y),0]T,Ω = [0 ,1]2,Lt= 1000 ,∆t= 10−3, and ∆x= ∆y= 1/256. The initial
+condition is u(x,0) =0and the boundary condition is periodic. The N-S equations with this setup
+result in a 2-D spatiotemporal turbulence. The stable fluids algorithm is used to solve the 2-D
+Navier-Stokes equations with the above settings to generate 1000-time-unit vorticity. The first 800
+units are used as train data and the remaining 200 units are used as test data. To demonstrate the
+robustness of CGKN and simulate real-world applications, the measurement noise of N(0,2.52)
+has been independently and identically added to both the train and test data. The resolution of both
+train and test data is sub-sampled to ∆t= 0.01,∆x= 1/64and∆y= 1/64. In the 64×642-D
+vorticity field, 8×8observed points are set uniformly distributed across the spatial domain, while
+the other points are unobserved. The proposed CGKN for this 2-D turbulent vorticity field aims to
+i) estimate the 64×64vorticity field from a trajectory of 8×8sparse observed data and ii) forecast
+the future 64×64vorticity field given any initial 64×64vorticity field.
+24
+With the CGKN that includes an encoder φ, a decoder ψ, and sub-networks ηthat output F1,
+G1,F2,G2, the surrogate model in Eq. (2.4) is constructed to approximate the state transition
+map of the 2-D vorticity field. The hyper-parameter dv, which is the dimension of latent states,
+has been selected as 16×16 = 256 in this example. To facilitate the generalized application of
+Koopman theory for this 2-D turbulence, the convolutional autoencoder has been employed with
+encoder φ:R64×647→R16×16and decoder ψ:R16×l67→R64×64. The states in the surrogate
+model are constituted by observed states u1∈R64and latent states v∈R256. The sub-networks
+η:R647→R82240takes observed states u1as input and outputs the nonlinear components F1∈
+R64,G1∈R64×256,F2∈R256,G2∈R256×256in the surrogate model. The number of parameters
+θφ,θψ, andθηin the CGKN are 187265,187265 and 82240, respectively. The training settings
+for the CGKN include: state forecast horizon tNs= ∆t= 0.01time units which is the temporal
+resolution of data (i.e., one-step prediction) and the DA horizon tNl= 20 time units (2000 steps)
+with the warm-up period set as tNb= 5 time units (500 steps). The weights in the target loss
+function are set as λAE= 1/d2,λu= 1/d,λv= 1/dv, and λDA= 1/d2.
+The test results of state forecast and DA from different methods are summarized in Table 3.1 under
+the column Navier-Stokes equations. The DA error is based on a 200-time-unit (20000 steps)
+horizon and the forecast error is calculated by one-step prediction. The EnKF is applied on the
+true governing equations in Eq. (3.4) with the ensemble size set as J= 100 . Initial conditions
+of ensembles in EnKF are randomly sampled from the training data, while the initial distribution
+of CGKN is set as Gaussian white noise. The constant multiplicative covariance inflation and
+the localization strategy have been taken for EnKF to exploit spatial information and reduce the
+sampling errors. The parameters of inflation and localization are chosen as 1.1and8based on
+the empirical tunings of training data. The numerical simulation of the governing equation for the
+forecast step in EnKF uses a temporal resolution of ∆t= 0.001, compared with 0.01of the data,
+to ensure numerical stability and accuracy.
+In this 2-D turbulence example, the DA performance of CGKN outperforms that of EnKF, with
+the interpolation result displaying an error twice as large as that observed in CGKN. Additionally,
+CGKN completes DA for 20000 steps of test data in about 80 seconds, whereas EnKF requires
+about 25000 seconds (about 7 hours) to perform the same task. Though the EnKF can be ac-
+celerated by parallel computing for numerical simulation of ensemble numbers, it will cost more
+memory resources, especially for this 2-D turbulence simulation. The efficient DA of CGKN stems
+from the availability of analytical DA formulae, the reduced dimensionality of latent state, and fast
+forecast through approximation of the state transition map. Overall, with substantial advantages in
+terms of computational cost, the DA result from CGKN is still comparable to that of EnKF.
+For state forecast, CGKN achieves performance comparable to FNO and outperforms both CNN
+and DNN, with DNN delivering the worst results. This is primarily because the DNN fails to
+leverage spatial information, which is crucial for analyzing a 2-D field. The state forecast per-
+formance demonstrates the effectiveness of the embeddings-based learning in the CGKN, which
+is analogous to the Fourier-modes-based learning in the FNO. It is worth highlighting that due
+to the black-box nature and lack of the DA loss constraint in the training state, the general non-
+linear neural-network-based models including DNN, CNN, and FNO are incapable of performing
+efficient and accurate DA, which is a key advantage of CGKN.
+25
+The state forecast results from different models are presented in Fig. 3.9, with the initial condition
+set as the vorticity at 950 time units from the test dataset. The forecast results from CGKN and
+FNO successfully capture the flow pattern of the true simulation, whereas the result from CNN
+deviates significantly, and that from DNN performs the worst. In addition to its superior state
+forecast performance, a major advantage of CGKN is its capability for efficient and accurate DA.
+Figure 3.9: Results of state forecast for the Navier-Stokes equations. The evolution of the true vorticity field is
+compared with the predictive vorticity field from various models including CGKN, DNN, CNN, and FNO.
+Figure 3.10 shows the DA results from CGKN and EnKF. Given a trajectory of 8×8observed states
+uniformly distributed on the vorticity field starting from 800 time units in test data, the evolutions
+of the full fields ( 64×64) of the true simulation, posterior means from CGKN and EnKF, and
+interpolation result are shown in each row of the figure. The flow patterns of estimated fields from
+CGKN and EnKF can capture that of the true fields, while the flow pattern of interpolation is very
+blurry and deviates significantly from the truth. The figure confirms the comparable DA result
+between CGKN and EnKF, despite CGKN using much fewer computing resources.
+26
+Figure 3.10: Spatiotemporal evolution of the DA results for the Navier-Stokes equations. Heatmaps of each row
+display the vorticity fields for the true simulation, the DA posterior means from CGKN and EnKF, and the interpolation
+result.
+Figure 3.11 shows the time series of the unobserved state indexed at the location (x, y) =
+(0.5625,0.5625) in the spatial domain of [0,1]2. The first two rows of the figure present a com-
+parison between the true signal and the DA posterior means from CGKN and EnKF, along with
+their associated uncertainty areas. The uncertainty area is two standard deviations associated with
+the posterior means, which for CGKN is determined through residual analysis, and for EnKF, it
+is estimated using the ensemble standard deviation. The interpolation result is shown in the last
+row. By comparing the posterior mean and the true signal, both CGKN and EnKF outperform
+the interpolation result, with CGKN demonstrating slightly better performance than EnKF, partic-
+ularly for some extreme values. Additionally, the uncertainty areas from both CGKN and EnKF
+can effectively encompass most of the true signals, demonstrating a robust quantification of the
+uncertainty associated with the estimated mean field. Overall, the CGKN is capable of tackling
+both tasks of state forecast and efficient DA for this 2-D turbulence example. It is worth noting that
+the CGKN can achieve comparable DA performance to that of EnKF but with significantly lower
+computational costs. For state forecast, the CGKN can reach a level of performance similar to that
+of FNO.
+27
+910 912 914 916 918 920−50−2502550
+910 912 914 916 918 920−50−2502550ω(0.5625,0.5625,t)
+910 912 914 916 918 920
+t−50−2502550Truth
+InterpolationCGKN
+UncertaintyEnKFFigure 3.11: Time series of the DA results for the Navier-Stokes equations. The true signal, DA posterior means
+from CGKN and EnKF together with uncertainty areas of two standard deviations, and interpolation result for the
+unobserved state at spatial position (0.5625 ,0.5625) are presented.
+4. Conclusion and Discussion
+This work develops a unified deep learning framework, the discrete-time conditional Gaussian
+Koopman network (CGKN), to learn a surrogate model to perform efficient data assimilation (DA)
+and state forecast for spatiotemporal dynamical systems governed by nonlinear partial differential
+equations. Exploiting the Koopman embedding of the unobserved system states to discover a la-
+tent representation with conditional linear dynamics, the spatiotemporal dynamical system can be
+converted into a conditional Gaussian nonlinear system, serving as a surrogate model of the true
+system and facilitating analytical formulae for DA. The analytical DA formulae and the lower-
+dimensional embedded latent space can significantly improve the efficiency of DA, enabling the
+incorporation of DA performance into the training process of the surrogate model. Therefore, the
+proposed discrete-time CGKN framework in this work unifies the processes of training a scien-
+tific machine learning (SciML) model and tuning its DA performance. The effectiveness of the
+proposed framework for efficient state forecast and DA is demonstrated through several canonical
+problems governed by PDEs, including the viscous Burgers’ equation, the Kuramoto–Sivashinsky
+equation, and the 2-D Navier-Stokes equations. Extensions and future directions of the proposed
+28
+framework CGKN include introducing sparsity or locality in the identified latent states to employ
+the spatial information for further accelerating the speed of state forecast and DA, exploring alter-
+native approaches to quantifying the uncertainties associated with the posterior mean of CGKN,
+and employing advanced multi-objective optimization methods to minimize each loss functions
+for enhancing the training performance of CGKN. Incorporating some known physics and design-
+ing more structures of CGKN, e.g., allowing temporal memories to account for non-Markovian
+dynamics and characterizing the stochastic terms via fluctuation–dissipation theorem, are also in-
+teresting future directions. It is worth noting that the proposed CGKN framework also serves as an
+example to illustrate unifying the development of SciML models and their outer-loop applications,
+which can potentially inspire research directions of other outer-loop applications such as design
+optimization, inverse problems, and optimal control.
+Acknowledgments
+The research of C.C. and J.W. was funded by the University of Wisconsin-Madison, Office of the
+Vice Chancellor for Research and Graduate Education, with funding from the Wisconsin Alumni
+Research Foundation. The research of N.C. is funded by Office of Naval Research N00014-24-
+1-2244 and Army Research Office W911NF-23-1-0118. Z.W. is partially supported as a research
+assistant under the first grant.
+Data Availability
+The data that support the findings of this study are available from the corresponding author upon
+reasonable request.
+Code Availability
+The code that supports the findings of this study is available in the link: https://github.
+com/AIMS-Madison/Discrete-CGKN .
+References
+[1] J ¨urgen Jost. Dynamical systems: examples of complex behaviour . Springer Science &
+Business Media, 2005.
+[2] Stephen Wiggins. Introduction to applied nonlinear dynamical systems and chaos , vol-
+ume 2. Springer, 2003.
+[3] Andrew Majda and Xiaoming Wang. Nonlinear dynamics and statistical theories for basic
+geophysical flows . Cambridge University Press, 2006.
+[4] Nan Chen. Stochastic Methods for Modeling and Predicting Complex Dynamical Systems:
+Uncertainty Quantification, State Estimation, and Reduced-Order Models . Springer Nature,
+2023.
+29
+[5] Konstantinos V ogiatzoglou, Costas Papadimitriou, Vasilis Bontozoglou, and Konstantinos
+Ampountolas. Physics-informed neural networks for parameter learning of wildfire spread-
+ing. Computer Methods in Applied Mechanics and Engineering , 434:117545, 2025.
+[6] Zihao Wang, Guiyong Zhang, Tiezhi Sun, and Bo Zhou. Development and application of a
+fluid mechanics analysis framework based on complex network theory. Computer Methods
+in Applied Mechanics and Engineering , 435:117677, 2025.
+[7] Henk A Dijkstra. Nonlinear climate dynamics . Cambridge University Press, 2013.
+[8] Kevin E Trenberth, John T Fasullo, and Theodore G Shepherd. Attribution of climate ex-
+treme events. Nature Climate Change , 5(8):725–730, 2015.
+[9] HK Moffatt. Extreme events in turbulent flow. Journal of Fluid Mechanics , 914:F1, 2021.
+[10] Andrew Majda. Introduction to PDEs and Waves for the Atmosphere and Ocean , volume 9.
+American Mathematical Soc., 2003.
+[11] Andrew J Majda and Nan Chen. Model error, information barriers, state estimation and
+prediction in complex multiscale systems. Entropy , 20(9):644, 2018.
+[12] Paul Manneville and Yves Pomeau. Intermittency and the Lorenz model. Physics Letters A ,
+75(1-2):1–2, 1979.
+[13] Benjamin Sanderse, Panos Stinis, Romit Maulik, and Shady E Ahmed. Scientific ma-
+chine learning for closure models in multiscale problems: A review. arXiv preprint
+arXiv:2403.02913 , 2024.
+[14] Jin-Long Wu, Matthew E Levine, Tapio Schneider, and Andrew Stuart. Learning about
+structural errors in models of complex dynamical systems. Journal of Computational
+Physics , 513:113157, 2024.
+[15] Nan Chen and Di Qi. A physics-informed data-driven algorithm for ensemble forecast of
+complex turbulent systems. Applied Mathematics and Computation , 466:128480, 2024.
+[16] Samuel H Rudy, Steven L Brunton, Joshua L Proctor, and J Nathan Kutz. Data-driven
+discovery of partial differential equations. Science advances , 3(4):e1602614, 2017.
+[17] Hayden Schaeffer, Russel Caflisch, Cory D Hauck, and Stanley Osher. Sparse dynam-
+ics for partial differential equations. Proceedings of the National Academy of Sciences ,
+110(17):6634–6639, 2013.
+[18] Andrew J Majda and Di Qi. Strategies for reduced-order models for predicting the statistical
+responses and uncertainty quantification in complex turbulent dynamical systems. SIAM
+Review , 60(3):491–549, 2018.
+[19] Kevin Carlberg, Charbel Farhat, Julien Cortial, and David Amsallem. The gnat method for
+nonlinear model reduction: effective implementation and application to computational fluid
+dynamics and turbulent flows. Journal of Computational Physics , 242:623–647, 2013.
+30
+[20] Bernd R Noack, Marek Morzynski, and Gilead Tadmor. Reduced-order modelling for flow
+control , volume 528. Springer Science & Business Media, 2011.
+[21] Nan Chen and Yinling Zhang. A causality-based learning approach for discovering the
+underlying dynamics of complex systems from partial observations with stochastic parame-
+terization. Physica D: Nonlinear Phenomena , 449:133743, 2023.
+[22] Chuanqi Chen, Nan Chen, and Jin-Long Wu. CEBoosting: Online sparse identification
+of dynamical systems with regime switching by causation entropy boosting. Chaos: An
+Interdisciplinary Journal of Nonlinear Science , 33(8), 2023.
+[23] Nan Chen and Honghu Liu. Minimum reduced-order models via causal inference. Nonlin-
+ear Dynamics , pages 1–25, 2024.
+[24] Yifan Chen, Bamdad Hosseini, Houman Owhadi, and Andrew M Stuart. Solving and
+learning nonlinear pdes with Gaussian processes. Journal of Computational Physics ,
+447:110668, 2021.
+[25] Yann LeCun, Yoshua Bengio, and Geoffrey Hinton. Deep learning. nature , 521(7553):436–
+444, 2015.
+[26] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E Hinton. Imagenet classification with deep
+convolutional neural networks. Advances in neural information processing systems , 25,
+2012.
+[27] David E Rumelhart, Geoffrey E Hinton, and Ronald J Williams. Learning representations
+by back-propagating errors. nature , 323(6088):533–536, 1986.
+[28] Yann LeCun, Yoshua Bengio, et al. Convolutional networks for images, speech, and time
+series. The handbook of brain theory and neural networks , 1995.
+[29] Yann LeCun, Bernhard Boser, John Denker, Donnie Henderson, Richard Howard, Wayne
+Hubbard, and Lawrence Jackel. Handwritten digit recognition with a back-propagation
+network. Advances in Neural Information Processing Systems , 2, 1989.
+[30] George Em Karniadakis, Ioannis G Kevrekidis, Lu Lu, Paris Perdikaris, Sifan Wang, and
+Liu Yang. Physics-informed machine learning. Nature Reviews Physics , 3(6):422–440,
+2021.
+[31] Karthik Duraisamy, Gianluca Iaccarino, and Heng Xiao. Turbulence modeling in the age of
+data. Annual review of fluid mechanics , 51(1):357–377, 2019.
+[32] Rose Yu and Rui Wang. Learning dynamical systems from data: An introduction
+to physics-guided deep learning. Proceedings of the National Academy of Sciences ,
+121(27):e2311808121, 2024.
+[33] Jian-Xun Wang, Jin-Long Wu, and Heng Xiao. Physics-informed machine learning ap-
+proach for reconstructing reynolds stress modeling discrepancies based on dns data. Physi-
+cal Review Fluids , 2(3):034603, 2017.
+31
+[34] Jin-Long Wu, Heng Xiao, and Eric Paterson. Physics-informed machine learning approach
+for augmenting turbulence models: A comprehensive framework. Physical Review Fluids ,
+3(7):074602, 2018.
+[35] George Cybenko. Approximation by superpositions of a sigmoidal function. Mathematics
+of control, signals and systems , 2(4):303–314, 1989.
+[36] Kurt Hornik, Maxwell Stinchcombe, and Halbert White. Multilayer feedforward networks
+are universal approximators. Neural networks , 2(5):359–366, 1989.
+[37] Tianping Chen and Hong Chen. Universal approximation to nonlinear operators by neural
+networks with arbitrary activation functions and its application to dynamical systems. IEEE
+transactions on neural networks , 6(4):911–917, 1995.
+[38] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for
+image recognition. In Proceedings of the IEEE conference on computer vision and pattern
+recognition , pages 770–778, 2016.
+[39] Ricky TQ Chen, Yulia Rubanova, Jesse Bettencourt, and David K Duvenaud. Neural ordi-
+nary differential equations. Advances in neural information processing systems , 31, 2018.
+[40] Maziar Raissi, Paris Perdikaris, and George E Karniadakis. Physics-informed neural net-
+works: A deep learning framework for solving forward and inverse problems involving
+nonlinear partial differential equations. Journal of Computational physics , 378:686–707,
+2019.
+[41] Lu Lu, Pengzhan Jin, Guofei Pang, Zhongqiang Zhang, and George Em Karniadakis. Learn-
+ing nonlinear operators via deeponet based on the universal approximation theorem of op-
+erators. Nature machine intelligence , 3(3):218–229, 2021.
+[42] Zongyi Li, Nikola Borislavov Kovachki, Kamyar Azizzadenesheli, Burigede liu, Kaushik
+Bhattacharya, Andrew Stuart, and Anima Anandkumar. Fourier neural operator for paramet-
+ric partial differential equations. In International Conference on Learning Representations ,
+2021.
+[43] Chuanqi Chen and Jin-Long Wu. Neural dynamical operator: Continuous spatial-temporal
+model with gradient-based and derivative-free optimization methods. Journal of Computa-
+tional Physics , 520:113480, 2025.
+[44] Zecheng Zhang. MODNO: Multi-operator learning with distributed neural operators. Com-
+puter Methods in Applied Mechanics and Engineering , 431:117229, 2024.
+[45] Guang Lin, Christian Moya, and Zecheng Zhang. B-deeponet: An enhanced Bayesian
+deeponet for solving noisy parametric pdes using accelerated replica exchange sgld. Journal
+of Computational Physics , 473:111713, 2023.
+[46] Chenxi Wu, Min Zhu, Qinyang Tan, Yadhu Kartha, and Lu Lu. A comprehensive study of
+non-adaptive and residual-based adaptive sampling for physics-informed neural networks.
+Computer Methods in Applied Mechanics and Engineering , 403:115671, 2023.
+32
+[47] Diederik P Kingma, Max Welling, et al. Auto-encoding variational bayes, 2013.
+[48] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil
+Ozair, Aaron Courville, and Yoshua Bengio. Generative adversarial networks. Communi-
+cations of the ACM , 63(11):139–144, 2020.
+[49] Jin-Long Wu, Karthik Kashinath, Adrian Albert, Dragos Chirila, Heng Xiao, et al. Enforc-
+ing statistical constraints in generative adversarial networks for modeling chaotic dynamical
+systems. Journal of Computational Physics , 406:109209, 2020.
+[50] Jonathan Ho, Ajay Jain, and Pieter Abbeel. Denoising diffusion probabilistic models. Ad-
+vances in neural information processing systems , 33:6840–6851, 2020.
+[51] Yang Song, Jascha Sohl-Dickstein, Diederik P Kingma, Abhishek Kumar, Stefano Ermon,
+and Ben Poole. Score-based generative modeling through stochastic differential equations.
+arXiv preprint arXiv:2011.13456 , 2020.
+[52] Xinghao Dong, Chuanqi Chen, and Jin-Long Wu. Data-driven stochastic closure modeling
+via conditional diffusion model and neural operator. Journal of Computational Physics ,
+534:114005, 2025.
+[53] Pan Du, Meet Hemant Parikh, Xiantao Fan, Xin-Yang Liu, and Jian-Xun Wang. Condi-
+tional neural field latent diffusion model for generating spatiotemporal turbulence. Nature
+Communications , 15(1):10416, 2024.
+[54] Stamatis Stamatelopoulos and Themistoklis P Sapsis. Can diffusion models capture extreme
+event statistics? Computer Methods in Applied Mechanics and Engineering , 435:117589,
+2025.
+[55] Han Gao, Sebastian Kaltenbach, and Petros Koumoutsakos. Generative learning of the
+solution of parametric partial differential equations using guided diffusion models and vir-
+tual observations. Computer Methods in Applied Mechanics and Engineering , 435:117654,
+2025.
+[56] Burr Settles. Active learning literature survey. 2009.
+[57] Ksenia Konyushkova, Raphael Sznitman, and Pascal Fua. Learning active learning from
+data. Advances in neural information processing systems , 30, 2017.
+[58] Xun Huan and Youssef M Marzouk. Simulation-based optimal Bayesian experimental de-
+sign for nonlinear systems. Journal of Computational Physics , 232(1):288–317, 2013.
+[59] Udo V on Toussaint. Bayesian inference in physics. Reviews of Modern Physics , 83(3):943–
+999, 2011.
+[60] Harshit Kapadia, Lihong Feng, and Peter Benner. Active-learning-driven surrogate model-
+ing for efficient simulation of parametric nonlinear systems. Computer Methods in Applied
+Mechanics and Engineering , 419:116657, 2024.
+33
+[61] Anthony Atkinson, Alexander Donev, and Randall Tobias. Optimum experimental designs,
+with SAS , volume 34. OUP Oxford, 2007.
+[62] Huchen Yang, Chuanqi Chen, and Jin-Long Wu. Active learning of model discrepancy with
+Bayesian experimental design. arXiv preprint arXiv:2502.05372 , 2025.
+[63] Rudolph Emil Kalman. A new approach to linear filtering and prediction problems. Trans.
+ASME, D , 82:35–44, 1960.
+[64] Rudolph E Kalman and Richard S Bucy. New results in linear filtering and prediction theory.
+Journal of Fluids Engineering , 83:95–108, 1961.
+[65] Andrew J Majda and John Harlim. Filtering complex turbulent systems . Cambridge Univer-
+sity Press, 2012.
+[66] Kody Law, Andrew Stuart, and Kostas Zygalakis. Data assimilation. Cham, Switzerland:
+Springer , 214, 2015.
+[67] Tapio Schneider, Andrew M Stuart, and Jin-Long Wu. Learning stochastic closures
+using ensemble Kalman inversion. Transactions of Mathematics and Its Applications ,
+5(1):tnab003, 2021.
+[68] Tapio Schneider, Andrew M Stuart, and Jin-Long Wu. Ensemble Kalman inversion for
+sparse learning of dynamical systems from time-averaged data. Journal of Computational
+Physics , 470:111559, 2022.
+[69] Marco A Iglesias, Kody JH Law, and Andrew M Stuart. Ensemble Kalman methods for
+inverse problems. Inverse Problems , 29(4):045001, 2013.
+[70] Nan Chen, Yuchen Li, and Evelyn Lunasin. An efficient continuous data assimilation al-
+gorithm for the sabra shell model of turbulence. Chaos: An Interdisciplinary Journal of
+Nonlinear Science , 31(10), 2021.
+[71] Nan Chen and Andrew J Majda. Efficient statistically accurate algorithms for the fokker–
+planck equation in large dimensions. Journal of Computational Physics , 354:242–268,
+2018.
+[72] Geir Evensen. Sequential data assimilation with a nonlinear quasi-geostrophic model using
+Monte Carlo methods to forecast error statistics. Journal of Geophysical Research: Oceans ,
+99(C5):10143–10162, 1994.
+[73] Kay Bergemann and Sebastian Reich. An ensemble Kalman-Bucy filter for continuous data
+assimilation. Meteorologische Zeitschrift , 21(3):213, 2012.
+[74] Geir Evensen. The ensemble Kalman filter: Theoretical formulation and practical imple-
+mentation. Ocean dynamics , 53:343–367, 2003.
+[75] Jeffrey S Whitaker and Thomas M Hamill. Ensemble data assimilation without perturbed
+observations. Monthly weather review , 130(7):1913–1924, 2002.
+34
+[76] Gerrit Burgers, Peter Jan van Leeuwen, and Geir Evensen. Analysis scheme in the ensemble
+Kalman filter. Monthly weather review , 126(6):1719–1724, 1998.
+[77] Changhong Mou, Birgul Koc, Omer San, Leo G Rebholz, and Traian Iliescu. Data-driven
+variational multiscale reduced order models. Computer Methods in Applied Mechanics and
+Engineering , 373:113470, 2021.
+[78] Benjamin Peherstorfer and Karen Willcox. Dynamic data-driven reduced-order models.
+Computer Methods in Applied Mechanics and Engineering , 291:21–41, 2015.
+[79] Saddam Hijazi, Giovanni Stabile, Andrea Mola, and Gianluigi Rozza. Data-driven pod-
+galerkin reduced order model for turbulent flows. Journal of Computational Physics ,
+416:109513, 2020.
+[80] Kevin K Lin and Fei Lu. Data-driven model reduction, Wiener projections, and the
+Koopman-Mori-Zwanzig formalism. Journal of Computational Physics , 424:109864, 2021.
+[81] Wei Xiao, Xiaojing Liu, Jianhua Zu, Xiang Chai, Hui He, and Tengfei Zhang. Operator
+inference driven data assimilation for high fidelity neutron transport. Computer Methods in
+Applied Mechanics and Engineering , 430:117214, 2024.
+[82] Changhong Mou, Leslie M Smith, and Nan Chen. Combining stochastic parameterized
+reduced-order models with machine learning for data assimilation and uncertainty quan-
+tification with partial observations. Journal of Advances in Modeling Earth Systems ,
+15(10):e2022MS003597, 2023.
+[83] Judith Berner, Ulrich Achatz, Lauriane Batte, Lisa Bengtsson, Alvaro de la C ´amara, Han-
+nah M Christensen, Matteo Colangeli, Danielle RB Coleman, Daan Crommelin, Stamen I
+Dolaptchiev, et al. Stochastic parameterization: Toward a new view of weather and climate
+models. Bulletin of the American Meteorological Society , 98(3):565–588, 2017.
+[84] PierGianLuca Porta Mana and Laure Zanna. Toward a stochastic parameterization of ocean
+mesoscale eddies. Ocean Modelling , 79:1–20, 2014.
+[85] Andrew Dawson and TN Palmer. Simulating weather regimes: Impact of model resolution
+and stochastic parameterization. Climate Dynamics , 44:2177–2193, 2015.
+[86] Nan Chen, Changhong Mou, Leslie M Smith, and Yeyu Zhang. A stochastic precipitating
+quasi-geostrophic model. Physics of Fluids , 36(11), 2024.
+[87] Jeffrey L. Anderson. An ensemble adjustment Kalman filter for data assimilation. Monthly
+Weather Review , 129(12):2884–2903, 2001.
+[88] Quentin Malartic, Alban Farchi, and Marc Bocquet. State, global, and local parameter
+estimation using local ensemble Kalman filters: Applications to online machine learning of
+chaotic dynamics. Quarterly Journal of the Royal Meteorological Society , 148(746):2167–
+2193, 2022.
+35
+[89] Sibo Cheng, C ´esar Quilodr ´an-Casas, Said Ouala, Alban Farchi, Che Liu, Pierre Tandeo,
+Ronan Fablet, Didier Lucor, Bertrand Iooss, Julien Brajard, et al. Machine learning with
+data assimilation and uncertainty quantification for dynamical systems: a review. IEEE/CAA
+Journal of Automatica Sinica , 10(6):1361–1387, 2023.
+[90] Stephan Rasp, Michael S Pritchard, and Pierre Gentine. Deep learning to represent sub-
+grid processes in climate models. Proceedings of the national academy of sciences ,
+115(39):9684–9689, 2018.
+[91] Massimo Bonavita and Patrick Laloyaux. Machine learning for model error inference and
+correction. Journal of Advances in Modeling Earth Systems , 12(12):e2020MS002232, 2020.
+[92] Julien Brajard, Alberto Carrassi, Marc Bocquet, and Laurent Bertino. Combining data as-
+similation and machine learning to infer unresolved scale parametrization. Philosophical
+Transactions of the Royal Society A , 379(2194):20200086, 2021.
+[93] Amina Benaceur and Barbara Verf ¨urth. Statistical variational data assimilation. Computer
+Methods in Applied Mechanics and Engineering , 432:117402, 2024.
+[94] Sibo Cheng, Yilin Zhuang, Lyes Kahouadji, Che Liu, Jianhua Chen, Omar K Matar, and
+Rossella Arcucci. Multi-domain encoder–decoder neural networks for latent data assimi-
+lation in dynamical systems. Computer Methods in Applied Mechanics and Engineering ,
+430:117201, 2024.
+[95] Ashesh Chattopadhyay, Ebrahim Nabizadeh, Eviatar Bach, and Pedram Hassanzadeh. Deep
+learning-enhanced ensemble-based data assimilation for high-dimensional nonlinear dy-
+namical systems. Journal of Computational Physics , 477:111918, 2023.
+[96] Guy Revach, Nir Shlezinger, Xiaoyong Ni, Adria Lopez Escoriza, Ruud JG Van Sloun, and
+Yonina C Eldar. Kalmannet: Neural network aided Kalman filtering for partially known
+dynamics. IEEE Transactions on Signal Processing , 70:1532–1547, 2022.
+[97] Pierre Boudier, Anthony Fillion, Serge Gratton, Selime G ¨urol, and Sixin Zhang. Data assim-
+ilation networks. Journal of Advances in Modeling Earth Systems , 15(4):e2022MS003353,
+2023.
+[98] Yuming Chen, Daniel Sanz-Alonso, and Rebecca Willett. Autodifferentiable ensemble
+Kalman filters. SIAM Journal on Mathematics of Data Science , 4(2):801–833, 2022.
+[99] Yuming Chen, Daniel Sanz-Alonso, and Rebecca Willett. Reduced-order autodifferentiable
+ensemble Kalman filters. Inverse Problems , 39(12):124001, 2023.
+[100] Chuanqi Chen, Nan Chen, and Jin-Long Wu. CGNSDE: Conditional Gaussian neural
+stochastic differential equation for modeling complex systems and data assimilation. Com-
+puter Physics Communications , 304:109302, 2024.
+[101] Chuanqi Chen, Nan Chen, Yinling Zhang, and Jin-Long Wu. CGKN: A deep learning
+framework for modeling complex dynamical systems and efficient data assimilation. Jour-
+nal of Computational Physics , 532:113950, 2025.
+36
+[102] Bernard O Koopman. Hamiltonian systems and transformation in Hilbert space. Proceed-
+ings of the National Academy of Sciences , 17(5):315–318, 1931.
+[103] Marko Budi ˇsi´c, Ryan Mohr, and Igor Mezi ´c. Applied koopmanism. Chaos: An Interdisci-
+plinary Journal of Nonlinear Science , 22(4), 2012.
+[104] Igor Mezi ´c. Analysis of fluid flows via spectral properties of the Koopman operator. Annual
+review of fluid mechanics , 45(1):357–378, 2013.
+[105] Matthew O. Williams, Clarence W. Rowley, and Ioannis G. Kevrekidis. A kernel-based
+method for data-driven Koopman spectral analysis. Journal of Computational Dynamics ,
+2(2):247–265, 2015.
+[106] Shaowu Pan and Karthik Duraisamy. Physics-informed probabilistic learning of linear em-
+beddings of nonlinear dynamics with guaranteed stability. SIAM Journal on Applied Dy-
+namical Systems , 19(1):480–509, 2020.
+[107] Bethany Lusch, J Nathan Kutz, and Steven L Brunton. Deep learning for universal linear
+embeddings of nonlinear dynamics. Nature communications , 9(1):4950, 2018.
+[108] Felix Dietrich, Thomas N Thiem, and Ioannis G Kevrekidis. On the Koopman operator of
+algorithms. SIAM Journal on Applied Dynamical Systems , 19(2):860–885, 2020.
+[109] Hannah Lu and Daniel M Tartakovsky. Prediction accuracy of dynamic mode decomposi-
+tion. SIAM Journal on Scientific Computing , 42(3):A1639–A1662, 2020.
+[110] Samuel E Otto and Clarence W Rowley. Koopman operators for estimation and control
+of dynamical systems. Annual Review of Control, Robotics, and Autonomous Systems ,
+4(1):59–87, 2021.
+[111] Petar Bevanda, Stefan Sosnowski, and Sandra Hirche. Koopman operator dynamical mod-
+els: Learning, analysis and control. Annual Reviews in Control , 52:197–212, 2021.
+[112] Hannah Lu and Daniel M Tartakovsky. Extended dynamic mode decomposition for inho-
+mogeneous problems. Journal of Computational Physics , 444:110550, 2021.
+[113] Steven L. Brunton, Marko Budi ˇsi´c, Eurika Kaiser, and J. Nathan Kutz. Modern koopman
+theory for dynamical systems. SIAM Review , 64(2):229–340, 2022.
+[114] Nan Chen and Andrew J Majda. Conditional Gaussian systems for multiscale nonlinear
+stochastic systems: Prediction, state estimation and uncertainty quantification. Entropy ,
+20(7):509, 2018.
+[115] Nan Chen, Yingda Li, and Honghu Liu. Conditional Gaussian nonlinear system: A fast
+preconditioner and a cheap surrogate model for complex nonlinear systems. Chaos: An
+Interdisciplinary Journal of Nonlinear Science , 32(5), 2022.
+[116] Nan Chen and Andrew J Majda. Filtering nonlinear turbulent dynamical systems through
+conditional Gaussian statistics. Monthly Weather Review , 144(12):4885–4917, 2016.
+37
+[117] Nan Chen, Andrew J Majda, and Xin T Tong. Information barriers for noisy lagrangian
+tracers in filtering random incompressible flows. Nonlinearity , 27(9):2133, 2014.
+[118] Nan Chen, Andrew J Majda, and Xin T Tong. Noisy lagrangian tracers for filtering random
+rotating compressible flows. Journal of Nonlinear Science , 25(3):451–488, 2015.
+[119] Nan Chen and Andrew J Majda. Beating the curse of dimension with accurate statistics
+for the fokker–planck equation in complex turbulent systems. Proceedings of the National
+Academy of Sciences , 114(49):12864–12869, 2017.
+[120] Zhongrui Wang, Nan Chen, and Di Qi. A closed-form nonlinear data assimilation algorithm
+for multi-layer flow fields. arXiv preprint arXiv:2412.11042 , 2024.
+[121] Ming Cheng, Peng Wang, and Daniel M Tartakovsky. Efficient quadratures for high-
+dimensional Bayesian data assimilation. Journal of Computational Physics , 506:112945,
+2024.
+[122] Xin T Tong and Matthias Morzfeld. Localized ensemble Kalman inversion. Inverse Prob-
+lems, 39(6):064002, 2023.
+[123] Shuigen Liu, Sebastian Reich, and Xin T Tong. Dropout ensemble Kalman inversion for
+high dimensional inverse problems. arXiv preprint arXiv:2308.16784 , 2023.
+[124] David Vishny, Matthias Morzfeld, Kyle Gwirtz, Eviatar Bach, Oliver RA Dunbar, and
+Daniel Hodyss. High-dimensional covariance estimation from a small number of samples.
+Journal of Advances in Modeling Earth Systems , 16(9):e2024MS004417, 2024.
+[125] Jeffrey L Anderson and Stephen L Anderson. A Monte Carlo implementation of the non-
+linear filtering problem to produce ensemble assimilations and forecasts. Monthly weather
+review , 127:18, 1999.
+[126] Gregory Gaspari and Stephen E Cohn. Construction of correlation functions in two and
+three dimensions. Quarterly Journal of the Royal Meteorological Society , 125(554):723–
+757, 1999.
+[127] Robert S Liptser and Albert N Shiryaev. Statistics of random processes II: Applications ,
+volume 6. Springer Science & Business Media, 2013.
+38
+Appendix A. Koopman Theory
+For nonlinear dynamical systems in the general form:
+un+1=G(un), (A.1)
+where un∈Rdis the system state and Gis a nonlinear map, Koopman theory [102] provides a
+linear perspective by describing the system in terms of the evolution of observable of the system
+state. The observable h:Rd7→Ris a function in the Hilbert space operating on the system state
+u.
+The Koopman operator Kis a linear operator acting on observable function hwhich is defined as
+Kh:=h◦ G, (A.2)
+where ◦denotes function composition.
+The evolution of observable his governed by the Koopman operator:
+h(un+1) =h◦ G(un) =Kh(un). (A.3)
+In practice, this infinite-dimensional linear dynamical system and the linear operator Kcan be
+approximated by finite-dimensional representations:
+vn+1=Avn+σϵn, (A.4)
+where vn∈Rdvis a finite-dimensional vector representing the linear embeddings of the system
+states un, approximating the infinite-dimensional function h(un). The matrix A∈Rdv×dvis the
+linear dynamics of this discrete linear dynamical system, which approximates the linear operator
+K. The ϵn∈Rdvis Gaussian white noise with σ∈Rdv×dvas the noise coefficient.
+Appendix B. Generalized Application of Koopman Theory for Partially Ob-
+served Systems
+Considering a partially observed nonlinear dynamical system in the general form of
+un+1
+1=G1 
+un
+1,un
+2
+,
+un+1
+2=G2 
+un
+1,un
+2
+,(B.1)
+where un={un
+1,un
+2}with observed states un
+1∈Rd1and unobserved states un
+2∈Rd2.
+The generalized application of Koopman theory to the partially observed nonlinear dynamical
+system in Eq. (B.1) aims to linearize the unobserved states un
+2while retaining the nonlinearity
+of the observed states un
+1. Therefore, the full system remains highly nonlinear, fundamentally
+contrasting with the standard Koopman theory. The approximated finite-dimensional dynamical
+39
+system is given by:
+un+1
+1=F1 
+un
+1
++G1 
+un
+1
+vn+σ1ϵn
+1,
+vn+1=F2 
+un
+1
++G2 
+un
+1
+vn+σ2ϵn
+2,(B.2)
+where vn∈Rdvare linear embeddings of unobserved states un
+2andF1,G1,F2,G2are four
+nonlinear maps of observed states un
+1. The ϵn
+1∈Rd1andϵn
+2∈Rdvare independent Gaussian
+white noises with σ1∈Rd1×d1andσ2∈Rdv×dvas noise coefficients.
+Appendix C. Conditional Gaussian Nonlinear Systems
+The system in Eq. (B.2) belongs to a class of nonlinear stochastic dynamical systems called con-
+ditional Gaussian nonlinear systems (CGNS). A key feature of the CGNS is that the conditional
+distribution p(vn|{ui
+1}n
+i=0)is Gaussian, whose mean µvand covariance Σvcan be solved by the
+analytical formulae [127]:
+µn+1
+v=F2+G2µn
+v+Kn 
+un+1
+1−F1−G1µn
+v
+,
+Σn+1
+v=G2Σn
+vGT
+2+σ2σT
+2−KnG1Σn
+vGT
+2,(C.1)
+where Kn=G2Σn
+vGT
+1 
+σ1σT
+1+G1Σn
+vGT
+1−1is an analog to the Kalman gain. The conditional
+distribution is the filtering solution of data assimilation and the formulae in Eq. (C.1) is called the
+conditional Gaussian filter (CG Filter).
+40

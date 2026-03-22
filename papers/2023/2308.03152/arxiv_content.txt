@@ -1,0 +1,549 @@
+AI-GOMS: Large AI-Driven Global Ocean
+Modeling System
+Wei Xiong1†, Yanfei Xiang1†, Hao Wu2, Shuyi Zhou1, Yuze Sun1,
+Muyuan Ma1, Xiaomeng Huang1*
+1*Department of Earth System Science, Ministry of Education Key
+Laboratory for Earth System Modeling, Institute for Global Change
+Studies, Tsinghua University, Beijing, 100084, China.
+2School of Computer Science and Technology, University of Science and
+Technology of China, Hefei, 230026, China.
+*Corresponding author(s). E-mail(s): hxm@tsinghua.edu.cn;
+Contributing authors: xiongw21@mails.tsinghua.edu.cn;
+xiangyf22@mails.tsinghua.edu.cn; wuhao2022@mail.ustc.edu.cn;
+zhousy22@mails.tsinghua.edu.cn; syz23@mails.tsinghua.edu.cn;
+mamy22@mails.tsinghua.edu.cn;
+†These authors contributed equally to this work.
+Abstract
+Ocean modeling is a powerful tool for simulating the physical, chemical, and bio-
+logical processes of the ocean, which is the foundation for marine science research
+and operational oceanography. Modern numerical ocean modeling mainly consists
+of governing equations and numerical algorithms. Nonlinear instability, computa-
+tional expense, low reusability efficiency and high coupling costs have gradually
+become the main bottlenecks for the further development of numerical ocean
+modeling. Recently, artificial intelligence-based modeling in scientific computing
+has shown revolutionary potential for digital twins and scientific simulations,
+but the bottlenecks of numerical ocean modeling have not been further solved.
+Here, we present AI-GOMS, a large AI-driven global ocean modeling system,
+for accurate and efficient global ocean daily prediction. AI-GOMS consists of
+a backbone model with the Fourier-based Masked Autoencoder structure for
+basic ocean variable prediction and lightweight fine-tuning models incorporat-
+ing regional downscaling, wave decoding, and biochemistry coupling modules.
+AI-GOMS has achieved the best performance in 30 days of prediction for the
+global ocean basic variables with 15 depth layers at 1/4◦spatial resolution.
+1arXiv:2308.03152v2  [physics.ao-ph]  10 Aug 2023
+Beyond the good performance in statistical metrics, AI-GOMS realizes the sim-
+ulation of mesoscale eddies in the Kuroshio region at 1/12◦spatial resolution
+and ocean stratification in the tropical Pacific Ocean. AI-GOMS provides a new
+backbone-downstream paradigm for Earth system modeling, which makes the
+system transferable, scalable and reusable.
+Keywords: Ocean Modeling, Deep Learning, AI for Science, Earth System Science
+1 Main
+Ocean modeling drives oceanography into the era of experimentability and predictabil-
+ity. Employing numerical algorithms to solve the governing equations, ocean modeling
+enables researchers to simulate and predict ocean dynamics and facilitate qualitative
+and quantitative studies of the ocean[1]. With the development of high-performance
+computing clusters, more complicated numerical algorithms, parameterization schemes
+and data assimilation methods have been deploying in ocean modeling and operational
+ocean forecasting systems, which gradually reach accurate global ocean simulation[2].
+It seems that traditional numerical ocean modeling have reveal an empirical knowledge
+that accurate simulations means higher computational costs. However, it is estimated
+that 10 billion times bigger in storage and faster in calculation than the current
+supercomputer to solve the primitive equations directly without approximations and
+parameterizations for high-fidelity global ocean simulation[3]. With the development
+of the observation system and reanalysis technology, a new paradigm to model the
+ocean gradually shows its potential. A quiet revolution of ocean modeling is coming.
+Abundant and high-quality data drive the booming development of deep learning
+models, which have emerged as one of the most highly discussed topics in the world.
+Generative artificial intelligence models, including large language models, have started
+to exert a profound influence on our daily lives. In the field of Earth science, artifi-
+cial intelligence-based modeling has been achieving step-wise achievements and even
+being gradually deployed in operational institutions[4–6]. For medium-range weather
+prediction, artificial intelligence-based modeling[7–11] has demonstrated that deep
+learning models with large parameters can perform comparably to numerical fore-
+casting systems beyond the 10-day forecast[11]. These studies prove that large deep
+learning models have great potential to learn and model the Earth system dynamics.
+Furthermore, they exhibit superior scalability with increasing available data com-
+pared to numerical modeling. With much lower computational and temporal budget
+of the inference process, larger ensemble members[7], enhanced forecast timeliness and
+lower barriers to digital simulations will drive more possibilities for the Earth science
+application.
+However, it still has two gaps in artificial intelligence-based modeling in Earth sys-
+tem science. Firstly, the ocean, as one of the most important components of the Earth
+system, has not yet been modeled by the large deep learning model at present. Different
+from atmosphere simulation, the ocean is a special system with closed complex geo-
+metric boundaries, which means terrain topology constraints should be considered[2].
+2
+Encoder Module (16 Layers)FourierLayerDecoder Module(8 Layers)
+× WeightsFourier LayerFourierLayerFourierLayer
+...S, T, U, V( 15 Layers )
+...SSH.........
+...Light-weight TrainingDownscaling Module Schematic
+MergeOcean VariablesOutputDownstream Output
+🔐
+Frozen parametersLightweight TrainingDownstream InputCoupling Module Schematic
+ProjectionRandom MaskPatchify
+Initial Conditions
+Boundary ConditionsAtmospheric Force, TopologyOcean Variables: T, S, U, V, SSH
+a  Backbone Model
+Ocean VariablesInputProjectionBackboneFeature  Tensor
+🔐
+🔐Decoding Module Schematic
+Lightweight Fine-tuning Modelb  Downstream Module
+Ocean BiochemistryInitial ConditionsCoupling ModelOcean BiochemistryVariables
+Backbone Model
+DownscalingModelGlobal FeatureLow     Resolution High Resolution 
+Backbone Model
+Surface Ocean Wave
+Ocean Variables
+Atmospheric Force TopologyDecodingModel
+Ocean BiochemistryInitial ConditionsCoupling ModelOcean BiochemistryVariables
+Backbone Model
+DownscalingModelGlobal FeatureLow     Resolution High Resolution 
+Backbone Model
+Fig. 1 Overall Architecture of AI-GOMS. a , Backbone Model of AI-GOMS. Based on the asym-
+metric encoder-decoder structure with the random mask strategy, the model supports different length
+sequences. The prediction variables of the backbone model include 5 basic ocean variables (sea tem-
+perature(T), sea salinity(S), zonal velocity(U), meridional velocity(V) and sea surface height(SSH))
+b, Downstream Module of AI-GOMS. Having trained the backbone model and frozen its parameters,
+lightweight fine-tune models can be applied to other ocean-related scenarios at a low cost.
+Ocean observations exhibit sparsity and an imbalanced distribution, and even large
+amounts are missing in the deep ocean[12]. In addition, the eddy-resolving capabil-
+ity is a prerequisite for accurate global ocean simulation due to the magnitude of the
+Rossby deformation radius in the ocean, which requires finer resolution to resolve the
+eddies and their growth and decay in some regions[13]. Secondly, existing studies have
+not fully explored the potential of the paradigm of large-scale deep learning models.
+These studies have not yet proven their model can handle different downstream appli-
+cations well, which means their trained model has not been proven to be transferable
+to other related scenarios. Large models that are not reusable in various applications
+will not be able to take advantage of their low inference cost. Inspired by the gaps,
+we propose a large AI-driven global ocean modeling system named AI-GOMS with a
+general framework for three ocean-related downstream tasks. The overall architecture
+is shown in Fig.1.
+AI-GOMS consists of a backbone model with the Fourier-based Masked Autoen-
+coder structure and lightweight fine-tuning models incorporating regional downscaling,
+wave decoding, and biochemistry coupling modules. Inspired by the dynamic core of
+traditional ocean modeling, the backbone model of AI-GOMS is used to simulate and
+predict the basic global ocean physical variables (temperature, salinity, velocity and
+sea surface height). It is designed with an asymmetric encoder-decoder structure[14]
+with Fourier-based attention blocks[15], which means the sequence lengths of the
+3
+encoder and decoder can be various. Similar to the common vision transformer struc-
+ture, our backbone model employs a patch embedding structure to map the various
+forms of physical fields into one-dimensional sequence tokens, which supports multi-
+modal fusion[16, 17]. Owning to the design, our model is available for two-dimensional
+and three-dimensional regular grid data as well as sparse data as input. Therefore, our
+model can be driven by multi-source data, which means it also natively supports data
+assimilation at the model level. Due to the asymmetric structure, we use a random
+mask strategy to selectively hide some patches of physics variables as input, which can
+be motivated to learn more intrinsic features rather than local spatio-temporal inter-
+polation, to mitigate overfitting and get better performance in long-term prediction.
+For ocean-related downstream tasks, we exemplary present downstream modules to
+solve three different scenarios (regional downscaling, wave and biochemistry variables
+prediction). It proves that our trained backbone model can be transferred to other
+ocean-related scenarios by fine-tuning a simple module with extremely low training
+cost, which means users can download our trained backbone model to solve their own
+needs at a relatively low cost instead of training a whole model repetitively.
+2 Results
+2.1 Quantitative result and profile analysis on 30 days of
+prediction
+We train our backbone model on the HYbrid Coordinate Ocean Model (HYCOM)
+global reanalysis data, which is the best estimation state for ocean variables with
+Global Ocean Data Assimilation Experiment (GODAE)[18]. It is trained on 10 years of
+data (from 2000 to 2010), validated on 2011 and tested on 2012. Our model predicts five
+ocean variables daily, which include sea temperature, sea salinity, zonal and meridional
+stream velocity, with 15 depth layers (0m, 6m, 10m, 20m, 30m, 50m, 70m, 100m, 125m,
+150m, 200m, 250m, 300m, 400m, 500m) and sea surface height at a spatial resolution
+of 1/4◦. Five atmospheric variables and topography data are introduced as boundary
+condition inputs to drive the model, which are from one of the best atmospheric
+reanalysis datasets named ERA5[19] and a topology dataset named ETOPO[20]. In
+30 days scenario, our model shows strong stability and accuracy.
+In Fig. 2, we measure the prediction accuracy of each ocean variable during test-
+ing using the latitude-weighted anomaly correlation coefficient (ACC) and compare
+AI-GOMS with FourCastNet[7], which is the state-of-the-art open source AI-based
+weather forecast model. AI-GOMS achieves better performance for all variables. Espe-
+cially, AI-GOMS exhibits strong long-term predicting capability and has achieved
+significantly better performances in both ACC and RMSE (Root Mean Square Error).
+Beyond the better performance in statistical metrics, our model achieves good per-
+formance in the stratification of the ocean. The equatorial Pacific Ocean is an ideal
+region for profile analysis due to the presence of various equatorial waves, such as
+Rossby waves and Kelvin waves[21]. These movements deeply influence the feedback
+processes in air-sea interactions and climatic teleconnection. Therefore, we use the
+equatorial Pacific Ocean profile to evaluate our model. AI-GOMS accurately simulates
+4
+GOAMSFourCastNet
+Fig. 2 AI-GOMS achieves the best performance for all variables in 30 days of predic-
+tion. Latitude-weighted ACC for AI-GOMS (blue) and FourCastNet (green) averaged over several
+predictions in the out-of-sample testing dataset. The colored shaded regions around the ACC curves
+denote the region between the first and third quartile values. Here, T0, S0, U0 and V0 indicate the
+sea temperature, sea salinity, and the u-component and v-component of stream velocity at the sea
+surface, respectively. Similarly, T100, S100, U100, V100, T500 and S500 indicate that the variables
+are at 100 or 500 meters of depth. SWH and TCa indicate significant wave height and total chloro-
+phyll a concentration.
+equatorial sea temperature profiles that are influenced by the Walker Cell and Bjerk-
+ness feedback modulation[22]. Mixed layers and thermoclines can also be simulated,
+as shown in Fig.3. On the eastern coast of the Pacific Ocean, the rising thermocline
+and high chlorophyll concentrations due to upwelling can be simulated.
+2.2 Regional downsacling module for resolving mesoscale eddy
+For global ocean general circulation models, some special regions, such as Kuroshio
+and Gulf Stream, require finer spatial resolution because of their Rossby deformation
+radius[13]. Accurate simulation of the pathway of Kuroshio and its extension requires
+the model to resolve mesoscale eddies and the fast processes in the ocean, which means
+5
+Fig. 3 Prediction Result of AI-GOMS Backbone Model. a , The 3-day and 30-day predictions
+for main surface variables (sea surface temperature, sea surface salinity, sea surface height and sea
+surface velocity). For each case, the initial condition time is 12:00 UTC on 26 January 2012. b, The
+30-day prediction sea temperature profile in the equatorial Pacific at 12:00 UTC on 26 December
+2012 (left). The 30-day prediction time of sea temperature at the location (0◦,120◦E, right) is 12:00
+UTC on 31 March 2012, 12:00 UTC on 29 June 2012, 12:00 UTC on 27 September 2012 and 12:00
+UTC on 26 December 2012, respectively.
+finer spatial resolution and more stable algorithms[23]. In other words, whether hav-
+ing the capability for eddy-resolving marks a watershed for ocean general circulation
+models.
+Having considered that finer resolution is indispensable in such local regions, our
+architecture provides a regional downscaling module to support finer nested grids for
+the specific region. We tested the module in the region of Kuroshio and its extensions,
+downscaling the region from 1 /4◦to 1/12◦. As Fig.4 shows, AI-GOMS can accurately
+6
+Fig. 4 Prediction Result of AI-GOMS Downstream Module. a , The 7-day prediction of the
+Regional Downscaling Module for sea surface stream velocity at 12:00 UTC on 8 January 2012. b,
+The 15-day prediction of the Wave Decoding Module for significant wave height at 12:00 UTC on 16
+January 2012. c, The 15-day prediction of the Biochemistry Couple Module for total chlorophyll a
+concentration at 12:00 UTC on 15 May 2012.
+simulate the stream pathway with a spatial resolution of 1 /12◦. The details of some
+mesoscale eddies are also accurately simulated. AI-GOMS can achieve an ACC of over
+0.6 in 7 days of stream velocity prediction and over 0.6 in 7 days of sea surface height
+prediction in the Kuroshio region. According to the above results, the design of the
+downscaling module enables our system to achieve nested grid resolution to meet the
+diverse resolution requirements of various ocean regions.
+2.3 Wave decoding module for significant wave height
+prediction
+In operational oceanography, some important ocean prediction variables are derived
+from the basic ocean variables. Our architecture attempts to decode the operational
+prediction variables from the feature tensor and some closure conditions. Waves, driven
+by the wind, are classified into wind waves and swell, which are significant operational
+forecast variables. Therefore, we chose significant wave height as the decoding object
+variable in our experiments. Having lightweight fine-tuning trained, our architecture
+can realize the 30 days significant wave height prediction (Fig.4).
+7
+2.4 Biochemistry coupling module for biochemical variables
+prediction
+From the perspective of marine science, the physical and biochemical properties of the
+ocean are highly correlated. In numerical ocean models, the physical ocean numerical
+model and the biochemical model are coupled using an external coupler to simulate
+biochemical variables[24]. Inspired by the design, we used a lightweight fine-tuning
+model to fuse the physical variables features and ocean biochemical conditions to
+predict 8 ocean biochemical variables (total chlorophyll a concentration, chlorophyte
+concentration, diatom concentration, coccolithophores concentration, cyanobacteria
+concentration, iron concentration, nitrate concentration and mixed layer depth). As
+Fig.4 shows, our lightweight fine-tuning model gets good performance in 30 days of
+prediction. Our results show that the predictions of total chlorophyll a concentra-
+tion exhibit high values along the eastern Pacific coastline, which corresponds to the
+upwelling predicted by the backbone model.
+3 Conclusion
+In this paper, we design a large AI-driven global ocean modeling system named AI-
+GOMS for 30 days of simulation and prediction, which achieves global ocean simulation
+at 1/4◦resolution with 15 layers. Our model not only achieves good performance in
+statistical metrics (RMSE and ACC), but also demonstrates good physical consistency
+in eddy simulations and vertical profiles.
+In order to fully leverage the model’s scalability and meet users’ demands beyond
+the basic ocean variables, we design the downstream module for various ocean-related
+scenarios. We exemplary present three lightweight fine-tuning models (downscal-
+ing, decoding, and coupling) and achieve good performance at a lower cost. Our
+architecture explores the transferability capabilities of the trained backbone model.
+Several future works are needed to further explore additional potential. First,
+our architecture supports sparse data as input, which will offer more possibilities for
+data assimilation and end-to-end training with sparse observation data. Second, more
+transfer learning techniques can be introduced into the architecture to further reduce
+fine-tuning costs.
+4 Method
+4.1 Architecture of AI-GOMS
+4.1.1 Backbone Model
+The overall structure of the AI-GOMS backbone is shown in Fig.1a, which is mainly
+established on the scheme of an asymmetric encoder-decoder and patch embedding-
+recovery module. Our model is designed to support multi-source data as input,
+including two-dimensional, three-dimensional and sparse data. However, all data needs
+to be preprocessed as grid-like data, which means sparse data should be processed
+into grid data with masks.
+8
+In our scenario, two-dimensional topology data, surface and near-surface variables
+(1×720×1440) and three-dimensional ocean variables with 15 layers(15 ×720×1440) as
+boundary conditions and initial conditions. We stack these variables as the input ten-
+sor denoted as X∈RCin×H×W, where Cinconsists of different variables, and the size of
+the tensor is 67 ×720×1440. We use the patch embedding module to non-overlapping
+patchify the input tensor and get the sequence of tokens X∈R(h×w)×Cembed dim
+(with a small patch size p ×p, where p = 8). After the patch embedding mod-
+ule, part of the tokens will be truncated randomly by the specific mask strategy and
+the remaining tokens, along with a cosine positional encoding, will be encoded by
+several 1D-AFNO blocks. Subsequently, the encoded tokens, combined with their id-
+ranks, will be decoded and reconstructed by the decoder structure with shallower
+1D-AFNO blocks. The decoded sequence of tokens will be mapped to the output
+variables Xout∈RCout×H×Wby the patch-recovery module with a two-dimensional
+transposed convolution operator.
+More detailed explanations of our architecture, flow chart, additional visualizations
+of results and experimental logs are provided in Supplementary Information.
+4.1.2 Downstream Model
+For various downstream tasks, our design adopts the backbone-downstream architec-
+ture. Having loaded the trained backbone model, the feature tensor of the backbone
+model is denoted by Xf∈RCdecoder dim×h×wis obtained from the input tensor
+X∈RCin×H×Wcalculated by the backbone model before the patch-recovery mod-
+ule. The input tensor of the downstream module is merged from the feature tensor
+of the backbone model Xfand several conditions of the downstream scenario Xdin∈
+RCdin×Hd×Wd, where Cdin,HdandWdindicate the number of input conditions and the
+size of the longitude and latitude of the downstream scenario, respectively. We exem-
+plary design the lightweight fine-tuning model for three downstream tasks. For the
+regional downscaling module, we test 8, 16 or 32 Residual Convolution blocks and a
+3-fold upscaling ConvTranspose2d layer as the fine-tuning model. For the wave decod-
+ing module and biochemistry coupling module, we introduce two additional 1D-AFNO
+blocks and a projection layer as the fine-tuning model.
+4.2 Data and Training details
+4.2.1 Backbone Model
+Our backbone model is trained by a publicly available and influential ocean reanalysis
+dataset from HYCOM, which mainly consists of 3-hourly of 8 sea surface variables
+and 9 ocean standard variables at a latitude and longitude resolution of 1 /12◦×1/12◦
+from the sea surface to 5000m depth with 41 vertical layers from 1994 to 2015. The
+dataset is the optimal result from numerical simulation and multi-source observation
+(satellite and in-situ observation) by 3D-Var algorithm of Navy Coupled Ocean Data
+Assimilation (NCODA). In order to train a backbone model for daily prediction, we
+preprocessed the dataset and daily dataset at get 1 /4◦×1/4◦spatial resolution, which
+contains enough information to resolve the majority of ocean regions. To accurately
+predict the thermocline and mixed layer of the ocean, we choose 15 depth layers (0m,
+9
+Table 1 Backbone Variables
+Variable Layer Details
+T 15 Sea temperature (◦C)
+S 15 Sea Salintiy (PSU)
+U 15 Sea stream zonal velocity (ms−1)
+V 15 Sea stream meridonal velocity (ms−1)
+SSH 1 Sea surface height (m)
+U10 1 Wind meridonal velocity 10m from the surface (ms−1)
+V10 1 Wind zonal velocity 10m from the surface (ms−1)
+T2m 1 Air temperature at 2m from the surface (◦C)
+MSL 1 Mean surface level (m)
+SP 1 Surface pressure (hPa)
+Topology 1 Digital elevation and ocean bathymetry (m)
+6m, 10m, 20m, 30m, 50m, 70m, 100m, 125m, 150m, 200m, 250m, 300m, 400m, 500m)
+of temperature, salinity, zonal stream velocity and meridional stream velocity.
+The goal of our backbone model is to predict the sea surface height (SSH),
+temperature, salinity, u-component (zonal) and v-component (meridional) stream
+velocity. In order to accurately learn complex dynamic relationships, we choose several
+boundary conditions, including the topology variable[20] and five atmospheric forcing
+variables[19], as well as the initial conditions of sea surface height and four ocean basic
+variables, as input. Although the data contains 3D variables, such as ocean basic vari-
+ables, as well as 2D variables, such as sea surface variables, each of the variables is
+represented as a 3D shape of C ×720×1440, where C represents the number of lay-
+ers. We merge different variables by stacking them in the C dimension. Within each
+24-hour period per day, we sample the variables from the dataset at 1200hours. We
+divide the dataset into training, validation and out-of-sample testing datasets, where
+the training dataset comprises the data from 2000 to 2010, the validation dataset is
+from 2011, and the testing dataset includes the data from 2012.
+AI-GOMS employs auto-regressive prediction, which means it generates T-step
+prediction by iterating from the initial condition. The model predicts the later step
+by feeding its own output for the preceding time step combined with boundary condi-
+tions, similar to numerical ocean models. We define the input tensor as Xt
+iincluding
+11 variables. These variables consist of two components: one is from the initial con-
+ditions or model output (ocean prediction variables), and the other is from boundary
+conditions (atmospheric forcing and topology variables). The output tensor, denoted
+asXt
+o, includes five variables. Here, trepresents the current time, and therefore, the
+next time step of the variables is represented as Xt+1, with a time interval of 1 day.
+In the training process of the backbone model, we use the random mask strategy
+of gradually decreasing the mask ratio to force the model to learn hidden physics
+features behind sparse information. Two-step supervision is used in our training. We
+use the cosine learning rate schedule. The training process takes about 34.2 hours of
+wall-clock time on four clusters with 16 Nvidia A100 GPUs.
+More details about data preprocessing, hyperparameters, training strategies and
+computational budget are provided in Supplementary Information.
+10
+Table 2 Downstream Variables
+Variable Resolution Details Task Source
+SST 1/12◦Sea surface temperature (◦C) Downscaling HYCOM
+SSS 1/12◦Sea surface salintiy (PSU) Downscaling HYCOM
+SSU 1/12◦Sea surface stream zonal velocity (ms−1) Downscaling HYCOM
+SSV 1/12◦Sea stream meridonal velocity (ms−1) Downscaling HYCOM
+SSH 1/12◦Sea surface height (m) Downscaling HYCOM
+SWH 1/2◦Significant wave height (m) Decoding ERA5
+U10 1/2◦10m wind meridonal velocity (ms−1) Decoding ERA5
+V10 1/2◦10m wind zonal velocity (ms−1) Decoding ERA5
+Tca 1◦Total chlorophyll a concentration (mg/m3) Coupling NASA
+Chl 1◦Chlorophyte concentration (mg/m3) Coupling NASA
+Dia 1◦Diatom concentration (mg/m3) Coupling NASA
+Coc 1◦Coccolithophores concentration (mg/m3) Coupling NASA
+Cya 1◦Cyanobacteria concentration (mg/m3) Coupling NASA
+Irn 1◦Iron concentration (nano mole/L) Coupling NASA
+Nit 1◦Nitrate concentration (micro mole/L) Coupling NASA
+MLD 1◦Mixed layer depth (m) Coupling NASA
+4.2.2 Downstream Module
+The overall variables related to the three downstream tasks are shown in Table 2. The
+dividing method of training, validation and testing datasets is similar to that of the
+backbone model. The prediction time interval for all modules is 1 day.
+Regional Downscaling Module
+We use the HYCOM dataset at a 1/12◦resolution in the Kuroshio region, which ranges
+from 124.7◦E to 180◦and 21.28◦N to 45◦N as training label. We combined five low-
+resolution Kuroshio variables (sea surface temperature, sea surface salinity, zonal and
+meridional surface stream velocity and sea surface height) and the feature tensor of
+the backbone model with global information. The size of the condition tensor is 5 ×
+120×230 at 1/4◦spatial resolution in time step tand the feature tensor is 512 ×90
+×180. Having through the lightweight fine-tuning model, the size of the output tensor
+is 5×360×690 in the next time step t+ 1, which achieves 3-times super resolution
+from 1/4◦to 1/12◦.
+Wave Decoding Module
+We use significant height wave dataset as prediction variables in this scenario. Having
+considered the mechanics of ocean waves, we set the 10m wind velocity field from the
+surface as boundary conditions to drive the model. These variables are all from the
+ERA5 dataset[19]. In this scenario, the input variables beside the feature tensor are
+combined the initial condition of a significant height wave and the boundary condition
+of two components of the 10m wind velocity field from the surface. The size of the
+tensor is 3 ×360×720. Our lightweight fine-tuning model maps the wave variables
+into a next time step at each iteration. Besides, we use the annual mean sea ice
+distribution area as the mask of sea ice.
+11
+Biochemistry Coupling Module
+Our Biochemistry Coupling Module is trained by 8 biochemical variables, which are
+from the NASA Ocean Biochemical Model assimilating satellite chlorophyll data[25].
+The dataset integrates satellite remote sensing observations and ocean circulation-
+biochemical coupled numerical models. We re-grid each of the variables into a global
+regular Euclidean grid at 180 ×360 by the bilinear interpolation method[26]. After
+the re-gridding process, we combine 8 biochemical variables (total chlorophyll a
+concentration, chlorophyte concentration, diatom concentration, coccolithophores con-
+centration, cyanobacteria concentration, iron concentration, nitrate concentration and
+mixed layer depth) as initial conditions and feature tensors of the backbone model
+with physical oceanography information. Through the lightweight fine-tuning model,
+8 biochemical variables in the next time step are predicted.
+4.3 Statistical Metric
+Following the former works[7, 27], we use latitude-weighted RMSE and ACC as sta-
+tistical metrics to assess the performance. Land area is not calculated for each metric.
+Therefore, we denote ( i, j) as the index of grid coordinates in the ocean grid set Gas
+follows.
+Latitude Weighting
+The latitude weighting L(j) for the latitude at the j-th index is defined as
+L(j) =cos(lat( j))
+1
+NlatPNlat
+jcos(lat( j)),
+where Nlatis the number of latitude index.
+Root mean square error
+The root mean square error (RMSE) for the variable cat forecast time step tis defined
+as
+RMSE( c, t) =s
+1
+|G|X
+i,jL(i)
+Xt
+pred[c, i, j ]−Xt
+true[c, i, j ]2
+,
+where Xt
+pred andXt
+truerepresents the value of predicted and true variable cat
+coordinates ( i, j).
+Anomaly correlation coefficient
+The anomalous correlation coefficient (ACC) for the variable cat the forecast time
+steptis defined as
+ACC( c, t) =P
+i,jL(i)˜Xt
+pred[c, i, j ]˜Xt
+true[c, i, j ]r
+P
+i,jL(i)
+˜Xt
+pred[c, i, j ]2P
+i,jL(i)
+˜Xt
+true[c, i, j ]2,
+12
+where ˜Xt
+predrepresents the climatological-mean-subtracted value of the predicted and
+true variable cat coordinates ( i, j). The climatological mean is calculated by sampling
+HYCOM reanalysis data at 2-year intervals between 2000 and 2010.
+13
+References
+[1] Sonnewald, M., Lguensat, R., Jones, D.C., Dueben, P.D., Brajard, J., Balaji,
+V.: Bridging observations, theory and numerical simulation of the ocean using
+machine learning. Environmental Research Letters 16(7), 073008 (2021)
+[2] Hurlburt, H.E., Chassignet, E.P., Cummings, J.A., Kara, A.B., Metzger, E.J.,
+Shriver, J.F., Smedstad, O.M., Wallcraft, A.J., Barron, C.N.: Eddy-resolving
+global ocean prediction. Technical report, Naval Research Lab Stennis Space
+Center Ms Oceanography Div (2009)
+[3] Fox-Kemper, B., Adcroft, A., B¨ oning, C.W., Chassignet, E.P., Curchitser, E.,
+Danabasoglu, G., Eden, C., England, M.H., Gerdes, R., Greatbatch, R.J., et al. :
+Challenges and prospects in ocean circulation models. Frontiers in Marine Science
+6, 65 (2019)
+[4] Reichstein, M., Camps-Valls, G., Stevens, B., Jung, M., Denzler, J., Carvalhais,
+N., Prabhat, f.: Deep learning and process understanding for data-driven earth
+system science. Nature 566(7743), 195–204 (2019)
+[5] D¨ uben, P., Modigliani, U., Geer, A., Siemen, S., Pappenberger, F., Bauer, P.,
+Brown, A., Palkovic, M., Raoult, B., Wedi, N., et al.: Machine learning at ecmwf:
+A roadmap for the next 10 years. ECMWF Technical Memoranda 878(2021)
+[6] Aires, F., Weston, P., Rosnay, P., Fairbairn, D.: Statistical approaches to assim-
+ilate ascat soil moisture information—i. methodologies and first assessment.
+Quarterly Journal of the Royal Meteorological Society 147(736), 1823–1852
+(2021)
+[7] Pathak, J., Subramanian, S., Harrington, P., Raja, S., Chattopadhyay, A., Mar-
+dani, M., Kurth, T., Hall, D., Li, Z., Azizzadenesheli, K., et al.: Fourcastnet: A
+global data-driven high-resolution weather model using adaptive fourier neural
+operators. arXiv preprint arXiv:2202.11214 (2022)
+[8] Bi, K., Xie, L., Zhang, H., Chen, X., Gu, X., Tian, Q.: Pangu-weather: A 3d high-
+resolution model for fast and accurate global weather forecast. arXiv preprint
+arXiv:2211.02556 (2022)
+[9] Lam, R., Sanchez-Gonzalez, A., Willson, M., Wirnsberger, P., Fortunato, M.,
+Pritzel, A., Ravuri, S., Ewalds, T., Alet, F., Eaton-Rosen, Z., et al.: Graph-
+cast: Learning skillful medium-range global weather forecasting. arXiv preprint
+arXiv:2212.12794 (2022)
+[10] Nguyen, T., Brandstetter, J., Kapoor, A., Gupta, J.K., Grover, A.: Climax:
+A foundation model for weather and climate. arXiv preprint arXiv:2301.10343
+(2023)
+14
+[11] Chen, K., Han, T., Gong, J., Bai, L., Ling, F., Luo, J.-J., Chen, X., Ma, L., Zhang,
+T., Su, R., et al.: Fengwu: Pushing the skillful global medium-range weather
+forecast beyond 10 days lead. arXiv preprint arXiv:2304.02948 (2023)
+[12] Levin, L.A., Bett, B.J., Gates, A.R., Heimbach, P., Howe, B.M., Janssen, F.,
+McCurdy, A., Ruhl, H.A., Snelgrove, P., Stocks, K.I., et al. : Global observing
+needs in the deep ocean. Frontiers in Marine Science 6, 241 (2019)
+[13] Røed, L.P.: Modelling mesoscale features in the ocean. Waves and Nonlinear
+Processes in Hydrodynamics, 383–396 (1996)
+[14] He, K., Chen, X., Xie, S., Li, Y., Doll´ ar, P., Girshick, R.: Masked autoencoders
+are scalable vision learners. In: Proceedings of the IEEE/CVF Conference on
+Computer Vision and Pattern Recognition, pp. 16000–16009 (2022)
+[15] Guibas, J., Mardani, M., Li, Z., Tao, A., Anandkumar, A., Catanzaro, B.:
+Adaptive fourier neural operators: Efficient token mixers for transformers. arXiv
+preprint arXiv:2111.13587 (2021)
+[16] Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner,
+T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., et al.: An image is
+worth 16x16 words: Transformers for image recognition at scale. arXiv preprint
+arXiv:2010.11929 (2020)
+[17] Kim, W., Son, B., Kim, I.: Vilt: Vision-and-language transformer without convo-
+lution or region supervision. In: International Conference on Machine Learning,
+pp. 5583–5594 (2021). PMLR
+[18] Chassignet, E.P., Hurlburt, H.E., Smedstad, O.M., Halliwell, G.R., Hogan, P.J.,
+Wallcraft, A.J., Baraille, R., Bleck, R.: The hycom (hybrid coordinate ocean
+model) data assimilative system. Journal of Marine Systems 65(1-4), 60–83
+(2007)
+[19] Hersbach, H., Bell, B., Berrisford, P., Hirahara, S., Hor´ anyi, A., Mu˜ noz-Sabater,
+J., Nicolas, J., Peubey, C., Radu, R., Schepers, D., et al. : The era5 global reanal-
+ysis. Quarterly Journal of the Royal Meteorological Society 146(730), 1999–2049
+(2020)
+[20] Environmental Information, N.N.C.: ETOPO 2022 15 Arc-Second Global Relief
+Model. NOAA Boulder, CO, USA (2022)
+[21] Yanai, M., Maruyama, T.: Stratospheric wave disturbances propagating over the
+equatorial pacific. Journal of the Meteorological Society of Japan. Ser. II 44(5),
+291–294 (1966)
+[22] Bjerknes, J.: Atmospheric teleconnections from the equatorial pacific. Monthly
+weather review 97(3), 163–172 (1969)
+15
+[23] Yankovsky, E., Zanna, L., Smith, K.S.: Influences of mesoscale ocean eddies on
+flow vertical structure in a resolution-based model hierarchy. Journal of Advances
+in Modeling Earth Systems 14(11), 2022–003203 (2022)
+[24] Fennel, K., Mattern, J.P., Doney, S.C., Bopp, L., Moore, A.M., Wang, B., Yu,
+L.: Ocean biogeochemical modelling. Nature Reviews Methods Primers 2(1), 76
+(2022)
+[25] Gregg, W., Rousseaux, C.: Nasa ocean biogeo-chemical model assimilating satel-
+lite chlorophyll data global daily vr2017. Goddard Earth Sciences Data and
+Information Services Center (GES DISC)[data set], Greenbelt, MD, USA 10
+(2017)
+[26] Schulzweida, U.: CDO User Guide. Zenodo (2022). https://doi.org/10.5281/
+zenodo.7112925
+[27] Rasp, S., Dueben, P.D., Scher, S., Weyn, J.A., Mouatadid, S., Thuerey, N.: Weath-
+erbench: a benchmark data set for data-driven weather forecasting. Journal of
+Advances in Modeling Earth Systems 12(11), 2020–002203 (2020)
+16

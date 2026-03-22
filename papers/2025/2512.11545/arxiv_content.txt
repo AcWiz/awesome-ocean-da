@@ -1,0 +1,1318 @@
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 1
+Graph Embedding with Mel-spectrograms for
+Underwater Acoustic Target Recognition
+Sheng Feng, Shuqing Ma, Xiaoqian Zhu
+Abstract—Underwater acoustic target recognition (UATR) is
+extremely challenging due to the complexity of ship-radiated
+noise and the variability of ocean environments. Although deep
+learning (DL) approaches have achieved promising results, most
+existing models implicitly assume that underwater acoustic data
+lie in a Euclidean space. This assumption, however, is unsuitable
+for the inherently complex topology of underwater acoustic
+signals, which exhibit non-stationary, non-Gaussian, and non-
+linear characteristics. To overcome this limitation, this paper
+proposes the UATR-GTransformer, a non-Euclidean DL model
+that integrates Transformer architectures with graph neural
+networks (GNNs). The model comprises three key components:
+a Mel patchify block, a GTransformer block, and a classification
+head. The Mel patchify block partitions the Mel-spectrogram
+into overlapping patches, while the GTransformer block employs
+a Transformer Encoder to capture mutual information between
+split patches to generate Mel-graph embeddings. Subsequently,
+a GNN enhances these embeddings by modeling local neighbor-
+hood relationships, and a feed-forward network (FFN) further
+performs feature transformation. Experiments results based on
+two widely used benchmark datasets demonstrate that the UATR-
+GTransformer achieves performance competitive with state-of-
+the-art methods. In addition, interpretability analysis reveals that
+the proposed model effectively extracts rich frequency-domain
+information, highlighting its potential for applications in ocean
+engineering.
+Index Terms—Graph embedding, Transformer, GNN, Model
+interpretability, Underwater target recognition
+I. INTRODUCTION
+UNDERWATER acoustic target recognition (UATR), a
+crucial topic in ocean engineering, involves detecting and
+classifying underwater targets based on their unique acoustic
+properties. This capability holds important implications for
+maritime security, environmental monitoring, and underwater
+exploration. However, UATR is highly challenging due to
+the complex mechanisms of underwater sound propagation
+in diverse marine environments [1]. Factors such as atten-
+uation, scattering, and reverberation significantly complicate
+target identification and classification. Early UATR methods
+primarily relied on experienced sonar operators for manual
+recognition, but such approaches are prone to subjective influ-
+ences, including psychological and physiological conditions.
+This paper was produced by the IEEE Publication Technology Group.
+(corresponding author: Xiaoqian Zhu.)
+Manuscript received May 5, 2024; This work was supported by the
+National Defense Fundamental Scientific Research Program under Grant
+No.JCKY2020550C011. The authors are with the College of Meteorology
+and Oceanography, National University of Defense Technology, Chang sha
+410073, China (e-mail: fengsheng18@nudt.edu.cn; mashuqing@nudt.edu.cn;
+zhu xiaoqian@sina.com).To overcome these limitations, statistical learning techniques
+were introduced, leveraging time-frequency representations
+derived from waveforms to enhance automatic recognition.
+Representative approaches include Support Vector Machines
+(SVM) [2], [3] and logistic regression [4]. Nevertheless, as
+the demand for higher recognition accuracy has increased, the
+shortcomings of statistical learning-based methods have be-
+come apparent. These methods typically capture only shallow
+discriminative patterns and fail to fully exploit the potential of
+diverse datasets.
+Deep learning (DL), as a subset of machine learning, has
+achieved remarkable progress in UATR by learning complex
+patterns from large volumes of acoustic data [5], [6]. Among
+DL models, convolutional neural networks (CNNs) have been
+widely studied for end-to-end modeling of acoustic structures,
+owing to their strong feature extraction capabilities. For exam-
+ple, [7] proposed a dense CNN that outperformed traditional
+methods by extracting meaningful features from waveforms.
+Similarly, [8] employed ResNet and DenseNet to identify syn-
+thetic multitarget signals, demonstrating effective recognition
+of ship signals using acoustic spectrograms. A separable and
+time-dilated convolution-based model for passive UATR was
+proposed in [9], showing notable improvements over conven-
+tional approaches. In addition, [10] introduced a fusion net-
+work combining CNNs and recurrent neural networks (RNNs),
+achieving strong recognition performance across multiple tasks
+through data augmentation. Despite these successes, the in-
+herent local connectivity and parameter-sharing properties of
+CNNs bias them toward local feature extraction, making it
+difficult to capture global structures such as overall spectral
+evolution and relationships among key frequency components.
+To address this issue, attention mechanisms have been
+integrated into DL models to capture long-range dependencies
+in acoustic signals [11]. For instance, [12] proposed an in-
+terpretable neural network incorporating an attention module,
+while [13] designed an attention-based multi-scale convolution
+network that extracted filtered multi-view representations from
+acoustic inputs and demonstrated effectiveness on real-ocean
+data. Leveraging the Transformer’s multi-head self-attention
+(MHSA) mechanism, [14] proposed a lightweight UATR-
+Transformer, which achieved competitive results compared
+to CNNs. Inspired by the Audio Spectrogram Transformer
+(AST) [15], a spectrogram-based Transformer model (STM)
+was applied to UATR [16], yielding satisfactory outcomes.
+Moreover, self-supervised Transformers have shown strong
+0000–0000/00$00.00 © 2021 IEEEarXiv:2512.11545v1  [cs.SD]  12 Dec 2025
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 2
+potential in extracting intrinsic characteristics of underwater
+acoustic data [17]–[19]. Nonetheless, the complexity of pre-
+training and the unclear internal mechanisms suggest that this
+line of research is still in its early stages. In summary, current
+UATR research primarily focuses on extracting discriminative
+features through convolution, attention, and their variants [20],
+[21], which have achieved encouraging results with promising
+applications.
+In practice, underwater acoustic data are often regarded
+as high-dimensional topological data due to their irregular
+structure and cluttered characteristics [22]. The generation
+and radiation of underwater target noise involve multiple
+components, including broadband continuous spectra, strong
+narrowband lines, and distinct modulation features. As a result,
+underwater signals often exhibit nonlinear, non-stationary, and
+non-Gaussian behavior. In the time domain, the waveforms and
+amplitudes vary dynamically, while in the frequency domain,
+spectral distributions can change over time. These characteris-
+tics challenge the representation of acoustic features as simple
+Euclidean vectors. Traditional models directly process sequen-
+tial Euclidean data, such as images or audio, focusing on
+optimizing local and global information extraction. However,
+they neglect the geometric structure of acoustic data in high-
+dimensional space and overlook the non-Euclidean nature of
+the signals, leading to suboptimal performance.
+To address this limitation, we propose the UATR-
+GTransformer, a non-Euclidean DL model that performs
+recognition via Mel-graph embeddings. The motivation for
+graph modeling on the Mel-spectrogram stems from the
+strength of graph theory in handling complex structures and
+uncovering latent patterns in topological data [23], thereby
+providing a promising solution to the challenges of non-
+stationarity, non-Gaussianity, and nonlinearity [24]–[26]. In
+the proposed framework, the acoustic signal is first trans-
+formed into a Mel-spectrogram and partitioned into overlap-
+ping patches. A Transformer Encoder then extracts features,
+capturing global dependencies via MHSA to form Mel-graph
+embeddings. Each embedding is subsequently treated as a
+graph node, and edges are defined by relationships among
+nodes. This Mel-graph captures both local and global struc-
+tures of the spectrogram, enabling the discovery of hidden
+patterns. Through further graph processing, it is expected
+that the UATR-GTransformer can effectively exploit the topo-
+logical structure of acoustic features to enhance recognition
+performance.
+The main contributions of this paper are as follows:
+•We propose a non-Euclidean framework for intelligent
+UATR that explicitly incorporates spatial information
+from acoustic features. To the best of our knowledge, this
+is the first work to introduce graph structures into UATR.
+Mel-graph processing enables the model to leverage
+topological characteristics of underwater acoustic signals.
+•We integrate a Transformer Encoder to enhance global
+feature perception during graph processing. By propa-
+gating global information across neighboring nodes, the
+graph representation becomes more robust.
+•We provide interpretability through attention and graph
+visualization, allowing better understanding of the pre-diction process and increasing the model’s practicality
+for ocean engineering applications.
+II. GAUSSIANITY ANDLINEARITYTEST
+In this section, we examine the Gaussianity and linearity of
+sonar-received radiated noise using Hinich theory [27], which
+provides an effective framework to validate the non-Gaussian
+and nonlinear characteristics of random processes.
+Letxdenote the ship-radiated noise with probability density
+functionf(x). Its moment generating function (MGF) can be
+defined as:
+Φ(ω) =Z∞
+−∞f(x)ejωxdx.(1)
+Thek-th order moment is obtained by differentiatingΦ(ω)k
+times with respect toω:
+mk= (−j)kdkΦ(ω)
+dωk
+ω=0.(2)
+Based on the relationship between the cumulant generating
+function and the MGF,Ψ(ω) = ln Φ(ω), thek-th order
+cumulant is expressed as:
+ck= (−j)kdkΨ(ω)
+dωk
+ω=0.(3)
+According to Hinich theory, if the third-order cumulants of
+a process are zero, its bispectrum and bicoherence are also
+zero, indicating Gaussianity. Conversely, a nonzero bispectrum
+implies that the process is non-Gaussian.
+The hypothesis testing can be formulated as follows: the
+null hypothesisH 0assumes that the underwater acoustic
+signal is Gaussian, i.e., its higher-order cumulants are zero;
+the alternative hypothesisH 1assumes the opposite, i.e., the
+signal is non-Gaussian. The probability of false alarm (PFA)
+reflects the risk of incorrectly acceptingH 1. Typically, if
+PFA≥0.05,H 0is accepted; whereas whenPFA→0,
+H1is accepted. To further assess nonlinearity, a comparison
+between the theoretical and estimated interquartile deviations
+is conducted. A large deviation suggests nonlinearity, while a
+small deviation indicates linearity.
+Fig. 1 presents the Hinich test results based on a 20-s sample
+selected from the ShipsEar dataset [29], implemented using
+the HOSA package [30]. The original sampling frequency
+of the signal is 52374 Hz, and it was segmented into 40
+intervals of 0.5 s each for Gaussianity and linearity evaluation.
+Previous studies have already demonstrated the non-stationary
+characteristic of underwater acoustic signals [31], [32]. As
+shown in Fig. 1(b), the PFA values of the Gaussianity test
+vary between 0 and 1. In particular, multiple instances exhibit
+PFA = 0, indicating strong non-Gaussianity. Moreover, the
+significant deviation between the estimated and theoretical
+interquartile ranges further confirms nonlinearity. Following
+t-SNE visualization using the HyperTools package [33] with
+default parameters, Fig. 2 clearly illustrates that both the
+waveform and the time-frequency representation of underwater
+acoustic signals exhibit complex structures, forming high-
+dimensional topological patterns in a non-Euclidean space.
+Notably, the time-frequency features demonstrate better class
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 3
+(a)
+(b)
+(c)
+Fig. 1. Hinich hypothesis testing on the ShipsEar dataset: (a) waveform of
+one segment; (b) Gaussianity test results; (c) linearity test results.
+separability than raw waveforms, validating their effectiveness
+for underwater target classification.
+III. PROPOSEDMETHOD
+For UATR in topological space, we propose a Mel-graph
+embedding-based DL model to recognize real-world under-
+water acoustic signals. The overall framework is illustrated
+in Fig. 3, which comprises four main components: Mel-
+spectrogram feature extraction, the Mel Patchify Block, the
+GTransformer Block, and a classification head. In this section,
+we first describe the extraction of Mel-spectrogram features,
+followed by the partitioning of the spectrogram using the Mel
+Patchify Block. The construction and updating of the Mel-
+graph are performed within the GTransformer Block. Finally,
+we provide a brief overview of the classification head.
+A. Mel-spectrogram Feature
+In the context of UATR, the Mel-spectrogram, derived from
+the Mel filterbank (Mel-Fbank), has become a widely adopted
+time–frequency representation in sonar signal processing [10].
+In this work, the choice of Mel-spectrograms as model input
+is motivated by their partially overlapping frequency bands,
+which preserve intrinsic signal information and exhibit high
+inter-feature correlation. Consequently, when further processed
+through graph modeling, the connections among graph nodes
+are strengthened, enabling the construction of a more discrim-
+inative topological graph.
+The extraction of Mel-spectrogram features involves the
+following steps, after resampling the input signal to 16 kHz:(1)Pre-emphasis:This step enhances the energy of high-
+frequency components for spectrum balancing. It is typically
+implemented by processing the original signalx[n]as follows:
+y[n] =x[n]−αx[n−1],(4)
+wherey[n]is the pre-emphasized signal andαis the pre-
+emphasis coefficient, usually set to0.97, approximated by a
+hardware-friendly coefficient [34].
+(2)Framing:The pre-emphasized signaly[n]is segmented
+into overlapping frames, each containing 25 ms of audio with
+a frame shift of 10 ms.
+(3)Windowing:To mitigate spectral leakage, each frame
+is multiplied by a Hanning window.
+(4)Fast Fourier Transform (FFT):The FFT is then
+applied to each windowed frame to transform the signal into
+its frequency-domain representation.
+(5)Mel Filtering:The frequency-domain signal is filtered
+using a 128-band triangular Mel-Fbank, defined as
+Fm(k) =
+
+0ifk < f[m−1],
+k−f[m−1]
+f[m]−f[m−1]iff[m−1]≤k < f[m],
+f[m+1]−k
+f[m+1]−f[m]iff[m]≤k < f[m+ 1],
+0ifk≥f[m+ 1],(5)
+wheref[i]denotes thei-th center frequency of the Mel
+bins andkis the frequency index. The filterbank energy is
+then applied to the Short-Time Fourier Transform (STFT)
+coefficientX(k)to compute the Mel-spectrogram:
+M= log N−1X
+k=0Fm(k)×X(k)!
+,(6)
+whereN= 128is the number of Mel frequency bins.
+The above extraction procedure is implemented using the
+torchaudiopackage. Suppose the received underwater acoustic
+signal has a duration of 5 s, the resulting Mel-spectrogram will
+have a dimension of512×128after time padding.
+B. Mel Patchify Block
+Previous studies have shown that patch modeling of
+acoustic spectrograms can effectively capture meaningful
+time–frequency structures from acoustic signals [35]. There-
+fore, the Mel-spectrogram is first divided into overlapping
+patches, which serve as the basic computational units of the
+model. This enables the UATR-GTransformer to construct a
+graph that preserves spatial information in both the time and
+frequency domains. Specifically, an input Mel-spectrogram is
+partitioned intoNpatches of size16×16using the Mel
+patchify block. This block employs a stem convolution con-
+sisting of a sequence of trainable3×3convolutional kernels
+sliding across the spectrogram. Such convolutions are effective
+for extracting fine-grained features and have been shown to
+maintain optimization stability and computational efficiency
+[36]. In our implementation, five convolutional kernels are
+used to process the Mel-spectrogram. The primary objective
+is to extract salient features from the split patches and provide
+rich representations for subsequent network layers.
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 4
+(a)
+ (b)
+Fig. 2. Topological structure of the ShipsEar dataset using the t-SNE algorithm [28]. (a) waveform distribution; (b) Mel-Fbank feature distribution.
+T-F 
+TransformL
+…
+…
+…
+…Patch+Position
+Embedding
+GTransformer Block
+FFN GNNTransfo -
+rmer
+Encoder
+GTransformer Block
+FFN GNNTransfo -
+rmer
+EncoderGTransformer Block
+FFN GNNTransfo -
+rmer
+EncoderPooling1×1
+Conv1×1
+ConvClassification Head  
+3x3 
+Conv3x3 
+Conv3x3 
+Conv3x3 
+Conv3x3 
+Conv
+Mel Patchify BlockClass： 
+RORO，
+Passenger
+Fishboat
+  …Class： 
+RORO，
+Passenger
+Fishboat
+  …
+Fig. 3. Overall workflow of the proposed UATR-GTransformer framework.
+Among these convolutional kernels, the first four use a stride
+of 2, while the final kernel uses a stride of 1. The stride
+configuration serves two purposes. The initial strides of 2
+progressively downsample the feature maps to capture coarse-
+grained features and reduce computational cost, whereas the
+final stride of 1 maintains the spatial resolution for detailed
+representation. To further improve training stability and intro-
+duce nonlinearity, batch normalization and ReLU activation
+are applied after each convolutional operation. Assuming the
+input Mel-spectrogram size is512×128, the resulting patch
+embedding has a dimension of(dim,32,8)due to the stridesof 2, 2, 2, 2, and 1. Here,dimdenotes the output channel
+size of the last convolutional kernel, which is also the graph
+embedding dimension.
+Since graph-structured representations rely on precise spa-
+tial information, a two-dimensional positional embedding
+is added to the patch embeddings, similar to the Trans-
+former framework [37]. This embedding captures the order of
+time–frequency distributions, thereby enhancing the model’s
+ability to process graph structures:
+xi←x i+PE i,(7)
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 5
+MHSAAdd&NormAdd&Norm
+MLP
+Qh Kh Vh
+Xembedding
+[B, 256, dim] [B, 256, dim]
+Xhidden
+Fig. 4. Illustration of the Transformer Encoder for global feature extraction.
+Here,Bdenotes the batch size.
+wherex idenotes the patch embedding. Specifically, a learn-
+able positional encodingPE i∈R32×8is added along both
+the frequency and time axes of the split patches, followed by
+a broadcasting operation. Finally, the set of patch embeddings
+X0is reshaped into(256, dim)as input to the GTransformer
+Block.
+C. GTransformer Block
+As the backbone of the UATR-GTransformer, the GTrans-
+former block consists of a Transformer Encoder, a graph neural
+network (GNN), and a feed-forward network (FFN).
+1) Transformer Encoder:In the UATR-GTransformer, the
+Transformer Encoder functions as a global feature extractor
+onX, capturing the overall time–frequency structure. Its
+architecture is illustrated in Fig. 4. The core mechanism of
+the Transformer Encoder is MHSA, which projects the input
+features into multiple sets of queries, keys, and values. Atten-
+tion is then computed independently in each head, enabling
+the model to capture high-level dependencies from multiple
+perspectives. The MHSA formulation for embeddings at the
+l-th layerX lis given by:
+Qh,Kh,Vh=X lWQ
+h,XlWK
+h,XlWV
+h,
+Attn (Q h,Kh,Vh) = softmaxQhKT
+h√Dattn
+Vh,(8)
+whereWQ
+h,WK
+h, andWV
+hare learnable projection matrices
+for the query, key, and value sets, respectively.Hdenotes the
+number of heads,h∈[1, H]indexes the head, andD attn=
+dim/His the dimensionality per head.
+The outputs of allHattention heads, each of size
+(256, dim/H), are concatenated to generate an attention repre-
+sentation of size(256, dim). This representation is then passed
+through a multi-layer perceptron (MLP) comprising two lin-
+ear layers with a GELU activation in the middle. Residual
+connections are applied after both the MHSA and MLP mod-
+ules. Following standard Transformers, layer normalization is
+employed between layers instead of batch normalization to
+improve gradient stability and convergence.2) GNN:In topological data processing, graphs naturally
+represent associative relationships among entities [38], [39].
+GNNs are well suited to capture and exploit these relationships
+by integrating node-specific features with the graph structure.
+Through message passing along edges, GNNs effectively learn
+dependencies between nodes, enabling the processing of high-
+dimensional topological data. In the proposed framework, a
+GNN is employed to construct and update the Mel-graph
+following the Transformer Encoder. Coupling a GNN af-
+ter the Transformer Encoder allows the model to capture
+local structural information of underwater acoustic signals,
+such as rapid time–frequency variations, and to form high-
+dimensional, discriminative graph representations.
+To construct and update the graph, theK-nearest neighbors
+(KNN) algorithm [40] is employed to measure the similarity
+between Transformer Encoder outputs. This provides a compu-
+tationally efficient and intuitive approach for graph operations,
+enabling the model to capture salient local relationships within
+the feature space while avoiding unnecessary complexity. The
+similarity distance is computed using thep-norm metric:
+∥x∥p= nX
+i=1|xi|p!1/p
+,(9)
+wherepis set to 2 in this study. Subsequently, for each
+nodev i,Knearest neighborsN(v i)are connected by di-
+rected edgese jifromv jtovifor allv j∈ N(v i). In this
+way, the initial Mel-graph is defined asG mel = (V,E),
+whereV={v 1, v2,···, v N}is the node set andEis the
+edge set. The outputs of the Transformer Encoder, obtained
+through MHSA, are regarded as Mel-graph embeddings in
+the UATR-GTransformer. Each embedding encodes its own
+Mel-frequency energy distribution while also capturing global
+dependencies among embeddings due to the strong global
+modeling capability of MHSA. Consequently, these Mel-graph
+embeddings serve as higher-order representations that preserve
+detailed time–frequency information of underwater acoustic
+target signals, thereby implicitly constructing a robust Mel-
+graph.
+The core operation of the GNN is graph convolution, which
+aggregates neighboring topological information and updates
+node features within the Mel-graph, as illustrated in Fig. 5.
+From the perspective of a central nodex i, graph convolution
+is formulated as:
+x′
+i=h(x i, g(x i,N(x i);W agg);W update),(10)
+whereg(·)andh(·)denote the aggregation and update
+functions, respectively, andN(x i)is the set of neighboring
+nodes ofx i. To mitigate gradient vanishing, the max-relative
+(MR) graph convolution [41] is applied to process Mel-graph
+embeddings:
+g(·) =x′′
+i= [x i,max ({x j−xi|j∈ N(x i)})],
+h(·) =x′
+i=x′′
+iWupdate +b,(11)
+wherebis the bias term. After MR graph convolution, the
+updated node setN(x′
+i)forms a new Mel-graph, denoted by
+G′
+mel. Here,W aggandW update represent learnable weights for
+the aggregation and update operations, respectively. In par-
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 6
+Graph
+UpdateNodes
+Aggregation
+Fig. 5. Illustration of graph convolution for nodes aggregation and graph update. The central node is marked by a circle, while its neighboring nodes are
+denoted by surrounding boxes.
+FFN
+Conv1 ReLU Conv2 X
+Residual addX'
+Fig. 6. Illustration of the FFN for feature transformation.
+ticular, the aggregation function captures salient information
+by computing the maximum difference between the central
+node and itsKneighbors, while the update function applies
+a nonlinear transformation to generate the updated graph.
+After graph convolution onX, the updated featuresX′
+are processed by two fully connected layers with projection
+matricesW inandW outto enhance feature diversity. A ReLU
+activation function is applied after the first projection layer to
+mitigate layer collapse. The output featureYis then computed
+as follows:
+X′= MR Graph Convolution(X),
+Y= ReLU(X′Win)W out+X.(12)
+3) FFN:After GNN processing, an FFN is applied to
+further transform the node-level features and to integrate the
+Transformer and GNN modules. The structure of the FFN is
+illustrated in Fig. 6 and can be expressed as:
+Z= ReLU (YW 1+b1)W 2+b2+Y,(13)
+whereZ∈RN×dim,N= 256is the number of nodes,W 1
+andW 2are the weights of two fully layers, andb 1,b2are
+the corresponding biases. The hidden dimension of the FFN is
+set to4×dimto enhance its feature transformation capacity.
+The ReLU activation function is employed to introduce non-
+linearity and improve representation learning for underwater
+acoustic signals.
+D. Classification Head
+To predict the ship class, a classification head is attached
+after the GTransformer stacks. Specifically, the classification
+head operates on 4-D tensors interpreted as a graph after thefinal FFN. Since fully connected layers alone cannot directly
+process such data, the classification head incorporates a pool-
+ing layer for dimension reduction and two convolutional layers
+to progressively extract meaningful features for prediction.
+For the two convolutional layers, the first employs a1×1
+convolution to transform the feature map fromdim= 96to
+a hidden dimension. The second1×1convolution further
+projects the features from the hidden dimension toC, where
+Cdenotes the number of classes. The hidden dimension is
+set to 512 to better capture intricate patterns from the graph
+embeddings. Batch normalization and a ReLU activation are
+applied between the two convolutional layers to facilitate
+training.
+The overall framework of the UATR-GTransformer is sum-
+marized as follows.
+Algorithm 1UATR-GTransformer Algorithm for UATR.
+Require:Mel-graphx∈Rt×f
+Ensure:Classification lossL ce
+1: Apply Mel patchify on spectrogramxusing stem
+convolutions to obtain the patch set.
+2: Add positional embedding to the patch embeddings
+using (7).
+forl= 1toLdo
+3: Transformer Encoder to extract deep features as Mel-
+graph embeddings.
+4: Construct Mel-graphG mel= (V,E)by findingK
+nearest neighbors using the KNN algorithm.
+5: Graph convolution in a GNN block to aggregate
+information and updateG mel, yieldingG′
+mel.
+6: FFN for feature transformation onG′
+mel.
+end for
+7: Classification head to predict the ship labely predict .
+8: Compute the cross-entropy lossL cewith the ground-
+truth labely true.
+IV. EXPERIMENTAL SETTINGS
+A. Dataset description
+The dataset used in the experiments consists of two widely
+researched datasets: (1) ShipsEar [29]: this dataset contains a
+diverse collection of 90 ship audio recordings at a sampleing
+frequency of 52734 Hz, the duration of each recording is
+between 15 seconds to 10 minutes. ShipsEar contains a total of
+11 vessel types, which can be further combined into 4 vessel
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 7
+TABLE I
+DETAILED CONFIGURATION OF THE MODEL ARCHITECTURE. THE INPUT DIMENSION IS(B,512,128),WHEREBDENOTES THE BATCH SIZE.
+Module Main Opearation Dimension
+Mel PatchifyConv(K=3, C=12, S=2, P=1) (B, 12, 256, 64)
+Conv(K=3, C=24, S=2, P=1) (B, 24, 128, 32)
+Conv(K=3, C=48, S=2, P=1) (B, 48, 64, 16)
+Conv(K=3, C=96, S=2, P=1) (B, 96, 32, 8)
+Conv(K=3, C=96, S=1, P=1) (B, 96, 32, 8)
+GTransformer
+(L=8)Encoder H=8,dim=96 (B, 256, 96)
+GNN1×1 Conv (B, 96, 32, 8)
+Graph Conv, KNN[2, 8] (B, 96, 256)
+1×1 Conv (B, 96, 32, 8)
+FFNConv(96, 384), ReLU (B, 384, 32, 8)
+Conv(386, 96), residual connection (B, 96, 32, 8)
+Classification Head2d pooling (B, 96, 1, 1)
+1×1 Conv(96, 512) (B, 512, 1, 1)
+1×1 Conv(512,C) (B,C)
+TABLE II
+DATASET PARTITIONS OF THE TWO UNDERWATER ACOUSTIC DATABASES.
+Dataset Class Split sample
+ShipsEarA: Fish boats, Trawlers, Mussel boat, Tugboat, Dredger 340
+B: Motorboat, Pilotboat, Sailboat 301
+C: Passengers 843
+D: Ocean liner, RORO 486
+E: Background noise 253
+DeepShipA: Cargo 7369
+B: Passengers 9677
+C: Tanker 8817
+D: Tug 8159
+categories depending on vessel size, and 1 background noise
+category. (2) DeepShip [42]: this dataset consists of 265 real
+underwater sound recordings at a sampling frequency of 32000
+Hz, which is further merged into four categories of ship vessels
+with no background noise provided.
+For preprocessing, the waveform data is first resampled to
+16 kHz and then cut into 5-seconds segments. These segments
+are divided into training, validation, and testing sets according
+to time periods, using a ratio of 70% for training, 15% for
+validation, and the remainder for testing. This partitioning
+strategy, recommended in [43], helps prevent potential data
+leakage that may occur with random splitting. The detailed
+dataset partitions are shown in Table II.
+B. Experimental Details
+The experiments were implemented in PyTorch (version
+1.8.0) with Python (version 3.8). The hardware platform
+consisted of four Nvidia GeForce RTX 3090 GPUs and two
+Intel Xeon Platinum 8377c CPUs. For data augmentation,
+the time–frequency masking method [44] was applied, with
+a frequency mask of 24 and a time mask of 96 on the Mel-
+spectrogram. To ensure consistent scaling across the dataset,
+the input Mel-spectrograms were normalized to have zeromean and unit variance. The cross-entropy lossL ce, a widely
+used loss function in recognition and classification tasks, was
+adopted to optimize the training process.
+For the training configurations, the initial learning rate was
+set to1.5×10−3for ShipsEar and1.2×10−3for DeepShip.
+The learning rate was decayed by a factor of 0.5 after 90
+epochs for ShipsEar and 130 epochs for DeepShip. The batch
+size was set to 16 for ShipsEar and 64 for DeepShip, while
+the total number of epochs was 130 and 180, respectively.
+Other hyperparameters were kept the same for both datasets:
+the number of GTransformer blocksL= 8; the number of
+nearest neighborsKincreased from 2 to 8 across blocks; the
+number of attention headsH= 8; and the graph embedding
+dimensiondim= 96. These hyperparameters were determined
+through repeated trials to optimize recognition performance.
+The Adam optimizer was used to update network parameters.
+C. Evaluation Criteria
+The recognition performance of the proposed model was
+evaluated using four widely adopted metrics: overall accuracy
+(OA), average accuracy (AA), Kappa coefficient (Kappa),
+andF1-score (F1), averaged over five runs. Specifically,OA
+measures overall classification accuracy, whileAAandKappa
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 8
+account for imbalanced datasets. TheF1-score reflects the
+trade-off between recall and precision. LetTP,TN,FP,
+andFNdenote true positives, true negatives, false positives,
+and false negatives, respectively. These metrics are defined as
+follows:
+OA=TP+TN
+TP+TN+FP+FN,(14)
+AA=nX
+i=1TPi+TN i
+TPi+TN i+FP i+FN i,(15)
+whereTP i,TN i,FP i, andFN irepresent the numbers of
+TP,TN,FP, andFNfor thei-th class.
+Kappa=P0−Pe
+1−P e,(16)
+whereP 0denotes the observed agreement among raters (equal
+toOA), andP edenotes the expected agreement by chance.
+F1 = 
+2 +FP
+TP+FN
+TP
+2!−1
+.(17)
+V. RESULTS ANDDISCUSSIONS
+A. Comparison with Baseline Models
+To evaluate the effectiveness of the proposed UATR-
+GTransformer, its recognition performance is compared with
+other baseline DL models, including ResNet-18, DenseNet-
+169 [8], MbNet-V2 [45], Xception [46], EfficientNet-B0,
+UATR-Transformer [14], STM [16], and convolution-based
+mixture of experts (CMoE) [47]. The main characteristics of
+these baseline models are summarized below:
+•ResNet-18: A residual network with 18 convolutional
+layers, which has demonstrated strong performance
+across various recognition tasks.
+•DenseNet-169: A densely connected convolutional net-
+work with 169 layers, where each layer is connected to
+all preceding layers, enabling efficient feature reuse and
+robust recognition performance in UATR.
+•MbNet-V2: A lightweight model based on depthwise
+separable convolution, which substantially reduces model
+parameters and computational cost while maintaining
+accuracy.
+•Xception: An efficient model that also employs depth-
+wise separable convolution, further reducing parameter
+count and computation without sacrificing performance.
+•EfficientNet-B0: An optimized model that incorporates
+inverted residual connections and compound scaling
+strategies, achieving excellent recognition accuracy with
+relatively low complexity.
+•UATR-Transformer: A convolution-free model designed
+to exploit both global and local information from
+time–frequency spectrograms for UATR tasks.
+•STM: A Transformer-based model inspired by the Au-
+dio Spectrogram Transformer (AST) [37], specifically
+adapted for UATR.
+•CMoE: A convolutional mixture-of-experts model that
+adopts ResNet as its backbone to enhance feature extrac-
+tion.To ensure fair comparisons, all networks were modified to
+accept 1-D Mel-spectrograms as input. Moreover, to maintain
+a consistent training paradigm, the SPM model was not pre-
+trained on ImageNet but was trained from scratch, similar to
+the other models.
+From Table III, it can be observed that on the ShipsEar
+dataset, the proposed UATR-GTransformer achieves the best
+performance, withOA= 0.832,AA= 0.825,Kappa=
+0.778, andF1 = 0.828. On the DeepShip dataset, the UATR-
+GTransformer also achieves the best results, withOA= 0.827,
+AA= 0.824,Kappa= 0.768, andF1 = 0.826. These
+results clearly demonstrate the effectiveness and robustness
+of the proposed model. Specifically, for the ShipsEar dataset,
+CMoE achieves the strongest performance among CNN-based
+methods, benefitting from its multiple expert layers that act as
+independent learners capable of capturing high-level patterns
+in underwater acoustic targets. ResNet-18 and DenseNet-169
+also show competitive performance, outperforming other back-
+bone CNNs. In contrast, the lightweight MbNet-V2, as well as
+EfficientNet-EfficientNet-B0, exhibit weaker performance on
+ShipsEar, suggesting that their relatively shallow architectures
+may limit the extraction of sufficiently discriminative higher-
+order features. Among Transformer-based approaches, the
+UATR-Transformer achieves moderate recognition accuracy
+by leveraging hierarchical tokenization and the Transformer
+Encoder to capture both local and global dependencies. How-
+ever, STM relies on a standard square tokenization scheme,
+which restricts local information interaction between tokens.
+The lack of ImageNet pre-training further amplifies this limita-
+tion, resulting in weaker performance. On the larger DeepShip
+dataset, ResNet-18 and DenseNet-169 continue to demonstrate
+strong generalization ability, with overall accuracy values close
+to 0.8. Among CNNs, CMoE again achieves the best results,
+confirming its capability to generalize across diverse data dis-
+tributions through its mixture-of-experts mechanism. Further-
+more, the UATR-Transformer achieves superior performance
+compared to STM, demonstrating the effectiveness of its de-
+sign for modeling complex underwater acoustic signals. When
+trained on larger datasets, both Xception and EfficientNet-B0
+exhibit improved recognition accuracy, implying that increased
+data volumes partially offset their architectural constraints.
+B. Ablation Study
+This section presents the results of ablation experiments
+conducted to evaluate the contribution of different components
+in the proposed UATR-GTransformer. In particular, we analyze
+the effect of the modules within the GTransformer block
+and the positional embedding on recognition performance,
+measured by the four evaluation metrics.
+The first set of experiments examines the importance of
+each module in the GTransformer block. Table IV summarizes
+the results obtained by removing individual components. The
+symbol “–” denotes the removal of the corresponding module.
+Specifically, “– Encoder” indicates that the model employs
+only the GNN and FFN in the GTransformer block, excluding
+the MHSA-based feature extractor. “– GNN” indicates that the
+model consists of the Encoder and FFN, but without graph
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 9
+TABLE III
+RECOGNITION PERFORMANCE COMPARISON WITH DIFFERENT METHODS.
+Dataset MethodOA AA Kappa F1
+ShipsEarResNet-18 0.799 0.736 0.727 0.738
+DenseNet-169 0.798 0.736 0.726 0.743
+MbNet-V2 0.745 0.681 0.656 0.686
+Xception 0.777 0.765 0.705 0.766
+EfficientNet-B0 0.757 0.749 0.678 0.749
+UATR-Transformer 0.816 0.802 0.755 0.814
+STM 0.707 0.684 0.607 0.692
+CMoE 0.815 0.807 0.756 0.809
+UATR-GTransformer0.832 0.825 0.778 0.828
+DeepShipResNet-18 0.802 0.796 0.734 0.799
+DenseNet-169 0.799 0.792 0.730 0.795
+MbNet-V2 0.630 0.638 0.509 0.628
+Xception 0.801 0.796 0.732 0.798
+EfficientNet-B0 0.795 0.793 0.725 0.793
+UATR-Transformer 0.811 0.806 0.746 0.808
+STM 0.744 0.737 0.656 0.739
+CMoE 0.812 0.805 0.747 0.808
+UATR-GTransformer0.827 0.824 0.768 0.826
+embedding operations. Finally, “– FFN” represents the variant
+where the Encoder and GNN are retained, while the FFN is
+removed.
+From Table IV, it can be seen that the complete UATR-
+GTransformer, which incorporates the Encoder, GNN, and
+FFN, achieves the bestOA,AA,Kappa, andF1on both
+datasets. Each component within the GTransformer block
+contributes significantly to capturing discriminative Mel-graph
+representations. The Transformer Encoder, GNN, and FFN
+operate jointly to enhance recognition performance, and the
+removal of any individual component undermines the under-
+lying Mel-graph structure, leading to noticeable performance
+degradation. In particular, for the ShipsEar dataset, removing
+any module results in substantial variation, highlighting the
+critical role of graph-structured feature extraction and process-
+ing for this dataset.
+The second set of experiments investigates the effectiveness
+of the two-dimensional positional embeddingPEin the
+UATR-GTransformer. Specifically, recognition performance
+was compared across three configurations: Case 1, without
+PE; Case 2, with one-dimensional absolutePEfollowing
+standard Transformer models [48]; and Case 3, with two-
+dimensionalPE. As shown in Table V, introducingPE
+consistently improves performance over Case 1, confirm-
+ing its ability to capture the positional information of split
+patches. Moreover, Case 3 outperforms Case 2, particularly
+on the ShipsEar dataset, demonstrating the superiority of
+the two-dimensionalPEapproach, which provides richer
+time–frequency distribution information for Mel-graph con-
+struction.
+To further examine the contribution of the Transformer lay-
+ers on the recognition performance, comparative experiments
+were conducted using only a single Transformer layer for
+initial Mel-graph embedding. Table VI shows that employingthe full Transformer stack in the GTransformer block yields
+superior results compared to a single-layer variant, indicating
+that successive MHSA computations enable the extraction of
+higher-level semantic information across graph nodes, thereby
+producing more discriminative Mel-graph embeddings.
+Finally, it is worth noting that the ablation experiments
+have a smaller impact on the DeepShip dataset. This can be
+attributed to the larger scale of the dataset, which facilitates the
+learning of more generalized features and reduces the model’s
+reliance on individual modules.
+C. Recognition Performance under Different Features
+The third set of experiments evaluates the recognition per-
+formance of the UATR-GTransformer using different acoustic
+features, including the STFT, the Mel-Frequency Cepstral
+Coefficients (MFCC), and the Gammatone-Frequency Cepstral
+Coefficients (GFCC). These features have been widely studied
+for UATR [11] and are important benchmarks for assessing the
+effectiveness of the proposed model. The experiments were
+conducted on the ShipsEar dataset for simplicity. As shown
+in Table VII, the Mel-Fbank feature yields the best recog-
+nition performance across all four evaluation metrics (OA,
+AA,Kappa, andF1), demonstrating that Mel-graphs provide
+more discriminative information for the UATR-GTransformer.
+In contrast, cepstral coefficient-based features (GFCC and
+MFCC) achieve better recognition accuracy compared with
+STFT, while STFT performs the worst, with anOAof only
+0.609. This result suggests that constructing STFT-graphs may
+not effectively capture discriminative information for UATR.
+In particular, when using the Mel-Fbank feature, the UATR-
+GTransformer achieves its best results on the ShipsEar dataset,
+withOA= 0.832,AA= 0.825,Kappa= 0.778, and
+F1 = 0.828. Based on these findings, the Mel-Fbank feature
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 10
+TABLE IV
+ABLATION STUDY ON THEGTRANSFORMER BLOCK BASED ON THE TWO DATASETS.
+Dataset ModelOA AA Kappa F1
+ShipsEarUATR-GTransformer0.832 0.825 0.778 0.828
+- Encoder 0.780 0.769 0.709 0.776
+- GNN 0.802 0.800 0.739 0.801
+- FFN 0.792 0.783 0.725 0.788
+DeepShipUATR-GTransformer0.827 0.824 0.768 0.826
+- Encoder 0.818 0.815 0.756 0.816
+- GNN 0.814 0.811 0.750 0.812
+- FFN 0.815 0.810 0.751 0.813
+TABLE V
+ABLATION STUDY ON THE POSITION EMBEDDING BASED ON THE TWO DATASETS.
+Dataset ModelOA AA Kappa F1
+ShipsEarCase 1 0.790 0.783 0.723 0.785
+Case 2 0.798 0.788 0.731 0.793
+Case 30.832 0.825 0.778 0.828
+DeepShipCase 1 0.817 0.817 0.759 0.818
+Case 2 0.821 0.816 0.760 0.819
+Case 30.827 0.824 0.768 0.826
+TABLE VI
+ABLATION STUDY ON THETRANSFORMER CONFIGURATIONS BASED ON THE TWO DATASETS.
+Dataset TransformerOA AA Kappa F1
+ShipsEarFirst Layer 0.790 0.783 0.723 0.785
+Full layer0.832 0.825 0.778 0.828
+DeepShipFirst Layer 0.817 0.812 0.754 0.814
+Full layer0.827 0.824 0.768 0.826
+TABLE VII
+PERFORMANCE COMPARISON UNDER DIFFERENT FEATURES.
+FeatureOA AA Kappa F1
+STFT 0.609 0.606 0.491 0.583
+GFCC 0.779 0.773 0.709 0.772
+MFCC 0.762 0.758 0.687 0.758
+Mel-Fbank0.832 0.825 0.778 0.828
+was selected for graph embedding in the proposed UATR-
+GTransformer.
+D. Parameter sensitivities
+As major parameters of the UATR-GTransformer, we further
+analyze the sensitivity ofKin the KNN algorithm, the number
+of GNN blocksL, and the graph embedding dimensiondim
+on recognition performance using the ShipsEar dataset for
+simplicity.
+E. Parameter Sensitivities
+Table VIII presents the recognition performance with dif-
+ferent values ofKto find neighboring nodes. “4 to 8”TABLE VIII
+PERFORMANCE COMPARISON UNDER VARIOUSK.
+K OA AA Kappa F1
+2 0.767 0.760 0.692 0.756
+4 0.788 0.786 0.721 0.781
+6 0.802 0.794 0.738 0.796
+8 0.812 0.804 0.751 0.808
+10 0.782 0.778 0.711 0.776
+4 to 8 0.804 0.797 0.740 0.799
+2 to 80.832 0.825 0.778 0.828
+TABLE IX
+RECOGNITION PERFORMANCE UNDER VARIOUSL.
+L OA AA Kappa F1
+4 0.796 0.795 0.731 0.796
+6 0.810 0.803 0.750 0.804
+80.832 0.825 0.778 0.828
+10 0.784 0.776 0.714 0.779
+12 0.797 0.789 0.731 0.792
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 11
+TABLE X
+RECOGNITION PERFORMANCE UNDER VARIOUSdim.
+dim OA AA Kappa F1
+48 0.783 0.778 0.713 0.778
+960.832 0.825 0.778 0.828
+192 0.690 0.679 0.589 0.673
+384 0.525 0.486 0.353 0.450
+768 0.417 0.333 0.165 0.291
+indicates thatKis progressively increased from 4 to 8 across
+the GTransformer blocks. For fixed values ofK, the best
+performance is obtained atK= 8. This may be explained
+by the fact that splitting the Mel-spectrogram into eight fre-
+quency regions provides sufficient information for aggregating
+neighborhood features, whereas further increasingKto 10
+introduces redundancy that can reduce performance. When
+Kis gradually increased with network depth, the receptive
+field of the Mel-graph is enlarged, enabling information ex-
+change among more distant nodes. This strategy is particularly
+beneficial for complex ship-radiated noise, as it allows the
+model to capture long-range dependencies and improve node
+separability. As shown in Table VIII, progressively enlarging
+Kimproves recognition performance. In particular, the “2 to
+8” strategy outperforms “4 to 8”, which may be attributed to
+the initial layers capture local node relationships, while later
+layers gradually expand the receptive field and stabilize the
+graph structure.
+The number of GNN blocksLand the embedding dimen-
+siondimalso strongly influence the generalization ability of
+the UATR-GTransformer, as they control the model’s depth
+and width. Table IX and Table X report the corresponding
+results. From Table IX, the optimal performance is achieved
+atL= 8, suggesting that too few GNNs limit informa-
+tion exchange, while too many can lead to overfitting. With
+respect todim, Table X shows that the best results occur
+atdim= 96. A smallerdimcannot adequately represent
+graph features, while an excessively largedimproduces an
+over-parameterized model prone to overfitting. This effect is
+particularly evident atdim= 768, whereOAdecreases
+sharply to 0.417.
+Considering these results, the following parameters are
+adopted for the UATR-GTransformer:Kincreases from 2 to
+8 across layers, the number of GTransformer blocksLis set
+to 8, and the graph embedding dimensiondimis set to 96.
+F . Statistical significance test
+From the results in previous subsection, it is known that the
+UATR-GTransformer exceeds previous methods in accuracy.
+To quantitatively validate whether the accuracy advantages are
+statistically reliable, a comprehensive analysis is conducted
+using paired-sample t-tests, which are specifically designed
+for comparing paired measurements obtained under identical
+experimental conditions [49]. The paired-sample t-tests is par-
+ticularly suitable for our evaluation framework, which utilizes
+the same data partitions across multiple independent runs,thereby effectively controlling for inter-run variability through
+its focus on within-trial performance differences.
+All models are evaluated using the same data splits over
+five repeated runs, generating paired samples for analysis. The
+null hypothesis for each test is a zero mean difference in
+OA. Here, we use standard significance thresholds (p <0.05
+for significance,p <0.01 for strong significance). Table XI
+demonstrates that the proposed UATR-GTransformer achieves
+statistically significant improvements over most models on the
+ShipsEar dataset. However, because the UATR-Transformer
+and CMoE also deliver competitive results, the improvement
+over these specific models is not statistically significant. Be-
+sides, the results obtained on the DeepShip dataset provide
+stronger evidence, with the UATR-GTransformer achieving
+highly significant results against other models.
+G. Model Complexity
+To further examine the computational complexity of the
+UATR-GTransformer, Table XII presents comparisons on
+widely used complexity metrics, including the number of
+parameters (NP), average prediction time for a single acoustic
+signal (Avg. time), giga floating-point operations (GFLOPs),
+and frames per second (FPS).
+As shown in Table XII, the UATR-GTransformer has a
+relatively small NP and low GFLOPs, but exhibits higher
+Avg. time and lower FPS compared with most other models.
+This is likely due to the additional computations required
+for similarity calculations and multi-head self-attention across
+multiple nodes. Among lightweight CNNs, MbNet-V2, Xcep-
+tion, and EfficientNet-B0 all show low GFLOPs, indicating
+less computational requirements. Owing to its larger spatial
+resolution and wider network width, EfficientNet-B0 contains
+the largest number of parameters (4.01M) among lightweight
+CNNs and yields the slowest prediction speed, with an
+Avg. time of 9.53 ms. In contrast, Xception achieves the
+fastest prediction owing to the use of depthwise and pointwise
+convolutions, and also has the smallest NP and GFLOPs,
+thereby demonstrating the best recognition efficiency. For
+ResNet-based models, CMoE provides higher recognition
+performance than ResNet-18, though with slightly greater
+complexity, which may be attributed to the introduction of the
+mixture-of-experts mechanism. DenseNet-169, due to its dense
+connections within a deep architecture, exhibits the highest
+complexity overall, with 12.49M parameters, an Avg. time of
+42.54±5.99 ms, GFLOPs of 4.41, and the lowest FPS (23.51).
+H. Interpretability experiments
+In the UATR-GTransformer, information flows through the
+Transformer Encoder via the attention matrix, which enables
+the model to capture dependencies among Mel-graph em-
+beddings from split spectrogram patches. To investigate how
+attention operates, we first visualize the attention matrices
+from theH= 8attention heads in the UATR-GTransformer.
+Fig. 7 shows the256×256attention matrices from the eight
+heads in the first and last Transformer Encoder layers when a
+Mel-spectrogram is processed. The horizontal and vertical axes
+represent the positions of queries and keys, respectively, and
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 12
+TABLE XI
+P-VALUES OF SIGNIFICANCE TESTS AGAINST THEUATR-GTRANSFORMER.
+ResNet-18 DenseNet-169 MbNet-V2 Xception EfficientNet-B0 UATR-Transformer STM CMoE
+ShipsEar1.01×10−22.30×10−33.89×10−33.45×10−31.29×10−50.1491.45×10−35.78×10−2
+DeepShip4.79×10−44.95×10−32.40×10−51.23×10−36.08×10−42.30×10−42.46×10−48.61×10−4
+TABLE XII
+COMPARISON OF MODEL COMPLEXITY.
+Model NP(M) Avg.time(ms) GFLOPs FPS
+MbNet-V2 2.23 4.91 ±0.59 0.43 203.76
+Xception 3.63 1.82 ±0.28 0.575 548.18
+EfficientNet-B0 4.01 9.53 ±0.63 0.54 104.96
+ResNet-18 11.17 3.24 ±0.57 2.28 309.15
+DenseNet-169 12.49 42.54 ±5.99 4.41 23.51
+UATR-Transformer 2.55 3.54 ±0.43 3.25 282.95
+CMoE 11.19 4.28 ±0.49 2.28 233.47
+UATR-GTransformer 2.05 18.99 ±0.72 0.672 52.65
+the values indicate their similarity. The presence of vertical
+line patterns suggests that a query attends to multiple keys,
+reflecting the model’s capacity to perceive global structures
+and capture high-level information through multi-head inter-
+actions.
+As shown in Fig. 7, the first-layer attention heads display
+relatively sparse vertical line patterns, indicating that they
+primarily capture localized embedding details with limited
+importance. By contrast, in the final layer, the attention
+becomes more concentrated on multiple embeddings, with
+stronger interactions among nodes. For example, the second
+attention head (h= 2) highlights several prominent vertical
+lines, demonstrating that important information is aggregated
+across multiple embeddings. These results confirm that stack-
+ing GTransformer blocks progressively enhances global fea-
+ture perception, enabling the model to capture higher-order
+information from the Mel-spectrogram.
+To further examine graph structure learning, the learned
+Mel-graph is visualized in Fig. 8. The input Mel-spectrogram
+is partitioned into32×8patches, corresponding to 256 graph
+nodes. Row 1 shows the Mel-graph learned by the model
+without the Transformer Encoder, where only the GNN is
+applied. Row 2 shows the Mel-graph learned by the complete
+UATR-GTransformer.
+In Row 1, the GNN primarily extracts frequency-domain
+features to build discriminative criteria. In the first block (l=
+1), neighboring nodes are identified along the adjacent time
+axis. Whenl= 4withK= 4, neighbors are primarily within
+the same frequency bands. At the final block (l= 8), withK=
+8, the receptive field expands, allowing broader frequency-
+domain interactions. These results suggest that the Mel-graph
+learned by GNNs is mainly frequency-driven, with nodes in
+the same bands more tightly connected.
+Row 2 illustrates the effect of combining the Transformer
+Encoder with the GNN. Atl= 1, MHSA facilitates global
+interactions by linking adjacent time-frequency bands as well
+as distant frequency nodes. Aslincreases, the receptive field
+expands further. Atl= 4, the model begins to capture
+long-range relationships both within and across frequency
+bands. Atl= 8, the UATR-GTransformer integrates bothlocal frequency-domain connections and global cross-band
+interactions, enabling a more comprehensive representation of
+the signal.
+In summary, the interpretability experiments highlight com-
+plementary roles of the Transformer Encoder and GNN.
+The Transformer Encoder enhances global perception across
+frequency bands and captures complex time–frequency rela-
+tionships through MHSA, while the GNN emphasizes local
+frequency-domain consistency, ensuring that discriminative
+information is preserved.
+VI. CONCLUSION
+This paper proposes an intelligent UATR approach based
+on a non-Euclidean framework, named as the UATR-
+GTransformer. In this model, the input Mel-spectrogram is
+first divided into overlapping patches, which are processed
+by a Transformer Encoder to obtain graph embeddings en-
+riched with Mel-frequency information. These embeddings are
+treated as graph nodes and connected via the KNN algo-
+rithm to construct a Mel-graph that captures the topological
+structure of the acoustic signal. A GNN and an FFN are
+then employed to enhance the feature representations and
+perform classification, followed by a classification head for
+final prediction. Experimental results demonstrate that the
+UATR-GTransformer achieves superior performance compared
+with baseline models, validating its effectiveness.
+In contrast to conventional methods that treat spectrograms
+as images, the UATR-GTransformer represents time-frequency
+patches as nodes in a graph, enabling the capture of internal
+relationships between features and the construction of local
+structures through KNN graphs. The interpretability exper-
+iments further show that the UATR-GTransformer provides
+valuable insights into the information flow and decision-
+making process.
+Despite its contributions, several limitations remain. First,
+the experiments were conducted only on two publicly available
+datasets; thus, the model’s generalization ability to unseen
+sea areas and conditions requires further validation. Second,
+the computational complexity of the UATR-GTransformer is
+relatively high due to the similarity calculations and MHSA
+among multiple nodes, which may restrict its real-time appli-
+cability. Future work may focus on optimizing the architecture
+to reduce complexity and facilitate real-time deployment.
+Finally, while the model offers a degree of interpretability
+by illustrating local feature relationships through GNNs, it
+does not yet provide detailed insights into the most critical
+frequency bands. Further research will therefore explore graph
+feature quantification techniques with higher-quality underwa-
+ter acoustic datasets.
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 13
+l = 1
+l = 8
+h = 1 h = 2 h = 3 h = 4 h = 5 h = 6 h = 7 h = 8
+Fig. 7. Visualization of attention matrices in the first and last Transformer Encoder layers using Mel-spectrogram features.l∈[1,8]denotes thel-th
+GTransformer Block, andh∈[1,8]theh-th attention head.
+REFERENCES
+[1] Y . Xie, J. Ren, and J. Xu, “Adaptive ship-radiated noise recognition with
+learnable fine-grained wavelet transform,”Ocean Engineering, vol. 265,
+p. 112626, Dec. 2022.
+[2] N. N. de Moura and J. M. de Seixas, “Novelty detection in passive
+SONAR systems using support vector machines,” in2015 Latin America
+Congress on Computational Intelligence (LA-CCI), Oct. 2015, pp. 1–6.
+[3] S. B. M. and S. M. H., “Selection and parameter optimization of
+SVM kernel function for underwater target classification,” in2015 IEEE
+Underwater Technology (UT), Feb. 2015, pp. 1–5.
+[4] S. J. Quraishi, M. Singh, S. K. Prasad, K. Arora, S. Pathak, and A. Singh,
+“A machine learning approach to rock and mine classification in SONAR
+systems using logistic regression,” in2023 3rd International Conference
+on Technological Advancements in Computational Sciences (ICTACS),
+Nov. 2023, pp. 462–468.
+[5] H. Yang, K. Lee, Y . Choo, and K. Kim, “Underwater acoustic research
+trends with machine learning: passive SONAR applications,”Journal of
+Ocean Engineering and Technology, vol. 34, no. 3, pp. 227–236, Jun.
+2020.
+[6] M. J. Bianco, P. Gerstoft, J. Traer, E. Ozanich, M. A. Roch, S. Gannot,
+and C.-A. Deledalle, “Machine learning in acoustics: Theory and ap-
+plications,”The Journal of the Acoustical Society of America, vol. 146,
+no. 5, pp. 3590–3628, Nov. 2019.
+[7] V .-S. Doan, T. Huynh-The, and D.-S. Kim, “Underwater acoustic target
+classification based on dense convolutional neural network,”IEEE
+Geoscience and Remote Sensing Letters, vol. 19, pp. 1–5, Oct. 2022.
+[8] Q. Sun and K. Wang, “Underwater single-channel acoustic signal mul-
+titarget recognition using convolutional neural networks,”The Journal
+of the Acoustical Society of America, vol. 151, no. 3, pp. 2245–2254,
+Mar. 2022.
+[9] G. Hu, K. Wang, and L. Liu, “Underwater acoustic target recognition
+based on depthwise separable convolution neural networks,”Sensors,
+vol. 21, no. 4, p. 1429, 2021.
+[10] F. Liu, T. Shen, Z. Luo, D. Zhao, and S. Guo, “Underwater target
+recognition using convolutional recurrent neural networks with 3-D Mel-
+spectrogram and data augmentation,”Applied Acoustics, vol. 178, p.
+107989, Jul. 2021.
+[11] B. Wang, W. Zhang, Y . Zhu, C. Wu, and S. Zhang, “An underwater
+acoustic target recognition method based on AMNet,”IEEE Geoscience
+and Remote Sensing Letters, vol. 20, pp. 1–5, Jan. 2023.
+[12] X. Xiao, W. Wang, Q. Ren, P. Gerstoft, and L. Ma, “Underwater acoustic
+target recognition using attention-based deep neural network,”JASA
+Express Letters, vol. 1, no. 10, p. 106001, Oct. 2021.
+[13] A. Zhou, X. Li, W. Zhang, C. Zhao, K. Ren, Y . Ma, and J. Song, “An
+attention-based multi-scale convolution network for intelligent underwa-
+ter acoustic signal recognition,”Ocean Engineering, vol. 287, p. 115784,
+Nov. 2023.
+[14] S. Feng and X. Zhu, “A Transformer-based deep learning network for
+underwater acoustic target recognition,”IEEE Geoscience and Remote
+Sensing Letters, vol. 19, pp. 1–5, Aug. 2022.
+[15] Y . Gong, Y . Chung, and J. R. Glass, “AST: Audio Spectrogram
+Transformer,” inInterspeech 2021, 22nd Annual Conference of the
+International Speech Communication Association. ISCA, 2021, pp.
+571–575.[16] P. Li, J. Wu, Y . Wang, Q. Lan, and W. Xiao, “STM: Spectrogram
+transformer model for underwater acoustic target recognition,”Journal
+of Marine Science and Engineering, vol. 10, no. 10, p. 1428, Oct. 2022.
+[17] Y . Xie, J. Ren, and J. Xu, “Underwater-art: Expanding information per-
+spectives with text templates for underwater acoustic target recognition,”
+The Journal of the Acoustical Society of America, vol. 152, no. 5, pp.
+2641–2651, Nov. 2022.
+[18] S. Feng, X. Zhu, and S. Ma, “Masking hierarchical Tokens for underwa-
+ter acoustic target recognition with self-supervised learning,”IEEE/ACM
+Transactions on Audio, Speech, and Language Processing, vol. 32, pp.
+1365–1379, Jan. 2024.
+[19] K. Xu, Q. Xu, K. You, B. Zhu, M. Feng, D. Feng, and B. Liu, “Self-
+supervised learning–based underwater acoustical signal classification via
+mask modeling,”The Journal of the Acoustical Society of America, vol.
+154, no. 1, pp. 5–15, Jul. 2023.
+[20] S.-Z. Tian, D.-B. Chen, Y . Fu, and J.-L. Zhou, “Joint learning model
+for underwater acoustic target recognition,”Knowledge-Based Systems,
+vol. 260, p. 110119, Jan. 2023.
+[21] S. Yang, A. Jin, X. Zeng, H. Wang, X. Hong, and M. Lei, “Underwater
+acoustic target recognition based on sub-band concatenated Mel spectro-
+gram and multidomain attention mechanism,”Engineering Applications
+of Artificial Intelligence, vol. 133, p. 107983, Jul. 2024.
+[22] M. Esfahanian, H. Zhuang, and N. Erdol, “Using local binary patterns as
+features for classification of dolphin calls,”The Journal of the Acoustical
+Society of America, vol. 134, no. 1, pp. EL105–EL111, Jun. 2013.
+[23] L. Waikhom and R. Patgiri, “A survey of graph neural networks in
+various learning paradigms: methods, applications, and challenges,”
+Artificial Intelligence Review, vol. 56, no. 7, pp. 6295–6364, Jul. 2023.
+[24] J. Mei and J. M. F. Moura, “Signal processing on graphs: Causal mod-
+eling of unstructured data,”IEEE Transactions on Signal Processing,
+vol. 65, no. 8, pp. 2077–2092, Dec. 2017.
+[25] R. Torkamani, H. Zayyani, and F. Marvasti, “Joint topology learning and
+graph signal recovery using variational bayes in non-Gaussian noise,”
+IEEE Transactions on Circuits and Systems II: Express Briefs, vol. 69,
+no. 3, pp. 1887–1891, Sep. 2022.
+[26] L. Lacasa and R. Flanagan, “Time reversibility from visibility graphs of
+nonstationary processes,”Phys. Rev. E, vol. 92, p. 022817, Aug. 2015.
+[27] M. J. Hinich, “Testing for Gaussianity and linearity of a stationary time
+series,”Journal of Time Series Analysis, vol. 3, no. 3, pp. 169–176, May
+1982.
+[28] L. van der Maaten and G. Hinton, “Visualizing data using t-SNE,”
+Journal of Machine Learning Research, vol. 9, no. 86, pp. 2579–2605,
+2008.
+[29] D. Santos-Dom ´ınguez, S. Torres-Guijarro, A. Cardenal-L ´opez, and
+A. Pena-Gimenez, “ShipsEar: An underwater vessel noise database,”
+Applied Acoustics, vol. 113, pp. 64–69, 2016.
+[30] A. Swami, “HOSA-higher order spectral analysis tool-
+box,” MATLAB Central File Exchange, Sep. 2025, [On-
+line]. [Online]. Available: https://www.mathworks.com/matlabcentral/
+fileexchange/3013-hosa-higher-order-spectral-analysis-toolbox.
+[31] A. M. Thode, A. S. Conrad, E. Ozanich, R. King, S. E. Freeman, L. A.
+Freeman, B. Zgliczynski, P. Gerstoft, and K. H. Kim, “Automated two-
+dimensional localization of underwater acoustic transient impulses using
+vector sensor image processing (vector sensor localization),”The Journal
+of the Acoustical Society of America, vol. 149, no. 2, pp. 770–787, Feb.
+2021.
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 14
+Fig. 8. Visualization of Mel-graph connections for an input Mel-spectrogram. The central node is shown as a circle, while neighboring nodes are shown
+as surrounding boxes. Row 1: graph visualization without the Transformer Encoder (only GNN). Row 2: graph visualization with the complete UATR-
+GTransformer.ldenotes thel-th GTransformer Block.
+[32] S. W. Lani, K. G. Sabra, W. S. Hodgkiss, W. A. Kuperman, and P. Roux,
+“Coherent processing of shipping noise for ocean monitoring,”The
+Journal of the Acoustical Society of America, vol. 133, no. 2, pp. EL108–
+EL113, Jan. 2013.
+[33] A. C. Heusser, K. Ziman, L. L. W. Owen, and J. R. Manning, “Hy-
+perTools: a Python toolbox for gaining geometric insights into high-
+dimensional data,”Journal of Machine Learning Research, vol. 18, no.
+152, pp. 1–6, 2018.
+[34] Z. Song and L. Ma, “Speech command recognition algorithm based
+on improved MFCC features,” inCommunications, Signal Processing,
+and Systems. Singapore: Springer Nature Singapore, Mar. 2024, pp.
+587–595.
+[35] Y . Gong, C.-I. Lai, Y .-A. Chung, and J. Glass, “SSAST: Self-Supervised
+Audio Spectrogram Transformer,” inProceedings of the AAAI Confer-
+ence on Artificial Intelligence, vol. 36, no. 10, 2022, pp. 10 699–10 709.
+[36] T. Xiao, M. Singh, E. Mintun, T. Darrell, P. Doll ´ar, and R. B. Girshick,“Early convolutions help Transformers see better,” inAdvances in Neural
+Information Processing Systems 34: Annual Conference on Neural
+Information Processing Systems 2021, Dec. 2021, pp. 30 392–30 400.
+[37] Y . Gong, Y .-A. Chung, and J. Glass, “AST: Audio Spectrogram Trans-
+former,” inProc. Interspeech 2021, 2021, pp. 571–575.
+[38] P. Han and X. Zhang, “VGE: Gene-disease association by variational
+graph embedding,”International Journal of Crowd Science, vol. 8, no. 2,
+pp. 95–99, May 2024.
+[39] L. H. Torres, B. Ribeiro, and J. P. Arrais, “Multi-scale cross-attention
+Transformer via graph embeddings for few-shot molecular property
+prediction,”Applied Soft Computing, vol. 153, p. 111268, Mar. 2024.
+[40] W. Dong, C. Moses, and K. Li, “Efficient k-nearest neighbor graph
+construction for generic similarity measures.” New York, NY , USA:
+Association for Computing Machinery, Mar. 2011, p. 577–586.
+[41] G. Li, M. Muller, A. Thabet, and B. Ghanem, “DeepGCNs: Can GCNs
+go as deep as CNNs?” in2019 IEEE/CVF International Conference on
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2021 15
+Computer Vision (ICCV). Los Alamitos, CA, USA: IEEE Computer
+Society, Nov. 2019, pp. 9267–9276.
+[42] M. Irfan, Z. Jiangbin, S. Ali, M. Iqbal, Z. Masood, and U. Hamid,
+“DeepShip: An underwater acoustic benchmark dataset and a separable
+convolution based autoencoder for classification,”Expert Systems with
+Applications, vol. 183, p. 115270, Nov. 2021.
+[43] H. Niu, X. Li, Y . Zhang, and J. Xu, “Advances and applications of ma-
+chine learning in underwater acoustics,”Intelligent Marine Technology
+and Systems, vol. 1, no. 1, p. 8, Oct. 2023.
+[44] D. S. Park, W. Chan, Y . Zhang, C.-C. Chiu, B. Zoph, E. D. Cubuk,
+and Q. V . Le, “SpecAugment: A simple data augmentation method for
+automatic speech recognition,” inProc. Interspeech 2019, Sep. 2019,
+pp. 2613–2617.
+[45] S.-F. Hsiao and B.-C. Tsai, “Efficient computation of depthwise sepa-
+rable convolution in MoblieNet deep neural network models,” in2021
+IEEE International Conference on Consumer Electronics-Taiwan (ICCE-
+TW). IEEE, Sep. 2021, pp. 1–2.
+[46] F. Chollet, “Xception: Deep learning with depthwise separable convo-
+lutions,” in2017 IEEE Conference on Computer Vision and Pattern
+Recognition (CVPR), Jul. 2017, pp. 1800–1807.
+[47] Y . Xie, J. Ren, and J. Xu, “Unraveling complex data diversity in under-
+water acoustic target recognition through convolution-based mixture of
+experts,”Expert Systems with Applications, vol. 249, p. 123431, Sep.
+2024.
+[48] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez,
+L. Kaiser, and I. Polosukhin, “Attention is all you need,” inProceedings
+of the 31st International Conference on Neural Information Processing
+Systems, ser. NIPS’17. Red Hook, NY , USA: Curran Associates Inc.,
+2017, p. 6000–6010.
+[49] M. Xu, D. Fralick, J. Z. Zheng, B. Wang, X. M. Tu, and C. Feng, “The
+differences and similarities between two-sampleT-test and pairedT-
+test,”Shanghai Archives of Psychiatry, vol. 29, no. 3, pp. 184–188, Jun.
+2017.
+Sheng Fengreceived the Ph.D. degree in computer
+science and technology from National University of
+Defense Technology, Changsha, China, in 2024. He
+is currently an Assistant Researcher with the College
+of Meteorology and Oceanography, National Uni-
+versity of Defense Technology. His research inter-
+ests include ocean information processing, artificial
+intelligence, underwater acoustic target recognition
+and tracking.
+Shuqing Mareceived the Ph.D. degree in under-
+water acoustic engineering from Harbin Engineering
+University, Harbin, China, in 2011. He is currently
+an Associate Professor with the College of Mete-
+orology and Oceanography, National University of
+Defense Technology, Changsha, China. His research
+interests include underwater acoustics, underwater
+acoustic signal processing, and intelligent informa-
+tion processing of underwater multi-physical fields.
+Xiaoqian Zhureceived the Ph.D. degree in com-
+puter science and technology from National Uni-
+versity of Defense Technology, Changsha, China,
+in 2007. He is currently a Professor and Doc-
+toral Supervisor with the College of Meteorology
+and Oceanography, National University of Defense
+Technology. His research interests include numerical
+weather prediction, ocean information processing,
+and underwater target detection. He has led or par-
+ticipated in more than 30 major research projects,
+including the development of the Global Medium-
+Range Numerical Weather Prediction System.

@@ -1,0 +1,684 @@
+FEM -PIKFNN s for underwater acoustic propagation  
+induced by structural vibrations  in different ocean 
+environments  
+Qiang Xib,  Zhuojia Fua,c,1,  Wenzhi Xuc,  Mi-An Xuea,b,  Jinhai Zhenga,b 
+ 
+aKey Laboratory of Ministry of Education for Coastal Disaster and Protection, Hohai 
+University, Nanjing 210098, China  
+bCollege of Harbour, Coastal and Offshore Engineering, Hohai University, Nanjing 
+210098, China  
+cCenter for Numerical Simulation Software in En gineering and Sciences, College of 
+Mechanics and Materials, Hohai University, Nanjing 211100, China  
+ 
+Abstract:  In this paper, a novel hybrid method based on the finite element method 
+(FEM) and physics -informed kernel function neural network s (PIKFNN s) is p roposed 
+and applied to the prediction of underwater acoustic propagation induced by structural 
+vibrations in the unbounded ocean, deep ocean and shallow ocean.  In the hybrid method,  
+PIKFNN s are a class of  improved shallow physics -informed neural network s (PINN s) 
+that replace  the activation function s in PINN s with the physics -informed kernel 
+function s (PIKF s), thereby integrating prior physical information into the neural 
+network model.  Moreover, this neural network circumvents the step of embedding  the 
+governing equations into the loss function in PINNs, and requires only training o n 
+boundary data. By using the Green's function s as the PIKFs  and the structural -acoustic 
+coupling  response information obtained from the FEM  as boundary training data , the 
+PIKFN Ns can inherently capture the Sommerfeld radiation condition at infinity,  which 
+is naturally suitable for  predicting  ocean acoustic propagation.  Numerical experiments  
+demonstrate the accuracy and feasibility  of the FEM -PIKFNNs  in comparison with the 
+true solutions and finite element results.  
+ 
+Keywords:  Shallow physics -informed neural network ; Physics -informed kernel 
+function; Finite element method ; Ocean  acoustic propagation ; Structural vibration  
+ 
+ 
+1Corresponding authors: paul212063@hhu.edu.cn  
+1. Introduction  
+As the most popular numerical algorithm in the fields of science and engineering , 
+the finite element method  (FEM)  [1-4] is widely applied to structural -acoustic coupling 
+analysis  in finite domains.  However, the FEM will encounter a computational 
+bottleneck  where  the computational cost increases rapidly as the domain size increases 
+in the infinite domain ocean acoustic propagation simulation.  In contrast, PIKFs -based 
+numerical  methods  [5-7], such as boundary element method (BEM)  [8,9], singular 
+boundary method (SBM)  [10-12] and method of fundamental solutions (MFS)  [13-16], 
+are preferred  in the ocean acoustic simulation due to the employed  PIKFs  (Green's 
+functions)  inherently satisfy the governing equation of the ocean acoustic propagation 
+and the Sommerfeld radiation condition at infinity.  Moreover , these PIKFs -based 
+numerical  methods  can also effectively avoid  the truncation treatment required by the 
+FEM for infin ite domains.  To take advantage of the individual  strengths  of the 
+aforementioned methods , an increasing number of researchers have devoted  their 
+efforts to the study of  coupling method s that integrate the FEM with  these PIKFs -based 
+numerical  methods , and have proposed various coupling methods such as the FEM -
+BEM  [17,18], FEM -SBM  [19,20], and FEM -MFS [21,22] for vibration  [23] and sound 
+propagation analysis in infinite domain s. 
+Over the past two decades, neural networks  [24-29] have emerged as powerful 
+machine learning tools with remarkable potential in the field of scientific computing. 
+By employing multi -layer network connections and weight adjustments, they can 
+capture intricate relationships among data  and offer  a fresh pers pective for solving 
+partial differential equations (PDEs).  Among them,  the physics -informed neural 
+networks (PINNs)  [30-34] and deep Galerkin method (DGM)  [35,36] are two typical 
+neural network s. They incorporate the information embedded in the governing 
+equation s into neural networks by using appropriate  loss functions and training 
+strategies. This ensures that the trained results  of the neural network model not only fit 
+the existing data but also  satisfy the governing equation s. These approaches have shown  
+remarkable potential for solving  high-dimensional, complex geometric and nonlinear 
+problems.  However, the iterative solving of multi -layer network structures during the 
+training process has resulted in  neural networks requiring more computational 
+resources than traditional numerical methods.  To improve the  computational efficiency,  
+the shallow PINNs  [37,38] is proposed.  It requires only iterative solutions for a single  
+hidden layer network structure during each training step, which can significantly reduce 
+the computational burden of the neural network with the same number of neurons.  It is 
+worth noting that the early proposed radial basis function  neural networks (RBFNNs)  
+[39,40] can also be considered as a type of shallow PINNs  using the radial basis 
+function  (RBF)  [41] as the activation function.  
+Recently, inspired by the fundamental ideas of PIKFs -based numerical  methods  
+and shallow  PINNs , physics -informed  kernel function neural networks (PIKFNNs)  [42] 
+have  been proposed.  PIKFNNs  are a class of  improved shallow PINN s that utilize 
+PIKFs as neuron functions, thereby naturally incorporating prior physical information 
+into the neural network model.  Furthermore, PIKFNNs benefit from the inherent 
+satisfaction of the governing equations by PIKF s. There is no need to explicitly embed 
+the governing  equations in the loss function. It only requires training to fit the boundary 
+data,  which  significantly reduc es the amount of training data, thereby achieving a more 
+efficient training process.  It is worth noting that when Green's function is used as the 
+PIKF s, the PIKFNNs can automatically capture the Sommerfeld radiation condition at 
+infinit y. This property makes  PIKFNNs promising for applications in  the ocean acoustic  
+propagation  simulation.  
+Based on the above statements, this paper proposes the  hybrid  FEM -PIKFNNs and 
+applies it to the prediction of underwater acoustic propagation  induced by  structural 
+vibrations  in the unbounded ocean, deep ocean and shallow ocean.  The brief outline  of 
+this paper is given  as follows. The theoretical and numerical model of the  hybrid  FEM -
+PIKFNNs for underwater acoustic propagation  induced by structural vibrations  in 
+different ocean environments  is provide d in Section 2 . In Section 3, the feasibility and 
+efficacy  of the hybrid  FEM -PIKFNNs  are presented  under  three numerical examples . 
+The main finding s are summarized in Section 4.  
+ 
+2. Theoretical  and numerical  model  
+In this section, the  hybrid  finite element method -physics -informed kernel function 
+neural networks ( FEM -PIKFNNs)  is proposed to predict  the underwater acoustic 
+propagation  induced by structural vibrations  in the unbounded ocean, deep ocean and 
+shallow ocean.  
+ 
+2.1. Finite element method  
+Based on the theory of linear elasticity, the finite element discrete equation for the 
+time-harmonic vibration of an elastic structure is given by  
+( )2
+a a a ai+ − =K C M u F,                         (1) 
+where  
+aK, 
+aC  and 
+aM  are the stiffness matrix , damping matrix  and mass matrix  of 
+the e lastic structure , 
+1 i=−  , 
+   is the angular frequency , 
+u  represents  the 
+displacement  of the e lastic structure , and 
+aF  denote s the structural excitation force . 
+Similar to the structural vibration,  the finite element discrete equation of the  
+underwater acoustic propagation  can be expressed as  
+( )2
+b b b bi+ − =K C M p F
+,                         (2) 
+where 
+bK  , 
+bC   and 
+bM   represent  the stiffness matrix , damping matrix  and mass 
+matrix  of the underwater acoustic propagation , 
+p is the  underwater  sound pressure,  
+and 
+bF  is the a coustic  excitation force . 
+In the ocean  environment , the vibration of elastic structure and underwater 
+acoustic  wave must satisfy  the conditions of  force equilibrium and displacement 
+continuity , the resulting structural -acoustic coupling matrix can be written in t he 
+following form   
+2
+22a a a c ac
+bc c b b bi
+i
+  +− =  − + −  K C M K F u
+pF M K C M
+,             (3) 
+where 
+acF   and 
+bcF   are the coupling  excitation  force s of the elastic structure  and 
+underwater acoustic  wave , 
+cK  indicates  the coupling  stiffness  matrix , 
+0T
+cc=−MK , 
+and 
+T  denotes the transpose of the matrix . 
+In the finite element implementation, ocean environments are truncated into finite 
+domains  by setting perfectly matched layers and ocean boundaries , as shown in Fig. 1 . 
+Then, the FEM mesh  is generated  in the finite  domain , and the near-field underwater 
+sound pressure  induced by structural vibrations  can be calculated by the FEM.  
+   
+(a) Unbounded ocean          (b) Deep ocean           (c) Shallow ocean  
+Fig. 1. Sketch of the truncated finite domain . 
+
+ 
+2.2. Physics -informed kernel function neural networks  
+In this sub section , the near-field underwater sound pressure  information  calculated 
+by the FEM  is used as the training data of  the PIKFNN s for predicting  the underwater  
+acoustic propagation  in the unbounded ocean, deep ocean and shallow ocean.  
+ 
+2.2.1. Physics -informed kernel function s 
+Based on the linear acoustic wave theory, the governing equation for the sound 
+pressure  induced by the structural vibration in the ocean  environment  is given by  
+()()20 p k p + =xx
+,                         (4) 
+in which  
+p denotes the sound pressure at the position 
+x , 
+ indicates the Laplacian, 
+and 
+k  is the wave number.  The sound pressure  training sample  is prescribed as  
+()() pp=xx
+,                            (5) 
+where 
+()px  represents the underwater sound pressure data  calculated by the FEM . 
+Moreover, the underwater sound pressure in all three ocean environments must satisfy 
+the Sommerfeld radiation condition at infinity. It is worth noting that the underwater 
+sound pressure in the deep and shallow ocean s must  also satisfy the additional reflection 
+conditions imposed by the ocean surface o r ocean sediment.  
+To construct the PIKFNNs , the PIKFs of underwater acoustic propagation in the 
+unbounded ocean, deep ocean  and shallow ocean are presented . In the unbounded ocean , 
+the PIKF of underwater acoustic propagation is defined as  
+()1,aikR
+ae
+R=xs
+,                             ( 6) 
+where 
+()()()2 2 2x y z
+aR x s y s z s= − + − + −   represents the distance between the 
+sample point  
+(),,x y z=x  and source point  
+() ,,x y zs s s=s . 
+In the deep ocean , the propagation of  radiated acoustic waves induced  by structural 
+vibrations is affected  by the reflection effect from the ocean  surface. Its PIKF  can be 
+represented as  
+()2,abikR ikR
+abee
+RR−−
+ = −xs
+,                        ( 7) 
+where 
+()()()2 2 22x y z
+bR x s y s h z s= − + − + − −  , and 
+h   denotes the distance 
+between the structural center and the ocean  surface.  
+In the shallow  ocean,  underwater acoustic propagation involves multiple 
+reflections from the ocean surface and ocean sediment . To represent th e reflection 
+characteristic, the PIKF  can be regarded as the superposition of multiple image point 
+source acoustic waves, which can be described  as 
+()3 1 2 4 i i i i
+1 2 1 2 1 2
+0 1 2 43
+3kR kR kR kRe e e e
+R R R R
+     − − − − 
+=+ + +
+=
+
+,           (8) 
+where  
+2 2 2
+1
+2 2 2
+2
+2 2 2
+3
+2 2 2
+4( ) ( ) (2 ) ,
+( ) ( ) (2 2( ) ) ,
+( ) ( ) (2 2 ) ,
+( ) ( ) (2( 1) ) ,x y z
+x y z
+x y z
+x y zR x s y s H z s
+R x s y s H H h z s
+R x s y s H h z s
+R x s y s H z s
+
+
+= − + − + + −
+= − + − + + − + +
+= − + − + + − −
+= − + − + + − +
+ 
+in which  
+H  indicates  the depth of the shallow ocean , 
+1   and 
+2   represent the 
+acoustic  reflection coefficients of the  ocean sediment and  ocean surface, respectively.  
+The ocean surface is  typically  considered as a free surface, the  acoustic  reflection 
+coefficient 
+2 1=− . The acoustic  reflection coefficient 
+1  is determined by the  mass 
+density  and sound speed of seawater and ocean sediment , which can be obtained by  
+()()()
+()()()2 2
+1 0 0 1
+12 2
+1 0 0 1cos sin
+cos sincc
+cc   
+   −−=
++−
+,                ( 9) 
+where 
+  denote s the incident angle of the acoustic  wave. 
+0c  and 
+0  are the sound 
+speed and mass density of the seawater,  
+1c and 
+1  represent  the sound speed and 
+mass density of the ocean sediment.  
+ 
+2.2.2.  Numerical framework of PIKFNNs  
+Based on the PIKFs of underwater acoustic propagation in different ocean  
+environments, this section presents the numerical framework of PIKFNN s. To provide 
+a more intuitive presentation, we first introduce the well -known physics -informed 
+neural network s (PINN s). The core idea of PINNs is to embed physical equations into 
+loss function s, allowing  the neural  network to learn the underlying physical laws from  
+the data, thereby improving  model accuracy and generalization capabi lities . 
+ 
+Fig. 2. Numerical framework  of PIKFNN s. 
+ 
+Inspired by the above perspective, we replaced the conventional activation 
+function s in neural networks with PIKFs, thus integrating prior physical information 
+into the neural network and constructing  the PIKFNN s, as illustrated in Fig. 2. The 
+PIKFNN s is a fully connected neural architecture consisting of  an input layer, a hidden 
+layer, a nd an output layer.  
+w and 
+υ  are the parameters in the neural network. 
+  
+represents the PIKFs  of underwater acoustic propagation in different ocean 
+environments,  which contains prior physical information and thus naturally performs  
+the physical regularization in the hidden layer of the neural network.  
+For the underwater  acoustic propagation  in the ocean  environment , the loss 
+function of the PIKFNN can be written as  
+()() ( )2
+11N
+PIKFNN PIKFNN i i
+iLoss p pN==− xx
+,                (10) 
+where 
+N   is the number of training samples, 
+PIKFNNp   denotes the predicted sound 
+pressure  of PI KFNNs. Eq. ( 10) represents the mean squared error between the true 
+solution and the predicted values of underwater sound pressure, which signifies the data 
+fitting process in the neural network.  
+Then, the optimiza tion algorithm is utilized  to optimize the loss function and 
+update the parameters of the neural network to gradually fit the boundary training data . 
+In this study, the Levenberg -Marquardt (LM) algorithm is utilized  as the optimizer for 
+training the neural network model , which  integrates  the strengths  of the Gauss -Newton 
+method  and the  gradient descent method,  and allowing  automatic adjustment of the st ep 
+
+size during iterations to balance convergence speed and stability.  The optimization 
+process of the LM algorithm is as follows . 
+First, the objective of the optimization algorithm is to minimize the loss function 
+in PIKFNN s 
+arg min
+uLoss=u
+.                        (11) 
+Then , the stopping tolerance  
+tol   is determined, and the optimization result is 
+checked to see if it is less than the tolerance  
+()()1 maxi i i i i i tol or Loss Loss tol−−  −  if u u u u
+,       ( 12) 
+where the su bscript 'i' indicates the i-th iteration.  Finally, the optimization is stopped 
+when the result is less than the tolerance . 
+The above process constitutes the training process of PIKFNN s, and  the trained 
+PIKFNN s can be applied to new data to obtain predicted underwater sound pressure.  It 
+should be noted here that while both PINN s and PIKFNN s incorporate prior physical 
+information into the neural network, PINN s embeds the governing equations into the 
+loss function , while  PIKFNN s replaces traditional activation functions with PIKFs as 
+neuron basis functions, which is the main difference between the two neural network 
+models.  
+ 
+3. Numerical examples and discussions  
+This section presents some  examples to verify the effectiveness and accuracy of 
+the developed  method  for predicting  the underwater acoustic propagation induced by 
+structural vibrations  in the unbounded ocean, deep ocean and shallow ocean.  The sound 
+speed  
+01500c m s=   and mass density  
+3
+01025 kg m=   of the seawater are  
+considered.  The L 2 relative error  
+Lrerr  is defined by  
+()() ( )()()2 2
+11ttNN
+p i t i t i
+iiLreer u u u
+===− x x x
+,            (13) 
+where 
+tN  is the number of  underwater  test point s, 
+pu  and 
+tu  indicate the  predicted 
+solution  and true solution  at the node 
+ix , respectively.  
+ 
+Example 1.  Unbounded ocean  
+To verify the effectiveness of  the PIKFNN,  we first study  the underwater acoustic 
+field induced by the vibration of a spherical structure in the unbounded ocean.  The 
+radius of the sphere is 
+1rm= , and the radial vibration velocity is 
+00.1v mm s= , as 
+shown in Fig. 3. The true solution for the underwater sound pressure in the unbounded 
+ocean is  
+()() 00
+01ik r r ikr crp r v er ikr − =−
+,                      ( 14) 
+where 
+r  denotes the distance from the underwater test point to the center of the sphere , 
+k
+ is the wave number.  
+ 
+Fig. 3. Sketch of the spherical structure . 
+ 
+ 
+Fig. 4. Diagram of the artificial sonar  detection  array in the unbounded ocean . 
+ 
+In the PIKFNN implementation,  the artificial sonar detection array is deployed at 
+a distance of 
+3m   from the center of the underwater structure, and the Cartesian 
+coordinate is established with the center of the structure as the origin, as depicted  in 
+Fig. 4. The artificial sonar detection array consists of 9 linear array sonars distributed 
+along the y -axis, with a spacing of 
+0.5m  between the linear array sonars. Each linear 
+array sonar is equipped with 17 hydrophones spaced 
+0.5m   apart . The above true 
+solution is considered to be  the underwater sound pressure measured by the artificial 
+sonar detection array . The PIKF  function  is 
+1  , the source points are uniformly 
+distributed on a sphere with a radius of  
+0.5m  , and the training data consists of 
+underwater sound pressure obtained from the artificial sonar detection array.  The 
+
+number of PIKF  neurons, source points, and training samples is 
+153N=  . The 
+Levenberg -Marquardt algorithm is utilized to minimize the loss function formed by the 
+training data.  1911 underwater test points are uniformly distributed in a rectangular area  
+()  , , 10 100 , 0, 10 10x y z m x m y m z m   = −  
+. 
+We investigate the influence of the tolerance a nd the number of training samples 
+on the numerical accuracy of the proposed PIKFNN, the vibration frequency of the 
+sphere is 6000Hz.  Tables 1 and 2 compare the L 2 relative error of the proposed PIKFNN 
+with different tolerances and number of training samples.  It can be found that the 
+PIKFNN results gradually converge as the tolerance decreases  and the number of 
+training samples increases . Here , the tolerance of 
+1E-6 tol=  and 
+153N=  training 
+samples are used for  the subsequent PIKFNN computation.  
+ 
+Table 1. Lrerr with different tolerances . 
+tol 1E-1 1E-2 1E-3 1E-4 1E-5 1E-6 
+Lrerr  1.17E -4 1.02E-4 9.64E -5 6.64E -5 4.03E -5 3.61E -5 
+ 
+Table 2. Lrerr  with different number of training sample s. 
+N 85 119 153 187 221 
+Lrerr  5.78E -3 1.01E -3 3.61E -5 2.82E -5 1.08E -5 
+ 
+Fig. 5 illustrates the sound pressure levels predicted  by the developed PIKFNN 
+and the true solution at different vibration frequencies.  The coordinates of the 
+underwater  test point are (10, 0, 0).  The contour plots  of the sound pressure level 
+induced by the structural vibration frequency of 1000  Hz are shown  in Fig . 6. It can be 
+seen that the underwater sound pressure level results obtained by the developed 
+PIKFNN  fit well with the true solution . These figures  further confirm the reliability  of 
+the developed PIKFNN  for predicting  the sound pressure levels  induced by structural 
+vibrations  in the unbounded ocean . 
+  
+Fig. 5. The sound pressure levels obtained by the PIKFNN  and true solution . 
+ 
+ 
+(a) PIKFNN                        (b) True solution  
+Fig. 6. Contours of sound pressure level induced by the vibration of a spherical 
+structure  in the unbounded ocean . 
+ 
+Example 2.  Deep ocean  
+As the second numerical example,  the prediction  performance of FEM -PIKFNN 
+for the underwater acoustic propagation induced by  the vibration of the  ribbed 
+cylindrical shell in  the deep  ocean  environment is investigated.  At the bottom of the 
+ribbed cylindrical shell, there is a  simple harmonic  concentrated force  
+110FN=  
+acting vertically downward, while at the middle and top, two  simple harmonic  
+distributed forces  
+210F N m=   act outward along the horizontal direction. The 
+specific dimensions and force diagram of the ribbed cylindrical shell are shown in Fig. 
+7. The immersion depth of the ribbed cylindrical shell  is 
+20hm= . 
+
+          
+(a) Size of the ribbed cylindrical shell      (b) Simple harmonic excitation force  
+Fig. 7. Sketch of the ribbed cylindrical shell.  
+ 
+In the FEM -PIKFNN implementation,  due to the axisymmetric characteristics of 
+the structure shape and force, the FEM  uses the axisymmetric model to calculate the 
+near-field sound pressure level induced  by the vibration of the ribbed cylindrical shell 
+structure , with the number of triangular and quadrilateral elements being 143846  and 
+52800 , respectively.  The results calculated by the FEM  are used as the underwater 
+sound pressure obtained by the artificial sonar detection array . The position of the 
+artificial sonar detection array  is the same as in Example  1. The PIKF  function  is 
+2 , 
+153 samples obtained from the artificial sonar detection array in the deep ocean are 
+adopt ed for neural network training , and 153 source points are uniformly distributed on 
+a sphere with a radius of 
+0.5m . The Levenberg -Marquardt algorithm  with a tolerance 
+of 
+1E-6 tol=  is used to minimize the loss function composed of underwater sound 
+pressure in the deep ocean.  
+Fig. 8 plots the sound pressure levels at  the underwater test nodes (10, 0, 0) 
+calculated by the present  FEM -PIKFNN and COMSOL Multiphysics finite element 
+analy sis (FEA)  software.  As illustrated in Fig. 8, the sound pressure levels obtained by 
+both methods are consistent over the range of excitation frequencies from 50 Hz to 1000  
+Hz. Next, two different excitation frequencies, 400  Hz and 800  Hz, are considered. The 
+contour plots  of the sound pressure level induced by the  vibration of the  ribbed 
+cylindrical shell in the deep ocean environment are plotted  in Figs. 9 and 10, 
+respectively.  It can be observed  that the sound pressure level results  predicted  by the 
+present  FEM -PIKFNN agree well with those calculated  by the COMSOL Multiphysics 
+FEA software for the simple harmonic force with two different excitation frequencies, 
+which indicates  that the present  FEM -PIKFNN can achieve satisfactory results for  
+predicting the  underwater acoustic propagation in the deep ocean.  
+
+  
+Fig. 8. The sound pressure levels  in the deep ocean  obtained by the FEM -PIKFNN 
+and COMSOL Multiphysics.  
+ 
+(a) FEM -PIKFNN                       (b) COMSOL  
+Fig. 9. Contours of the sound pressure level of the ribbed cylindrical shell under 
+simple harmonic force excitation with a frequency of 400Hz.  
+ 
+(a) FEM -PIKFNN                       (b) COMSOL  
+Fig. 10. Contours of the sound pressure level of the ribbed cylindrical shell under 
+simple harmonic force excitation with a frequency of 800Hz.  
+ 
+Example 3.  Shallow ocean  
+
+In the last example,  the underwater acoustic propagation  behavior induced by the 
+vibration of a capsule shell under simple harmonic force  in the shallow ocean  
+environment is considered.  The two simple harmonic  distributed force  
+35F N m=  
+acts outward along the horizontal direction on the capsule shell with thickness 
+1th mm=
+, and its sketch  is presented  in Fig. 11. The depth of the shallow ocean  is 
+20Hm=
+, and the  immersion depth of the capsule shell  is 
+10hm= . The mass density 
+and sound speed of the ocean sediment  are 
+3
+12600 kg m=   and 
+11620c m s=  , 
+respectively.   
+ 
+Fig. 11. Sketch of the capsule shell  with simple harmonic excitation force . 
+ 
+Similar to Example 2, the underwater sound pressure induced  by the vibration of 
+the capsule shell structure  in the shallow ocean  calculated by the FEM  is used as the 
+training data of PIKFNN . The number of triangular and q uadrilateral elements in the 
+finite element  simulation is 34048 and 22400 , respectively.  In the PIKFNN 
+implementation,  the PIKF  function  is 
+3  , 153 training data  are obtained from the 
+artificial sonar detection array in the shallow ocean , and 153 source points are 
+uniformly distributed on a sphere with a radius of 
+0.5m . The Levenberg -Marquardt 
+algorithm with a tolerance of 
+1E-6 tol=  is used to minimize the loss function  in this 
+example . 
+The underwater sound pressure level curve induced by the capsule shell at different 
+excitation frequencies in the shal low ocean environment is depicted in Fig. 12. It can 
+be found that the sound pressure level s predicted  by the FEM -PIKFNN  are in good 
+agreement with those  calculated  by the COMSOL Multiphysics FEA  software  at the 
+underwater test nodes (10, 0, 0). The underwater sound pressure level distributions of  
+the capsule shell excited by two distributed forces  with the frequency  of 500 Hz  at the 
+immersion depths of  
+8hm=   and 
+12hm=   are depicted  in Figs. 13 and 14, 
+respectively. The numerical results demonstrate  that the predicted sound pressure level 
+
+obtained by the proposed FEM -PIKFNN is consistent with  that calculated by the 
+COMSOL Multiphysics FEA  softwar e, which  shows that  the FEM -PIKFNN is 
+effective in predicting the underwater acoustic propagation behavior in the shallow 
+ocean environment.  
+ 
+Fig. 12. The sound pressure levels in the shallow ocean obtained by the FEM -
+PIKFNN and COMSOL Multiphysics.  
+ 
+(a) FEM -PIKFNN                        (b) COMSOL  
+Fig. 13. Contours of the sound pressure level of the capsule shell (
+8hm= ).  
+ 
+(a) FEM -PIKFNN                        (b) COMSOL  
+Fig. 14. Contours of the sound pressure level of the capsule shell (
+12hm= ).  
+
+ 
+5. Conclusions  
+This paper proposes  the hybrid  FEM -PIKFNNs  for predicting  the underwater 
+acoustic propagation induced by structural vibrations  in the unbounded ocean, deep 
+ocean and shallow ocean.  In the proposed  method,  the underwater  sound pressure level s 
+calculated by FEM  are used as the training data of PIKFNN s. PIKF s containing the  
+underwater acoustic  propagation information from different ocean  environments are 
+used as  the activation functions  of PIKFNN s, and the loss function contains  only the 
+training sample  information of  the underwater acoustic  propagation.  The numerical 
+result s show  that PIKFNN s gradually converge  as the tolerance decreases and the 
+number of training samples increases, and the effectiveness and accuracy of the 
+proposed  method  in predicting  underwater acoustic  propagation are verified by 
+comparison with the true  solutions and finite element results . 
+The study demonstrates that incorporating prior physical information into  the 
+activation functions of artificial neural networks can improve  their generalization 
+ability and reduce the complexity of neural networks.  PIKFNN s with a single  hidden 
+layer  can accurately predict  the underwater acoustic  propagation behavior in  three  
+different ocean environments.  
+ 
+Acknowledgements  
+The work reported in  this paper was supported by the Natural Science Foundation of 
+China (Grant No. 12122205), the Innovative Research Foundation of Ship General 
+Performance (Grant No. 33122126), the Six Talent Peaks Project in Jiangsu Province 
+of China (Grant No. 2019 -KTHY -009). 
+ 
+References  
+[1] Gui Q, Li W, Chai Y B (2023)  The enriched quadrilateral overlapping finite elements 
+for time -harmonic acoustics. Appl Math Comput  451: 128018  
+[2] Remillieux MC, Burdisso RA  (2012)  Vibro -acoustic response of an infinite, rib -
+stiffened, thick -plate assembly using finite -element analysis. J Acoust Soc Am  132(1): 
+EL36 -EL42  
+[3] Agathos K, Chatzi E, Bordas SPA (2018) Multiple crack detection in 3D using a 
+stable XFEM and global optimizat ion. Comput Mech 62: 835 -852 
+[4] Sun T T, Wang P, Zhang G J, Chai  YB (2023)  Transient analyses of wave 
+propagations in nonhomogeneous media employing the novel finite element method 
+with the appropriate enrichment function. Comput Math Appl  129: 90 -112 
+[5] Gu Y , Fan C M, Qu W, Wang FJ, Zhang CZ  (2019)  Localized method of fundamental 
+solutions for three -dimensional inhomogeneous elliptic problems: theory and 
+MATLAB code. Comput Mech 64: 1567 -1588  
+[6] Qiu L, Ma X, Qin QH  (2023)  A novel meshfree method based on spatio -temporal 
+homogenization functions for one -dimensional fourth -order fractional diffusion -wave 
+equations. Appl Math Lett  142: 108657  
+[7] Xi Q, Fu Z J, Zhang C Z, Yin DS (2021)  An efficient localized Trefftz -based 
+collocation scheme for heat conduction a nalysis in two kinds of heterogeneous 
+materials under temperature loading. Comput Struct  255: 106619  
+[8] Chen LL, Lian H, Liu Z, Chen HB , Atroshchenko E, Bordas SPA  (2019)  Structural 
+shape optimization of three dimensional acoustic problems with isogeometr ic boundary 
+element methods. Comput Meth Appl Mech Eng  355: 926 -951 
+[9] Atroshchenko E, Hale JS, Videla JA, Potapenko S, Bordas SPA  (2017)  Micro -
+structured materials: Inhomogeneities and imperfect interfaces in plane micropolar 
+elasticity, a boundary eleme nt approach. Eng Anal Bound Elem  83: 195 -203 
+[10] Wei X, Rao C, Chen S, Luo W  (2023)  Numerical simulation of anti -plane wave 
+propagation in heterogeneous media. Appl Math Lett  135: 108436  
+[11] Li J P, Fu Z J, Gu Y ,  Qin QH (2022)  Recent advances and emerging applications 
+of the singular boundary method for large -scale and high -frequency computational 
+acoustics. Adv Appl Math Mech  14(2): 315 -343 
+[12] Fu ZJ, Xi Q, Gu Y , Li JP, Q, WZ, Sun LL, Wei X, Wang FJ, Lin J, Li WW, Xu WZ, 
+Zhan g CZ (2023) Singular boundary method: a review and computer implementation 
+aspects. Eng Anal Bound Elem 147: 231 -266 
+[13] Karageorghis A, Lesnic D, Marin L  (2017)  The MFS for the id entification of a 
+sound -soft interior acoustic scatterer. Eng Anal Bound El em 83: 107 -112 
+[14] Karageorghis A, Poullikkas A, Berger JR  (2006)  Stress intensity factor 
+computation using the method of fundamental solutions. Comput Mech  37: 445 -454 
+[15] Rek Z, Šarler B  (2021)  The method of fundamental solutions for the Stokes flow 
+with the subdomain technique. Eng Anal Bound Elem  128: 80 -89 
+[16] Askour O, Mesmoudi S, Tri A, Braikat B, Zahrouni H, Potier -Ferry M (2020) 
+Method of fundamental solutions and a high order continuati on for bifurcation analysis 
+within Föppl -von Karman plate theory. Eng Anal Bound Elem 120: 67 -72 
+[17] Zhao W C, Chen L L, Chen H B, Marburg  S (2019)  Topology optimization of 
+exterior acoustic‐structure interaction systems using the coupled FEM‐BEM method. 
+Int J Numer Methods Eng  119(5): 404 -431 
+[18] Sharma N, Mahapatra TR, Panda SK  (2019)  Vibroacoustic analysis of thermo -
+elastic laminated composite sandwich curved panel: a higher -order FEM -BEM 
+approach. Int J Mech Mater Des  15: 271 -289 
+[19] Liravi H, Arcos R, Clot A, Conto  KF, Romeu  JA (2022)  2.5D coupled FEM -SBM 
+methodology for soil–structure dynamic interaction problems . Eng Struct  250: 113371  
+[20] Fu Z J, Xi Q, Li Y D, Huang H, Rabczuk T  (2020)  Hybrid FEM -SBM solver for 
+structural vibration induced underwater acoustic radiation in shallow marine 
+environment. Comput Meth Appl Mech  Eng 369: 113236  
+[21] Colaço A, Costa PA, Amado -Mendes P, Magalhães F, Godinho L  (2018)  
+Experimental validation of a FEM -MFS hybrid numerical approach for vibro -acoustic 
+prediction. Appl Acoust  141: 79 -92 
+[22] Gfrerer MH, Schanz M  (2020)  A coupled FEM‐MFS method for the vibro‐acoustic 
+simulation of laminated poro‐elastic shells. Int J Numer Methods Eng  121(19): 4235 -
+4267  
+[23] Cadou JM, Boumediene F, Guevel Y , Girault G, Duigou L, Daya EM, Potier -Ferry 
+M (2016) A high order reduction -correction method for Ho pf bifurcation in fluids and 
+for viscoelastic vibration. Comput Mech 57: 305 -324 
+[24] LeCun Y , Bengio Y , Hinton G  (2015)  Deep learning. Nature, 521(7553): 436 -444 
+[25] Hinton GE, Salakhutdinov RR  (2006)  Reducing the dimensionality of data with 
+neural networks. Science, 313(5786): 504 -507 
+[26] Anitescu C, Atroshchenko E, Alajlan N, Rabczuk T  (2019)  Artificial Neural 
+Network Methods for the Solution of Second Order Boundary Value Problems. CMC -
+Comput Mat C ontin  59(1) : 345-359 
+[27] Krokos V , Bui Xuan V , Bordas SPA, Young P, Kerfriden P (2022) A Bayesian 
+multiscale CNN framework to predict local stress fields in structures with microscale 
+features. Comput Mech 69(3): 733 -766 
+[28] Qu W Z, Gu Y , Zhao S D, Wang FJ  (2023)  Boundary integrated neural networks 
+(BINNs) for acoustic radiation and scattering. Preprint arXiv:2307.10521  
+[29] Zhang P J, Zhang C Z, Gu Y , Qu WZ, Zhao SD  (2023)  Boundary integrated neural 
+networks (BINNs) for 2D elastostatic and piezoelectric problems: Theory and 
+MATLAB code. Preprint arXiv:2308.01053  
+[30] Raissi M, Perdikaris P, Karniadakis GE  (2019)  Physics -informed neural networks: 
+A deep learning framework fo r solving forward and inverse problems involving 
+nonlinear partial differential equations. J Comput Phys  378: 686 -707 
+[31] Lu L, Meng X, Mao Z, Karniadakis GE  (2021)  DeepXDE: A deep learning library 
+for solving differential equations. SIAM Rev  63(1): 208 -228 
+[32] Karniadakis GE, Kevrekidis IG, Lu L, Perdikaris P, Wang SF, Yang L  (2021)  
+Physics -informed machine learning. Nat Rev Phys  3(6): 422 -440 
+[33] Mao Z, Jagtap A D, Karniadakis G E  (2020)  Physics -informed neural networks for 
+high-speed flows. Comput Met h Appl Mech Eng  360: 112789  
+[34] Bai J, Rabczuk T, Gupta A, Alzubaidi L, Gu YT (2023) A physics -informed neural 
+network technique based on a modified loss function for computational 2D and 3D solid 
+mechanics. Comput Mech 71(3): 543 -562 
+[35] Sirignano J, Spiliopoulos K  (2018)  DGM: A deep learning algorithm for solving 
+partial differential equations. J Comput Phys  375: 1339 -1364  
+[36] Saporito YF, Zhang Z  (2021)  Path-dependent deep Galerkin method: A neural 
+network approach to solve path -depende nt partial differential equations. SIAM J Financ 
+Math  12(3): 912 -940 
+[37] Kim Y , Choi Y , Widemann D, Zohdi  T (2022)  A fast and accurate physics -informed 
+neural network reduced order model with shallow masked autoencoder. J Comput Phys  
+451: 110841  
+[38] Hu W F, Lin TS, Lai MC  (2022)  A discontinuity capturing shallow neural network 
+for elliptic interface problems. J Comput Phys  469: 111576  
+[39] Karageorghis A, Chen CS  (2022)  Training RBF neural networks for the solution 
+of elliptic boundary value problems. Comp ut Math Appl  126: 196 -211 
+[40] Li JY, Luo SW, Qi YJ, Huang  YP (2003)  Numerical solution of elliptic partial 
+differential equation using radial basis function neural networks. Neural Netw  16(5-6): 
+729-734 
+[41] Liu Q, Gu YT, Zhuang P, Liu F, Nie YF (2011) An implicit RBF meshless approach 
+for time fractional diffusion equations. Comput Mech 48: 1 -12 
+[42] Fu ZJ, Xu W Z, Liu S N (2023)  Physics -Informed Kernel Function Neural Networks 
+for Solving Partial Differential Equations. Preprint arXiv:2306.02606  

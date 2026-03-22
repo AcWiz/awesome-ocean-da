@@ -1,0 +1,935 @@
+manuscript submitted toEnter journal name here
+Eddy-Resolving Global Ocean Forecasting with
+Multi-Scale Graph Neural Networks
+Yuta Hirabayashi1, Daisuke Matsuoka1, Konobu Kimura2
+1Japan Agency for Marine-Earth Science and Technology
+2FURUNO ELECTRONIC CO. LTD.
+Key Points:
+•A multi-scale graph neural network that uses two spherical meshes for 10-day eddy-
+resolving global ocean forecasts is proposed.
+•The model is designed to improve the representation of multi-scale ocean dynam-
+ics and short-term variability.
+•Evaluations show improved representation across a wide range of spatial scales and
+higher short-term skill.
+Corresponding author: Yuta Hirabayashi,yuta.hirabayashi@jamstec.go.jp
+–1–arXiv:2601.12775v1  [cs.LG]  19 Jan 2026
+manuscript submitted toEnter journal name here
+Abstract
+Research on data-driven ocean models has progressed rapidly in recent years; however,
+the application of these models to global eddy-resolving ocean forecasting remains lim-
+ited. The accurate representation of ocean dynamics across a wide range of spatial scales
+remains a major challenge in such applications. This study proposes a multi-scale graph
+neural network-based ocean model for 10-day global forecasting that improves short-term
+prediction skill and enhances the representation of multi-scale ocean variability. The model
+employs an encoder-processor-decoder architecture and uses two spherical meshes with
+different resolutions to better capture the multi-scale nature of ocean dynamics. In ad-
+dition, the model incorporates surface atmospheric variables along with ocean state vari-
+ables as node inputs to improve short-term prediction accuracy by representing atmo-
+spheric forcing. Evaluation using surface kinetic energy spectra and case studies shows
+that the model accurately represents a broad range of spatial scales, while root mean square
+error comparisons demonstrate improved skill in short-term predictions. These results
+indicate that the proposed model delivers more accurate short-term forecasts and im-
+proved representation of multi-scale ocean dynamics, thereby highlighting its potential
+to advance data-driven, eddy-resolving global ocean forecasting.
+Plain Language Summary
+Ocean forecasting is essential for maritime operations, such as ship route planning
+and fisheries. Traditional numerical ocean models play a critical role; however, they re-
+quire substantial computational resources. To this end, data-driven approaches have demon-
+strated effectiveness across various fields. However, their application to high-resolution
+global ocean forecasting remains limited. This study develops a new data-driven method
+that learns from reanalysis data to predict ocean conditions. The data-driven method
+uses a machine learning model called a graph neural network, which is designed to pro-
+cess information on spherical grids covering the globe. By combining two different grid
+resolutions, the model can represent both large- and small-scale ocean features more con-
+sistently. In addition, the model incorporates information regarding winds and other sur-
+face atmospheric conditions, which improves short-term forecasts in surface layers. Re-
+sults show that the proposed model improves short-term global ocean forecasting and
+the representation of ocean variability across multiple spatial scales. These features are
+indispensable for high-resolution global ocean modeling, highlighting the potential of data-
+driven global ocean forecasting models.
+======
+1 Introduction
+High-resolution global ocean forecasting is essential for scientific research and prac-
+tical applications, yet computationally challenging. In particular, eddy-resolving ocean
+forecasting (1/10◦or finer resolution) enables explicit representation of key oceanic fea-
+tures, including western boundary currents, mesoscale variability, and the position and
+sharpness of ocean fronts (Hurlburt et al., 1996; Hurlburt & Metzger, 1998; Metzger et
+al., 2014). Furthermore, mesoscale variability influences plankton distribution (McGillicuddy,
+2016), which is closely tied to the location of fishing grounds (Woodson & Litvin, 2015).
+Therefore, eddy-resolving ocean state information contributes not only to advancing our
+understanding of ocean dynamics but also to supporting industries such as fisheries. To
+provide accurate global ocean state information, ocean global circulation models (OGCMs)
+play a crucial role. Although eddy-resolving OGCMs simulate ocean states more accu-
+rately than coarser-resolution models (Hurlburt et al., 2008), their increased spatial res-
+olution results in substantially greater computational demands.
+–2–
+manuscript submitted toEnter journal name here
+Data-driven approaches have gained prominence in computational fluid dynamics,
+including ocean forecasting, as they can achieve high accuracy while maintaining low com-
+putational costs. These approaches utilize advanced machine learning models trained to
+capture the evolution of fluid dynamics (e.g., Roznowicz et al. (2024)). In global weather
+forecasting, numerous data-driven models have been developed (Keisler, 2022; Pathak
+et al., 2022; Nguyen et al., 2023; Chen et al., 2023; Bi et al., 2023; Lam et al., 2023; Lang
+et al., 2024), several of which report outperforming the ECMWF Integrated Forecast-
+ing System (IFS), a state-of-the-art numerical global weather forecasting system. Build-
+ing on the success of these data-driven models in global weather forecasting, similar ap-
+proaches have been explored for global ocean forecasting. For example, Xiong et al. (2023)
+developed a data-driven ocean model based on the Fourier Neural Operator (FNO) (Li
+et al., 2020) at 1/4◦resolution. Subsequently, El Aouni et al. (2025) proposed another
+FNO-based model also at 1/4◦resolution, thereby introducing comprehensive validation
+metrics and demonstrating promising results. These models primarily focus on short-
+term predictions (e.g., 10 days), whereas global climate ocean emulators, such as Guo
+et al. (2025); Dheeshjith et al. (2025); Subel and Zanna (2024), have extended predic-
+tion timescales to the decadal range, demonstrating the capability to stably emulate ocean
+dynamics over decadal periods at 1◦resolution.
+However, although data-driven ocean forecasting models successfully reproduce coarse-
+scale patterns at lower resolutions, whether they can represent fine-scale structures re-
+mains unclear. In fact, in weather forecasting, data-driven models have shown limita-
+tions in capturing fine-scale features compared with traditional numerical weather pre-
+diction models (Bonavita, 2024). Given these considerations, the feasibility of data-driven
+models for eddy-resolving global ocean forecasting warrants investigation. Motivated by
+this knowledge gap, several recent studies have proposed data-driven models for eddy-
+resolving global ocean forecasting (Wang et al., 2024; Cui et al., 2025; Huang et al., 2025).
+For example, Wang et al. (2024) proposed an architecture based on the Swin Transformer
+(Liu et al., 2021) and showed that their model outperforms several operational numer-
+ical ocean forecasting systems in terms of root mean square error (RMSE). Subsequently,
+Cui et al. (2025) demonstrated the effectiveness of incorporating atmospheric variables,
+while Huang et al. (2025) employed the mixture-of-time module to capture multi-scale
+temporal dependencies of ocean variables. Although these studies demonstrate the po-
+tential of data-driven models for eddy-resolving global ocean forecasting, the capabil-
+ity of these models to represent oceanic structures across a wide range of spatial scales
+is potentially constrained. This is partly because these models rely on similar Swin Transformer-
+based architectures with rectilinear meshes that lack spherical symmetry, leading to un-
+physical inductive biases (Linander et al., 2025; Ramavajjala, 2024). Such limitations
+may hinder accurate representation of the broad spatial scales required for eddy-resolving
+ocean models.
+This study applies a multi-scale graph neural network (GNN) (Fortunato et al., 2022)
+to global ocean forecasting at 1/12◦resolution over a 10-day period. The multi-scale GNN
+employs an encoder-processor-decoder architecture designed to capture the multi-scale
+spatial characteristics of ocean dynamics. This architecture incorporates two spherical
+meshes with different spatial resolutions to naturally encode global information. Thus,
+the proposed architecture is expected to represent a wide range of spatial scales, from
+mesoscale eddies to basin-scale features such as western boundary currents. This multi-
+scale design is motivated by the success of GraphCast (Lam et al., 2023) in global weather
+forecasting. Building on GraphCast, this study tailors the architecture for eddy-resolving
+global ocean forecasting by removing land nodes and using only two mesh levels to fo-
+cus on fine-scale dynamics. In addition, to account for atmospheric forcing, surface at-
+mospheric variables are combined with ocean variables and used as node input features,
+thereby improving the evolution of surface-layer fields that are particularly important
+for short-term prediction. This study evaluates prediction accuracy and the ability of
+the model to capture ocean dynamics across a wide range of spatial scales, using quan-
+–3–
+manuscript submitted toEnter journal name here
+titative and qualitative comparisons with the first data-driven, eddy-resolving global ocean
+forecasting model based on a Swin Transformer-based architecture proposed by Wang
+et al. (2024).
+2 Methods
+2.1 Overview
+Figure 1 (a) illustrates the overall schematic design of the proposed model. The
+input consists of ocean state data at the current time step (t= 0) and one step prior
+(t=−1), denoted asX0andX−1; atmospheric forecast dataA−1, A0, A1; and latitude,
+longitude, and ocean depth provided as static dataS, whereX trepresents the ocean state
+variables that include vertical levels, whereasA tconsists of atmospheric variables de-
+fined at the ocean surface. BothX tandA tare treated as two-dimensional gridded data,
+with different depth levels inX trepresented as separate variables, flattening the verti-
+cal dimension into the channel dimension of the input tensor. Given these inputs, the
+multi-scale GNN modelFperforms a one-step-ahead prediction of the ocean state, as
+expressed in Equation (1). Forecasting is performed in an autoregressive manner up to
+t=Tby recursively feeding predicted ocean states back as input, with atmospheric
+data provided at each timestep. In this study, we setT= 10, with each step correspond-
+ing to one day. Accordingly, both ocean and atmospheric inputs are given as daily-mean
+fields.
+Xt+1=F(Xt−1, Xt, At−1, At, At+1, S) (1)
+2.2 Mesh construction
+The meshes used in this study are constructed according to the design described
+by Lam et al. (2023). Among the hierarchical meshes defined in GraphCast, the two finest
+resolutions–the finest and second finest meshes–are employed to represent multi-scale ocean
+dynamics. As illustrated in Figure 1 (b), the graph includes grid nodes corresponding
+to the ocean data grid, mesh nodes at two types of resolutions, and edges connecting grid-
+to-mesh, mesh-to-grid, and mesh-to-mesh nodes.
+A key modification is introduced: land nodes are excluded from the graph struc-
+ture. This refinement enables the mesh to focus exclusively on ocean regions, thereby
+improving both computational efficiency and physical relevance for ocean forecasting.
+This is implemented through a filtering process that removes land grid nodes and their
+associated edges from the graph. Specifically, edges connected to land nodes are excluded,
+and mesh-to-mesh connections are pruned to retain only those involving ocean-connected
+nodes, thus ensuring an efficient graph structure for ocean forecasting.
+2.3 Algorithm
+This section outlines the prediction algorithm using a multi-scale GNN, which fol-
+lows the overall methodology of GraphCast.
+Definition of GNN Operations
+The GNN operations in this study follow the message passing framework (Gilmer
+et al., 2017), where the message function and update function are implemented using mul-
+tilayer perceptrons (MLPs) with residual connections (Fortunato et al., 2022; Lam et al.,
+2023):
+es→r←MLP(e s→r, vs, vr) +e s→r (2)
+–4–
+manuscript submitted toEnter journal name here
+vr←MLP
+vr,X
+s∈N(r)es→r
++vr (3)
+wheree s→ris the edge feature vector from nodesto noder,v ris the feature vec-
+tor of noder, andN(r) denotes the set of neighbors of noder. The operation GNN N=n(vs, vr, es→r)
+refers to applying equations (2) and (3) forniterations.
+Preprocessing
+The features of the nodesvG,vMand edgeseG→M,eM→M,eM→Gare defined as
+shown in Fig. 1 (b). The node featuresvGare constructed by concatenatingXt−1,Xt,
+At−1,At,At+1, andS, andvMrepresent positional vectors of the mesh nodes. The edge
+features are constructed using the relative positions of the edge endpoints, following the
+method outlined by Lam et al. (2023). Subsequently, all features are normalized.
+Encode
+To unify the embedding dimension, the featuresvG,vM,eG→M,eM→M, andeM→G
+are individually processed by MLPs and projected into a common feature space. The
+embedding dimension is set to 192.
+vM←GNN N=1(vM, vG, eG→M) (4)
+vG←MLP(vG) +vG(5)
+Process
+Using the updatedvMandeM→M, GNN operations are applied to each mesh, where
+the iteration number of message passing is set to 16.
+vM←GNN N=16 (vM, vM, eM→M) (6)
+Decode
+Based onvMandeM→G, the final grid-level features are computed as follows:
+vG←GNN N=1(vG, vM, eM→G) (7)
+Finally, the output is obtained by passingvGthrough an MLP and adding the re-
+sult toXt, thus producing the forecastXt+1.
+2.4 Data and training settings
+Gridded ocean and atmospheric datasets were used for both training and evalu-
+ation. For the ocean data, GLORYS12V1 (Jean-Michel et al., 2021) (hereafter, referred
+to as GLORYS), a global ocean reanalysis dataset, was used forXtandS, with 23 ver-
+tical levels ranging from 0.49 m to 643.57 m. For the atmospheric data at the ocean sur-
+face, ECMWF’s ERA5 (Hersbach et al., 2020), a global atmospheric reanalysis dataset,
+was used forAtduring training, while NOAA’s GFS (Global Forecast System) forecast
+data, an operational atmospheric forecasting dataset, was used for evaluation. Both ocean
+and atmospheric variables were provided as daily-mean fields, and the atmospheric data
+were interpolated onto the ocean grid using bicubic interpolation. A summary of the datasets
+used in this study is presented in Table 1.
+–5–
+manuscript submitted toEnter journal name here
+The model was trained using 25 years of reanalysis datasets in two training phases.
+The training period spanned from January 1, 1993, to December 31, 2017. In the first
+phase, the model was trained with 1-day predictions, followed by fine-tuning with 2-day
+rollouts in the second phase. Both training phases employed the AdamW optimizer (Loshchilov
+& Hutter, 2019) withβ 1= 0.9 andβ 2= 0.95, which are the coefficients used to com-
+pute the running averages of the gradient and its square, respectively, and used the mean
+squared error (MSE) loss. The learning rates were set to 10−3and 10−4for the first and
+second phases, respectively. All training was conducted using eight NVIDIA A100 GPUs
+(40 GB memory each).
+3 Experiments
+3.1 Experimental setting
+Quantitative and qualitative evaluations were conducted in comparison with Wang
+et al. (2024), which serves as the baseline. The RMSE evaluation was performed using
+30 cases in 2019, with predictions initialized every 12 days starting on January 1, 2019,
+using GLORYS as common initial conditions. This RMSE comparison was conducted
+to assess the overall performance of both models; however, RMSE alone does not cap-
+ture spatial or temporal characteristics. To evaluate these characteristics, surface kinetic
+energy spectra and case study analyses were conducted using forecasts initialized on Jan-
+uary 1, 2019. The surface kinetic energy spectra quantitatively assess the representation
+of fine-scale structures, while the case study analyses qualitatively reveal both spatial
+and temporal characteristics.
+In addition to comparison with the baseline, sensitivity experiments were conducted
+to investigate whether the proposed model appropriately reflects atmospheric forcing by
+using different types of atmospheric input data. Following previous sensitivity studies
+in numerical ocean models (Hurlburt et al., 2008; Metzger et al., 2014), the input atmo-
+spheric data during the prediction phase were varied from forecasts (GFS) to reanaly-
+sis data (ERA5) and climatology. The climatological data were obtained as the daily mean
+values of ERA5 over the training period. In all cases, the initial ocean condition was fixed
+and obtained from GLORYS. Evaluations were performed on the same 30 cases in 2019,
+with predictions initiated every 12 days. As the accuracy of atmospheric data is expected
+to be highest for reanalysis, followed by forecast and then climatology, the prediction ac-
+curacy of the developed model was expected to follow this order if the atmospheric in-
+puts were properly utilized.
+3.2 Baseline
+The Swin Transformer-based model proposed by Wang et al. (2024) was used as
+a baseline. The baseline model can be directly compared with the model developed here,
+as its trained weights are publicly available (see Data Availability Statement), and sev-
+eral experimental settings are shared between the two studies. Specifically, the baseline
+model was trained using the same ocean dataset (GLORYS) over the same period (1993–
+2017) and with the same loss function (MSE) as adopted in this study. In addition, both
+models predict the same set of ocean variables at the same depth levels with a horizon-
+tal resolution of 1/12◦.
+Despite several shared settings, methodological differences other than model ar-
+chitecture exist between the baseline and this study. The baseline trains separate mod-
+els for each lead time, in contrast with the autoregressive approach adopted in this study.
+In addition, atmospheric forcing is treated differently. The baseline model relies solely
+on the atmospheric wind field at the initial time, whereas the model presented in this
+study employs time-evolving atmospheric forecasts to represent surface boundary con-
+ditions, consistent with standard practices in numerical ocean modeling. Experiments
+–6–
+manuscript submitted toEnter journal name here
+were conducted to investigate the influence of these methodological differences and dif-
+ferences in model architecture on the predictive characteristics of the proposed model.
+4 Results
+4.1 Spatially averaged prediction skill across lead times and depths
+The proposed model exhibited lower RMSE at the surface layer for short lead times
+(Figure 2). At the first forecast step (1-day lead time), the RMSE of the proposed model
+was lower than that of the baseline. Although RMSE increased with lead time for both
+models, the increase was more rapid for the proposed model than for the baseline. Con-
+sequently, a relatively low RMSE was maintained for the proposed model up to a 4-day
+lead time. Similar behavior was observed for all surface variables, including salinity, tem-
+perature, eastward current, northward current, and sea surface height.
+This short-lead-time surface skill was consistently observed across multiple ocean
+basins. Figure 3 shows comparisons over several regions, following the domain definitions
+of Metzger et al. (2014). Similar trends to those in Figure 2 were identified for the Kuroshio
+Extension, Gulf Stream, and South China Sea regions. In contrast, in the Yellow Sea,
+where strong short-term variability is present (Metzger et al., 2014), both models exhib-
+ited relatively poor accuracy in sea surface height from the first forecast step. Despite
+this degradation, lower RMSE at short lead times was consistently observed for the pro-
+posed model across regions.
+This short-lead-time improvement was also observed below the surface, particularly
+within the upper ocean layers. Figure 4 shows that, for the eastward and northward cur-
+rents at a 3-day lead time, the proposed model exhibited lower RMSE in the upper lay-
+ers, approximately down to 100 m, whereas the baseline showed lower RMSE at greater
+depths. At the 6- and 10-day lead times, RMSE of the proposed model increased across
+all depth layers. For temperature and salinity, lower RMSE was observed for the pro-
+posed model across all depth layers at the 3-day lead time. At the 6-day lead time, lower
+RMSE was mainly retained in the upper layers, while at the 10-day lead time, higher
+RMSE was observed across all layers. Although the lead time at which RMSE degra-
+dation became evident varied among variables, lower RMSE at short lead times was ob-
+served on the surface and within the upper mixing layer.
+4.2 Evaluation of representation across spatial scales
+The surface kinetic energy (KE) spectra of the proposed model showed closer align-
+ment with the reanalysis data (Figure 5). Specifically, for forecasts with a 1-day lead time,
+the KE spectra of the proposed model more closely matched those of GLORYS, whereas
+the baseline exhibited a deficiency at high wavenumbers in both the North Pacific and
+the North Atlantic. At a 10-day lead time, a discrepancy emerged at high wavenumbers;
+however, the KE spectra of the proposed model remained closer to those of GLORYS
+than those of the baseline. Overall, the spectral agreement was observed for both ocean
+basins at both lead times.
+4.3 Qualitative evaluation of spatiotemporal variability
+The proposed model produced surface temperature fields with finer-scale structures
+compared with the baseline (Figure 6). These comparisons were conducted over three
+western boundary current regions: the Agulhas Current, the Kuroshio Current, and the
+Gulf Stream. These regions contain abundant mesoscale eddies and are therefore suit-
+able for qualitative evaluation of the representation of fine-scale structures. Across all
+regions, predictions from the proposed model exhibited discrepancies relative to GLO-
+RYS, reflecting the inherent difficulty of forecasting in these regions. Nevertheless, the
+–7–
+manuscript submitted toEnter journal name here
+proposed model produced temperature fields that preserved fine-scale structures more
+clearly than those of the baseline. This behavior is consistent with the spectra-based eval-
+uation shown in Figure 5.
+Beyond spatial structures, differences in the temporal evolution of fine-scale fea-
+tures were observed between the proposed model and the baseline (Figure 7). By com-
+paring sea surface height and surface currents in the Indian Ocean at 1-, 5-, and 10-day
+lead times, the temporal evolution of eddy structures was identified in GLORYS. At a
+5-day lead time, the proposed model reproduced the temporal development of a coher-
+ent eddy structure (red boxes), whereas the baseline did not reproduce this feature. At
+a 10-day lead time, erroneous developments were observed in the proposed model (or-
+ange boxes), which are further examined in the sensitivity experiments.
+4.4 Sensitivity analysis to input atmospheric forcing
+The influence of atmospheric input on the predictions was examined through sen-
+sitivity experiments. In these experiments, atmospheric forecast data were replaced with
+reanalysis and climatological data, following similar sensitivity studies in numerical ocean
+models (Hurlburt et al., 2008; Metzger et al., 2014). Figure 8 shows that atmospheric
+forcing had a strong impact on temperature and current predictions at short lead times,
+whereas its impact on salinity and sea surface height was relatively limited. The RMSE
+associated with atmospheric forecast forcing increased rapidly with lead time and even-
+tually approached the RMSE obtained using climatological forcing. In addition, the in-
+fluence of atmospheric forcing was most pronounced in the upper ocean layers (Figure 9).
+Overall, the influence of atmospheric input was evident for temperature and current fields
+at short lead times and near the surface.
+The effects of atmospheric forcing were further illustrated qualitatively through a
+case study (Figure 10). This case study was conducted for the region corresponding to
+Figure 7. At a 10-day lead time, degradation was evident when atmospheric forecast forc-
+ing was used (orange boxes); however, this degradation was reduced when atmospheric
+reanalysis forcing was applied. At a 5-day lead time, the temporal development of the
+surface current field was reproduced when atmospheric forecast forcing was applied (as
+shown in Figure 7), while degraded structures were observed when atmospheric clima-
+tological forcing was used (red boxes). Overall, differences in the temporal evolution of
+surface currents were consistently observed depending on the atmospheric forcing used.
+5 Discussion and Conclusions
+This study aimed to develop a multi-scale GNN-based ocean prediction model that
+represents a wide range of spatial scales and achieves improved short-term skill, partic-
+ularly within the upper ocean layers. This representation capability is demonstrated by
+kinetic energy (KE) spectra (Figure 5) and qualitative evaluations (Figure 6, Figure 7),
+demonstrating that the proposed model enables the reproduction of high spatial frequency
+components. Specifically, the advantage of the proposed model in the KE spectra at the
+one-day forecast is likely attributable to its architectural design, as the spectra are not
+affected at the first prediction step by the choice of time evolution scheme. Furthermore,
+the superiority in short-term and surface predictions (Figure 2) can be attributed to the
+incorporation of atmospheric forcing. This interpretation is supported by the sensitiv-
+ity experiments (Figure 8), which demonstrated that replacing atmospheric forecast forc-
+ing with reanalysis or climatological forcing led to systematic changes in prediction ac-
+curacy, particularly for temperature and surface currents at short lead times. These find-
+ings indicate that the proposed model effectively utilizes atmospheric forcing to constrain
+short-term ocean evolution. This behavior is consistent with established results from nu-
+merical ocean models, which emphasize the critical role of accurate atmospheric forcing
+in short-term ocean forecasting (Hurlburt et al., 2008).
+–8–
+manuscript submitted toEnter journal name here
+The degradation of KE spectra representation at a lead time of 10 days indicates
+that extending the lead time further could make the proposed model outputs unstable.
+This instability is likely attributed to the proposed model’s autoregressive approach, where
+errors accumulate during rollout. To address such issues, some studies have proposed in-
+corporating additional loss terms to prevent instability, such as kinetic energy-based loss
+contributions (Subel & Zanna, 2024). Although these treatments are effective for rela-
+tively low-resolution models, the feasibility of achieving stable long-lead forecasts at eddy-
+resolving resolution remains uncertain. The application of such approaches is beyond the
+scope of the present study, which focuses on 10-day forecasting; however, future research
+should consider applying them to the proposed model.
+The RMSE degradation of the proposed model at longer lead times can be attributed
+to two factors: the sensitivity of RMSE to positional errors and error accumulation aris-
+ing from the autoregressive approach. The first factor implies that forecasts that are less
+smoothed tend to exhibit higher RMSE, known as the double-penalty effect (Hoffman
+et al., 1995; Ebert et al., 2013). This interpretation is supported by the ability of the pro-
+posed model to better capture the temporal evolution of fine-scale structures (Figure 7).
+This highlights the importance of conducting evaluations that do not rely solely on point-
+wise metrics such as RMSE. For example, Bonavita (2024) revealed that data-driven weather
+prediction models showed superiority in terms of RMSE but lacked physical consistency.
+Although the double-penalty effect may play a role, error accumulation during autore-
+gressive rollout may also contribute to the degradation of predictions, leading to increased
+RMSE. Disentangling these factors and conducting further investigations are crucial for
+future research.
+The evaluation presented in this study was conducted in a simplified setting, which
+included relying on the reanalysis dataset and focusing on comparison with a data-driven
+model. Regarding the first simplified setting, the evaluation requires comprehensive data
+that are spatially and temporally consistent, such as ocean reanalysis products, as this
+study focuses on evaluating the representation of spatial distributions including fine-scale
+structures. In addition, the initial conditions were obtained from the reanalysis dataset,
+allowing the evaluation to focus directly on the capability of the model, rather than on
+errors stemming from the initial state. Regarding the second simplified setting, the eval-
+uation focuses on a comparison with Wang et al. (2024), and no comparisons were made
+with state-of-the-art operational numerical ocean prediction systems. This comparison
+is performed to reveal the distinctive characteristics of the proposed architecture, such
+as the integration of a multi-scale GNN, an autoregressive formulation, and atmospheric
+forcing. To this end, a comparison with another data-driven model trained on the same
+dataset provides a clearer basis for highlighting the advantages and limitations of the
+proposed model and is therefore suitable for the objectives of this study.
+Despite the simplified setting, this study highlights the potential of the multi-scale
+GNN-based ocean model for 10-day global ocean forecasting at eddy-resolving resolu-
+tion. Compared with the prior eddy-resolving data-driven global ocean model (Wang et
+al., 2024) as a baseline, the proposed model exhibits better representation of a wide range
+of spatial scales as well as temporal evolution, which are crucial for eddy-resolving ocean
+models, though RMSE degradation has been observed at longer lead times. In addition
+to its performance, a key advantage of the multi-scale GNN architecture lies in its flex-
+ibility, particularly its ability to be extended through mesh configuration design. For ex-
+ample, unstructured meshes, which are commonly used in computational fluid dynam-
+ics and adopted in ocean models such as MPAS-Ocean (Ringler et al., 2013), can be in-
+corporated into the architecture, similar to GNN-based weather prediction models that
+use stretched grids (Nipen et al., 2024). Such an extension would further advance data-
+driven ocean modeling and presents scope for future investigation.
+–9–
+manuscript submitted toEnter journal name here
+Table 1.Definition, description, and data sources of variables
+Variable Description Data source
+XtTemperature, eastward current, northward cur-
+rent, salinity, sea surface heighta.GLORYS
+At10m eastward wind, 10m northward wind,
+precipitation, 2m temperature, 2m dewpoint
+temperature, shortwave radiation flux, longwave
+radiation flux, latent heat flux, sensible heat
+flux, sea level pressure.ERA5 Reanalysis
+(training), GFS
+Forecasts (evalua-
+tion)
+SLatitude, longitude, ocean depth. GLORYS
+aAll variables except sea surface height include 23 vertical layers at 0.49, 2.65, 5.08,
+7.93, 11.41, 15.81, 21.60, 29.44, 40.34, 55.76, 77.85, 92.32, 109.73, 130.67, 155.85,
+186.13, 222.48, 266.04, 318.13, 380.21, 453.94, 541.09, and 643.57 m.
+–10–
+manuscript submitted toEnter journal name here
+(a) 
+Fine mesh
+(b) At-1, At , At+1
+SXt-1 , Xt
+Ocean
+Atmosphere
+StaticPreprocess
+＆
+Encode
+MP
+MP
+Coarse meshOcean
+Xt+1 Process
+Decode
+MP = Message Passing
+Figure 1.Overview of the proposed ocean-forecasting model. (a) Schematic of the model
+architecture, which takes ocean states (Xt−1, Xt), atmospheric conditions (At−1, At, At+1), and
+static features (S) as input. These inputs are preprocessed and encoded, followed by indepen-
+dent message passing (MP) on coarse and fine meshes. The encoded features are then decoded
+to predict the next ocean state (Xt+1). (b) Mesh structure, where grid nodes (vG) and mesh
+nodes (vM) are connected via directional edges: grid-to-mesh (eG→M), mesh-to-grid (eM→G),
+and mesh-to-mesh (eM→M). Grid-node positions align with those of the ocean reanalysis dataset
+(GLORYS).
+–11–
+manuscript submitted toEnter journal name here
+1 2 3 4 5 6 7 8 910
+Forecast day0.100.150.200.250.30RMSE [psu]
+salinity
+Ours
+Wang+24
+1 2 3 4 5 6 7 8 910
+Forecast day0.20.30.40.50.6RMSE [K]
+temperature
+1 2 3 4 5 6 7 8 910
+Forecast day0.040.060.080.100.12RMSE [m/s]
+eastward current
+1 2 3 4 5 6 7 8 910
+Forecast day0.040.060.080.10RMSE [m/s]
+northward current
+1 2 3 4 5 6 7 8 910
+Forecast day0.020.030.040.050.06RMSE [m]
+sea surface height
+Figure 2.Comparison of RMSE over a 10-day forecast horizon for five surface variables, com-
+puted against GLORYS.
+–12–
+manuscript submitted toEnter journal name here
+0.00.20.40.60.8salinity
+RMSE [psu]
+Gulf
+Stream
+Ours
+Wang+24
+0.00.20.40.60.8
+Kuroshio
+0.00.20.40.60.8
+South
+China
+Sea
+0.00.20.40.60.8
+Yellow
+Sea
+0.00.20.40.60.81.01.2temperature
+RMSE [K]
+0.00.20.40.60.81.01.2
+0.00.20.40.60.81.01.2
+0.00.20.40.60.81.01.2
+0.000.050.100.15eastward current
+RMSE [m/s]
+0.000.050.100.15
+0.000.050.100.15
+0.000.050.100.15
+0.000.050.100.15northward current
+RMSE [m/s]
+0.000.050.100.15
+0.000.050.100.15
+0.000.050.100.15
+2 4 6 8 10
+Forecast day0.000.020.040.060.080.100.12sea surface height
+RMSE [m]
+2 4 6 8 10
+Forecast day0.000.020.040.060.080.100.12
+2 4 6 8 10
+Forecast day0.000.020.040.060.080.100.12
+2 4 6 8 10
+Forecast day0.000.020.040.060.080.100.12
+Figure 3.Comparison of RMSE over a 10-day forecast horizon for five surface variables, salin-
+ity, temperature, eastward current, northward current, and sea surface height, computed against
+GLORYS. The evaluation is performed across four regional domains: Gulf Stream (76°W–40°W,
+35°N–45°N), Kuroshio Extension (120°E–179°E, 20°N–55°N), South China Sea (100°E–122°E,
+0°N–27°N), and Yellow Sea (118°E–127°E, 30°N–42°N). The performance of the proposed model
+(Ours, blue) is compared with that of Wang et al. (2024) (Wang+24, orange). The domain sepa-
+ration follows Metzger et al. (2014).
+–13–
+manuscript submitted toEnter journal name here
+0.0 0.1 0.2 0.3 0.4
+RMSE [psu]0
+50
+100
+150
+200
+250Depth [m]salinity (LT=3 days)
+Ours
+Wang+24
+0.0 0.1 0.2 0.3 0.4
+RMSE [psu]0
+50
+100
+150
+200
+250Depth [m]salinity (LT=6 days)
+0.0 0.1 0.2 0.3 0.4
+RMSE [psu]0
+50
+100
+150
+200
+250Depth [m]salinity (LT=10 days)
+0.00 0.25 0.50 0.75
+RMSE [K]0
+50
+100
+150
+200
+250Depth [m]temperature (LT=3 days)
+0.00 0.25 0.50 0.75
+RMSE [K]0
+50
+100
+150
+200
+250Depth [m]temperature (LT=6 days)
+0.00 0.25 0.50 0.75
+RMSE [K]0
+50
+100
+150
+200
+250Depth [m]temperature (LT=10 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]eastward current (LT=3 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]eastward current (LT=6 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]eastward current (LT=10 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]northward current (LT=3 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]northward current (LT=6 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]northward current (LT=10 days)
+Figure 4.Comparison of RMSE profiles across depth for four ocean variables at forecast lead
+times of 3, 6, and 10 days computed against GLORYS. Each row corresponds to a different vari-
+able, and each column represents a different lead time.
+–14–
+manuscript submitted toEnter journal name here
+Figure 5.Kinetic energy spectra of surface velocity fields, presented as the ampli-
+tude of KE versus wavenumber. The left column shows results for the North Pacific region
+(10◦–40◦N,145◦–175◦E), while the right column shows results for the North Atlantic region
+(10◦–40◦N,60◦–30◦W).
+Figure 6.Comparison of sea surface temperature predictions at forecast day 10 in three re-
+gions: Sea surface temperature is shown for the Agulhas Current (top row), Kuroshio Current
+(middle row), and the Gulf Stream (bottom row). The results are presented for the reanalysis
+dataset (GLORYS, left), the proposed model (Ours, center), and Wang et al. (2024) (right).
+–15–
+manuscript submitted toEnter journal name here
+Figure 7.Comparison of sea surface height and surface currents in the Indian Ocean at dif-
+ferent forecast lead times: Sea surface height and surface currents (vector fields) are shown for
+the Indian Ocean region using the reanalysis dataset (GLORYS, left), the proposed model (Ours,
+center), and Wang et al. (2024) (right). From top to bottom, the rows correspond to forecast
+days 1, 5, and 10, respectively. Red (orange) boxes highlight areas where the proposed model
+successfully (unsuccessfully) reproduced features. Inset panels provide magnified views of these
+highlighted regions.
+–16–
+manuscript submitted toEnter journal name here
+1 2 3 4 5 6 7 8 910
+Forecast day0.00.10.20.30.4RMSE [psu]
+salinity
+w/fcst
+w/reana
+w/clim
+1 2 3 4 5 6 7 8 910
+Forecast day0.00.20.40.60.8RMSE [K]
+temperature
+1 2 3 4 5 6 7 8 910
+Forecast day0.0000.0250.0500.0750.1000.1250.150RMSE [m/s]
+eastward current
+1 2 3 4 5 6 7 8 910
+Forecast day0.0000.0250.0500.0750.1000.1250.150RMSE [m/s]
+northward current
+1 2 3 4 5 6 7 8 910
+Forecast day0.000.020.040.060.08RMSE [m]
+sea surface height
+Figure 8.Sensitivity analysis of surface prediction accuracy to different atmospheric forcing:
+The horizontal axis represents the forecast lead time, and the vertical axis shows the RMSE com-
+puted against GLORYS . Each panel corresponds to a different variable (salinity, temperature,
+eastward current, northward current, and sea surface height). The blue circles (w/fcst) denote
+predictions forced by GFS forecast data, the orange squares (w/reana) denote predictions forced
+by ERA5 reanalysis data, and the green diamonds (w/clim) denote predictions forced by ERA5
+climatological data.
+–17–
+manuscript submitted toEnter journal name here
+0.0 0.1 0.2 0.3 0.4
+RMSE [psu]0
+50
+100
+150
+200
+250Depth [m]salinity (LT=3 days)
+w/fcst
+w/reana
+w/clim
+0.0 0.1 0.2 0.3 0.4
+RMSE [psu]0
+50
+100
+150
+200
+250Depth [m]salinity (LT=6 days)
+0.0 0.1 0.2 0.3 0.4
+RMSE [psu]0
+50
+100
+150
+200
+250Depth [m]salinity (LT=10 days)
+0.00 0.25 0.50 0.75
+RMSE [K]0
+50
+100
+150
+200
+250Depth [m]temperature (LT=3 days)
+0.00 0.25 0.50 0.75
+RMSE [K]0
+50
+100
+150
+200
+250Depth [m]temperature (LT=6 days)
+0.00 0.25 0.50 0.75
+RMSE [K]0
+50
+100
+150
+200
+250Depth [m]temperature (LT=10 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]eastward current (LT=3 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]eastward current (LT=6 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]eastward current (LT=10 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]northward current (LT=3 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]northward current (LT=6 days)
+0.00 0.05 0.10 0.15
+RMSE [m/s]0
+50
+100
+150
+200
+250Depth [m]northward current (LT=10 days)
+Figure 9.Sensitivity analysis of prediction accuracy across depth under different atmospheric
+forcing: Each row corresponds to a different variable, and each column corresponds to a different
+forecast lead time (3, 6, and 10 days). The horizontal axis shows the RMSE computed against
+GLORYS, and the vertical axis indicates the depth range evaluated. The blue curves (w/fcst)
+represent predictions forced by GFS forecast data, the orange curves (w/reana) represent predic-
+tions forced by ERA5 reanalysis data, and the green curves (w/clim) represent predictions forced
+by ERA5 climatological data.
+–18–
+manuscript submitted toEnter journal name here
+Figure 10.Comparison of sea surface height and surface currents in the Indian Ocean using
+different atmospheric forcing: Sea surface height and surface currents (vector fields) are shown for
+the Indian Ocean, based on the reanalysis dataset (GLORYS, leftmost column) and the proposed
+model with three different atmospheric forcings: ERA5 reanalysis (ERA-ANL), GFS forecast
+(GFS-FCST), and ERA5 climatology (ERA-CLM). From top to bottom, the rows correspond to
+forecast days 1, 5, and 10, respectively. Orange dashed boxes highlight regions where the predic-
+tion accuracy differs depending on the atmospheric forcing. Inset panels provide magnified views
+of these regions.
+–19–
+manuscript submitted toEnter journal name here
+Data Availability Statement
+The GLORYS reanalysis dataset is available athttps://doi.org/10.48670/moi
+-00021. The model by Wang et al. (2024), version released on 2024.09.22, is available
+from their GitHub repository:https://github.com/Ocean-Intelligent-Forecasting/
+XiHe-GlobalOceanForecasting.
+Software Availability Statement
+Software supporting this research was developed under restrictions that include a
+required NDA, and is not publicly accessible. The software can be made available to other
+researchers upon establishing an NDA with the authors’ affiliated institution.
+–20–
+manuscript submitted toEnter journal name here
+References
+Bi, K., Xie, L., Zhang, H., Chen, X., Gu, X., & Tian, Q. (2023, Jul 01). Ac-
+curate medium-range global weather forecasting with 3d neural networks.
+Nature,619(7970), 533-538. Retrieved fromhttps://doi.org/10.1038/
+s41586-023-06185-3doi: 10.1038/s41586-023-06185-3
+Bonavita, M. (2024). On some limitations of current machine learning weather
+prediction models.Geophysical Research Letters,51(12), e2023GL107377.
+Retrieved fromhttps://agupubs.onlinelibrary.wiley.com/doi/abs/
+10.1029/2023GL107377(e2023GL107377 2023GL107377) doi: https://
+doi.org/10.1029/2023GL107377
+Chen, L., Du, F., Hu, Y., Wang, F., & Wang, Z. (2023, 6). Swinrdm: Integrate
+swinrnn with diffusion model towards high-resolution and high-quality
+weather forecasting.arXiv preprint arXiv:2306.03110. Retrieved from
+http://arxiv.org/abs/2306.03110doi: 10.48448/zn7f-fc64
+Cui, Y., Wu, R., Zhang, X., Zhu, Z., Liu, B., Shi, J., . . . Wu, L. (2025, Mar 06).
+Forecasting the eddying ocean with a deep neural network.Nature Com-
+munications,16(1), 2268. Retrieved fromhttps://doi.org/10.1038/
+s41467-025-57389-2doi: 10.1038/s41467-025-57389-2
+Dheeshjith, S., Subel, A., Adcroft, A., Busecke, J., Fernandez-Granda, C., Gupta, S.,
+& Zanna, L. (2025). Samudra: An ai global ocean emulator for climate.Geo-
+physical Research Letters,52(10), e2024GL114318. Retrieved fromhttps://
+agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2024GL114318
+(e2024GL114318 2024GL114318) doi: https://doi.org/10.1029/2024GL114318
+Ebert, E., Wilson, L., Weigel, A., Mittermaier, M., Nurmi, P., Gill, P., . . .
+Watkins, A. (2013). Progress and challenges in forecast verification.
+Meteorological Applications,20(2), 130-139. Retrieved fromhttps://
+rmets.onlinelibrary.wiley.com/doi/abs/10.1002/met.1392doi:
+https://doi.org/10.1002/met.1392
+El Aouni, A., Gaudel, Q., Regnier, C., Van Gennip, S., Le Galloudec, O., Drevil-
+lon, M., . . . Lellouche, J.-M. (2025). Glonet: Mercator’s end-to-end neural
+global ocean forecasting system.Journal of Geophysical Research: Machine
+Learning and Computation,2(3), e2025JH000686. Retrieved fromhttps://
+agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/2025JH000686
+(e2025JH000686 2025JH000686) doi: https://doi.org/10.1029/2025JH000686
+Fortunato, M., Pfaff, T., Wirnsberger, P., Pritzel, A., & Battaglia, P. (2022). Mul-
+tiscale meshgraphnets. InIcml 2022 2nd ai for science workshop.Retrieved
+fromhttps://openreview.net/forum?id=G3TRIsmMhhf
+Gilmer, J., Schoenholz, S. S., Riley, P. F., Vinyals, O., & Dahl, G. E. (2017). Neu-
+ral message passing for quantum chemistry. InProceedings of the 34th interna-
+tional conference on machine learning - volume 70(p. 1263–1272). JMLR.org.
+Guo, Z., Lyu, P., Ling, F., Bai, L., Luo, J.-J., Boers, N., . . . Ouyang, W. (2025).
+Data-driven global ocean modeling for seasonal to decadal prediction.Science
+Advances,11(33), eadu2488. Retrieved fromhttps://www.science.org/doi/
+abs/10.1126/sciadv.adu2488doi: 10.1126/sciadv.adu2488
+Hersbach, H., Bell, B., Berrisford, P., Hirahara, S., Hor´ anyi, A., Mu˜ noz-Sabater,
+J., . . . Th´ epaut, J.-N. (2020). The era5 global reanalysis.Quarterly Jour-
+nal of the Royal Meteorological Society,146(730), 1999-2049. Retrieved from
+https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.3803doi:
+https://doi.org/10.1002/qj.3803
+Hoffman, R. N., Liu, Z., Louis, J.-F., & Grassoti, C. (1995). Distortion rep-
+resentation of forecast errors.Monthly Weather Review,123(9), 2758 -
+2770. Retrieved fromhttps://journals.ametsoc.org/view/journals/
+mwre/123/9/1520-0493 1995 1232758 drofe 20co2.xmldoi: 10.1175/
+1520-0493(1995)123⟨2758:DROFE⟩2.0.CO;2
+Huang, Q., Niu, Y., Zhong, X., Guo, A., Chen, L., Zhang, D., . . . Li, H. (2025,
+–21–
+manuscript submitted toEnter journal name here
+6). Fuxi-ocean: A global ocean forecasting system with sub-daily resolution.
+arXiv preprint arXiv:2506.03210. Retrieved fromhttp://arxiv.org/abs/
+2506.03210
+Hurlburt, H. E., Chassignet, E. P., Cummings, J. A., Kara, A. B., Metzger,
+E. J., Shriver, J. F., . . . Barron, C. N. (2008). Eddy-resolving global
+ocean prediction. InOcean modeling in an eddying regime(p. 353-
+381). American Geophysical Union (AGU). Retrieved fromhttps://
+agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/177GM21doi:
+https://doi.org/10.1029/177GM21
+Hurlburt, H. E., & Metzger, E. J. (1998). Bifurcation of the kuroshio extension
+at the shatsky rise.Journal of Geophysical Research: Oceans,103(C4), 7549-
+7566. Retrieved fromhttps://agupubs.onlinelibrary.wiley.com/doi/abs/
+10.1029/97JC02723doi: https://doi.org/10.1029/97JC02723
+Hurlburt, H. E., Wallcraft, A. J., Schmitz Jr., W. J., Hogan, P. J., & Metzger,
+E. J. (1996). Dynamics of the kuroshio/oyashio current system us-
+ing eddy-resolving models of the north pacific ocean.Journal of Geo-
+physical Research: Oceans,101(C1), 941-976. Retrieved fromhttps://
+agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/95JC01674doi:
+https://doi.org/10.1029/95JC01674
+Jean-Michel, L., Eric, G., Romain, B.-B., Gilles, G., Ang´ elique, M., Marie, D., . . .
+Pierre-Yves, L. T. (2021). The copernicus global 1/12°oceanic and sea ice
+glorys12 reanalysis.Frontiers in Earth Science,Volume 9 - 2021. Retrieved
+fromhttps://www.frontiersin.org/journals/earth-science/articles/
+10.3389/feart.2021.698876doi: 10.3389/feart.2021.698876
+Keisler, R. (2022, 2). Forecasting global weather with graph neural networks.
+arXiv preprint arXiv:2202.07575. Retrieved fromhttp://arxiv.org/abs/
+2202.07575
+Lam, R., Sanchez-Gonzalez, A., Willson, M., Wirnsberger, P., Fortunato, M.,
+Alet, F., . . . Battaglia, P. (2023). Learning skillful medium-range global
+weather forecasting.Science,382(6677), 1416-1421. Retrieved from
+https://www.science.org/doi/abs/10.1126/science.adi2336doi:
+10.1126/science.adi2336
+Lang, S., Alexe, M., Chantry, M., Dramsch, J., Pinault, F., Raoult, B., . . . Rabier,
+F. (2024, 6). Aifs - ecmwf’s data-driven forecasting system.arXiv preprint
+arXiv:2406.01465. Retrieved fromhttp://arxiv.org/abs/2406.01465
+Li, Z., Kovachki, N., Azizzadenesheli, K., Liu, B., Bhattacharya, K., Stuart, A., &
+Anandkumar, A. (2020, 10). Fourier neural operator for parametric par-
+tial differential equations.arXiv preprint arXiv:2010.08895. Retrieved from
+http://arxiv.org/abs/2010.08895
+Linander, H., Petersson, C., Persson, D., & Gerken, J. E. (2025, 5). Pear: Equal
+area weather forecasting on the sphere.arXiv preprint arXiv:2505.17720. Re-
+trieved fromhttp://arxiv.org/abs/2505.17720
+Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., . . . Guo, B. (2021, October).
+Swin transformer: Hierarchical vision transformer using shifted windows. In
+Proceedings of the ieee/cvf international conference on computer vision (iccv)
+(p. 10012-10022).
+Loshchilov, I., & Hutter, F. (2019). Decoupled weight decay regularization. In
+International conference on learning representations.Retrieved fromhttps://
+openreview.net/forum?id=Bkg6RiCqY7
+McGillicuddy, D. J. (2016). Mechanisms of physical-biological-biogeochemical
+interaction at the oceanic mesoscale [Journal Article].Annual Review of
+Marine Science,8(Volume 8, 2016), 125-159. Retrieved fromhttps://www
+.annualreviews.org/content/journals/10.1146/annurev-marine-010814
+-015606doi: https://doi.org/10.1146/annurev-marine-010814-015606
+Metzger, E. J., Smedstad, O. M., Thoppil, P. G., Hurlburt, H. E., Cummings, J. A.,
+–22–
+manuscript submitted toEnter journal name here
+Wallcraft, A. J., . . . DeHaan, C. J. (2014, September). Us navy operational
+global ocean and arctic ice prediction systems.Oceanography,27(3), 32 - 43.
+Retrieved fromhttps://doi.org/10.5670/oceanog.2014.66
+Nguyen, T., Brandstetter, J., Kapoor, A., Gupta, J. K., & Grover, A. (2023,
+1). Climax: A foundation model for weather and climate.arXiv preprint
+arXiv:2301.10343. Retrieved fromhttp://arxiv.org/abs/2301.10343
+Nipen, T. N., Haugen, H. H., Ingstad, M. S., Nordhagen, E. M., Salihi, A. F. S.,
+Tedesco, P., . . . Chantry, M. (2024, 9). Regional data-driven weather modeling
+with a global stretched-grid.arXiv preprint arXiv:2409.02891. Retrieved from
+http://arxiv.org/abs/2409.02891
+Pathak, J., Subramanian, S., Harrington, P., Raja, S., Chattopadhyay, A., Mar-
+dani, M., . . . Anandkumar, A. (2022, 2). Fourcastnet: A global data-
+driven high-resolution weather model using adaptive fourier neural operators.
+arXiv preprint arXiv:2202.11214. Retrieved fromhttp://arxiv.org/abs/
+2202.11214
+Ramavajjala, V. (2024, 2). Heal-vit: Vision transformers on a spherical mesh for
+medium-range weather forecasting.arXiv preprint arXiv:2403.17016. Re-
+trieved fromhttp://arxiv.org/abs/2403.17016
+Ringler, T., Petersen, M., Higdon, R. L., Jacobsen, D., Jones, P. W., & Maltrud,
+M. (2013). A multi-resolution approach to global ocean modeling.Ocean
+Modelling,69, 211-232. Retrieved fromhttps://www.sciencedirect.com/
+science/article/pii/S1463500313000760doi: https://doi.org/10.1016/
+j.ocemod.2013.04.010
+Roznowicz, D., Stabile, G., Demo, N., Fransos, D., & Rozza, G. (2024, Mar 23).
+Large-scale graph-machine-learning surrogate models for 3d-flowfield pre-
+diction in external aerodynamics.Advanced Modeling and Simulation in
+Engineering Sciences,11(1), 6. Retrieved fromhttps://doi.org/10.1186/
+s40323-024-00259-1doi: 10.1186/s40323-024-00259-1
+Subel, A., & Zanna, L. (2024, 2). Building ocean climate emulators.arXiv preprint
+arXiv:2402.04342. Retrieved fromhttp://arxiv.org/abs/2402.04342
+Wang, X., Wang, R., Hu, N., Wang, P., Huo, P., Wang, G., . . . Song, J. (2024,
+2). Xihe: A data-driven model for global ocean eddy-resolving forecasting.
+arXiv preprint arXiv:2402.02995. Retrieved fromhttp://arxiv.org/abs/
+2402.02995
+Woodson, C. B., & Litvin, S. Y. (2015). Ocean fronts drive marine fishery produc-
+tion and biogeochemical cycling.Proceedings of the National Academy of Sci-
+ences,112(6), 1710-1715. Retrieved fromhttps://www.pnas.org/doi/abs/10
+.1073/pnas.1417143112doi: 10.1073/pnas.1417143112
+Xiong, W., Xiang, Y., Wu, H., Zhou, S., Sun, Y., Ma, M., & Huang, X. (2023,
+8). Ai-goms: Large ai-driven global ocean modeling system.arXiv preprint
+arXiv:2308.03152. Retrieved fromhttp://arxiv.org/abs/2308.03152
+–23–

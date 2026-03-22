@@ -1,0 +1,2161 @@
+arXiv:2105.05363v1  [stat.ME]  11 May 2021A Langevinized Ensemble Kalman Filter for Large-Scale Stat ic and
+Dynamic Learning
+Peiyi Zhang, Qifan Song, and Faming Liang∗
+May 13, 2021
+Abstract
+The Ensemble Kalman Filter (EnKF) has achieved great successes in d ata assimilation in atmo-
+spheric and oceanic sciences, but its failure in convergence to the r ight ﬁltering distribution precludes
+its use for uncertainty quantiﬁcation. We reformulate the EnKF un der the framework of Langevin
+dynamics, which leads to a new particle ﬁltering algorithm, the so-calle d Langevinized EnKF. The
+Langevinized EnKF inherits the forecast-analysis procedure from the EnKF and the use of mini-batch
+datafromthestochasticgradientLangevin-typealgorithms,whic hmakeitscalablewithrespecttoboth
+the dimension and sample size. We prove that the Langevinized EnKF c onverges to the right ﬁltering
+distribution in Wasserstein distance under the big data scenario tha t the dynamic system consists of a
+large number of stages and has a large number of samples observed at each stage. We reformulate the
+Bayesian inverse problem as a dynamic state estimation problem base d on the techniques of subsam-
+pling and Langevin diﬀusion process. We illustrate the performance o f the Langevinized EnKF using
+a variety of examples, including the Lorenz-96 model, high-dimension al variable selection, Bayesian
+deep learning, and Long Short Term Memory (LSTM) network learnin g with dynamic data.
+Keywords: Data Assimilation; Inverse Problem; State Space Model; Stochastic Gradient Markov
+Chain Monte Carlo; Uncertainty Quantiﬁcation
+1 Introduction
+Coming with the new century, the integration of computer tec hnology into science and daily life has
+enabled scientists to collect massive volumes of data, such as satellite data, high-throughput biological
+assay data and website transaction logs. To address computa tional diﬃculty encountered in Bayesian
+analysis of big data, a variety of scalable MCMC algorithms h ave been developed, which include stochas-
+tic gradient MCMC algorithms (Welling and Teh, 2011; Ding et al., 2014; Ahn et al., 2012; Chen et al.,
+2014; Betancourt, 2015; Li et al., 2016; Ma et al., 2015; Neme th and Fearnhead, 2021), split-and-merge
+∗To whom correspondence should be addressed: Faming Liang. P . Zhang is Graduate Student (email:
+zhan2763@purdue.edu), Q. Song is Assistant Professor (ema il: qfsong@purdue.edu), and F. Liang is Professor (email: f m-
+liang@purdue.edu), Department of Statistics, Purdue Univ ersity, West Lafayette, IN 47907.
+1
+algorithms (Scott et al., 2016; Li et al., 2017; Srivastava e t al., 2018; Xue and Liang, 2019), mini-batch
+Metropolis-Hastingsalgorithms(Chen et al.,2016;Koratt ikara et al.,2014;Bardenet et al.,2014;Maclaurin and Adam s,
+2014;Bardenet et al.,2017), nonreversibleMarkovprocess -basedalgorithms(Bierkens et al.,2019;Bouchard Cot´ e et al.,
+2018), and Bayesian bootstrapping (Liang et al., 2016; Fong et al., 2019), among others.
+Although the scalable MCMC algorithms have achieved great s uccesses in Bayesian learning with
+static data, none of them could be directly applied to dynami c data. In the literature, learning with
+static data is often termed as static or oﬀ-line learning, and learning with dynamic data is often termed
+as dynamic or on-line learning. Dynamic learning is importa nt and challenging, as dynamic data collec-
+tion is general, heterogeneous and messy. We note that class ical sequential Monte Carlo or particle ﬁlter
+algorithms, see e.g. Doucet et al. (2001), lack the scalabil ity necessary for dealing with large-scale dy-
+namic data, which strive to make use of all available data at e ach processing step. The ensemble Kalman
+ﬁlter (EnKF) (Evensen, 1994) has achieved great successes i n high-dimensional data assimilation prob-
+lems, see e.g., Evensen and Van Leeuween (1996), Aanonsen et al. (2009) and Houtekamer and Mitchell
+(2011), but it fails to converge to the right ﬁltering distri bution for general nonlinear dynamic systems
+(Law et al., 2016). How to make Bayesian on-line learning wit h large-scale dynamic data has posed a
+great challenge on current statistical methods.
+In this paper, we are interested in conducting Bayesian on-l ine learning for the dynamic system:
+xt=g(xt−1)+ut, ut∼N(0,Ut),
+yt=Htxt+ηt, ηt∼N(0,Γt),(1)
+fort= 1,2,...,T, wherext∈Rpandyt∈RNtdenote, respectively, the state and observations at stage t;
+and the dimension p, the number of stages T, and the sample sizes Nt’t are all assumed to be very large.
+For the dynamic system, the top equation is called the state e volution equation, where g(·) is called state
+propagator and can be nonlinear; and the bottom equation is c alled the measurement equation, where
+the propagator Htrelates the state variable to the measurement variable and y ields the expected value of
+the prediction given the model states and parameters. The dy namic system (1) is of central importance
+in this paper. It itself models the data assimilation proble ms with linear measurement equations (studied
+in Section 3.3), the data assimilation problems with nonlin ear measurement equations (studied in Section
+3.4) and the inverse problems (studied in Sections 3.1 and 3. 2) can be converted to it via appropriate
+transformations. For simplicity, we assume that both the mo del error utand observation error ηtare
+zero-mean Gaussian random variables, and that the covarian ce matrices Utand Γtand the propagator
+g(·) andHtare all fully speciﬁed, i.e. containing no unknown paramete rs. How to extend our study to
+the problems with non-Gaussian random error and/or unknown parameters will be discussed at the end
+of the paper. Throughout this paper, we will let tindex the stage of the dynamic system, let f(yt|xt)
+denote the likelihood function of yt, letπ(xt|y1:t) denote the ﬁltering distribution at stage tgiven the data
+{y1,y2,...,yt}, and let π(xt|y1:t−1) =/integraltext
+π(xt|xt−1)π(xt−1|y1:t−1)dxt−1denote the predictive distribution
+ofxtgiven{y1,y2,...,yt−1}.
+2
+Our goal is to develop a scalable particle ﬁltering algorith m under the big data scenario that the
+dimension p, the numbers of stages Tand the sample sizes Nt’s are all very large. Toward this goal, we
+reformulate the EnKF under the framework of Langevin dynami cs. The resulting algorithm inherits the
+forecast-analysis procedure from the EnKF and the use of min i-batch data from the stochastic gradient
+Langevin-type algorithms. The former makes the new algorit hm scalable with respect to the dimension,
+and the latter makes it scalable with respect to the sample si ze. To credit to its two precursors, the new
+algorithm is coined as Langevinized EnKF. We prove that the L angevinized EnkF converges to the right
+ﬁltering distributions in Wasserstein distance under the s cenario that the number of stages Tand the
+sample sizes Nt’s are all large. We illustrate the performance of the Langev inized EnKF using a variety of
+examples, including the Lorenz-96 model (Lorenz, 1996), Ba yesian deep learning, and Long Short Term
+Memory (LSTM) network learning.
+The remaining part of this paper is organized as follows. Sec tion 2 provides a brief review for the
+EnKF and explains its scalability with respect to the dimens ion. Section 3 describes the Langevinized
+EnKF for both statistic learning and dynamic learning and st udies its convergence, where how the inverse
+problems and the data assimilation problems with a nonlinea r measurement equation can be converted
+to the system (1) is detailed. Sections 4 and 5 illustrate the performance of the Langevinized EnKF
+for the inverse and data assimilation problems, respective ly. Section 6 concludes the paper with a brief
+discussion.
+2 Why is the EnKF Eﬃcient for High-Dimensional Problems?
+Consider the dynamic system (1). To estimate the state varia blesx1,x2,...,x T, whereTdenotes the
+total number of stages, Evensen (1994) proposed the EnKF alg orithm:
+Algorithm 1. (EnKF Algorithm)
+0. (Initialization) Start with an initial ensemble xa,1
+0,xa,2
+0,...,xa,m
+0, wheremdenotes the ensemble
+size. For each stage t= 1,2,...,T, do the following:
+1. (Forecast) For i= 1,2,...,m, drawui
+t∼N(0,Ut)and calculate
+xf,i
+t=g(xa,i
+t−1)+ui
+t.
+Calculate the sample covariance matrix of xf,1
+t,...,xf,m
+tand denote it by Ct.
+2. (Analysis) For i= 1,2,...,m, drawηi
+t∼N(0,Γt)and calculate
+xa,i
+t=xf,i
+t+ˆKt(yt−Htxf,i
+t−ηi
+t)∆=xf,i
+t+ˆKt(yt−yf,i
+t),
+whereˆKt=CtHT
+t(HtCtHT
+t+ Γt)−1forms an estimator for the Kalman gain matrix Kt=StHT
+t
+(HtStHT
+t+Γt)−1andStdenotes the covariance matrix of xf
+t.
+3
+IfUt, Γt,g(·) andHtcontain some unknown parameters, the state augmentation me thod (Anderson,
+2001; Baek et al., 2006; Gillijns and De Moor, 2007) can be use d, where the state vector is augmented
+with the model parameters and the EnKF estimate the state and parameters in a simultaneous manner.
+The rationale underlying the EnKF can be explained as follow s. Letxf
+tandxa
+tdenote a generic
+sample obtained at the forecast and analysis step, respecti vely. The forecast step is to use the forecasted
+samples {xf,1
+t,...,xf,m
+t}to approximate the predictive distribution π(xt|y1:t−1). Letµ′
+tandStdenote
+the mean and variance of π(xt|y1:t−1), respectively. Hence, one can rewrite xf
+tas
+xf
+t=µ′
+t+wt,
+wherewtis a random error with mean 0 and variance St. Ifπ(xt|y1:t−1) is Gaussian, by the identity
+Kt=StHT
+t(HtStHT
+t+Γt)−1= (I−KtHt)StHT
+tΓ−1
+t= (HT
+tΓ−1
+tHt+S−1
+t)−1HT
+tΓ−1
+t, one can show
+xa
+t=/bracketleftbig
+µ′
+t+Kt(yt−Htµ′
+t)/bracketrightbig
++/bracketleftbig
+(I−KtHt)wt−Ktηt/bracketrightbig
+=µt+et,
+whereµt=µ′
+t+Kt(yt−Htµ′
+t)isthemeanof π(xt|y1:t)∝π(yt|xt)π(xt|y1:t−1), andet= (I−KtHt)wt−Ktηt
+is a Gaussian random error with mean 0 and variance Var( et) = (I−KtHt)St; that is, xa
+tis a sample
+following the ﬁltering distribution π(xt|y1:t).
+The EnKF has two attractive features which make it extremely successful in dealing with high-
+dimensional data assimilation problems such as those encou ntered in reservoir modeling (Aanonsen et al.,
+2009), oceanography(Evensen and Van Leeuween,1996),andw eatherforecasting(Houtekamer and Mitchell,
+2011). First, it approximates each ﬁltering distribution π(xt|y1:t) using an ensemble of particles. Since
+the ensemble size mis typically much smaller than p, it leads to dimension reduction and computational
+feasibility compared to the Kalman ﬁlter, see e.g. Shumway a nd Stoﬀer (2006). In particular, it ap-
+proximates StbyCt, and the storage for the matrix Ctis replaced by particles and thus much reduced.
+Second, in generating particles from each ﬁltering distrib ution, it avoids covariance matrix decomposition
+compared to conventional particle ﬁlters. It is known that a n LU-decomposition of the covariance matrix
+has a computational complexity of O(p3). Instead, the EnKF employs a forecast-analysis procedure to
+generate particles, which has a computational complexity o fO(max{p2Nt,N3
+t}+mpNt) formparticles at
+staget. That is, the forecast-analysis procedure reduces the comp utational complexity of the algorithm
+whenmandNtare smaller than p. This explains why the EnKF is so eﬃcient for high-dimension al
+problems.
+Despite its great successes, the performance of the EnKF is s ub-optimal. As shown by Law et al.
+(2016), it converges only to a mean-ﬁeld ﬁlter, which provid es the optimal linear estimator of the condi-
+tional mean but not the ﬁltering distribution except in the l arge sample limit for linear systems. Similar
+results can be found in Le Gland et al. (2009), Bergou et al. (2 019) and Kwiatkowski and Mandel (2015).
+As an extension, Iglesias et al. (2013) applied the EnKF to so lve the inverse problem, which is to ﬁnd
+the parameter zgiven observations of the form
+y=G(z)+η, (2)
+4
+whereG(·) is the forward response operator mapping the unknown param eterzto the space of obser-
+vations, η∼N(0,Γ) is Gaussian random noise, and yis observed data. With the state augmentation
+approach, they deﬁned the new state vector as xT= (zT,G(z)T) and an artiﬁcial dynamic system as
+xt=xt−1,
+yt=Hxt+ηt,(3)
+whereH= (0,I) such that HX=G(z) holds, yt≡yfor allt= 1,2,..., andηt∼N(0,Γ). However,
+as mentioned previously, the EnKF does not converge to the ﬁl tering distribution, so the posterior
+distribution π(z|y) cannot be well approximated by the ensemble, and thus uncer tainty of the estimate of
+zcannot be correctly quantiﬁed. Numerically, Ernst et al. (2 015) demonstrated that for nonlinear inverse
+problems the large sample limit does not lead to a good approx imation to the posterior distribution.
+3 Langevinized EnKF
+To motivate the development of the Langevinized EnKF, we ﬁrs t consider a linear inverse problem and
+then extend it to nonlinear inverse and data assimilation pr oblems.
+3.1 Linear Inverse Problem
+Consider a Bayesian inverse problem for the linear regressi on
+y=Hx+η, (4)
+whereη∼N(0,Γ) forsomecovariance matrixΓ, y∈RN, andx∈Rpisanunknowncontinuousparameter
+vector. To accommodate the case that Nis extremely large, we assume that ycan be partitioned into
+B=N/nindependent and identically distributed blocks {y1,...,yB}, where each block is of size nand
+has the covariance matrix Vsuch that Γ = diag[ V,···,V].
+Letπ(x) denote the prior density function of x, which is assumed to be diﬀerentiable with respect
+tox. Letπ(x|y) denote the posterior distribution. To develop an eﬃcient a lgorithm for simulating from
+π(x|y), which is scalable with respect to both the sample size Nand the dimension p, we reformulate the
+model (4) as a state-space model through subsampling and Lan gevin diﬀusion:
+xt=xt−1+ǫtn
+2N∇logπ(xt−1)+wt,
+yt=Htxt+vt,(5)
+wherewt∼N(0,n
+NǫtIp) =N(0,n
+NQt), i.e.,Qt=ǫtIp,ytdenotes a block randomly drawn from
+{y1,...,yB},vt∼N(0,Vt) withVt=V, andHtis a submatrix of Hextracted with the corresponding yt.
+In the state-space model, at each stage t, the state (i.e., the parameters of model (4)) evolves accor ding
+to an Euler-discretized Langevin equation of the prior dist ribution, and the measurement varies with
+subsampling. As shown in Theorem S1 of the Supplementary Mat erial, the ﬁltering distribution of the
+5
+state-space model converges to the target posterior π(x|y) ast→ ∞, provided that ǫtdecays to zero in an
+appropriate rate and the matrix Vsatisﬁes some regularity conditions. To simulate from dyna mic system
+(5), we propose Algorithm 2, which makes use of both techniqu es, subsampling and the forecast-analysis
+procedure and is thus scalable with respect to both the sampl e sizeNand the dimension p.
+Algorithm 2. (Langevinized EnKF for Linear Inverse Problems)
+0. (Initialization) Start with an initial ensemble xa,1
+0,xa,2
+0,...,xa,m
+0, wheremdenotes the ensemble
+size. For each stage t= 1,2,...,T(ﬁrst loop), do the following:
+1. (Subsampling) Draw without replacement a mini-batch dat a, denoted by (yt,Ht), of size nfrom the
+full dataset of size N.
+•SetQt=ǫtIp,Rt= 2Vt, and the Kalman gain matrix Kt=QtHT
+t(HtQtHT
+t+Rt)−1. For each
+chaini= 1,2,...,m(second loop), do steps 2-3:
+2. (Forecast) Draw wi
+t∼Np(0,n
+NQt)and calculate
+xf,i
+t=xa,i
+t−1+ǫtn
+2N∇logπ(xa,i
+t−1)+wi
+t. (6)
+3. (Analysis) Draw vi
+t∼Nn(0,n
+NRt)and calculate
+xa,i
+t=xf,i
+t+Kt(yt−Htxf,i
+t−vi
+t)∆=xf,i
+t+Kt(yt−yf,i
+t). (7)
+Remark 1. The Langevinized EnKF is diﬀerent from the existing formulat ion of EnKF for inverse
+problems (Iglesias et al., 2013) in three aspects: (i) It refor mulates the Bayesian inverse problem as a
+state-space model, where the state (i.e., parameters) evol ves according to a Langevin diﬀusion process
+converging to the prior π(x)and the measurement varies with subsampling; the subsampli ng technique
+enables the algorithm scalable with respect to the sample si zeN; (ii) the measurement noise is drawn from
+a variance inﬂated distribution N(0,2Vt)in the analysis step; and (iii) Qt=ǫtIpis a designed diagonal
+matrix with the learning rate ǫt=O(t−̟)for some 0< ̟ <1.
+The convergence of Algorithm 2 is established in Theorem S1. An informal restatement of the
+theorem is given in Proposition 1, which facilitates discus sions for the property of the Langevinized
+EnKF algorithm.
+Proposition 1. (Convergence of Langevinized EnKF) Let xa
+tdenote a generic member of the ensemble
+produced by Algorithm 2 in the analysis step of stage t. If the eigenvalues of Σt=n
+N(I−KtHt)are
+uniformly bounded with respect to t,logπ(x)is diﬀerentiable with respect to x, and the learning rate
+ǫt=O(t−̟)for some 0< ̟ <1, thenlimt→∞W2(˜πt,π∗) = 0, where˜πtdenotes the empirical distribu-
+tion ofxa
+t,π∗=π(x|y)denotes the target posterior distribution, and W2(·,·)denotes the second-order
+Wasserstein distance.
+6
+In the proof of Theorem S1, it is shown that
+xa
+t=xa
+t−1+ǫt
+2Σt/hatwide∇logπ(xa
+t−1|yt)+et, (8)
+whereetis a zero mean Gaussian random error with covariance Var( et) =ǫtΣt, and/hatwide∇logπ(xa
+t−1|yt) =
+N
+nHT
+tV−1
+t(yt−Htxa
+t−1) +∇logπ(xa
+t−1) denotes an unbiased estimate of ∇logπ(xa
+t−1|yt). That is, the
+Langevinized EnKF forms a new type of stochastic gradient Ri emannian Langevin dynamics (SGRLD)
+algorithm (Patterson and Teh, 2013; Ahn et al., 2012; Girola mi and Calderhead, 2011), where the Fisher
+information matrix is adapted with the mini-batch of data by noting that ǫtΣt=n
+N(I−KtHt)Qtis
+exactly the inverse of the Fisher information matrix of the d istribution π(xa
+t|xa
+t−1,yt). It is known that
+use of the Fisher information, which rescales parameter upd ates according to the geometry of the target
+distribution, can generally improve the convergence of SGM CMC especially when the target distribution
+exhibits pathological curvature and contains some saddle p oints (Li et al., 2016; Dauphin et al., 2014).
+Since we set the learning rate ǫt=O(t−̟) for some 0 < ̟ <1 in Algorithm 2, by Theorem 2 of
+Song et al. (2020), {xa
+t:t=t0+1,...,T}can betreated as equally weighted samples, where t0represents
+the burn-in period. That is, for any Lipschitz function ρ(x), the posterior mean Eπρ(x) =/integraltext
+ρ(x)π(x|y)
+can be estimated by
+/hatwiderEπρ(x) =1
+(T−t0)mT/summationdisplay
+t=t0+1m/summationdisplay
+i=1ρ(xa,i
+t), (9)
+which converges to Eπρ(x) in probability as T→ ∞. Alternatively, we can apply a weighted averaging
+scheme as suggested by Chen et al. (2015) and Teh et al. (2016) for estimating Eπρ(x). As for a conven-
+tional SGLD algorithm, we can also set ǫtto a small constant. In this case, the convergence of xa
+tto the
+posterior distribution is up to an approximation error even whent→ ∞.
+It is interesting to point out that when the dimension of xis high, Langevinized EnKF can be much
+more eﬃcient than directly implementing (8). The latter req uires an LU-decomposition of Σ t, which
+has a computational complexity of O(p3), in generating the random error et. While the Langevinized
+EnKF gets around this issue with the forecast-analysis proc edure. As shown in the proof of Theorem S1,
+we have et= (I−KtHt)wt−Ktvtand Var( et) =ǫtΣt. The computational complexity of the forecast-
+analysis procedure is O(max{n2p,n3}+mnp) for generating mparticles per iteration, where the ﬁrst
+term represents the cost for calculating Kt, the second term represents the total cost of mchains for
+forecasting and analysis, and the cost for calculating Ktis counted as the overhead at each iteration.
+This procedureis even faster than in the original EnKF algor ithm asQtis diagonal. For high-dimensional
+problems, we typically set n≪p, so the total computational complexity of the Langevinized EnKF is
+O((n2p+mnp)T), which implies that the algorithm is scalable with respect to both the sample size Nand
+the dimension p. In contrast, if (8) is directly simulated as a SGRLD algorit hm, the total computational
+complexity will be O((p3+np2)mT) formTiterations, where O(np2) represents the cost for computing
+Σt/hatwide∇logπ(xa
+t−1|yt). Here we note that the particles in the same ensemble of the L angevinized EnKF are
+not independent, as they are generated based on the same rand omly selected mini-batch of data at each
+stage. However, they are independent if the full data is used at each iteration.
+7
+Finally, wenotethatconventional SGRLDalgorithmslackth escalability necessaryforhigh-dimensional
+problems as computation of the Fisher information matrix ca n be very costly. For this reason, precon-
+ditioned SGLD (Li et al., 2016) approximates the Fisher info rmation matrix using a diagonal matrix
+estimated based on the current gradient information only. T he Langevinized EnKF forms a new type of
+SGRLD algorithm, where the forecast-analysis procedure en ables the Fisher information eﬃciently used
+in the simulation.
+3.2 Nonlinear Inverse Problem
+Consider the nonlinear inverse problem
+y=G(z)+η, η∈N(0,Γ),
+wherey= (yT
+1,yT
+2,...,yT
+B)T, Γ = diag[ V,V,...,V ] is a diagonal block matrix, each block Vis of size
+n×n, andN=Bnfor some positive constant B. To reformulate the problem in the central dynamic
+system (1), we deﬁne an augmented state vector by an n-vectorγt:
+xt=/parenleftBigg
+z
+γt/parenrightBigg
+, γt=Gt(z)+ut, ut∼N(0,αV), (10)
+whereGt(·) is the mean response function for a mini-batch of data drawn at stage t, and 0< α <1 is a
+pre-speciﬁed constant. In this paper, αis called the variance splitting proportion.
+Letπ(z) denote the prior density function of z, which is diﬀerentiable with respect to z. The
+conditional distribution of γtisγt|z∼N(Gt(z),αV), and then the joint density function of xtis
+π(xt) =π(z)π(γt|z). Based on Langevin dynamics, a system identical to (5) in sy mbol can be con-
+structed for the nonlinear inverse problem:
+xt=xt−1+ǫtn
+2N∇xlogπ(xt−1)+wt
+yt=Htxt+vt,(11)
+wherewt∼N(0,n
+NQt),Qt=ǫtIp,pis the dimension of xt;Ht= (0,I) such that Htxt=γt;vt∼
+N(0,(1−α)V), which is independent of wtfor allt; andytis a mini-batch sample randomly drawn from
+{y1,y2,...,yB}.
+By the variance splitting state augmentation approach, we h ave successfully converted the nonlinear
+inverse problem to the dynamic system (1). In this approach, z,γtandytform a hierarchical model, and
+it is easy to derive that
+γt|z,yt∼N(αyt+(1−α)Gt(z),α(1−α)V), (12)
+which will be used later in justifying eﬃciency of the Langev inized EnKF for nonlinear inverse problems.
+In particular, if αis close to 1, the conditional variance of γtgivenytandzcan be much smaller than V.
+With the above formulation, the following variant of the Lan gevinized EnKF can be applied to
+simulate from the posterior distribution π(x|y). The posterior samples of π(z|y) can be obtained from
+8
+those ofπ(x|y) via marginalization. Let xa,i
+t,kdenote the i-th sample obtained at iteration kof staget. In
+each stage of the algorithm, a mini-batch sample ytis drawn at random and the augmented state xtis
+updated for Kiterations.
+Algorithm 3. (Langevinized EnKF for Nonlinear Inverse Problems)
+0. (Initialization) Start with an initial ensemble xa,1
+1,0,xa,2
+1,0,...,xa,m
+1,0, wheremdenotes the ensemble
+size. For each stage t= 1,2,...,T(ﬁrst loop), do the following:
+1. (Subsampling) Draw without replacement a mini-batch sam ple, denoted by (yt,Ht), of size nfrom
+the full dataset of size N.
+•For each iteration k= 1,2,...,K(second loop), set Qt,k=ǫt,kIp,Rt= 2(1−α)Vand the Kalman
+gain matrix Kt,k=Qt,kHT
+t(HtQt,kHT
+t+Rt)−1, and do steps 2-3:
+2. (Forecast) For each chain i= 1,2,...,m(third loop), draw wi
+t,k∼Np(0,n
+NQt,k)and calculate
+xf,i
+t,k=xa,i
+t,k−1+ǫt,kn
+2N∇logπ(xa,i
+t,k−1)+wi
+t,k, (13)
+where, if k= 1,xa,i
+t,0=xa,i
+t−1,Kfor itsz-component and xa,i
+t,0=ytfor itsγ-component.
+3. (Analysis) For each chain i= 1,2,...,m(third loop), draw vi
+t,k∼Nn(0,n
+NRt), and calculate
+xa,i
+t,k=xf,i
+t,k+Kt,k(yt−Htxf,i
+t,k−vi
+t,k)∆=xf,i
+t,k+Kt,k(yt−yf,i
+t,k). (14)
+Compared to Algorithm 2, this algorithm includes a few more i terations at each stage. The added
+iterations help to drive γttowards its conditional equilibrium (12). Regarding the co nvergence of the
+algorithm, we have the following remark:
+Remark 2. In equation (13), ∇xlogπ(xt,k−1)is calculated based on a mini-batch of data:
+∇xlogπ(xt,k−1) =/parenleftBigg
+∇zlogπ(zt,k−1)+1
+αN
+n∇zGt(zt,k−1)V−1(γt,k−1−Gt(zt,k−1))
+−1
+αV−1(γt,k−1−Gt(zt,k−1))/parenrightBigg
+,(15)
+where the component ∇zlogπ(zt,k−1) +1
+αN
+n∇zGt(zt,k−1)V−1(γt,k−1−Gt(zt,k−1))provides an unbiased
+estimate of ∇zlogπ(z|y)as implied by (12). It follows from the standard convergence t heory of SGLD
+that the z-component of xt,kwill converge to π(z|y), provided that ǫt,ksatisﬁes the condition: {ǫt,k}
+is a positive sequence, decreasing in tand non-increasing in k, such that for any k∈ {1,2,...,K},
+ǫt,k=O(1/tς)for some 0< ς <1.
+From the Kalman gain matrix Kt,k, it is easy to see that only the γ-component of xt,kis updated at
+the analysis step. Intuitively, γt,kcan converge very fast, as it is updated with the second-orde r gradient
+information. Therefore, Kis not necessarily very large. In this paper, K= 5 is set as the default. Further,
+9
+by (12), ∇zlogπ(zt,k−1)+1
+αN
+n∇zGt(zt,k−1)V−1(γt,k−1−Gt(zt,k−1)) represents an improved gradient esti-
+mator compared to the estimator ∇zlogπ(zt)+N
+n∇zGt(zt)V−1(yt−Gt(zt)) used by SGLD in simulating
+fromπ(z|y). It is easy to show that the two stochastic gradients have th e same mean value, but the
+former has a smaller variance than the latter. More precisel y,
+Var/parenleftbigg1
+αN
+n∇zGt(zt)V−1(γt−Gt(zt))/vextendsingle/vextendsinglezt/parenrightbigg
+=1−α
+αVar/parenleftbiggN
+n∇zGt(zt)V−1(yt−Gt(zt))/vextendsingle/vextendsinglezt/parenrightbigg
+,(16)
+which implies that for nonlinear inverse problems, theLang evinized EnKFrepresents a variance reduction
+version of SGLD, and it is potentially more eﬃcient than SGLD if 0.5< α <1 is chosen. In this paper,
+we setα= 0.9 as the default and initialized γt,0byytat each stage, which enhances the convergence of
+the simulation.
+3.3 Data Assimilation with Linear Measurement Equation
+Consider the dynamic system (1), for which we assume that at e ach stage t,ytcan be partitioned into
+Bt=Nt/ntblocks such that yt,k=Ht,kxt+vt,k,k= 1,2,...Bt, where Ntis the total number of
+observations at stage t,yt,kis a block of ntobservations randomly drawn from yt={yt,1,...,yt,Bt},
+vt,k∼N(0,Vt) for allk, andvt,k’s are mutually independent.
+To motivate the development of the algorithm, we ﬁrst consid er the Bayesian formula
+π(xt|y1:t) =f(yt|xt)π(xt|y1:t−1)/integraltext
+f(yt|xt)π(xt|y1:t−1)dxt, (17)
+which suggests that to get the ﬁltering distribution π(xt|y1:t), the predictive distribution π(xt|y1:t−1)
+should be used as the prior at stage t. To estimate the gradient ∇logπ(xt|y1:t−1), we employ the
+following identity established in Song et al. (2020):
+∇βlogπ(β|D) =/integraldisplay
+∇βlogπ(β|γ,D)π(γ|β,D)dγ, (18)
+whereDdenotes data, and βandγdenote two parameters of a posterior distribution π(β,γ|D). By the
+identity, we have
+∇xtlogπ(xt|y1:t−1) =/integraldisplay
+∇xtlogπ(xt|xt−1,y1:t−1)π(xt−1|xt,y1:t−1)dxt−1
+=/integraldisplay
+∇xtlogπ(xt|xt−1)π(xt−1|xt,y1:t−1)
+π(xt−1|y1:t−1)π(xt−1|y1:t−1)dxt−1
+=/integraldisplay
+∇xtlogπ(xt|xt−1)ω(xt−1|xt)π(xt−1|y1:t−1)dxt−1,(19)
+whereω(xt−1|xt) =π(xt−1|xt,y1:t−1)/π(xt−1|y1:t−1) =π(xt|xt−1)/π(xt|y1:t−1)∝π(xt|xt−1), asπ(xt|y1:t−1)
+is a constant for a given particle xtand the data {y1,y2,...,yt−1}. Therefore, given a set of samples
+Xt−1={xt−1,1,xt−1,2,...,x t−1,m′}drawn from π(xt−1|y1:t−1), an importance resampling procedure can
+be employed to draw samples from π(xt−1|xt,y1:t−1). The importance resampling procedure can be
+executed very fast, as calculation of the importance weight ω(xt−1|xt) does not involve any data.
+10
+With the above formulas and Langevin dynamics, we can constr uct a dynamic system at stage tas
+xt,k=xt,k−1−ǫtnt
+2NtU−1
+t(xt,k−1−g(˜xt−1,k−1))+wt,k,
+yt,k=Ht,kxt,k+vt,k,(20)
+fork= 1,2,..., where xt,0=g(xt−1) +ut; ˜xt−1,k−1denotes an approximate sample drawn from
+π(xt−1|xt,k−1,y1:t−1) at iteration kof stage tthrough the importance resampling procedure; wt,k∼
+N(0,nt
+Ntǫt,kIp),Qt,k=ǫt,kIp, andpis the dimension of xt. Note that −U−1
+t(xt,k−1−g(˜xt−1,k−1)) forms
+an unbiased estimator of ∇logπ(xt,k−1|y1:t−1) only in the ideal case that the samples in Xt−1follows
+from the distribution π(xt−1|y1:t−1) and the sample size |Xt−1|is suﬃciently large. Our theory for the
+convergence of the algorithm has taken care of the deviation s from the ideal case as discussed in Remark
+3. In practice, Xt−1can be collected at stage t−1 from iterations k0+1,...,K, wherek0denotes the
+burn-in period and Kdenotes the total number of iterations performed at each sta ge. Applying the
+Langevinized EnKF at stage tleads to the following algorithm:
+Algorithm 4. (Langevinized EnKF for Data Assimilation)
+0. (Initialization) Start with an initial ensemble xa,1
+1,0,xa,2
+1,0,...,xa,m
+1,0drawn from the prior distribution
+π(x1), wheremdenotes the ensemble size. Set Xt=∅fort= 1,2,...,T. Setk0as the common
+burnin period for each stage t. For each stage t= 1,2,...,T(ﬁrst loop), and for each iteration
+k= 1,2,...,K(second loop), do the following:
+1. (Subsampling) Draw without replacement a mini-batch sam ple, denoted by (yt,k,Ht,k), of size nt
+from the full dataset of size Nt.
+•SetQt,k=ǫt,kIp,Rt= 2Vt, and the Kalman gain matrix Kt,k=Qt,kHT
+t,k(Ht,kQt,kHT
+t,k+Rt)−1. For
+each chain i= 1,2,...,m(third loop), do steps 2-5:
+2. (Importance resampling) If t >1, calculate importance weights ωi
+t,k−1,j=π(xa,i
+t,k−1|xt−1,j) =
+φ(xa,i
+t,k−1:g(xt−1,j),Ut)forj= 1,2,...,|Xt−1|, whereφ(·)denotes a Gaussian density, and xt−1,j∈
+Xt−1denotes the jth sample in Xt−1; ifk= 1, setxa,i
+t,0=g(xa,i
+t−1,K)+ua,i
+tandua,i
+t∼N(0,Ut). Resam-
+ples∈ {1,2,...,|Xt−1|}with a probability ∝ωi
+t,k−1,s, i.e.,P(St,k,i=s) =ωi
+t,k−1,s//summationtext|Xt−1|
+j=1ωi
+t,k−1,j,
+and denote the sample drawn from Xt−1by˜xi
+t−1,k−1.
+3. (Forecast) Draw wi
+t,k∼Np(0,n
+NQt,k). Ift= 1, set
+xf,i
+t,k=xa,i
+t,k−1−ǫt,knt
+2Nt∇logπ(xa,i
+t,k−1)+wi
+t,k, (21)
+whereπ(·)denotes the prior distribution of x1. Ift >1, set
+xf,i
+t,k=xa,i
+t,k−1−ǫt,knt
+2NtU−1
+t(xa,i
+t,k−1−g(˜xi
+t−1,k−1))+wi
+t,k. (22)
+11
+4. (Analysis) Draw vi
+t,k∼Nn(0,n
+NRt)and set
+xa,i
+t,k=xf,i
+t,k+Kt,k(yt,k−Ht,kxf,i
+t,k−vi
+t,k)∆=xf,i
+t,k+Kt,k(yt,k−yf,i
+t,k). (23)
+5. (Sample collection) If k > k0, add the sample xa,i
+t,kinto the set Xt.
+SinceKis usually not allowed to go to ∞for such a dynamic system, xa,1
+t,K,...,xa,m
+t,K∼π(xt|y1:t)
+only approximately holds for each stage t. However, as shown in Theorem S2 of the Supplementary
+Material, a smaller approximation error at one stage helps t o reduce the approximation error at the next
+stage; and the approximation error becomes negligible as th e number of stages increases, if the number
+of observations at each stage is reasonably large. To facili tate discussion, Theorem S2 is restated as a
+proposition in a less rigorous language in what follows.
+Proposition 2. Assume that for each stage t, the matrices Ht,UtandVtand the state propagator g(xt)
+satisfy mild regularity conditions (listed in the Appendix ). Then there exists a suﬃciently large iteration
+numberKsuch that limsupt→∞W2(˜π(xt|y1:t),π(xt|y1:t)) =O/parenleftBig
+1
+liminf tNt/parenrightBig
+.
+Remark 3. In Step 2, the probability P(St,k,i=s)is calculated in a self-normalized importance sampling
+estimator, which is known to be consistent but biased. The bia s has been taken into account in our proof
+of Theorem S2 as implied by equation (S17) in the Supplementar y Material.
+Remark 4. We argue that the convergence rate O(1/liminf tNt)is a reasonable precision. If the
+statextis observed, then it is not diﬃcult to derive that π(xt+1)∼N(g(xt),Γt)andπ(xt+1|y1:t+1) =
+π(xt+1|yt+1)∼N(µt+1,K)for some µt+1andK−1=HT
+tΣ−1
+tHt+Γ−1
+t. When the eigenvalues of Σtare
+bounded by constant, and His row-wisely independent, then the eigenvalues of Khave a lower bound of
+O(1/Nt). In other words, even when the state xtis known, the ﬁltering distribution π(xt+1|y1:t+1)has
+a variation scale of at least O(1/√Nt). Compared to this variation scale, the estimation inaccurac y of
+W2(˜πt+1,πt+1)is really negligible.
+It is known that weight degeneracy is an inherent default of s equential importance sampling (SIS)
+(also known as sequential Monte Carlo), especially when the dimension of the system is high. When
+it occurs, the importance weights concentrates on a few samp les, the eﬀective sample size is low, and
+the resulting importance sampling estimate is heavily bias ed. Fortunately, the Langevinized EnKF is
+essentially immune to this issue. In Langevinized EnKF, the importance resampling procedure is to
+draw from Xt−1a particle which matches a given particle xtin state propagation such that the gradient
+∇xtlogπ(xt|y1:t−1) can be reasonably well estimated, which is then combined wi th the gradient of the
+likelihood function of the new data ytto have xtupdated. By (17), π(xt|y1:t−1) works as the prior
+distributionof xtfortheﬁlteringdistribution π(xt|y1:t). Therefore,theeﬀectoftheimportanceresampling
+procedure on the performance of the algorithm is limited if t he sample size of ytis reasonably large at
+each stage t. In contrast, the importance resampling procedure in SIS is to draw a particle from Xt−1and
+treat the particle as from the ﬁltering distribution π(xt|y1:t). For high-dimensional problems, the overlap
+12
+between the high density regions of the neighboring stage ﬁl tering distributions can be very small, which
+naturally causes the weight degeneracy issue.
+In summary, the importance resampling step of the Langevini zed EnKF aims to draw a sample for
+the prior π(xt|y1:t−1) used at each stage t, while that of SIS aims to draw a sample for the posterior
+π(xt|y1:t). In consequence, the Langevinized EnKF is less bothered by the weight degeneracy issue.
+3.4 Data Assimilation with Nonlinear Measurement Equation
+To apply the Langevinized EnKF to the case that the measureme nt equation is nonlinear, the variance
+splitting state augmentation approach proposed in Section 3.2 can be used. For simplicity, we describe
+the algorithm under the full data scenario. Extension of the algorithm to the mini-batch scenario is
+straightforward. Consider the dynamic system
+zt=g(zt−1)+ut, ut∼N(0,Ut),
+yt=h(zt)+ηt, ηt∼N(0,Γt),(24)
+where both g(·) andh(·) are nonlinear. As for nonlinear inverse problems, we can au gment the state zt
+byγtat each stage t, where
+γt=h(zt)+ξt, ξt∼N(0,αtΓt),
+for some constant 0 < αt<1. LetxT
+t= (zT
+t,γT
+t) and thus π(xt|zt−1,y1:t−1) =π(zt|zt−1,y1:t−1)π(γt|zt).
+Similar to (20), at stage t, we have the following dynamic system
+xt,k=xt,k−1+ǫt
+2∇zlogπ(xt,k−1|˜xt−1,k−1,y1:t−1)+wt,k
+yt,k=Htxt,k+vt,k,(25)
+where ˜xt−1,k−1denotesasampledrawnfrom π(xt−1|xt,k−1,y1:t−1),xt,kdenotes theestimateof xtobtained
+at iteration kof stage t,yt,k=ytfor allk= 1,2,...,K,Ht= (0,I) such that Htxt=γt,wt,k∼
+N(0,ǫt,kIp),pis the dimension of xt, andvt,k∼N(0,(1−αt)Γt). Algorithm 4 can then be applied to
+simulate samples from π(xt|y1:t) and thus the samples from π(zt|y1:t) can be obtained by marginalization.
+In mappingthe ensemble from stage t−1to stage t,ztcan beset according to thestate evolution equation
+given in (24), while γtcan be set to yt. The convergence of the algorithm follows from Theorem S2 an d
+Remark 2.
+4 Numerical Studies for Static Learning Problems
+This section illustrates the performance of the Langeviniz ed EnKF as a general Monte Carlo algorithm
+for complex inverse problems. Two big data examples are cons idered, one is Bayesian variable selection
+for linear regression, and the other is Bayesian variable se lection for general nonlinear systems modeled
+by deep neural networks (DNNs).
+13
+4.1 Bayesian Variable Selection for Large-Scale Linear Reg ression
+Consider the linear regression
+Y=Zβ+ε, (26)
+whereY∈RN,Z= (Z1,Z2,...,Z p)∈RN×p,β∈Rp, andε∼N(0,IN). An intercept term has been
+implicitly included in the model. We generate ten datasets f rom this model with N= 50,000,p= 2,000,
+andβ= (β1,β2,...,β p) = (1,1,1,1,1,−1,−1,−1,0,...,0). That is, the ﬁrst 8 variables are true and
+the others are false. Each variable in Zhas a marginal distribution of N(0,IN), but they are mutually
+correlated with a correlation coeﬃcient of 0.5.
+To conduct Bayesian analysis, we consider the following hie rarchical mixture Gaussian prior distri-
+bution which, with the latent variable ξi∈ {0,1}, can be expressed as
+βi|ξi∼(1−ξi)N(0,τ2
+1)+ξiN(0,τ2
+2),
+P(ξi= 1) = 1 −P(ξi= 0) =p0,(27)
+fori= 1,2,...,p. Such a prior distribution has been widely used in the litera ture of Bayesian variable
+selection, see e.g. George and McCullloch (1993). To apply t he Langevinized EnKF to this problem, we
+ﬁrst integrate out ξifrom the prior distribution (27), which leads to the margina l distribution
+βi∼(1−p0)N(0,τ2
+1)+p0N(0,τ2
+2), i= 1,2,...,p, (28)
+for which the log-prior density is diﬀerentiable. Algorithm 2 can then be applied to simulate from the
+posterior distribution π(β|Y,Z). In the simulation, we set p0= 1/p= 0.0005,τ2
+1= 0.01 andτ2
+2= 1 for
+the prior distribution, and set the ensemble size m= 100, the mini-batch size n= 100, and the learning
+rateǫt= 0.2/max{t0,t}0.6, wheret0= 100. The algorithm was run for 10,000 iterations, which cos t 375
+CPU seconds on a personal computer with 2.9GHz Intel Core i7 C PU and 16GB RAM. All computation
+reported in this paper were done on the same computer.
+To accomplish the goal of variable selection, we consider th e factorization of the posterior distribution
+π(β,ξ|Y)∝π(Y|β)π(β|ξ)π(ξ), whereξ= (ξ1,ξ2,...,ξp). Under a prioriindependent assumptions for
+βi’s andξi’s, we are able to draw posterior samples of ξfrom the following distribution:
+π(ξti= 1|βti,Y) =ati
+ati+bti, i= 1,2,...,p, (29)
+whereati=p0
+τ2exp(−β2
+ti/2τ2
+2),bti=1−p0
+τ1exp(−β2
+ti/2τ2
+1), andβtidenotes the posterior sample of βidrawn
+by Algorithm 2 at stage t. Here we denote by βt= (βt,1,βt,2,...,β t,p) a posterior sample of βdrawn by
+Algorithm 2 at the analysis step of stage t.
+Figure 1 summarizes the variable selection results for one d ata set. The results for other data sets are
+similar. Figure 1(a) shows the sample trajectories of β1,β2,...,β 9, which are averaged over the ensemble
+along with iterations. All the samples converge to their tru e values within 100 iterations, taking about
+3.7 CPU seconds. This is extremely fast! Figure 1(b) shows th e marginal inclusion probabilities of the
+14
+variables Z1,Z2,...,Z p. From this graph, we can see that each of the 8 true variables ( indexed 1-8) has
+a marginal inclusion probability close to 1, while each fals e variable has a marginal inclusion probability
+close to 0. Figure 1(c) shows the scatter plot of the response variable and its ﬁtted value for the training
+data, and Figure 1(d) shows the scatter plot of the response v ariable and its predicted value for 200 test
+samples generated from the model (26). In summary, Figure 1 s hows that the Langevinized EnKF is able
+to identify true variables for large-scale linear regressi on and, moreover, it is extremely eﬃcient.
+0 100 200 300 400 500
+Iteration−1.0−0.50.00.51.0Value(a)
+β1
+β2
+β3
+β4
+β5
+β6
+β7
+β8
+β9
+1
+2
+3
+4
+5
+6
+7
+8
+253
+429
+511
+606
+924
+1042
+1084
+Variable0.00.20.40.60.81.0marginal inclu ion probability(b)
+−10 −5 0 5 10
+Y−10−50510Fitted Value(c)
+−6 −4 −2 0 2 4 6
+Y−6−4−20246Predicted Value(d)
+Figure 1: Langevinized EnKF for large-scale linear regress ion with 500 iterations: (a) Trajectories of
+β1,...,β 9, whereβ1,...,β 5have a true value of 1, β6,...,β 8have a true value of −1, andβ9has a true
+value of 0. (b) marginal inclusion probabilities of all cova riatesX1,...,X p, where the covariates are
+shown in the rank of marginal inclusion probabilities; (c) s catter plot of the response Y and the ﬁtted
+value for training samples; and (d) scatter plot of the respo nse Y and the predicted value for test samples.
+For comparison, SGLD (Welling and Teh, 2011), precondition ed SGLD (pSGLD, Li et al., 2016), and
+stochastic gradient Nos´ e-Hoover thermostat (SGNHT, Ding et al., 2014) were applied to this example.
+For thesealgorithms, thelearningrateshavebeentunedtot heirmaximumvaluessuchthatthesimulation
+converges fast while not exploding. For SGLD, we set ǫt= 4×10−6/max{t0,t}0.6witht0= 1000; for
+pSGLD, we set ǫt= 5×10−6/max{t0,t}0.6witht0= 1000; and for SGNHT, we set ǫ= 0.0001. Other
+than the learning rate, pSGLD contains two more tuning param eters, which control the extremes of the
+curvatures and the balance of the weights of the historical a nd current gradients, respectively. They both
+15
+were set to the default values as suggested by Li et al. (2016) . SGNHT also contains an extra parameter,
+the so-called diﬀusion parameter, for which diﬀerent values, including 1, 5, 10, and 20, have been tried.
+The algorithm performed very similarly with each of the choi ces. Figures 2 summarizes the results of the
+algorithm with the diﬀusion parameter being set to 10.
+For a fair comparison, we ran SGLD for 20,000 iterations, pSG LD for 10,000 iterations, and SGNHT
+for 15,000 iterations, which took about 387 CPU seconds, 410 CPU seconds and380 CPU seconds, respec-
+tively. Allthesealgorithms costslightly longerCPUtimet hantheLangevinizedEnKF.Figure2compares
+the trajectories of ( β1,β2,...,β 9) produced by the three algorithms. It indicates the Langevi nized EnKF
+can converge signiﬁcantly faster than SGLD, pSGLD, SGNHT fo r this example, which can be explained
+as the advantage of using the second-order gradient informa tion in the Langevinized EnKF.
+0 5000 10000 15000 20000−1.0−0.50.00.51.0ValueSGLD
+0 2000 4000 6000 8000 10000−1.0−0.50.00.51.0ValuepSGLD
+0 2000 4000 6000 8000 10000 12000 14000
+Iteration−2−1012ValueSGNHT
+0 2000 4000 6000 8000 10000
+Iteration−1.0−0.50.00.51.0ValueLangevinized  EnKF
+Figure 2: Convergence trajectories of SGLD, pSGLD, SGNHT an d Langevinized EnKF for a large-scale
+linear regression example: Trajectories of ( β1,β2,...,β 9) produced by SGLD (upper), pSGLD (upper
+middle), SGNHT (lower middle), and Langevinized EnKF (lowe r) in their whole runs, where the blue
+rectangle highlights the ﬁrst 5% iterations of the runs.
+Since the Langevinized EnKF is essentially a parallel SGRLD algorithm, we have also compared it
+with parallel SGLD, pSGLD and SGNHT. The results were presen ted in the Supplementary Material.
+Thecomparison gave amuch larger margin that theLangeviniz ed EnKFsigniﬁcantly outperformsparallel
+runs of these algorithms.
+16
+4.2 Bayesian Nonlinear Variable Selection with Deep Neural Networks
+The goal of this example is to show that the Langevinized EnKF can be used to train Bayesian DNNs
+and as one of its important application, the Bayesian DNN can be used in variable selection for nonlinear
+systems. We generated 10 data sets from the nonlinear regres sion model
+y=10x2
+1
+1+x2
+2+5sin(x3x4)+x5+ǫ, (30)
+whereǫ∼N(0,IN). The variables x1,···,x5together with additional 94 variables were generated as in
+Section 4.1: all the variables are mutually correlated with a correlation coeﬃcient of 0.5, and each has a
+marginal distribution of N(0,IN). Each data set consists of N= 2,000,000 samples for training and 200
+samples for testing.
+We modeled the data using a 3-hidden-layer neural network, w ithp= 100 input units including a
+bias unit (for the intercept term), 5 units on each hidden lay er and one unit on the output layer. The
+activation functionis LeakyRelu given by LeakyRelu (x) = 1(x<0)(0.1x)+1(x>=0)(x). That is, wemodeled
+the data by the neural network function
+y=LeakyRelu (LeakyRelu (LeakyRelu (X·W1)·W2+b1)·W3+b2)·W4+b3+ǫ,
+whereX= (x0,x1,x2,...,x 99),W1∈Rp×5,W2∈R5×5,W3∈R5×5andW4∈R5×1represent the weight
+matrices at diﬀerent layers of the neural network, and b1∈R5×1,b2∈R5×1,b3∈R5×1represent bias
+vectors at diﬀerent hidden layers. For each element of Wi’s andbi’s, we assume a hierarchical mixture
+Gaussian prior as given in (27). For the prior hyperparamete rs, we set p0= 0.01,τ2
+1= 0.05,τ2
+2= 1.
+Conditionedoneach posteriorsampleof( W1,W2,W3,W4,b1,b2,b3), asparseneuralnetwork canbedrawn
+by simulating an indicator variable for each potential conn ection of the neural network according to the
+Bernoulli distribution given in (29).
+To identify important input variables, for each sparse neur al network drawn above, we deﬁne four ξ-
+matrices G1,G2,G3andG4, which correspond to W1,W2,W3andW4, respectively. Each element of the
+ξ-matrix indicates the status, existing or not, of the corres pondingconnection. Deﬁne G=G1·G2·G3·G4
+as ap-vector and further truncates its each element to 1 if greate r than 1. That is, each element of G
+indicates the eﬀectiveness of the corresponding input varia ble. Averaging Gover the sparse network
+samples produces the marginal inclusion probabilities of t he input variables.
+Algorithm 3 was ﬁrst applied to this example with the varianc e split proportion α= 0.9, the ensemble
+sizem= 20, the mini-batch size n= 100, the iteration number K= 5 for each stage, and the total
+number of stages T= 20,000. The learning rate was set to ǫt,k= 4×10−4/max{k0,k}0.9withk0= 1
+fork= 1,···,K. Each run took about 4000 CPU seconds. For stochastic gradie nt MCMC algorithms,
+to avoid simulations to explode and meanwhile to achieve fas t convergence, we often need to start with
+a very small learning rate and then decrease it very slowly or even keep it as a constant. This note also
+applies to the remaining examples of this paper.
+17
+0
+1
+2
+3
+4
+5
+36
+22
+34
+75
+72
+37
+38
+27
+26
+23
+53
+39
+79
+80
+Variables0.00.20.40.60.81.0marginal  inclu ion probability for variable(a)
+−40 −20 0 20 40
+Y−40−30−20−10010203040Fitted Value(b)
+−20 −10 0 10 20
+Y−20−1001020Predicted Value(c)
+Figure 3: Langevinized EnKF for the nonlinear variable sele ction example: (a) marginal inclusion
+probabilities of thevariables, wherethevariables aresho wnin therankof marginal inclusionprobabilities;
+(b) scatter plot of the response Y and the ﬁtted value for 2,00 0 randomly selected training samples; and
+(c) scatter plot of the response Y and the predicted value for 200 test samples.
+Figure 3 summarizes the results for one dataset. The results for the other datasets are similar. Figure
+3(a) showsthemarginalinclusionprobabilitiesofall inpu tvariables x1,x2,...,x pwithacutoﬀ valueof0.5
+(red dash line). The results are very encouraging: Each of th e true variables (indexed 1-5) has a marginal
+inclusion probability close to 1, while each of the false var iables has a marginal inclusion probability
+close to 0. Figure 3(b) shows the scatter plot of the response variable and its ﬁtted value for 2,000
+randomly chosen training samples. Figure 3(c) shows the sca tter plot of the response variable and its
+predicted value for 200 test samples. In summary, Figure 3 sh ows that the Langevinized EnKF provides
+a feasible algorithm for training Bayesian deep neural netw orks, through which important variables can
+be identiﬁed for nonlinear systems.
+For comparison, SGLD and pSGLD were applied to this example. Each algorithm was run in parallel
+with 20 chains and each chain consisted of 100,000 iteration s. For both algorithms, we set the learning
+rate asǫt= 1×10−4/max{t0,t}witht0= 10,000, which has been tuned to its maximum value such that
+the simulations converge very fast but won’t explode. Each r un of SGLD cost about 4000 CPU seconds,
+and each run of pSGLD cost about 5600 CPU seconds. For the Lang evinized EnKF, we measured the
+ﬁtting and prediction errors, in mean squared errors (MSEs) , at the last iteration of each stage. For
+SGLD and pSGLD, we measured the ﬁtting and prediction errors at every 5th iteration. Figure 4 (a)
+shows the paths of the best ﬁtting and prediction MSEs produc ed by the time by each chain of pSGLD,
+SGLD, and Langevinized EnKF. Figure 4 (b) shows the path of th e best ﬁtting and prediction MSEs
+by the time produced by respective algorithms. Both plots in dicates the superiority of the Langevinized
+EnKF over SGLD and pSGLD: the Langevinized EnKF tends to prod uce smaller ﬁtting and prediction
+errors than SGLD and pSGLD for this example.
+Table 1 summarizes the results of Langevinized EnKF for 10 da tasets under diﬀerent settings of K
+andα, along with comparisons with SGLD and pSGLD. For each datase t, we calculated “MeanMSFE”
+by averaging the ﬁtting MSEs over the stages t= 15,001,...,20,000, and “MeanMSPE” by averaging
+the prediction MSEs over the stages t= 15,001,...,20,000. Then their values were averaged over
+18
+02500 5000 7500 10000 12500 15000 17500 20000
+Time index0.00.51.01.52.02.53.03.54.0Best log-fitting/prediction MSEfitting error of LEnKF
+prediction error of LEnKF
+fitting error of SGLD
+prediction error of SGLD
+fitting error of pSGLD
+prediction error of pSGLD
+02500 5000 7500 10000 12500 15000 17500 20000
+Time index0.00.51.01.52.02.53.03.54.0Best log-fitting/prediction MSEfitting error of LEnKF
+prediction error of LEnKF
+fitting error of SGLD
+prediction error of SGLD
+fitting error of pSGLD
+prediction error of pSGLD
+Figure 4: Comparison of the best ﬁtting and prediction MSEs b y the time (plotted in logarithm): (a) by
+each chain of SGLD, pSGLD and Langevinized EnKF; (b) by ensem ble averaging of SGLD, pSGLD and
+averaging Langevinized EnKF.
+10 datasets and denoted by “Ave-MeanMSFE” and “Ave-MeanMSP E”, respectively. The comparisons
+indicate that for this example, the Langevinized EnKF outpe rforms SGLD and pSGLD when Kandα
+are chosen appropriately, and it prefers to run with slightl y large values of Kandα. For this example,
+the Langevinized EnKF performed similarly with K= 5 and K= 10, while much better than with K= 1
+and 2; and the choice of αaﬀects not much on its training error, but its prediction erro r: A larger value
+ofαtends to lead to a smaller prediction error. As implied by (16 ), running the Langevinized EnKF with
+a mini-batch size of nis equivalent to running SGLD with a mini-batch size of nα/(1−α). Indeed, as
+shown in Table 1, SGLD with n= 900 produced similar training and test errors as Langevini zed EnKF
+withn= 100,α= 0.9 andK= 5. How the batch size aﬀects on the prediction error is an inte resting
+problem in machine learning, which can be partially explain ed by Theorem 1 of Liang et al. (2013) which
+accounts for the eﬀect of batch size on the convergence of SGD, but deserves a further study.
+In summary, this example shows that the Langevinized EnKF pr ovides a more eﬃcient algorithm
+than SGLD and pSGLD for training a Bayesian DNN, and that Baye sian DNN can be used in variable
+selection for nonlinear systems by imposing a mixture Gauss ian prior on each weight of the DNN. For
+simplicity, we consider only the case that the sample size is larger than the DNN size, i.e., total number
+of connections of the fully connected DNN. As shown in Sun et a l. (2019), such a prior also works for
+the case that the sample size is much smaller than the DNN size . In this case, posterior consistency and
+variable selection selection still hold.
+19
+Table 1: Comparison of Langevinized EnKF, parallel SGLD and parallel pSGLD for the nonlinear re-
+gression example, where the numbers in the parentheses deno te the standard deviations of the averaged
+MeanMSFE and MeanMSPE values over 10 datasets. The CPU time w as measured on a personal com-
+puter with RAM16GB and 2.9GHz Intel Core i7.
+nKαAve-MeanMSFE Ave-MeanMSPE CPU(s)
+100 5 0.1 2.4749(0.11) 3.4482(0.16) 4050.41
+100 5 0.3 2.4171(0.09) 3.3056(0.13) 4171.32
+100 5 0.5 2.4472(0.10) 3.1841(0.13) 4082.99
+100 5 0.8 2.5852(0.09) 3.1449(0.12) 4040.84
+Langevinized EnKF 100 5 0.9 2.4319(0.10) 3.1437(0.14) 4041 .91
+100 10 0.9 2.3422(0.07) 3.1469(0.17) 7766.84
+100 2 0.9 2.8509(0.17) 4.4075(0.27) 1943.71
+100 1 0.9 3.6848(0.25) 4.8561(0.22) 1093.09
+100 2.4747(0.12) 3.3877(0.12) 4111.09
+SGLD900 2.4255(0.17) 3.1997(0.13) 5772.94
+pSGLD 100 2.6317(0.11) 3.3988(0.10) 5624.10
+5 Numerical Studies for Dynamic Learning Problems
+This section illustrates the performance of the Langeviniz ed EnKF as a particle ﬁltering algorithm for
+dynamic problems. Two examples are considered under the Bay esian framework. One is uncertainty
+quantiﬁcation for the Lorenz-96 model which has been consid ered as the benchmark example for weather
+forecasting. The other is on-line learning with Long short- term memory (LSTM) networks.
+5.1 Uncertainty Quantiﬁcation for the Lorenz-96 Model
+The Lorenz-96 model was developed by Edward Lorenz in 1996 to study diﬃcult questions regarding
+predictability in weather forecasting (Lorenz, 1996). The model is given by
+dxi
+dt= (xi+1−xi−2)xi−1−xi+F, i= 1,2,···,p,
+whereF= 8,p= 40, and it is assumed that x−1=xp−1,x0=xp, andxp+1=x1. HereFis known as
+a forcing constant, and F= 8 is a common value known to cause chaotic behavior. In order to generate
+the true state Xt= (X1
+t,...,Xp
+t) fort= 1,2,...,T, we initialized X0by setting Xi
+0to 20 for all i
+but adding to X20
+0a small perturbation of 0.1; we solved the diﬀerential equati on using the fourth-order
+Runge-Kutta numerical method with a time interval of ∆ t= 0.01; and for each iandt, we added to Xi
+t
+a random noise generated from N(0,1). At each stage t, data was observed for half of the state variables
+20
+and masked with a standard Gaussian random noise, i.e.,
+yt=HtXt+ǫt, t= 1,2,...,T,
+whereǫt∼N(0,Ip/2), andHtis a random selection matrix. Figure 5 shows the simulated pa th of the
+partial state variables ( X1
+t,X2
+t,X3
+t) fort= 1,2,...,T, whose chaotic behavior indicates the challenge of
+the problem.
+x1−20−10010
+20
+30x2
+−30−20−1001020x3
+−30−20−1001020
+Figure 5: Chaotic path of the partial state variables ( X1
+t,X2
+t,X3
+t) fort= 1,2,...,100, simulated from
+the Lorenz-96 Model.
+Algorithm 4 was applied to this example with the ensemble siz em= 50, the iteration number K= 20,
+k0=K/2, and the learning rate ǫt,k= 0.5/k0.9fork= 1,2,...,Kandt= 1,2,...,T. At each stage t,
+the state was estimated by averaging over the ensembles gene rated in iterations k0+1,k0+2,...,K. The
+accuracy of the estimate was measured using the root mean-sq uared error (RMSE) deﬁned by
+RMSE t=||ˆXt−Xt||2/√p,
+whereˆXtdenote the estimate of Xt. For comparison, the EnKF algorithm was also applied to this
+example with the same ensemble size m= 50. To be fair, it was run in a similar way to Langevinized
+EnKF except that the Kalman gain matrix was estimated based o n the ensemble, without the resampling
+step being performed, and the random error was drawn from N(0,Vt) in the analysis step.
+Figure 6 compares the estimates of X1
+t,X2
+tandX3
+tproduced by Langevinized EnKF and EnKF for
+one simulated dataset. The plots are similar for the other co mponents X4
+t,...,X40
+t. The comparison
+shows that the EnKF and Langevinized EnKF produced comparab le RMSE t’s (see Figure 6 (d)). This
+is interesting as the EnKF is known to provide the optimal lin ear estimator of the conditional mean
+(Law et al., 2016). However, the Langevinized EnKF provided better uncertainty quantiﬁcation for the
+21
+estimates. For example, in Figure 6 (c), many state values ar e covered by the conﬁdence band pro-
+duced by the Langevinized EnKF, but not by the conﬁdence band by the EnKF. This is consistent with
+the existing result that the EnKF scheme is known to underest imate the conﬁdence intervals, see e.g.
+Saetrom and Omre (2013).
+(a) (b)
+0 20 40 60 80 100
+State estimates along the time−100102030ValueLangevinized EnKF
+EnKF
+True States
+0 20 40 60 80 100
+State estimates along the time−10−50510152025ValueLangevinized EnKF
+EnKF
+True States
+(c) (d)
+0 20 40 60 80 100
+State estimates along the time−20−1001020ValueLangevinized EnKF
+EnKF
+True States
+0 20 40 60 80 100−1.5−1.0−0.50.00.51.0Logarithm of RMSELangevinized EnKF
+EnKF
+Figure 6: State estimates produced by the EnKF and Langevini zed EnKF for the Lorenz-96 model with
+t= 1,2,...,100: plots (a)-(c) show, respectively, the estimates of X1
+t,X2
+tandX3
+t, where the true state
+values are represented by ‘+’, the estimates are represente d by solid lines, and their 95% conﬁdence
+intervals are represented by shaded bands; plot (d) shows lo g(RMSE t) along with stage t.
+Figure 7 (a) shows the coverage probabilities of the 95% conﬁ dence intervals produced by the EnKF
+and Langevinized EnKF, where the coverage probability was c alculated by averaging over 40 state com-
+ponents at each stage t∈ {1,2,...,100}. Figure 7(b) shows the averaged coverage probabilities ove r 10
+datasets. The comparison shows that the Langevinized EnKF p roduces the coverage probabilities closing
+to their nominal level, while the EnKF does not. This implies that the Langevinized EnKF is able to
+correctly quantify uncertainty of the estimates as tbecomes large. This is a remarkable result given the
+nonlinear and dynamic nature of the Lorenz-96 model!
+Table 2 summarizes the results produced by the two methods on 10 datasets. In Langevinized EnKF,
+two choices of k0were tried. For each dataset, we calculated the MeanRMSE by a veraging RMSE t
+over the stages t= 21,22,...,100. Similarly, we calculated the MeanCP by averaging CP t’s over the
+22
+(a) (b)
+0 20 40 60 80 100
+Time0.00.20.40.60.81.0Coverage Probability
+Langevinized EnKF
+EnKF
+0 20 40 60 80 100
+Time0.00.20.40.60.81.0Coverage Probability
+Langevinized EnKF
+EnKF
+Figure 7: Coverage probabilities of the 95% conﬁdence inter vals produced by EnKF and Langevinized
+EnKF for Lorenz-96 Model for stage t= 1,2,...,100: (a) coverage probabilities with one dataset; (b)
+coverage probabilities averaged over 10 datasets.
+stagest= 21,22,...,100, whereCP tdenotesthecoverage probabilitycalculated foronedatase t atstage t.
+Thentheirvalues wereaveraged over 10datasets anddenoted by“Ave-MeanRMSE” and“Ave-MeanCP”,
+respectively. Table 2 also gives the CPU time cost by each met hod. Compared to EnKF, Langevinized
+EnKF produced slightly lower RMSEt’s, but much more accurat e uncertainty quantiﬁcation for the
+estimates. We note that Langevinized EnKF also produced ver y good results with k0=K −1, which
+cost much less CPU time than with k0=K/2.
+Table 2: Comparison of the EnKF and Langevinized EnKF, where the averages over 10 independent
+datasets are reported with the standard deviation given in t he parentheses. The CPU time was recorded
+on a personal computer with RAM16GB and 2.9GHz Intel Core i7 f or a single run of the method.
+k0Ave-MeanRMSE Ave-MeanCP CPU(s)
+K/2 1.702(0.0343) 0.948(0.0028) 6.377(0.3942)
+Langevinized EnKFK−1 1.714(0.0360) 0.947(0.0034) 3.350(0.0807)
+EnKF 1.722(0.0230) 0.460(0.0029) 0.817(0.0426)
+In summary, the Langevinized EnKF can signiﬁcantly outperf orm the EnKF for the Lorenz-96 model.
+The Langevinized EnKF can producethe same accurate state es timates as EnKF, but outperforms EnKF
+in uncertainty quantiﬁcation.
+5.2 Online Learning with LSTM Neural Networks
+Reformulation of LSTM Network The LSTM network is a recurrent neural network architecture
+proposed by Hochreiter and Schmidhuber (1997), which has be en widely used for machine learning tasks
+23
+in dealing with time series data. Compared to traditional re current neural networks, hidden Markov
+models and other sequence learning methods, LSTM is less sen sitive to gap length of the data sequence.
+In addition, it is easy to train, less bothered by exploding a nd vanishing gradient problems. The LSTM
+network has been successfully used in natural language proc essing and handwriting recognition. It won
+the ICDAR handwriting competition 2009 (Graves et al., 2009 ) and achieved a record 17.7% phoneme
+error rate on the classic TIMIT natural speech dataset (Grav es et al., 2013). In this section we show
+that the Langevinized EnKF is not only able to train LSTM netw orks as well as the stochastic gradient
+descent (SGD) method does, but also able to quantify uncerta inty of the resulting estimates.
+Consider an autoregressive model of order q, denoted by AR( q). Letzt= (zt−q+1,···,zt−1,zt) denote
+the regression vector at stage t. Letyt=zt+1∈Rddenote the target output at stage t. The LSTM
+network with shidden neurons is deﬁned by the following set of equations:
+ηt=h/parenleftBig
+W(η)zt+R(η)ψt−1+b(η)/parenrightBig
+,
+it=σ/parenleftBig
+W(i)zt+R(i)ψt−1+b(i)/parenrightBig
+,
+ft=σ/parenleftBig
+W(f)zt+R(f)ψt−1+b(f)/parenrightBig
+,
+ct=Λ(i)
+tηt+Λ(f)
+tct−1,
+ot=σ/parenleftBig
+W(o)zt+R(o)ψt−1+b(o)/parenrightBig
+,
+ψt=Λ(o)
+th(ct),(31)
+whereΛ(f)
+t= diag(ft),Λ(i)
+t= diag(it), andΛ(o)
+t= diag(ot). The activation function h(·) applies to
+vectors pointwisely and is commonly set to tanh(·). The sigmoid function σ(·) also applies pointwisely to
+thevector elements. IntermsofLSTMnetworks, zt∈Rqdiscalled inputvector, ct∈Rsiscalled thestate
+vector,ψt∈Rsis called the output vector, and it,ftandotare called the input, forget and output gates,
+respectively. For the coeﬃcient matrices and weight vector s, we haveW(η),W(i),W(f),W(o)∈Rs×qd,
+R(η),R(i),R(f),R(o)∈Rs×s, andb(η),b(i),b(f),b(o)∈Rs. For initialization, we set ψ0=0, andc0=0.
+Given the output vector ψt, we can model the target output ytas
+yt=Wψt+b+ut, (32)
+whereW∈Rd×s,b∈Rd, andut∼N(0,Γt).
+For convenience, we group the parameters of the LSTM model as θ={W,b,W(η),R(η),b(η),W(i),
+R(i),b(i),W(f),R(f),b(f),W(o),R(o),b(o)} ∈Rnθ, where nθ= 4s2+ 4sqd+ 4s+sd+d. With the
+state-augmentation approach, we can rewrite the LSTM model as a state-space model with a linear
+24
+measurement equation as follows:
+
+θt
+ct
+ψt
+γt
+=
+θt−1
+Ω/parenleftbig
+ct−1,zt,ψt−1/parenrightbig
+τ/parenleftbig
+ct,zt,ψt−1/parenrightbig
+Wtψt+b
++
+et
+ζt
+ξt
+εt
+,
+yt=γt+vt,(33)
+whereεt∼N(0,αΓt) for some constant 0 < αt<1,vt∼N(0,(1−α)Γt), and Γ tis as deﬁned in (32).
+LetxT
+t= (θT
+t,cT
+t,ψT
+t,γT
+t). Then
+π(xt|xt−1,zt) =π(θt|θt−1,zt)π(ct|θt,ct−1,ψt−1,zt)π(ψt|θt,ct,ψt−1,zt)π(γt|θt,ψt).
+As in (25), we can rewrite the state-space model (33) as a dyna mic system at each stage t:
+xt,k=xt,k−1+ǫt
+2∇xlogπ(xt,k−1|xs
+t−1,zt)+ωt,k
+yt,k=Htxt,k+vt,k,(34)
+wherext,kdenote anestimate of xtobtained at iteration kfork= 1,2,...,K,yt,k=ytfork= 1,2,...,K,
+Ht= (0,I) such that Htxt=γt,ωt,k∼N(0,ǫtIp),pis the dimension of xt, andvt,k∼N(0,(1−α)Γt).
+With this formulation, Algorithm 4can beapplied totrain th eLSTMmodeland andquantify uncertainty
+of the resulting estimate.
+Wind Stress Data We considered the wind stress dataset, which can be download ed at https://
+iridl.ldeo.columbia.edu. The dataset consists of gridded (at a 2×2 degrees resolution and corresponding
+tod= 1470 spatial locations) monthly summaries of meridional w ind pseudo-stress collected from Jan
+1961 to Feb 2002. For this dataset, we set q= 6 and T= 300, i.e., modeling the data of the ﬁrst 300
+months using an AR(6) LSTM model. The data was scaled into the range (−1,1) in preprocessing and
+then scaled back to the original range in results reporting.
+The Langevinized EnKF was ﬁrst applied to this example. For t he model part, we set et∼
+N(0,0.0001I),ζt∼N(0,0.0001I),ξt∼N(0,0.0001I),ut∼N(0,0.0001I). These model parameters
+are assumed to be known, although this is not necessary as dis cussed at the end of the paper. For
+this example, we have tried diﬀerent settings for the model pa rameters. In general, a smaller variance
+setting will lead to a better ﬁtting to the observations. For the algorithmic part, we set the ensemble
+sizem= 100,K= 10,k0= 9,α= 0.9, the number of hidden neurons s= 20, and the learning rate
+ǫt,k= 0.0001/max{κb,k}0.95withκb= 8 fork= 1,···,Kandt= 1,···,T. At each stage t, the wind
+stress was estimated by averaging over ˆ yt,k=Htxt,kfor lastK/2 iterations. In addition, the credible
+interval for each component of xtwas calculated based on the ensemble obtained at stage t. Each run
+cost about 5334.5 CPU seconds. The results are summarized in Figure 8, where the wind stress estimates
+at four selected spatial locations and their 95% credible in tervals are plotted along with stages.
+25
+For comparison, SGD was also applied to this example with the same setting as the Langevinized
+EnKF, i.e., they share the same learning rate and the same ite ration number K= 10 at each stage. The
+results are also summarized in Figure 8, where the wind stres s estimates at four selected spatial locations
+are plotted along with stages. Each run of SGD cost about 15.9 CPU seconds. Since the Langevinized
+EnKF had an ensemble size m= 100, each chain cost only 53.3 CPU seconds. The Langevinize d EnKF
+cost more CPU time and as return, it produced more samples for uncertainty quantiﬁcation.
+Further, we calculated the mean squared ﬁtting error ||ˆyt−yt||2
+2for stages t= 1,2,...,Tand for both
+methods. The results are summarized in Figure 9, which indic ates that the Langevinized EnKF produced
+slightly smaller ﬁtting errors than SGD. Figure 10 shows the heat maps of the wind stress ﬁtted by the
+Langevinized EnKF and SGD for six diﬀerent months, August 196 5, October 1969, December 1973,
+February 1978, April 1982, and June 1986. The comparison wit h the true heat maps indicates that both
+SGD and Langevinized EnKF can train the LSTM very well for thi s example.
+Insummary, this exampleshowsthat theLangevinized EnKFis not only abletotrain LSTMnetworks
+as does SGD, but also able to quantify uncertainty of the resu lting estimates.
+6 Discussion
+This paper proposes a new particle ﬁltering algorithm, Lang evinized EnKF, by reformulating the EnKF
+under the framework of Langevin dynamics. The Langevinized EnKF converges to the right ﬁltering
+distribution in Wasserstein distance under the big data sce nario that the dynamic systems consists of a
+large number of stages and has a large number of observations at each stage. The Langevinized EnKF
+inherits theforecast-analysis procedurefrom theEnKFand theuseof mini-batch datafrom thestochastic
+gradient MCMC algorithms, enabling it scalable with respec t to both the dimension and the sample size.
+The Langevinized EnKF can be applied to both the inverse and d ata assimilation problems.
+Like theEnKF, theLangevinized EnKFis developed underthea ssumption that thestate space model
+contains no unknown parameters. Extension of the algorithm to the case with unknown parameters can
+be done in diﬀerent ways. One way is with the state augmentatio n approach. Taking the model (5) as an
+example: If the function π(·) or more general, the state propagator, contains some unkno wn parameters,
+we can augment the state xtto include these parameters. Another way is with the EM algor ithm
+(Dempster et al., 1977). Since the Langevinized EnKF is able to sample from the ﬁltering distribution for
+given parameters, the EM algorithm can be conveniently used for estimating parameters. A related work
+is Aicher et al. (2019), however, where the ﬁltering distrib ution is simulated using traditional sequential
+Monte Carlo. Third, the parameters can also be estimated usi ng an adaptive SGMCMC algorithm.
+Taking the model (5) as the example again: If the propagator Htor the observation noise covariance
+matrix contain some unknown parameters, then the parameter s can be estimated in a recursive way. In
+this case, if the state-augmentation approach is used, the c ovariance matrix Σ t=n
+N(I−KtHt) (deﬁned
+in equation (S3) of the Supplementary Material) will no long er be a constant matrix of the state variable
+26
+0 50 100 150 200 250 300
+Time index−60−40−2002040Wind Stress
+Lange inized EnKF
+SGD
+confidence inter al
+True States
+0 50 100 150 200 250 300
+Time index−20020406080100Wind StressLangevinized EnKF
+SGD
+confidence interval
+Tr e States
+0 50 100 150 200 250 300
+Time index−60−40−20020406080Wind StressLangevinized EnKF
+SGD
+confidence interval
+Tr e States
+0 50 100 150 200 250 300
+Time index−60−40−2002040Wind StressLange inized EnKF
+SGD
+confidence inter al
+True States
+Figure 8: Wind stress estimates at four spatial locations an d their 95% credible interval along with stages:
+the red line is for the Langevinized EnKF estimate; the pink s haded band is for credible intervals of the
+Langevinized EnKF, the green line is for the SGD estimate; an d the blue cross ’+’ is for the true wind
+stress value.
+27
+0 50 100 150 200 250 3000.000.020.040.060.080.10fitting error of LEnKF
+fitting error of SGD
+Figure 9: Comparison of the mean squared ﬁtting errors produ ced by SGD, Langevinized EnKF and
+ensemble averaging Langevinized EnKF.
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeGround Truth (Aug 1965)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using L-EnKF (Aug 1965)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using SGD (Aug 1965)
+−250255075
+150E 160E 170E 180E 10W 20W 30W 40W 50W 60W
+Longitude29S 19S 9S 1N 11N 21NLatitudeGround  Truth (Oct 1969)
+150E 160E 170E 180E 10W 20W 30W 40W 50W 60W
+Longitude29S 19S 9S 1N 11N 21NLatitudeLSTM using L-EnKF (Oct 1969)
+150E 160E 170E 180E 10W 20W 30W 40W 50W 60W
+Longitude29S 19S 9S 1N 11N 21NLatitudeLSTM using SGD (Oct 1969)
+−2002040
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeGround Truth (Dec 1973)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using L-EnKF (Dec 1973)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using SGD (Dec 1973)
+−75−50−25025
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeGround Truth (Feb 1978)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using L-EnKF (Feb 1978)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using SGD (Feb 1978)
+−60−40−2002040
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeGround Truth (Apr 1982)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using L-EnKF (Apr 1982)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using SGD (Apr 1982)
+−40−200204060
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeGround Truth (Jun 1986)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using L-EnKF (Jun 1986)
+150E160E170E180E10W20W30W40W50W60W
+Longitude29S19S9S1N11N21NLatitudeLSTM using SGD (Jun 1986)
+−40−2002040
+Figure 10: Heat maps of the wind stress ﬁtted by the Langevini zed EnKF and SGD for six diﬀerent
+months, August 1965, October 1969, December 1973, February 1978, April 1982, and June 1986: For
+both left and right panels, the left, middle and right column s show the true heat map, the heat map
+ﬁtted by Langevinized EnKF, and the heat map ﬁtted by SGD, res pectively.
+28
+and thus the convergence to the correct ﬁltering distributi on will not be guaranteed any more. To tackle
+this issue, a parameter updating step can be added to the Lang evinized EnKF Algorithm 2 as follows:
+3.(Parameter updating) Update the parameters according to th e recursion
+ϑt= (1−at)ϑt−1+atφ(ϑt−1,xa
+t),
+whereϑdenotes the vector of unknown parameters, {at}is a pre-speciﬁed, positive, decreasing
+sequence satisfying the conditions/summationtext
+tat=∞and/summationtext
+ta2
+t<∞,xa
+t= (xa1
+t,...,xam
+t)denotes the
+ensemble of samples at stage t, andφ(ϑt−1,xa
+t)is a mapping driving to an estimate of ϑbased on
+the ensemble xa
+t.
+Basedonthetheoryofstochasticapproximation(Robbins an d Monro,1951), themapping φ(ϑt−1,xa
+t)
+can be easily designed. With the parameter updating step, th e Langevinized EnKF will become an
+adaptive SGMCMC algorithm, where the target distribution v aries from iteration to iteration. The
+convergence of the adaptive SGMCMC algorithm has been studi ed in Deng et al. (2019). The theory
+of Deng et al. (2019) implies that as t→ ∞,ϑtconverges to the true parameter vector in probability
+and the Langevinized EnKF converges to the correct posterio r distribution. The above three parameter
+estimation methods also apply to Algorithm 3 and Algorithm 4 .
+In practice, we often encounter the problems where the respo nse variable follows a non-Gaussian
+distribution, e.g., multinomial or Poisson. The Langevini zed EnKF can be extended to these problems
+by introducing a latent variable. For example, consider an i nverse problem, for which the latent variable
+model can be formulated as
+z|y∼ρ(z|y), y=h(x)+η, η∼N(0,Γ), (35)
+wherezis observed data following a non-Gaussian distribution ρ(·),yis the latent Gaussian variable,
+andxis the parameter. To adapt the Langevinized EnKF to simulati ng from the posterior of x, we only
+need to add an imputation step in Algorithm 2, between the for ecast step and the analysis step. The
+imputation step is to simulate a latent vector yfrom the distribution π(y|x,z)∝ρ(z|y)f(y|x). Since the
+imputation will lead to an unbiased estimate for the gradien t of the involved log-density function, the
+proposed extension is valid, with which samples from the tar get posterior π(x|z) can be generated. A
+further extension of this algorithm to data assimilation pr oblems is straightforward.
+Appendix
+This supplementary material is organized as follows. Secti on A compares the Langevinized EnKF with
+parallel SGLD, pSGLD and SGNHT for a linear regression examp le. Section B proves the convergence
+of Algorithm 2 and Algorithm 4.
+29
+A Comparison of Langevinized EnKF with parallel SGLD, pSGLD
+and SGNHT
+For a thorough comparison, we also ran SGLD (Welling and Teh, 2011), pSGLD (Li et al., 2016) and
+SGNHT (Ding et al., 2014) in parallel for the linear regressi on example considered in Section 4.1. Each
+of the three algorithms was run for 1,000 iterations with 100 chains and exactly the same parameter
+setting as used in Section 4.1. The CPU times costed by SGLD, p SGLD, and SGNHT were 38.18, 43.19,
+42.39 CPU seconds, respectively. Recall that the Langevini zed EnKF with an ensemble size of m= 100
+cost 35.14 CPU seconds for 1,000 iterations on the same compu ter. Figure S1 shows the trajectories of
+(β1,β2,...,β 9) produced by SGLD, pSGLD, SGNHT and Langevinized EnKF in the runs, where each
+trajectory was obtained by averaging over 100 chains at each iteration. For this example, Langevinized
+EnKF took less than 100 iterations to converge to the true val ues, SGNHT took about 1000 iterations,
+while SGLD and pSGLD failed to converge with 1000 iterations .
+0 200 400 600 800 1000−1.0−0.50.00.51.0ValueSGLD
+0 200 400 600 800 1000−1.0−0.50.00.51.0ValuepSGLD
+0 200 400 600 800 1000
+Iteration−2−1012ValueSGNHT
+0 200 400 600 800 1000
+Iteration−1.0−0.50.00.51.0ValueLangevinized  EnKF
+Figure S1: Convergence trajectories of SGLD, pSGLD, SGNHT a nd Langevinized EnKF for a large-scale
+linear regression example.
+30
+B Proofs for the Convergence of Algorithm 2 and Algorithm 4
+We are interested in studying the convergence of the Langevi nized EnKF in Wasserstein distance. The
+r-th order Wasserstein distance between two probability mea suresµandνis deﬁned by
+Wr(µ,ν) =/parenleftbigg
+inf
+π∈Π(µ,ν)/integraldisplay
+X×Xd(x,y)rdπ(x,y)/parenrightbigg1/r
+= inf
+π∈Π(µ,ν){Eπd(X,Y)r}1/r,
+where Π( µ,ν) denotes the collection of all probability measures on X×Xwith marginals µandνrespec-
+tively.
+B.1 Convergence of Algorithm 2
+Theorem S1. LetΣt=n
+N(I−KtHt). Ifλl≤inftλmin(Σt)≤suptλmax(Σt)≤λuholds for some
+positive constants λlandλu, the log-prior density function logπ(x)is diﬀerentiable with respect to x, and
+the learning rate ǫt=O(t−̟)for some 0< ̟ <1, thenlimt→∞W2(˜πt,π∗) = 0, where˜πtdenotes the
+empirical distribution of xa
+t,π∗=π(x|y)denotes the target posterior distribution, and W2(·,·)denotes
+the second-order Wasserstein distance.
+Proof.First, weconsidertheKalmangain matrix Kt=QtHT
+t(Rt+HtQHT
+t)−1, which, withsomealgebra,
+can be shown
+Kt= (I−KtHt)QtHT
+tR−1
+t= (HT
+tR−1
+tHt+Q−1
+t)−1HT
+tR−1
+t. (S1)
+Letµt=E(xf
+t|xa
+t−1) =xa
+t−1+δt, whereδt=ǫtn
+2N∇logπ(xa
+t−1). Therefore, xf
+t=µt+wt.
+Taking conditional expectation on both sides of equation (7 ) of the main text, we have
+E(xa
+t|xa
+t−1) =µt+Kt(yt−Htµt) =xf
+t+Kt(yt−Htxf
+t)−(I−KtHt)wt. (S2)
+With the identity (S1), (S2) can be further written as
+E(xa
+t|xa
+t−1) =xa
+t−1+δt+Kt(yt−Htxa
+t−1−Htδt) =xa
+t−1+Kt(yt−Htxa
+t−1)+(I−KtHt)δt
+=xa
+t−1+(I−KtHt)QtHT
+tR−1
+t(yt−Htxa
+t−1)+(I−KtHt)δt
+=xa
+t−1+(I−KtHt)Qt/bracketleftbig
+HT
+tR−1
+t(yt−Htxa
+t−1)+Q−1
+tδt/bracketrightbig
+=xa
+t−1+n
+2N(I−KtHt)Qt/bracketleftbiggN
+nHT
+tV−1
+t(yt−Htxa
+t−1)+∇logπ(xa
+t−1)/bracketrightbigg
+,
+=xa
+t−1+ǫt
+2Σt/bracketleftbiggN
+nHT
+tV−1
+t(yt−Htxa
+t−1)+∇logπ(xa
+t−1)/bracketrightbigg
+,(S3)
+by deﬁning Σ t=n
+N(I−KtHt) and by noting Qt=ǫtIpandRt= 2Vt.
+For the Langevinized EnKF, the diﬀerence between the equatio n (7) of the main text and equation
+(S2) is
+et= (I−KtHt)wt−Ktvt=wt−Kt(Htwt+vt),
+31
+for which the mean E(et) = 0 and the covariance
+Var(et) =n
+NQt+Kt(n
+NHtQtHT
+t+n
+NRt)KT
+t−2n
+NKtHtQt=n
+N[Qt+KtHtQt−2KtHtQt]
+=n
+N(I−KtHt)Qt=ǫtΣt,
+wherethesecondequalityholdsduetothesymmetryof QtandRtandtheidentity Kt(HtQtHT
+t+Rt)KT
+t=
+Kt(HtQtHT
+t+Rt)(HtQT
+tHT
+t+RT
+t)−1HtQT
+t=KtHtQt. Then, by (S3), we have
+xa
+t=xf
+t+Kt/bracketleftBig
+yn−Htxf
+t−vt/bracketrightBig
+=xa
+t−1+ǫt
+2Σt/bracketleftbiggN
+nHT
+tV−1
+t(yt−Htxa
+t−1)+∇logπ(xa
+t−1)/bracketrightbigg
++et,(S4)
+whereN
+nHT
+tV−1(yt−Htxa
+t−1) represents an unbiased estimator for the gradient of the lo g-likelihood
+function, and ∇logπ(xa
+t−1) represents the gradient of the log-prior density function . By Corollary S1
+(withη= 0), we have lim t→∞W2(˜πt,π∗) = 0. For this algorithm, it is easy to see that (S8) is satisﬁe d,
+for which the bias factor η= 0 asN
+nHT
+tV−1
+t(yt−Htxa
+t−1)+∇logπ(xa
+t−1) forms an unbiased estimator of
+∇logπ(x|y) atxa
+t−1, and the variance of the estimation error is upper bounded by a quadratic function
+of∝ba∇dblxa
+t−1∝ba∇dbl.
+B.2 Convergence of Algorithm 4
+Letπt=π(xt|y1:t) denote the ﬁltering distribution at stage t, and let ˜ πtdenote the marginal distribution
+ofxa,i
+t,Kgenerated by Algorithm 4 at iteration Kof staget. The following conditions are assumed for the
+dynamic system (1) of the main text at each stage t:
+(A.1)πtisst-strongly log-concave:
+f(xt)−f(x∗
+t)−∇f(x∗
+t)T(xt−x∗
+t)≥st
+2∝ba∇dblxt−x∗
+t∝ba∇dbl2
+2,∀xt,x∗
+t∈Rp
+t, (S5)
+wheref(xt) =−logπ(xt|y1:t) =−logπt, andstis a positive number satisfying st≥cNtfor some
+constant c >0.
+(A.2) log( πt) isSt-gradient Lipschitz continuous:
+∝ba∇dbl∇f(xt)−∇f(x∗
+t)∝ba∇dbl2≤St∝ba∇dblxt−xt∝ba∇dbl2,∀xt,x∗
+t∈Rp
+t. (S6)
+whereStis a positive number satisfying St≤CNtfor some constant C >0. Note that we must
+havest≤St.
+(A.3) Let Σ t,k=n
+N(I−Kt,kHt,k), andassumethat λt,l≤infkλmin(Σt,k)≤supkλmax(Σt,k)≤λt,ufor some
+λt,landλt,u, whereλmax(·) andλmin(·) denote the largest and smallest eigenvalues, respectivel y.
+32
+(A.4) The stochastic error induced by the sub-sampling proc edure has a bounded variance, i.e., ∀x∈Rp
+t,
+E[∝ba∇dbl(N/n)HT
+t,kV−1
+t(yt,k−Ht,kx)−HT
+tΓ−1
+t(yt−Htx)∝ba∇dbl2]≤σ2
+t,s(p+∝ba∇dblx∝ba∇dbl2),
+for some constant σ2
+t,s>0, where the expectation is with respect to random sub-sampl ing.
+(A.5) The state propagator g(xt) isl-Lipschitz and bounded by Mg(i.e., supx∝ba∇dblg(x)∝ba∇dbl ≤Mg), and
+λmin(Ut)≥λt,s>0 for some positive constant λt,s.
+(A.6) There exist some constant Msuch that W2(νt+1,πt+1)≤Mfor allt≥0, where νt+1(xt+1) =
+/integraltext
+π(xt+1|xt)πt(xt)dxtis the ideal stage initial distribution of xa,i
+t+1,0fort≥1, andν1is the initial
+distribution used at stage 1. Similarly, we deﬁne ˜ νt+1(xt+1) =/integraltext
+π(xt+1|xt)˜πt(xt)dxtto be the
+practical stage initial distribution of xa,i
+t+1,0fort≥1.
+Remark S1. Log-concavity and strong log-concavity are preserved by pr oducts and marginalization (Saumard and Wellner,
+2014). If the prior density π(x1)is log-concave, the state transition density π(xt|xt−1)is log-concave with
+respect to both xtandxt−1for each stage t, and the emission density π(yt|xt)isλt-strongly-log-concave
+for each stage twhereλtis the smallest eigenvalue of HT
+tΓ−1
+tHt, then condition (A.1) holds with st=λt.
+Furthermore, by Brascamp-Lieb inequality (Brascamp and Lieb , 2002), we must have that πthas ﬁnite
+variance, that is
+pσ2
+t,v:=Eπt∝ba∇dblX−E(X)∝ba∇dbl2≤p/st. (S7)
+Strongly log-concave conditions are commonly used in the th eoretical study of Langevin Monte Carlo, see
+e.g. Dalalyan and Karagulyan (2019) and Cheng and Bartlett (2 018). These conditions potentially can
+be relaxed following the work of Durmus and Moulines (2017).
+Remark S2. Assumption (A.6) says the ideal initialization distributi on in each stage is not too bad, and
+essentially, it actually requires that the data are coheren t to the state space model (1) given in the main
+text, in the sense that the predictive distribution based on y1:t(π(xt+1|y1:t)) and estimated parameter
+based on yt+1(ˆxt+1= (HT
+t+1Ht+1)−1HT
+t+1yt+1) are close.
+Lemma S1. Letµandνbe two distribution laws on Rp, and let fbe anL-Lipschitz continuous function,
+then /vextenddouble/vextenddouble/vextenddouble/vextenddouble/integraldisplay
+f(x)dµ(x)−/integraldisplay
+f(x)dν(x)/vextenddouble/vextenddouble/vextenddouble/vextenddouble≤LW2(µ,ν).
+Proof.By deﬁnition of Wasserstein distance, there exist random va riablesX1andX2, whose marginal
+distributions follow µandνrespectively, such that ∝ba∇dblX1−X2∝ba∇dblL2= (E∝ba∇dblX1−X2∝ba∇dbl2
+2)1/2=W2(µ,ν).
+/vextenddouble/vextenddouble/vextenddouble/vextenddouble/integraldisplay
+f(x)dµ(x)−/integraldisplay
+f(x)dν(x)/vextenddouble/vextenddouble/vextenddouble/vextenddouble=∝ba∇dblEf(X1)−Ef(X2)∝ba∇dbl ≤E∝ba∇dblf(X1)−f(X2)∝ba∇dbl
+≤EL∝ba∇dblX1−X2∝ba∇dbl2=LE/radicalBig
+∝ba∇dblX1−X2∝ba∇dbl2
+2≤L/radicalBig
+E∝ba∇dblX1−X2∝ba∇dbl2
+2=LW2(µ,ν).
+33
+Lemma S2. Under the assumption (A.5), we have
+W2(˜νt+1,νt+1)≤lW2(πt,˜πt)
+Proof.By deﬁnition of Wasserstein distance, there exist random va riablesX1andX2, whose marginal
+distributions are πtand ˜πtrespectively, and E(∝ba∇dblX1−X2∝ba∇dbl2
+2) =W2
+2(˜πt,πt). Deﬁne Y1=g(X1) +u, and
+Y2=g(x2)+u, whereu∼N(0,Ut+1) such that the marginal distributions of Y1andY2areνt+1and ˜νt+1
+respectively. Then,
+W2
+2(˜νt+1,νt+1)≤E∝ba∇dblY1−Y2∝ba∇dbl2
+2=E∝ba∇dblg(X1)−g(X2)∝ba∇dbl2
+2≤El2∝ba∇dblX1−X2∝ba∇dbl2
+2=l2W2
+2(πt,˜πt).
+Lemma S3. Iffis anL-Lipschitz continuous function, then E∝ba∇dblf(X)−E(f(X))∝ba∇dbl2
+2≤L2E∝ba∇dblX−E(X)∝ba∇dbl2
+2.
+Proof.LetX1andX2be two independent copies of X. Then
+E∝ba∇dblf(X)−E(f(X))∝ba∇dbl2
+2= (1/2)E∝ba∇dblf(X1)−f(X2)∝ba∇dbl2
+2≤(1/2)E(L∝ba∇dblX1−X2∝ba∇dbl2)2
+≤L2(1/2)E(∝ba∇dblX1−X2∝ba∇dbl2)2=L2E∝ba∇dblX−E(X)∝ba∇dbl2
+2.
+Lemma S4. LetX∼µandY∼ν, then
+E∝ba∇dblY−E(Y)∝ba∇dbl2
+2≤E∝ba∇dblX−E(X)∝ba∇dbl2
+2+W2
+2(µ,ν)+2W2(µ,ν)/radicalBig
+E∝ba∇dblX−E(X)∝ba∇dbl2
+2.
+Proof.By deﬁnition of Wasserstein metric, we can assume that XandYsatisfy∝ba∇dblX−Y∝ba∇dblL2= (E∝ba∇dblX−
+Y∝ba∇dbl2
+2)1/2=W2(µ,ν). Without loss of generality, we also assume that EX, the mean of measure µ, is 0.
+Then
+[E∝ba∇dblY−E(Y)∝ba∇dbl2
+2−E∝ba∇dblX∝ba∇dbl2
+2]−W2
+2(µ,ν)
+=EYTY−(EY)T(EY)−EXTX−EXTX−EYTY+2EXTY
+=2EXTY−2EXTX−(EY)T(EY)≤2EXT(Y−X)≤2E∝ba∇dblX∝ba∇dbl2∝ba∇dblY−X∝ba∇dbl2
+≤2/radicalBig
+E∝ba∇dblX∝ba∇dbl2
+2E∝ba∇dblY−X∝ba∇dbl2
+2= 2W2(µ,ν)/radicalBig
+E∝ba∇dblX∝ba∇dbl2
+2.
+Lemma S5. LetX∼µandY∼ν, then
+E∝ba∇dblY∝ba∇dbl2≤E∝ba∇dblX∝ba∇dbl2+W2
+2(µ,ν)+2W2(µ,ν)/radicalbig
+E∝ba∇dblX∝ba∇dbl2,
+whereW2(·,·)denotes the second order Wasserstein distance.
+34
+Proof.By deﬁnition of Wasserstein metric, W.O.L.G, we can assume t hatXandYsatisfyE∝ba∇dblX−Y∝ba∇dbl2=
+W2
+2(µ,ν). Then
+[E∝ba∇dblY∝ba∇dbl2−E∝ba∇dblX∝ba∇dbl2]−W2
+2(µ,ν)
+=EYTY−EXTX−EXTX−EYTY+2EXTY
+=2EXTY−2EXTX= 2EXT(Y−X)≤2E∝ba∇dblX∝ba∇dbl∝ba∇dblY−X∝ba∇dbl
+≤2/radicalbig
+E∝ba∇dblX∝ba∇dbl2E∝ba∇dblY−X∝ba∇dbl2= 2W2(µ,ν)/radicalbig
+E∝ba∇dblX∝ba∇dbl2.
+Lemma S6 is a generalization of Theorem 4 of Dalalyan and Kara gulyan (2019), as well as a general-
+ization of Lemma S2 of Song et al. (2020).
+Lemma S6. Letxkandxk+1be two random vectors in Rpsatisfying
+xk+1=xk−ǫΣ[∇f(xk)+ζk]+√
+2ǫek+1,
+whereek+1∼N(0,Σ), andζkdenotes the random error of the gradient estimate which can d epend on
+xk. Letπkbe the distribution of xk, and let π∗∝exp{−f}be the target distribution. Suppose that ζk
+satisﬁes
+∝ba∇dblE(ζk|xk)∝ba∇dbl2≤η2p, E[∝ba∇dblζk−E(ζk|xk)∝ba∇dbl2]≤σ2
+1p+σ2
+2∝ba∇dblxk∝ba∇dbl2, (S8)
+for some constants ηandσ, andζk’s are independent of ek+1’s. If the function fiss-strongly convex
+andS-gradient-Lipschitz, λmin(Σ) =λl,λmax(Σ) =λu, and the learning rate ǫ≤2/(sλl+Sλu), then
+W2
+2(πk+1,π∗)≤/bracketleftBig
+(1−λlsǫ+√
+2σ2λuǫ)W2(πk,π∗)+1.65S(λ3
+uǫ3p)1/2+ǫηλu√p/bracketrightBig2
++ǫ2σ2
+1λ2
+up+2ǫ2σ2
+2λ2
+upV.(S9)
+whereV=/integraltext
+∝ba∇dblx∝ba∇dbl2π∗(x)dx.
+Proof.First of all, the updating iteration can be rewritten as:
+˜xk+1= ˜xk−ǫ[∇˜f(˜xk)+˜ζk]+√
+2ǫ˜ek+1,
+where˜f(x) =f(Σ1/2x), ˜xk= Σ−1/2xk,˜ζk= Σ1/2ζkand ˜ek+1∼N(0,I).
+Let ˜π∗denote the distribution ˜ π∗∝exp{−˜f}. It is easy to see that the distribution ˜ π∗issλl-strongly
+log-concave and Sλu-gradient-Lipschitz. In addition, ˜ζksatisﬁes
+∝ba∇dblE(˜ζk|˜xk)∝ba∇dbl2=∝ba∇dblΣ1/2E(ζk|xk)∝ba∇dbl2≤λuη2p
+E[∝ba∇dbl˜ζk−E(˜ζk|˜xk)∝ba∇dbl2] =E[∝ba∇dblΣ1/2ζk−E(Σ1/2ζk|xk)∝ba∇dbl2]≤λuσ2
+1p+λuσ2
+2∝ba∇dblΣ1/2˜xk∝ba∇dbl2,(S10)
+LetLtbe the stochastic process deﬁned by dLt=−(Σ1/2∇f(Σ1/2Lt))dt+√
+2dWtwith initialization
+L0∼˜π∗(henceLt∼˜π∗). Deﬁne ∆ 2=Lǫ−˜xt+1and ∆ 1=L0−˜xt. Then, by the same arguments used
+35
+in the proof of Proposition 2 in Dalalyan and Karagulyan (201 9). we have
+∝ba∇dblΣ1/2∆2∝ba∇dbl2
+L2
+≤{∝ba∇dblΣ1/2∆1−ǫΣ1/2U∝ba∇dblL2+∝ba∇dblΣ1/2W∝ba∇dblL2+ǫ∝ba∇dblΣ1/2E(˜ζk|˜xk)∝ba∇dblL2}2+ǫ2∝ba∇dblΣ1/2(˜ζk−E(˜ζk|˜xk))∝ba∇dbl2
+L2,(S11)
+whereW=/integraltextǫ
+0(∇˜f(Lt)−∇˜f(L0))dtandU=∇˜f(˜xk+∆1)−∇˜f(˜xk).
+By Lemma 4 of Dalalyan and Karagulyan (2019), ∝ba∇dblW∝ba∇dblL2≤0.5/radicalbig
+ǫ4S3λ3up+ (2/3)/radicalbig
+2ǫ3pSλu≤
+1.65Sλu(ǫ3p)1/2. By similar argument of Lemma 2 of Dalalyan and Karagulyan (2 019), we can show
+that∝ba∇dblΣ1/2∆1−ǫΣ1/2U∝ba∇dbl2≤ρ∝ba∇dblΣ1/2∆1∝ba∇dbl2, whereρ= max(1 −sλlǫ,Sλuǫ−1) = 1−sλlǫ. Combining with
+(S10) and (S11), we have that
+∝ba∇dblΣ1/2∆2∝ba∇dbl2
+L2≤ {ρ∝ba∇dblΣ1/2∆1∝ba∇dblL2+1.65S(λ3
+uǫ3p)1/2+ǫλuη√p}2+ǫ2λ2
+uσ2
+1p+ǫ2λ2
+uσ2
+2E∝ba∇dblxk∝ba∇dbl2,
+which further implies
+W2
+2(πk+1,π∗)≤ {(1−sλlǫ)W2
+2(πk+1,π∗)+1.65S(λ3
+uǫ3p)1/2+ǫλuη√p}2+ǫ2λ2
+uσ2
+1p+ǫ2λ2
+uσ2
+2E∝ba∇dblxk∝ba∇dbl2.
+By Lemma S5 ,E∝ba∇dblxk∝ba∇dbl2≤(W2(πk,π∗)+√
+V)2, we can derive that
+W2
+2(πk+1,π∗)≤/bracketleftBig
+(1−sλlǫ)W2(πk,π∗)+1.65S(λ3
+uǫ3p)1/2+ǫηλu√p/bracketrightBig2
++ǫ2σ2
+1λ2
+up+ǫ2σ2
+2λ2
+u(W2(πk,π∗)+√
+V)2
+≤/bracketleftBig
+(1−sλlǫ)W2(πk,π∗)+1.65S(λ3
+uǫ3p)1/2+ǫηλu√p/bracketrightBig2
++ǫ2σ2
+1λ2
+up+2ǫ2σ2
+2λ2
+upV+2ǫ2σ2
+2λ2
+uW2
+2(πk,π∗)
+≤/bracketleftBig
+(1−sλlǫ+√
+2σ2ǫλu)W2(πk,π∗)+1.65S(λ3
+uǫ3p)1/2+ǫηλu√p/bracketrightBig2
++ǫ2σ2
+1λ2
+up+2ǫ2σ2
+2λ2
+upV,
+which concludes the proof.
+Remark S3. Condition (S8) in Lemma S6 can be further relaxed. For example if we assume bias of
+gradient estimation is not uniformly bound, increasing wit h∝ba∇dblxk∝ba∇dblin the form ∝ba∇dblE(ζk|xk)∝ba∇dbl2≤η2(√p+
+∝ba∇dblxk∝ba∇dbl)2, then by the same technique we can prove that
+W2
+2(πk+1,π∗)≤/bracketleftBig
+(1−sλlǫ+ηλuǫ+√
+2σ2ǫλu)W2(πk,π∗)+1.65S(λ3
+uǫ3p)1/2+ǫηλu(√p+√
+V)/bracketrightBig2
++ǫ2σ2
+1λ2
+up+2ǫ2σ2
+2λ2
+upV.
+In the proof of Lemma S6, pis treated as a constant, so it is trivial to extend the proof t o the case
+that∝ba∇dblE(ζk|xk)∝ba∇dbl2andE[∝ba∇dblζk−E(ζk|xk)∝ba∇dbl2]increase in a polynomial of p. In that case, the statements in
+Remark 7, Corollary S1, and Theorem S2 can be updated according ly.
+36
+Remark S4. Consider a Langevin Monte Carlo algorithm with inaccurate gra dients, varying conditioning
+matrices and a constant learning rate ǫ, i.e.,
+xk+1=xk−ǫΣk[∇f(xk)+ζk]+√
+2ǫξk+1;ξk+1∼N(0,Σk).
+IfΣkis positive deﬁnite, λl≤infkλmin(Σk)≤supkλmax(Σk)≤λuandǫ≤2/(sλl+Sλu), then (S9)
+holds for all iterations. Combining it with Lemma 1 of Dalalya n and Karagulyan (2019), it is easy to
+obtain that
+W2(πk,π∗)≤(1−sλlǫ+√
+2σ2ǫλu)kW2(π0,π∗)
++ηλu√p
+sλl−√
+2σ2λu+1.65S(λ3
+uǫp)1/2
+sλl−√
+2σ2λu+√ǫλu(σ2
+1p+2σ2
+2V)
+1.65S(λup)1/2,(S12)
+where the ﬁrst term in the RHS of (S12) converges to 0 if sλl>√
+2σ2λu.
+The next corollary provides a decaying-learning-rate vers ion of the convergence result (S12).
+Corollary S1. Consider a Langevin Monte Carlo algorithm
+xk+1=xk−ǫk+1Σk[∇f(xk)+ζk]+/radicalbig
+2ǫk+1ξk;ξk∼N(0,Σk),
+whereζksatisﬁes (S8), Σkis positive deﬁnite, λl≤infkλmin(Σk)≤supkλmax(Σk)≤λuand the learning
+rateǫk= 2/[(sλl+Sλu)k̟]for some ̟∈(0,1). Ifsλl>√
+2σ2λu, then we have
+limsup
+k→∞W2(πk,π∗)≤ϕ
+1−ϕηλu√p
+sλl−√
+2σ2λu,for some constant ϕ∈(0,1). (S13)
+Proof.The proof of this corollary closely follows the proof of Theo rem 2(i) in Song et al. (2020). Let
+K0= 0, and Ki(i >0) be the smallest integer such that K−̟
+i≤(1+i)−χ, whereχ=̟/(1−̟). Thus,
+asymptotically, we have Ki+1−Ki≈(χ/̟)K̟
+i+1.
+In the spirit of (S12), we have
+W2(πKi+1,π∗)≤(1−(sλl−√
+2σ2λu)ǫKi+1)Ki+1−KiW2(πKi,π∗)
++ηλu√p
+sλl−√
+2σ2λu+/bracketleftBigg
+1.65S(λ3
+up)1/2
+sλl−√
+2σ2λu+λu(σ2
+1p+2σ2
+2V)
+1.65S(λup)1/2/bracketrightBigg
+√ǫKi.
+Note that due to the fact that Ki+1−Ki≈(χ/̟)ǫ−1
+Ki+1, we have
+lim
+i→∞[1−(sλl−√
+2σ2λu)ǫKi+1]Ki+1−Ki= exp/braceleftBigg
+−2(sλl−√
+2σ2λu)χ
+(sλl+Sλu)̟/bracerightBigg
+<1.
+Therefore, there exists some positive constant ϕ∈(exp(−2(sλl−√
+2σ2λu)χ
+(sλl+Sλu)̟),1), such that for all i≥1,
+(1−(sλl−√
+2σ2λu)ǫKi+1)Ki+1−Ki≤ϕ, i.e.,
+W2(πKi+1,π∗)≤ϕW2(πKi,π∗)+ηλu√p
+sλl−√
+2σ2λu+/bracketleftBigg
+1.65S(λ3
+up)1/2
+sλl−√
+2σ2λu+λu(σ2
+1p+2σ2
+2V)
+1.65S(λup)1/2/bracketrightBigg
+√ǫKi.
+37
+The above recursive inequality implies that
+W2(πKT,π∗)≤ϕTW2(πK0=π0,π∗)+(T/summationdisplay
+t=1ϕt−1)ηλu√p
+sλl−√
+2σ2λu
++(T/summationdisplay
+t=1ϕt−1K−̟/2
+T−t)/radicalbigg
+2
+sλl+Sλu/bracketleftBigg
+1.65S(λ3
+up)1/2
+sλl−√
+2σ2λu+λu(σ2
+1p+2σ2
+2V)
+1.65S(λup)1/2/bracketrightBigg
+.(S14)
+AsT→ ∞,/summationtextT
+t=1ϕt−1K−̟/2
+T−t→0, hence we have that W2(πKT+1,π∗)→ϕ
+1−ϕηλu√p
+sλl−√
+2σ2λu.
+Remark S5. For technical simplicity, we require ̟ <1for the decay of the learning rate ( ǫt∝t−̟) in
+the above corollary. We conjecture that the corollary still holds under the choice ǫt∝t−1, i.e.,̟= 1.
+However, more subtle technical tools are necessary to rigor ously characterize the convergence rate under
+ǫt∝t−1, see Teh et al. (2016).
+Theorem S2. Assume that the conditions (A.1)-(A.6) hold, the ensemble s ize is suﬃciently large, c1Nt≤
+st≤St≤c2Nt,c3(nt/Nt)≤λt,l≤λt,u≤c4(nt/Nt), andσ2
+t,s≤c5(Nt/nt). Letsupt1/(Ntnt)≤c6for
+some suﬃciently small constant c6such that
+ϕ0= 2c1c3−2√c5c6c4
+c1c3+c2c4∈(0,1).
+DenoteVt=/integraltext
+∝ba∇dblx∝ba∇dbl2dπtand it is assumed to satisfy the constraint Vt≤c7pfor some constant c7>0. We
+choose the learning rate ǫt,k= 2/[(stλt,l+Stλt,u)k̟](k= 1,...,K,t= 1,...,∞) for some ̟∈(0,1).
+If allNt’s are bounded away from 0, then limsupt→∞W2(˜πt+1,πt+1) =O(1/liminf tNt), as long as Kis
+suﬃciently large (refer to (S22) for formal conditions).
+Proof.DeﬁneKias in the proof of Corollary S1, and we let K=Kκ(≍κχ/̟) for some κto be speciﬁed
+later, where χ=̟/(1−̟).
+At stage t= 1, Algorithm 4 performs exactly as Algorithm 2; that is, it i s a Langevin Monte Carlo
+algorithm with a varying conditioning matrix as discussed i n Section 3. By Corollary S1 with no bias
+η= 0, we obtain that there exists some ϕ∈(exp{−ϕ0χ/̟},1), such that
+W2(˜π1,π1)≤ϕκW2(ν1,π1)+(κ/summationdisplay
+j=1ϕj−1K−̟
+2
+κ−j)/radicalBigg
+2
+s1λ1,l+S1λ1,u
+×/bracketleftBigg
+1.65S1λ1,u/radicalbig
+pλ1,u
+s1λ1,l−√
+2σ1,sλ1,u+σ2
+1,sλ1,u(p+2V1)
+1.65S1/radicalbig
+λ1,up/bracketrightBigg
+≤ϕκM+C0(κ/summationdisplay
+j=1ϕj−1K−̟
+2
+κ−j)/radicalbiggp
+N1,(S15)
+for some constant C0(which only depends on the ci’s values in the statement of this theorem), where ν1
+denotes the prior distribution of x1.
+38
+Now, we study the relationship between W2(˜πt+1,πt+1) andW2(˜πt,πt) fort≥2. As discussed in
+Section 3.1, at stage t+1, the algorithm can be rewritten as
+xa,i
+t+1,k+1=xa,i
+t+1,k+ǫt+1,k+1Σt+1,k+1/bracketleftbiggN
+nHT
+t+1,kV−1
+t+1(yt+1,k−Ht+1,kxa,i
+t+1,k)+∇logπ(xa,i
+t+1,k|˜xi
+t,k)/bracketrightbigg
++et+1
+∆=xa,i
+t+1,k+ǫt+1,k+1Σt+1,k+1[(I)+(II)]+et+1,
+(S16)
+whereet+1∼N(0,2ǫt+1,k+1Σt+1,k+1), and ˜xi
+t,kdenotes a sample drawn from the set Xtaccording to an
+importance weight proportional to π(xa,i
+t+1,k|˜xi
+t,k).
+To apply (S14), it is necessary to study the bias and variance of the gradient estimate used in (S16).
+Note that the term (I) is unbiased due to the property of simpl e random sampling. To study the bias
+of term (II), we deﬁne π(z|xa,i
+t+1,k,y1:t)∝π(xa,i
+t+1,k|z)πt(z|y1:t); that is, π(z|xa,i
+t+1,y1:t) can be viewed as a
+posterior density obtained with the prior density πt(z|y1:t) and the likelihood π(xa,i
+t+1|z). Similarly, we
+deﬁne ˜π(z|xa,i
+t+1,k,y1:t)∝π(xa,i
+t+1,k|z)˜πt(z|y1:t). Then, by equation (18) of the main text, the bias of term
+(II) can be bounded by
+/vextenddouble/vextenddouble/vextenddouble/vextenddouble/integraldisplay
+∇logπ(xa,i
+t+1,k|z)[d˜π(z|xa,i
+t+1,k,y1:t)−dπ(z|xa,i
+t+1,k,y1:t)]/vextenddouble/vextenddouble/vextenddouble/vextenddouble
+=/vextenddouble/vextenddouble/vextenddouble/vextenddouble/integraldisplay
+U−1
+t[xa,i
+t+1,k−g(z)][d˜π(z|xa,i
+t+1,k,y1:t)−dπ(z|xa,i
+t+1,k,y1:t)]/vextenddouble/vextenddouble/vextenddouble/vextenddouble
+=/vextenddouble/vextenddouble/vextenddouble/vextenddouble−/integraldisplay
+U−1
+tg(z)[d˜π(z|xa,i
+t+1,k,y1:t)−dπ(z|xa,i
+t+1,k,y1:t)]/vextenddouble/vextenddouble/vextenddouble/vextenddouble≤2Mg/λt,s,(S17)
+which holds for any ˜ π(·|·).
+By Condition (A.4), the variance of term (I) is bounded by σ2
+t+1,s(p+∝ba∇dblx∝ba∇dbl2). The variance of term
+(II) is upper bounded by
+E/vextenddouble/vextenddouble/vextenddouble/vextenddouble∇logπ(xa,i
+t+1,k|˜xi
+t,k)−E/parenleftBig
+∇logπ(xa,i
+t+1,k|˜xi
+t,k)/parenrightBig/vextenddouble/vextenddouble/vextenddouble/vextenddouble2
+≤(l/λt,s)2E∝ba∇dbl˜xi
+t,k−E(˜xi
+t,k)∝ba∇dbl2(by Lemma S3)
+≤(l/λt,s)2/bracketleftBig
+W2(πt,˜πt)2+pσ2
+t,v+2W2(πt,˜πt)/radicalBig
+pσ2
+t,v/bracketrightBig
+by Lemma S4 and (S7) .
+(S18)
+Combining the above results together, the variance of the es timated gradient is upper bounded by
+2σ2
+t+1,sp+2(l/λt,s)2(W2(πt,˜πt)+/radicalBig
+pσ2
+t,v)2+2σ2
+t+1,s∝ba∇dblxa,i
+t+1,k∝ba∇dbl2:=σ2
+p+2σ2
+t+1,s∝ba∇dblxa,i
+t+1,k∝ba∇dbl2,(S19)
+which implies that a smaller value of W2(πt,˜πt) will help to reduce the variance of the stochastic gradient
+at iteration t+1 as well as W2(˜πt+1,πt+1) as implied by (S20).
+Recall that ˜ νt+1denotes thepractical state initial distributionof xa,i
+t+1,0. Applyingequation (S14) with
+σ2
+1=σ2
+p/p,σ2
+2= 2σ2
+t+1,sandη= 2Mg/(√pλt,s), we obtain that there exists some ϕ∈(exp{−ϕ0χ/̟},1)
+39
+such that
+W2(˜πt+1,πt+1)≤ϕκW2(˜νt+1,πt+1)+ϕ
+1−ϕ2Mgλt+1,u
+λt,s(st+1λt+1,l−2σt+1,sλt+1,u)
++(κ/summationdisplay
+j=1ϕj−1K−̟
+2
+κ−j)/radicalBigg
+2
+st+1λt+1,l+St+1λt+1,u
+×
+1.65St+1/radicalBig
+pλ3
+t+1,u
+st+1λt+1,l−2σt+1,sλt+1,u+/radicalbig
+λt+1,u(σ2
+p+4σ2
+t+1,sVt)
+1.65St+1√p
+.(S20)
+Notethat ϕexistsbecause ϕ0≤mint2st+1λt+1,l−2σt+1,sλt+1,u
+st+1λt+1,l+St+1λt+1,u, andw.o.l.g., welet the ϕ’sin(S20) and(S15)
+match. By Assumption (A.6) and Lemma S2, W2(˜νt+1,πt+1)≤M+lW2(˜πt,πt). Further, combining
+with other conditions stated in the theorem, we have
+W2(˜πt+1,πt+1)≤ϕκ(M+lW2(˜πt,πt))+C1ϕ
+1−ϕ2Mg
+Nt+1
++C2(κ/summationdisplay
+j=1ϕj−1K−̟
+2
+κ−j)/radicalbiggp
+Nt+1+C3(κ/summationdisplay
+j=1ϕj−1K−̟
+2
+κ−j)/radicalBigg
+1
+N3
+t+1pW2
+2(πt,˜πt),(S21)
+for some positive constants C1,C2andC3(which only depend on the ci’s values in the statement of this
+theorem), where the last term follows from the deﬁnition of σ2
+pgiven in (S19).
+Basedontherecursiveinequalities (S15)and(S21), onecan concludethat W2(˜πt+1,πt+1)canconverge
+to any arbitrarily small quantity, as long as that κandNtare suﬃciently large. Let ˜ εbe some small
+positive quantity ˜ ε∈(0,1), and we assume that sample size Ntis non-decreasing with respect to t,Nt
+and the iteration number K=Kκ(≍κχ/̟) satisfy
+limNt=N∞;
+ϕκ<min{˜ε/(3M),1/(3l)}andκ/summationdisplay
+j=1ϕj−1K−̟
+2
+κ−j≤min/braceleftBigg/radicalbig
+N3
+1p
+3C3W,1,˜ε
+C2/radicalbig
+p/N1/bracerightBigg
+,(S22)
+Let’s deﬁne W= max{1+2C1ϕ
+1−ϕ2Mg
+N1+2C2/radicalBig
+p
+N1,1+C0√p}, then it is not diﬃcult to verify that
+(i)W2(˜πt,πt)≤Wfor allt≥1 and (ii) W2(˜πt+1,πt+1)≤˜ε/3 +W2(˜πt,πt)/3 +W2
+2(˜πt,πt)/(3W) +
+C1ϕ
+1−ϕ2Mg
+Nt+1+ ˜ε. Combine them with the fact that lim T/summationtextT
+t=1(2/3)T−tN−1
+t= 2lim t(1/Nt), this further
+implies
+limsup
+t→∞W2(˜πt+1,πt+1)≤4˜ε+2C1ϕ
+1−ϕMgN−1
+∞.
+Equivalently, we claim that given a suﬃciently large number of iterations in each stage, then
+limsup
+t→∞W2(˜πt+1,πt+1) =O/parenleftbigg1
+liminf tNt/parenrightbigg
+.
+40
+References
+Aanonsen, S., Naevdal, G., Oliver, D., Reynolds, A., and Val les, B. (2009), “The ensemble Kalman ﬁlter
+in reservoir engineering—a review,” SPE Journal , 14, 393–412.
+Ahn, S., Balan, A. K., and Welling, M. (2012), “Bayesian Post erior Sampling via Stochastic Gradient
+Fisher Scoring,” in ICML.
+Aicher, C., Putcha, S., Nemeth, C., Fearhead, P., and Fox, E. (2019), “Stochastic gradient MCMC for
+nonlinear state space models,” ArXiv:1901.10568v1 .
+Anderson, J. (2001), “An ensemble adjustment ﬁlter for data assimilation,” Monthly Weather Review ,
+129, 2884–2903.
+Baek, S.-J., Hunt, B., Kalney, E., Ott, E., and Szunyogh, I. ( 2006), “Local ensemble Kalman ﬁltering in
+the presence of model bias,” Tellus, 58A, 293–306.
+Bardenet, R., Doucet, A., and Holmes, C. (2014), “Towards sc aling up Markov chain Monte Carlo: an
+adaptive subsampling approach,” in International Conference on Machine Learning , pp. 405–413.
+Bardenet, R., Doucet, A., and Holmes, C. C. (2017), “On Marko v chain Monte Carlo methods for tall
+data,”Journal of Machine Learning Research , 18, 47:1–47:43.
+Bergou, E., Gratton, S., and Mandel, J. (2019), “On the conve rgence of a non-linear ensemble Kalman
+smoother,” Applied Numerical Mathematics , 137, 151–168.
+Betancourt, M. (2015), “The Fundamental Incompatibility o f Scalable Hamiltonian Monte Carlo and
+Naive Data Subsampling,” in ICML.
+Bierkens, J., Fearnhead, P., and Roberts, G. (2019), “The zi g-zag process and super-eﬃcient Monte Carlo
+for Bayesian analysis of big data,” Annals of Statistics , 47, 1288–1320.
+Bouchard Cot´ e, A., Vollmer, S., and Doucet, A. (2018), “The Bouncy Particle Sampler: A Nonreversible
+Rejection-Free Markov Chain Monte Carlo Method,” Journal of the American Statistical Association ,
+113, 855–867.
+Brascamp, H. J. and Lieb, E. H. (2002), “On extensions of the B runn-Minkowski and Pr´ ekopa-Leindler
+theorems, including inequalities for log concave function s, and with an application to the diﬀusion
+equation,” in Inequalities , Springer, pp. 441–464.
+Chen, C., Ding, N., and Carin, L. (2015), “On the convergence of stochastic gradient MCMC algorithms
+with high-order integrators,” in Advances in Neural Information Processing Systems , pp. 2278–2286.
+Chen, H., Seita, D., Pan, X., and Canny, J. (2016), “An Eﬃcien t Minibatch Acceptance Test for
+Metropolis-Hastings,” arXiv preprint arXiv:1610.06848 .
+41
+Chen, T., Fox, E. B., and Guestrin, C. (2014), “Stochastic Gr adient Hamiltonian Monte Carlo,” in ICML.
+Cheng, X. and Bartlett, P. L. (2018), “Convergence of Langev in MCMC in KL-divergence,” PMLR 83 ,
+186–211.
+Dalalyan, A. S. and Karagulyan, A. G. (2019), “User-friendl y guarantees for the Langevin Monte Carlo
+with inaccurate gradient,” Stochastic Processes and Their Applications , 129, 5278–5311.
+Dauphin, Y. N., Pascanu, R., Gulcehre, C., Cho, K., Ganguli, S., and Bengio, Y. (2014), “Identifying
+and attacking the saddle point problem in high-dimensional non-convex optimization,” in Advances in
+Neural Information Processing Systems 27 , eds. Ghahramani, Z., Welling, M., Cortes, C., Lawrence,
+N. D., and Weinberger, K. Q., Curran Associates, Inc., pp. 29 33–2941.
+Dempster, A., Laird, N., and Rubin, D. (1977), “Maximum like lihood estimation from incomplete data
+via the EM algorithm (with discussion),” Journal of the Royal Statistical Society, Series B , 39, 1–38.
+Deng, W., Zhang, X., Liang, F., and Lin, G. (2019), “An Adapti ve Empirical Bayesian Method for Sparse
+Deep Learning,” in NeurIPS .
+Ding, N., Fang, Y., Babbush, R., Chen, C., Skeel, R. D., and Ne ven, H. (2014), “Bayesian Sampling
+Using Stochastic Gradient Thermostats,” in NIPS.
+Doucet, A., de Freitas, N., and Gordon, N. (2001), Sequential Monte Carlo Methods in Practice , New
+York: Springer.
+Durmus, A. and Moulines, E. (2017), “Nonasymptotic converg ence analysis for the unadjusted Langevin
+algorithm,” The Annals of Applied Probability , 27, 1551–1587.
+Ernst, O., Sprungk, B., and Starkloﬀ, H.-J. (2015), “Analysi s of the ensemble and polynomial chaos
+Kalman ﬁlters in Bayesian inverse problems,” SIAM/ASA J. Uncertainty Quantiﬁcation , 3, 823–851.
+Evensen, G. (1994), “Sequential data assimilation with a no nlinear quasi-geostrophic model using Monte
+Carlo methods to forecast error statistics,” Journal of Geophysical Research: Oceans , 99, 10143–10162.
+Evensen, G. and Van Leeuween, P. (1996), “Assimilation of ge osat altimeter data for the Agulhas current
+using the ensemble Kalman ﬁlter with a quasi-geostrophic mo del,”Monthly Weather Review , 124,
+85–96.
+Fong, E., Lyddon, S., and Holmes, C. (2019), “Scalable Nonpa rametric Sampling from Multimodal Pos-
+teriors with the Posterior Bootstrap,” in ICML.
+George, E. and McCullloch, R. (1993), “Variable Selection v ia Gibbs Sampling,” Journal of the American
+Statistical Association , 88, 881–889.
+42
+Gillijns, S. and De Moor, B. (2007), “Model error estimation in ensemble data assimilation,” Nonlinear
+Processes in Geophysics , 14, 59–71.
+Girolami, M. and Calderhead, B. (2011), “Riemann manifold L angevin and Hamiltonian Monte Carlo
+methods (with discussion),” Journal of the Royal Statistical Society, Series B , 73, 123–214.
+Graves, A., Liwicki, M., Fern´ andez, S., Bertolami, R., Bun ke, H., and Schmidhuber, J. (2009), “A Novel
+Connectionist System for Unconstrained Handwriting Recog nition,” IEEE Transactions on Pattern
+Analysis and Machine Intelligence , 31, 855–868.
+Graves, A., rahman Mohamed, A., and Hinton, G. E. (2013), “Sp eech recognition with deep recurrent
+neural networks,” 2013 IEEE International Conference on Acoustics, Speech and Si gnal Processing ,
+6645–6649.
+Hochreiter, S. and Schmidhuber, J. (1997), “Long Short-ter m Memory,” Neural computation , 9, 1735–80.
+Houtekamer, P. and Mitchell, H. (2011), “A sequential ensem ble Kalman ﬁlter for atmospheric data
+assimilation,” Monthly Weather Review , 129, 123–137.
+Iglesias, M., Law, K., and Stuart, A. (2013), “Ensemble Kalm an methods for inverse problems,” Inverse
+Problems , 29, 045001.
+Korattikara, A., Chen, Y., and Welling, M. (2014), “Austeri ty in MCMC land: Cutting the Metropolis-
+Hastings budget,” in International Conference on Machine Learning , pp. 181–189.
+Kwiatkowski, E. and Mandel, J. (2015), “Convergence of the s quare root ensemble Kalman ﬁlter in the
+large ensemble limit,” SIAM/ASA J. Uncertainty Quantiﬁcation , 3, 1–17.
+Law, K., Tembine, H., and Tempone, R. (2016), “Deterministi c Mean-Field Ensemble Kalman Filtering,”
+SIAM J. Sci. Comput. , 38, A1251–A1279.
+Le Gland, F., Monbet, V., and Tran, V.-D. (2009), “Large samp le asymptotics for the ensemble Kalman
+ﬁlter,”Research report RR-7014, INRIA .
+Li, C., Chen, C., Carlson, D., and Carin, L. (2016), “Precond itioned Stochastic Gradient Langevin
+Dynamics for Deep Neural Networks,” in Proceedings of the Thirtieth AAAI Conference on Artiﬁcial
+Intelligence , AAAI Press, AAAI’16, pp. 1788–1794.
+Li, C., Srivastava, S., and Dunson, D. (2017), “Simple, scal able and accurate posterior interval estima-
+tion,”Biometrika , 104, 665–680.
+Liang, F., Cheng, Y., Song, Q., Park, J., and Yang, P. (2013), “A Resampling-based Stochastic Ap-
+proximation Method for Analysis of Large Geostatistical Da ta,”Journal of the American Statistical
+Association , 108, 325–339.
+43
+Liang, F., Kim, J., and Song, Q. (2016), “A Bootstrap Metropo lis-Hastings Algorithm for Bayesian
+Analysis of Big Data,” Technometrics , 58, 304–318.
+Lorenz, E. (1996), “Predictability—a problem partly solve d,” inSeminar on Predictability , eds. Palmer,
+T. and Hagedorn, R., Cambridge University Press, chap. 3, pp . 40–58.
+Ma, Y.-A., Chen, T., and Fox, E. B. (2015), “A Complete Recipe for Stochastic Gradient MCMC,” in
+NIPS.
+Maclaurin, D. and Adams, R. P. (2014), “Fireﬂy Monte Carlo: E xact MCMC with Subsets of Data,” in
+IJCAI.
+Nemeth, C. and Fearnhead, P. (2021), “Stochastic Gradient M arkov Chain Monte Carlo,” Journal of the
+American Statistical Association , 116, 433–450.
+Patterson, S. and Teh, Y. W. (2013), “Stochastic Gradient Ri emannian Langevin Dynamics on the
+Probability Simplex,” in Advances in Neural Information Processing Systems 26 , eds. Burges, C. J. C.,
+Bottou, L., Welling, M., Ghahramani, Z., and Weinberger, K. Q., Curran Associates, Inc., pp. 3102–
+3110.
+Robbins, H. and Monro, S. (1951), “A Stochastic Approximati on Method,” Annals of Mathematical
+Statistics , 22, 400–407.
+Saetrom, J. and Omre, H. (2013), “Uncertainty Quantiﬁcatio n in the Ensemble Kalman Filter,” Scandi-
+navian Journal of Statistics , 40, 868–885.
+Saumard, A. and Wellner, J. (2014), “Log-concavity and stro ng log-concavity: a review,” Statistics
+Surveys, 8, 45.
+Scott, S. L., Blocker, A. W., Bonassi, F. V., Chipman, H. A., G eorge, E. I., and McCulloch, R. E. (2016),
+“Bayes and Big Data: The Consensus Monte Carlo Algorithm,” International Journal of Management
+Science and Engineering Management , 11, 78–88.
+Shumway, R. and Stoﬀer, D. (2006), Time Series Analysis and Its Applications with R Examples , New
+York: Springer.
+Song, Q., Sun, Y., Ye, M., and Liang, F. (2020), “Extended Sto chastic Gradient MCMC Algorithms for
+Large-Scale Bayesian Variable Selection,” Biometrika , 107, 997–1004.
+Srivastava, S., Li, C., and Dunson, D. B. (2018), “Scalable B ayes via Barycenter in Wasserstein Space,”
+Journal of Machine Learning Research , 19, 1–35.
+Sun, Y., Song, Q., and Liang, F. (2019), “Consistent Sparse D eep Learning: Theory and Computation,”
+Manuscript , submitted.
+44
+Teh, W., Thiery, A., and Vollmer, S. (2016), “Consistency an d ﬂuctuations for stochastic gradient
+Langevin dynamics,” Journal of Machine Learning Research , 17, 1–33.
+Welling, M. and Teh, Y. W. (2011), “Bayesian Learning via Sto chastic Gradient Langevin Dynamics,”
+inICML.
+Xue, J. and Liang, F. (2019), “Double-Parallel Monte Carlo f or Bayesian analysis of big data,” Statistics
+and Computing , 29, 23–32.
+45

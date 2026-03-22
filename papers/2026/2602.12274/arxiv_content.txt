@@ -1,0 +1,39 @@
+# arXiv Content
+# 自动从 arXiv HTML 页面提取
+
+## Abstract
+
+Accurate characterization of subsurface flow is critical for Carbon Capture and Storage (CCS) but remains challenged by the ill-posed nature of inverse problems with sparse observations.
+We present Function-spaceDecoupledDiffusion Posterior Sampling (Fun-DDPS), a generative framework that combines function-space diffusion models with differentiable neural operator surrogates for both forward and inverse modeling.
+Our approach learns a prior distribution over geological parameters (geomodel) using a single-channel diffusion model, then leverages a Local Neural Operator (LNO) surrogate to provide physics-consistent guidance for cross-field conditioning on the dynamics field.
+This decoupling allows the diffusion prior to robustly recover missing information in parameter space, while the surrogate provides efficient gradient-based guidance for data assimilation.
+We demonstrate Fun-DDPS on synthetic CCS modeling datasets, achieving two key results:
+(1) For forward modeling with only 25% observations, Fun-DDPS achieves 7.7% relative error compared to 86.9% for standard surrogates (an 11×\timesimprovement), proving its capability to handle extreme data sparsity where deterministic methods fail.
+(2) We provide the first rigorous validation of diffusion-based inverse solvers against asymptotically exact Rejection Sampling (RS) posteriors. Both Fun-DDPS and the joint-state baseline (Fun-DPS) achieve Jensen-Shannon divergence<0.06<0.06against the ground truth.
+Notably, Fun-DDPS produces physically consistent realizations free from the high-frequency artifacts observed in joint-state baselines, achieving this with 4×\timesimproved sample efficiency compared to rejection sampling.
+
+## Introduction
+
+Carbon capture and storage (CCS) is a critical technology for mitigating anthropogenic climate change(Pacala & Socolow,2004; Agency,2020).
+The safety and efficacy of gigaton-scale storage depend on two complementary computational tasks:forward modeling, to forecast CO2plume migration and pressure buildup, andinverse modeling, to characterize subsurface geological heterogeneity from sparse monitoring data.
+However, robust uncertainty quantification in this domain faces a fundamental bottleneck: subsurface parameters are high-dimensional and non-Gaussian, while the governing multiphase flow equations are computationally expensive to solve.
+
+Current data assimilation (DA) methods struggle to effectively tackle these challenges.
+Traditional ensemble-based methods, such as the Ensemble Kalman Filter (EnKF) and Ensemble Smoother (ES-MDA), remain the industry standard but rely on Gaussian assumptions that fail to capture complex geological features such as discrete facies or channelized reservoirsNejadi et al. (2012); Emerick & Reynolds (2013).
+Conversely, rigorous Bayesian sampling methods including Markov Chain Monte Carlo (MCMC)Evensen (2003;2004); Vrugt et al. (2013)avoid these assumptions but are prohibitively expensive, often requiring thousands of high-fidelity simulations that are infeasible for large-scale 3D models(Oliver et al.,1997).
+While deep learning surrogates, such as Fourier Neural Operators (FNO), have successfully accelerated forward simulations by orders of magnitude(Li et al.,2020; Wen et al.,2022), they are typically deterministic and do not inherently address the ill-posed inverse problem directly.
+
+To bridge this gap, generative diffusion models have emerged as powerful priors for scientific inverse problems(Song et al.,2020; Chung et al.,2022; Yang et al.,2023; Yao et al.,2025).
+However, applying them to CCS encounters a critical limitation in existingjoint-statearchitectures, which learn the joint distribution of geological parameters and dynamic statesp​(𝒎,𝒔)p(\bm{m},\bm{s})together.
+We observe that joint training often leads to physical inconsistency, as the model learns statistical correlations rather than explicit physical laws, especially when paired training data is limited(Lin et al.,2026).
+
+In this work, we proposeFun-DDPS(Function-spaceDecoupledDiffusion Posterior Sampling), a novel framework that decouples the learning of geological priors from the approximation of flow physics.
+Our approach learns a prior distribution over geological parametersp​(𝒎)p(\bm{m})using a single-channel function-space diffusion model, and independently trains a neural operator surrogateℒϕ\mathcal{L}_{\phi}to approximate the forward physics.
+During inference, we employ the differentiable neural surrogate to backpropagate gradients from sparse observations directly into the diffusion generation process.
+This decoupled architecture offers three key contributions:1.Robust Forward Modeling:By leveraging the generative prior to reconstruct missing data, Fun-DDPS achieves 7.7% relative error on forward tasks with 25% data coverage, compared to 86.9% error for standard surrogates.2.Physics-Consistent Inversion:We demonstrate that guiding the diffusion process via a physics-based surrogate eliminates the high-frequency artifacts common in joint-state models, producing geologically realistic posterior samples even with limited observations.3.Rigorous Validation:We provide the first rigorous benchmark of diffusion-based inversion against asymptotically exact Rejection Sampling (RS) posteriors, achieving high statistical accuracy (JS divergence<0.06<0.06) with a4×4\timesreduction in computational cost.
+
+Robust Forward Modeling:By leveraging the generative prior to reconstruct missing data, Fun-DDPS achieves 7.7% relative error on forward tasks with 25% data coverage, compared to 86.9% error for standard surrogates.
+
+Physics-Consistent Inversion:We demonstrate that guiding the diffusion process via a physics-based surrogate eliminates the high-frequency artifacts common in joint-state models, producing geologically realistic posterior samples even with limited observations.
+
+Rigorous Validation:We provide the first rigorous benchmark of diffusion-based inversion against asymptotically exact Rejection Sampling (RS) posteriors, achieving high statistical accuracy (JS divergence<0.06<0.06) with a4×4\timesreduction in computational cost.

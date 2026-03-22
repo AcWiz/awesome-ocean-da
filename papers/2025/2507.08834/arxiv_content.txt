@@ -1,0 +1,489 @@
+PHYSICS-INFORMED NEURAL NETWORKS FOR
+MODELING OCEAN POLLUTANT
+A P REPRINT
+Karishma Battina
+Indiana Wesleyan University
+Indianapolis, IN 46260
+karishma.battina@myemail.indwes.edu
+Prathamesh Dinesh Joshi
+Vizuara AI Labs
+Pune, India
+prathamesh@vizuara.comRaj Abhijit Dandekar
+Vizuara AI Labs
+Pune, India
+raj@vizuara.com
+Rajat Dandekar
+Vizuara AI Labs
+Pune, India
+rajatdandekar@vizuara.comSreedath Panat
+Vizuara AI Labs
+Pune, India
+sreedath@vizuara.com
+April 24, 2025
+ABSTRACT
+Traditional numerical methods often struggle with the complexity and scale of modeling pollutant
+transport across vast and dynamic oceanic domains. This paper introduces a Physics-Informed Neural
+Network (PINN) framework to simulate the dispersion of pollutants governed by the 2D advection-
+diffusion equation. The model achieves physically consistent predictions by embedding physical laws
+and fitting to noisy synthetic data, generated via a finite difference method (FDM), directly into the
+neural network training process. This approach addresses challenges such as non-linear dynamics and
+the enforcement of boundary and initial conditions. Synthetic data sets, augmented with varying noise
+levels, are used to capture real-world variability. The training incorporates a hybrid loss function
+including PDE residuals, boundary/initial condition conformity, and a weighted data fit term. The
+approach takes advantage of Julia’s scientific computing ecosystem for high-performance simulations,
+offering a scalable and flexible alternative to traditional solvers.
+1 Introduction
+The dispersion of pollutants in ocean currents, from plastic debris to oil spills, poses significant threats to marine
+ecosystems and coastal communities. Predicting pollutant transport requires solving the advection-diffusion equa-
+tion, a partial differential equation(PDE) that models the interplay of fluid-driven advection and turbulent diffusion
+[19]. However, traditional numerical methods, such as finite-volume or spectral approaches, face critical limitations:
+computational costs escalate exponentially with domain size, parameter uncertainties degrade accuracy, and resolving
+boundary effects near coastlines remains challenging [ 14,20,21]. These constraints hinder timely predictions for
+environmental mitigation efforts, particularly in dynamic, large-scale oceanic systems.
+Recent advances in scientific machine learning have introduced physics-informed neural networks (PINNs) as a
+paradigm for solving PDEs [ 12]. Unlike conventional solvers, PINNs embed physical laws directly into neural network
+training, enabling mesh-free simulations and seamless integration of sparse observational or synthetic data. While
+PINNs have shown promise in fluid dynamics, their application to ocean pollution remains underexplored, especially in
+addressing real-world complexities such as transient velocity fields, spatially varying diffusion, and irregular coastal
+geometries.
+In this work, we develop a PINN-based framework tailored for oceanic pollutant transport. Our key contributions are
+threefold:arXiv:2507.08834v1  [cs.LG]  7 Jul 2025
+arXiv Template A P REPRINT
+1.1 Review of Pollutant Transport Modeling
+The modeling of oceanic pollutant transport has traditionally been approached from two main perspectives. Eulerian
+models, such as the Finite Difference Method (FDM) or Finite Element Method (FEM), discretize the ocean into a fixed
+grid and solve the governing equations at each grid point [15]. These methods are robust but become computationally
+prohibitive for large-scale, long-term simulations. Alternatively, Lagrangian particle-tracking models simulate the
+trajectories of individual pollutant particles, which is effective for tracking sparse debris but can struggle to represent
+continuous concentration fields accurately [10].
+Recent years have seen the application of machine learning to augment or replace these methods. Machine learning
+techniques augment traditional models but face generalization challenges without physical consistency [ 12,23]. Some
+studies use data-driven neural networks to predict flow fields or correct biases in numerical models [ 13]. However, these
+purely data-driven approaches require vast amounts of training data and may not generalize well to scenarios outside
+their training distribution, as they lack inherent knowledge of the underlying physics [24].
+1.2 Physics-Informed Neural Networks (PINNs)
+To address these limitations, recent advances in scientific machine learning have introduced Physics-Informed Neural
+Networks (PINNs) as a paradigm for solving PDEs [ 1,8,9]. Unlike conventional solvers or purely data-driven models,
+PINNs embed the physical laws directly into the neural network’s loss function [ 22]. This enables mesh-free simulations
+and seamless integration of sparse observational or synthetic data [ 13,18]. While PINNs have shown promise in
+fluid dynamics [ 18], their application to ocean pollution remains underexplored, especially concerning the systematic
+analysis of how network design choices impact solution accuracy for complex, noisy systems [3, 5, 6].
+In this work, we develop a PINN-based framework tailored for oceanic pollutant transport. Our key contributions are:
+• The development of a robust, data-augmented PINN framework in Julia that accurately enforces sharp initial
+conditions through a hybrid, weighted loss function.
+•A systematic investigation into the role of neural network architecture (depth, width) and hyperparameters
+(learning rate, optimizers) on solution accuracy and computational cost.
+•A comprehensive performance benchmark that identifies an optimal configuration capable of achieving a
+relative L2error of approximately 8.25% against a high-resolution FDM.
+2 Methodology
+2.1 Mathematical Formulation of the Advection-Diffusion Equation
+The advection-diffusion equation governs the transport of pollutants in oceanic environments, a partial differential
+equation that captures the combined effects of advection (directional transport by currents) and diffusion (random
+spreading of particles) [11, 19]:
+∂u
+∂t+v· ∇u=D∇2u (1)
+Where:
+u(x, y, t )Represents the concentration of pollutants at spatial location (x, y)and time t.
+v= (vx, vy)is the velocity field representing ocean currents, with components vxandvy. In this study, we set:
+vx= 0.5, v y= 0.5.
+Dis the diffusion coefficient, quantifying the rate of pollutant dispersion [2, 16]. For this work, we use
+D= 0.01.
+The advection term
+v· ∇u (2)
+models the transport of pollutants by ocean currents, while the diffusion term
+D∇2u (3)
+2
+arXiv Template A P REPRINT
+accounts for the spread of pollutants due to random molecular motion and turbulent eddies. When expanded in two
+dimensions, this equation becomes the following:
+∂u
+∂t+vx∂u
+∂x+vy∂u
+∂y=D∂2u
+∂x2+∂2u
+∂y2
+(4)
+This formulation serves as the foundation for our PINN-based modeling approach, enabling the simulation of pollutant
+transport across oceanic domains with varying current patterns and diffusion characteristics.
+2.2 Physics-Informed Neural Network Framework
+Our approach leverages a PINN to approximate the solution u(t,x,y) of the advection-diffusion equation. The framework
+is designed to be expressive, physically consistent, and robust to noisy data through a hybrid training strategy.
+2.2.1 Boundary and Initial Conditions
+To ensure a well-posed problem, we define the spatio-temporal domain as
+t∈[0,0.25], x∈[0,1.0], y∈[0,1.0].
+The final time is set to
+Tfinal= 0.25
+to ensure the reference solution remains non-trivial within the domain.
+The initial condition represents a sharply localized pollutant release at the center of the domain. This Gaussian peak is
+a standard analytical choice for modeling an idealized, instantaneous point-source spill before significant dispersion
+occurs [7, 9].
+Dirichlet boundary conditions are imposed, enforcing approximately zero pollutant concentration at the domain edges.
+This setup represents a localized pollution event within a much larger body of water, where the concentration at the
+far-field boundaries is assumed to be negligible. The inclusion of stochastic noise in these conditions aims to simulate
+the minor fluctuations and measurement uncertainties present in real-world oceanic systems.
+The following boundary and initial conditions, incorporating stochastic noise to simulate realistic data, are imposed:
+Boundary Conditions (Dirichlet):
+u(t, x, 0)≈0.0 +ϵBC (5)
+u(t, x, 1)≈0.0 +ϵBC (6)
+u(t,0, y)≈0.0 +ϵBC (7)
+u(t,1, y)≈0.0 +ϵBC (8)
+These conditions enforce approximately zero pollutant concentration at the domain boundaries [10].
+ϵBCrepresents additive Gaussian noise with a standard deviation of σBC= 0.01.
+Initial condition (IC):
+u(0, x, y)≈exp 
+−100
+(x−0.5)2+ (y−0.5)2
+·(1 +ϵIC)
+This initial condition represents a sharply localized pollutant release at the center of the domain.
+ϵICis Gaussian noise with a standard deviation of 0.5% of the clean initial condition value.
+2.2.2 Neural Network Architecture
+The core of the Physics-Informed Neural Network (PINN) is a neural network that approximates the solution u(t, x, y )
+of the partial differential equation of advection-diffusion. The chosen architecture is a fully connected feedforward
+neural network, designed to be sufficiently expressive to capture the complex spatio-temporal dynamics of pollutant
+dispersion.
+The network architecture comprises:
+•Input Layer: Receives 3 input features: the temporal coordinate tand the spatial coordinates (x, y).
+3
+arXiv Template A P REPRINT
+•Hidden Layers: The number of layers and neurons were varied. The primary architectures tested were:
+–9 hidden layers with 64 neurons per layer
+–9 hidden layers with 128 neurons per layer
+–9 hidden layers with 256 neurons per layer
+•Activation Function: The hyperbolic tangent ( Tanh ) activation function is applied to the output of each
+neuron in all hidden layers. Tanh is chosen for its smoothness and non-zero second derivatives, which are
+beneficial for computing PDE residuals via automatic differentiation.
+•Output Layer: A single neuron with a linear activation function produces the scalar value ˆu(t, x, y ), repre-
+senting the predicted pollutant concentration.
+The parameters (weights and biases) of the neural network are initialized using default schemes in Lux.jl library and
+all network operations are performed using Float32 precision for computational efficiency [16, 25].
+2.2.3 Synthetic Data and Noise Augmentation
+Synthetic training data is generated by numerically solving the advection-diffusion equation using a Finite Difference
+Method (FDM). The FDM solver operates on a discrete grid with Nx= 51 points in the x-direction, Ny= 51 points
+in the y-direction, and Nt= 100 time steps, discretizing the domain up to Tfinal= 0.25yielding a total of 262,701
+data points.
+To enhance model robustness and mimic real-world measurement uncertainties, Gaussian noise is added to the clean
+FDM solution Uclean:
+Unoisy=Uclean+εdata
+where εdatais drawn from a normal distribution with a standard deviation of
+σdata= 0.005·std(Uclean)
+2.2.4 Training Procedure
+The PINN is trained by finding the optimal set of network parameters θthat minimize a composite loss function. This
+loss function ensures the network’s output ˆu(t, x, y ;θ)both fits the available data and adheres to the governing physical
+laws.
+Loss Function Formulation
+The total loss function Ltotal(θ)is a sum of three main components: a physics-based loss, a specific initial condition
+loss, and a data fidelity loss:
+Ltotal(θ) =Lphysics(θ) +wICLIC(θ) +wdataLdata(θ)
+Each component is defined as follows:
+Physics-Based Loss ( Lphysics )This term is automatically constructed by NeuralPDE.jl [17]. It includes the mean
+squared error (MSE) of the PDE residual, the symbolic boundary condition residuals, and the symbolic initial condition
+residual, all evaluated over a set of collocation points. For this study, 200 collocation points were sampled per batch
+using a Latin Hypercube algorithm.
+Initial Condition Loss ( Lic)To ensure the network precisely learns the initial state, an explicit, heavily-weighted
+data loss term is added for the initial condition. This term computes the MSE between the PINN’s predictions at t= 0
+and the clean initial condition data, weighted by
+wic= 500 .0.
+Data Fidelity Loss ( Ldata)This term encourages the network to fit the noisy FDM data over the entire spatio-temporal
+domain. It is defined as the MSE between the PINN’s predictions and the noisy FDM data, weighted by
+wdata= 10.0.
+Both LicandLdataare computed using mini-batches of size 1,024, randomly sampled at each training iteration.
+4
+arXiv Template A P REPRINT
+Optimization Strategy
+Our optimization strategy involved a two-stage approach to robustly minimize the total loss. The primary optimizers
+explored were ADAM [ 26] and its variant ADAMW [ 27], known for their effectiveness in training deep neural networks
+[29]. The performance of these optimizers was systematically investigated by varying key hyperparameters, including
+the learning rate and the total number of training iterations. Additionally, a quasi-Newton method (L-BFGS) [ 28]
+was evaluated as a second-stage refiner, initialized with the parameters obtained from the Adam-family optimizers, to
+fine-tune the solution. This two-step approach of using Adam followed by L-BFGS is a common strategy in PINN
+literature [ 30], with other hybrid methods that combine global search algorithms like CMA-ES with gradient descent
+also proving effective [ 4]. This multi-faceted approach allowed for a thorough exploration of the optimization landscape
+to identify the most effective configuration for this problem.
+3 Results
+This section presents a comprehensive evaluation of the Physics-Informed Neural Network (PINN) framework applied
+to the 2D advection-diffusion equation. The analysis emphasizes accuracy, computational efficiency, and sensitivity to
+various hyperparameters such as neural network architecture, optimizer choices, learning rates, and training duration.
+All experiments used a final simulation time of Tfinal= 0.25and a 51×51Finite Difference Method (FDM) grid to
+generate reference data.
+3.1 Hyperparameter Configuration
+The experimental design included fixed physical and numerical parameters while varying key neural network settings
+and optimization. Table 1 summarizes these configurations.
+Table 1: Summary of Fixed and Varied Hyperparameters
+Parameter Category Parameter(s) Value(s) / Setting(s)
+Physical ParametersFinal Time ( Tfinal) 0.25
+Domain Max ( xmax, ymax) 1.0, 1.0
+Diffusion Coefficient ( D) 0.01
+Advection Velocity ( vx, vy) 0.5, 0.5
+Numerical Parameters (FDM)Grid Size ( Nx, Ny) 51, 51
+Time Steps ( ∆t) 100
+Noise LevelsSymbolic BC Absolute Noise 0.01
+Symbolic IC Relative Noise 0.005
+FDM Data Relative Noise 0.005
+Loss Function SetupData Loss Weight ( Wdata) 10.0
+IC Loss Weight ( WIC) 500.0
+Data Batch Size 1024
+IC Batch Size 1024
+Activation Function (NN) Activation Function (used consistently) Tanh
+Varied Hyperparameters Neural Network Architecture 9L-64N, 9L-128N, 9L-256N
+Optimizers ADAM, ADAM+LBFGS, ADAMW
+Learning Rates (Adam/AdamW) 0.002, 0.005, 0.006, 0.007, 0.008, 0.01
+Iterations (Adam/AdamW) 1000, 2000, 3000, 6000, 10000
+LBFGS Iterations Typically 500 (used post-Adam)
+3.2 Experimental Scenarios and Performance
+Different scenarios were executed, exploring different combinations of network architectures, optimizers, learning
+rates, and iteration counts. The key performance metrics – final selected loss, relative L2 error at Tfinal=0.25, and
+PINN training execution time – are summarized in Table 2. The FDM solver consistently took approximately 0.25-
+0.28 seconds to generate the 51 ×51×101 reference dataset. PINN inference times for full-field predictions were also
+consistently fast, around 0.024-0.029 seconds.
+5
+arXiv Template A P REPRINT
+Table 2: Performance Summary of PINN Training Scenarios
+NN Arch. Optimizer Iterations LR Final Loss Rel.L2Error Train Time(s)
+9L, 64N ADAM+LBFGS 1,000 0.002 4.0803×1010.8278 84.45
+9L, 64N ADAM+LBFGS 3,000 0.002 1.0340×1010.41047 321.32
+9L, 64N ADAM 10,000 0.002 2.6683×1000.18720 597.99
+9L, 64N ADAMW 10,000 0.002 2.6683×1000.18720 601.42
+9L, 128N ADAMW 6,000 0.002 3.2537×1000.17700 933.14
+9L, 128N ADAM 6,000 0.005 2.5142×1000.13490 942.05
+9L, 128N ADAM 6,000 0.002 3.2537×1000.17702 1207.19
+9L, 128N ADAM 6,000 0.006 3.9296×1000.08245 1168.53
+9L, 128N ADAM 10,000 0.006 1.2614×1000.12940 1987.39
+9L, 256N ADAM 6,000 0.006 5.3366×1000.22307 3255.62
+3.3 Analysis of Results
+3.3.1 Initial Condition Learning
+Across all documented scenarios, the PINN demonstrated excellent capability in learning the initial condition when
+using the combined_additional_loss strategy with a strong ic_loss_weight of 500.0. As consistently shown in
+the top-right panel of the four-panel solution plots (e.g., “PINN IC ( t= 0, ICW:500.0)” in Scenario 1 (Figure 1)), the
+PINN’s reconstruction of the initial Gaussian peak at t= 0almost perfectly matched the “Clean IC ( t= 0)” (top-left
+panel). This indicates the effectiveness of the specific IC loss term in anchoring the solution at its starting state.
+3.3.2 Performance with “9 Layers, 64 Neurons” Architecture (Scenarios 1–8)
+ADAM+LBFGS (Scenarios 1, 2) These scenarios combined ADAM pre-training with a subsequent L-BFGS
+refinement. In Scenario 1 (1,000 ADAM iterations), the model exhibited a high final loss of 4.08×101and relative L2
+error of 0.8278. Increasing to 3,000 ADAM iterations in Scenario 2 reduced the loss to 1.03×101and the L2error
+to 0.41047. In both cases, L-BFGS did not substantially improve upon the ADAM-only results. The solution plots
+(e.g., Scenario 1, Figure 1; Scenario 2, Figure 1) demonstrate accurate initial-condition learning but reveal artifacts and
+deviations in the PINN prediction at Tfinalwhen compared with the FDM reference.
+(a) Solution plot
+ (b) Adam Loss
+ (c) LBFGS Loss
+Figure 1: Solution plots and Adam loss history for Scenario 1 (9L-64N network, 1000 iterations)
+6
+arXiv Template A P REPRINT
+(a) Solution plot
+ (b) Adam Loss
+ (c) LBFGS Loss
+Figure 2: Solution plots and Adam and LBFGS loss history for Scenario 2 (9L-64N network, 3000 iterations)
+ADAM Only: Performance improved with additional ADAM iterations. The increase in iterations to 2,000 achieved
+a final loss of 1.44×101and a relative L2error of 0.475. The increase in iterations to 6,000 further reduced the loss
+to4.08×100with an L2error of 0.2776. The best results for this architecture were obtained in Scenario 3 (10,000
+iterations), resulting in a loss of 2.67×100and an L2error of 0.1872.
+(a) Caption 1
+ (b) Caption 2
+Figure 3: Solution plots and Adam loss history for Scenario 3 (9L-64N network, 10,000 Adam iterations)
+ADAMW Only: The ADAMW optimizer produced results nearly identical to ADAM for equivalent iteration counts
+and learning rates. In Scenario 4 (10,000 iterations), ADAMW exactly matched the performance of Scenario 3 (final
+loss2.67×100,L2error 0.1872), and training times were comparable between the two optimizers.
+(a) Caption 1
+ (b) Caption 2
+Figure 4: Solution plots and AdamW loss history for Scenario 4 (9L-64N network, 10,000 Adam iterations)
+7
+arXiv Template A P REPRINT
+3.3.3 Performance with “9 Layers, 128 Neurons” Architecture
+This larger architecture demonstrated the potential for significantly improved accuracy.
+ADAMW (Scenario 5) With a learning rate of 0.002 and 6,000 iterations, ADAMW produced a relative L2error of
+0.1770 and a final loss of 3.2537×100, outperforming the smaller network under the same optimizer.
+(a) Solution plot
+ (b) ADAMW Loss
+Figure 5: Solution plots and AdamW loss history for Scenario 5 (9L-128N network, 6000 Adam iterations)
+ADAM with Varying Learning Rates:
+•LR = 0.005, 6,000 iterations (Scenario 6): Achieved an L2error of 0.1349 and the lowest final loss in this
+sweep, 2.5142×100.
+(a) Solution plot
+ (b) ADAM Loss
+Figure 6: Solution plots and Adam loss history for Scenario 6 (9L-128N network, 6000 Adam iterations, 0.005 LR)
+•LR = 0.006, 6,000 iterations (Scenario 8): Produced the best L2error overall, 0.08245, with a loss of
+3.9296×100. The “PINN ( t=Tfinal)” plot (Figure Z) shows a clean solution that closely matched the
+reference FDM.
+8
+arXiv Template A P REPRINT
+(a) Solution plot
+ (b) ADAM Loss
+Figure 7: Solution plots and Adam loss history for Scenario 8 (9L-128N network, 6000 Adam iterations, 0.006 LR)
+•LR = 0.006, 10,000 iterations (Scenario 9): Maintained an excellent L2error of 0.1294 and achieved the
+lowest overall final loss, 1.2614×100.
+(a) Solution plot
+ (b) ADAM Loss
+Figure 8: Solution plots and Adam loss history for Scenario 9 (9L-128N network, 10000 Adam iterations, 0.006 LR)
+•Other LRs:
+–LR = 0.002, LR = 0.007, LR = 0.008, and LR = 0.01 resulted in higher L2errors and/or losses.
+–In particular, LR = 0.01 performed poorly compared to the midrange values.
+The visual results for the best runs (Scenarios 6, 8, and 9; Figures a, b) show excellent initial condition learning and
+PINN solutions at Tfinalthat qualitatively match the FDM data, with fewer artifacts than those of the smaller network.
+3.3.4 Performance with “9 Layers, 256 Neurons” Architecture
+This even larger architecture was tested using the ADAM optimizer with a learning rate of 0.006.
+Scenario 10 (6,000 iterations) Achieved a relative L2error of 0.22307 and a final loss of 5.3366×100after 6,000
+ADAM iterations. However, the training time was substantially longer (approx. 3,255.62s).
+9
+arXiv Template A P REPRINT
+(a) Solution plot
+ (b) ADAMW Loss
+Figure 9: Solution plots and Adam loss history for Scenario 10 (9L-256N network, 6000 Adam iterations, 0.006 LR)
+Overall, the “9L, 256N” configuration did not outperform the “9L, 128N” architecture in error metrics, yet incurred
+much longer training times (e.g., ∼3,255s vs. ∼1,168s for Scenario 8). This suggests diminishing returns when scaling
+width without additional hyperparameter tuning or extended training.
+3.3.5 Loss Histories
+The loss history plots for the Adam and AdamW optimizers (e.g., Figure L1 for Scenario 5, Figure L2 for Scenario 8)
+typically exhibit a rapid decrease during the initial iterations, followed by a more gradual reduction or a noisy plateau.
+In several cases, the Adam/AdamW curves display large, sharp spikes where the loss temporarily increases significantly
+before recovering, reflecting the optimizer’s exploration of complex regions of the loss landscape.
+When L-BFGS is used as a refiner (e.g., Scenario 1, Figure LBFGS1), its loss history shows fewer iterations and often a
+smoother descent from the Adam endpoint. However, in these experiments, the L-BFGS refinement does not always
+yield a lower final loss compared to the best Adam/AdamW runs.
+3.3.6 Computational Efficiency
+The finite difference method (FDM) solver was consistently fast, requiring approximately 0.25–0.28 s to generate the
+51×51×101reference dataset.
+PINN training times varied significantly with optimizer choice, network architecture, and iteration count:
+•The fastest training runs (e.g., ADAMW with 1,000 iterations in Scenario 8) were completed on the order of
+50 s.
+•The longest training time was approximately 3,255 s for ADAM with 6,000 iterations using the 9L–256N
+network (Scenario 10).
+•The most accurate configurations, Scenario 8 (9L–128N, ADAM, 6,000 iterations) and Scenario 9 (9L–128N,
+ADAM, 10,000 iterations) required around 1,168 s and 1,987 s, respectively, illustrating a clear trade-off
+between accuracy and computational cost.
+Once trained, PINN inference remained highly efficient, taking only about 0.024 s for a full field prediction at Tfinal.
+3.3.7 Summary of Best Results
+The investigation reveals that Scenario 8 (9 Layers, 128 Neurons, ADAM optimizer, learning rate 0.006, 6 000 iterations)
+yielded the lowest relative L2error of approximately 8.25%. Close to this, Scenario 9 (9 Layers, 128 Neurons, ADAM
+optimizer, learning rate 0.006, 10 000 iterations) achieved a very good relative L2error of 12.94% and the lowest
+overall final loss of 1.2614×100. These results underscore the significant impact of both network architecture and
+learning rate tuning on achieving high accuracy. The larger “9L, 128N” network generally outperformed the “9L, 64N”
+configuration, while the “9L, 256N” network did not offer further accuracy improvements and incurred substantially
+higher computational cost.
+10
+arXiv Template A P REPRINT
+4 Benchmarking: PINN vs. Finite Difference Method (FDM)
+To evaluate the efficacy of the Physics-Informed Neural Network (PINN) as an alternative to traditional numerical
+solvers, we conducted a direct comparison against the Finite Difference Method (FDM) used to generate the reference
+data. The analysis focuses on two key aspects: solution accuracy and computational cost.
+4.1 Accuracy Comparison
+The primary metric for accuracy is the Relative L2Error , which quantifies the normalized difference between the
+PINN’s predicted solution upredand the clean FDM reference solution urefat the final time step Tfinal= 0.25. It is
+defined as:
+Relative L2Error =∥upred−uref∥2
+∥uref∥2. (9)
+Across the various experiments, the optimal PINN configuration yielded impressive accuracy. The best result was
+achieved in Scenario 8, which utilized a “9L, 128N” architecture with the ADAM optimizer and a learning rate of 0.006.
+This model achieved a Relative L2Error of approximately 0.0825 (8.25%).
+4.2 Computational Cost Comparison
+The computational cost was evaluated by timing three distinct phases of the workflow using Julia’s
+@BenchmarkTools.jl package: FDM data generation, PINN training, and PINN inference. Table 3 summarizes the
+timings for a representative high-performing scenario (Scenario 8).
+Table 3: Computational Cost Comparison: FDM vs. PINN (Scenario 8)
+Task Method Time (s) Notes
+Data Generation / Single Solution FDM ≈0.26 Time to compute the entire 51×51×101
+solution grid.
+Model Training PINN ≈1168.53 Time for 6 000 ADAM iterations on the “9L,
+128N” network (one-time, offline cost).
+Inference (Full Field Prediction) PINN 0.024–0.029 Time for the trained PINN to predict the
+solution over the full 51×51grid at one
+time step.
+5 Discussion and Conclusion
+The results from our experimental scenarios provide key insights into the effective application of Physics-Informed
+Neural Networks for modeling the advection-diffusion equation. The most striking finding is the critical role of network
+architecture and learning rate in achieving high accuracy. Our investigation revealed that a 9-layer, 128-neuron network
+significantly outperformed both a smaller (“9L, 64N”) and a wider (“9L, 256N”) architecture, suggesting a “sweet
+spot” for model capacity. The wider 256-neuron network, despite its higher capacity, yielded worse accuracy and
+was computationally far more expensive, indicating that simply increasing network size can be counterproductive
+without further hyperparameter tuning, potentially due to a more challenging, non-convex optimization landscape.
+Furthermore, we identified a narrow optimal range for the Adam learning rate around 0.005–0.006 for this best-
+performing architecture, highlighting the sensitivity of PINN training to optimizer hyperparameters and underscoring
+the necessity of systematic tuning.
+The training dynamics also offered valuable insights. The loss history plots for the Adam and AdamW optimizers
+consistently exhibited a rapid initial decrease followed by noisy plateaus with large, periodic spikes. These spikes likely
+represent the optimizer exploring different regions of the complex loss surface to escape local minima, a characteristic
+of adaptive first-order methods [ 29]. While L-BFGS provided a smoother descent, which is typical for a quasi-Newton
+method approaching a minimum [ 28], it was ineffective as a standalone optimizer and did not consistently improve upon
+a well-converged Adam solution in these experiments, suggesting Adam’s exploratory nature was more beneficial for
+navigating the broader loss landscape of this specific problem, while L-BFGS struggled to find better minima without a
+good starting point, a known consideration for its use in PINNs [30].
+In summary, this paper successfully developed and benchmarked a PINN framework capable of solving the 2D
+advection-diffusion equation for modeling ocean pollution. We demonstrated that a hybrid loss function, which strongly
+11
+arXiv Template A P REPRINT
+enforces the initial condition with a heavily weighted data-driven term while also fitting to noisy reference data and
+respecting the underlying PDE, is critical for obtaining physically plausible and accurate solutions. Our systematic
+investigation culminated in identifying an optimal configuration—a 9-layer, 128-neuron network trained with the
+ADAM optimizer at a learning rate of 0.006—that achieved a relative L2error of approximately 8.25% against a
+high-resolution FDM solution. This highlights that PINN performance is highly sensitive to the interplay between
+network architecture and optimization hyperparameters.
+While computationally intensive to train, the resulting PINN serves as a highly efficient surrogate model, capable of
+near-instantaneous inference (approximately 0.024 s for a full-field prediction), which is a key advantage over traditional
+solvers that must recompute the entire solution for any change in parameters. A key limitation of this study is the use of
+a constant velocity field, as real-world ocean currents are spatially and temporally heterogeneous. However, the success
+of this framework with a constant field establishes a robust baseline for applying PINNs to environmental science and
+provides a clear methodology for hyperparameter exploration. Future work will focus on extending this framework to
+incorporate real-world, non-constant oceanographic data, moving closer to a practical tool for environmental monitoring
+and prediction.
+References
+[1]Maziar Raissi, Paris Perdikaris, and George Em Karniadakis. Physics-informed neural networks: A deep learning
+framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of
+Computational Physics , 378:686–707, 2019.
+[2]Lu Lu, Xuhui Meng, Zhiping Mao, and George Em Karniadakis. DeepXDE: A deep learning library for solving
+differential equations. SIAM Review , 63(1):208–228, 2021.
+[3]Shunjin Wang, Xuhui Yu, and Paris Perdikaris. When and why PINNs fail to train: A neural tangent kernel
+perspective. Journal of Computational Physics , 449:110768, 2022.
+[4]Yujie Yang, Paris Perdikaris, and Weinan E. Effective training of PINNs by combining CMA-ES with gradient
+descent. Computers & Mathematics with Applications , 127:27–41, 2024.
+[5]Mohammad Hossein Saadat and Mohammad Amin Ghatei. Neural tangent kernel analysis of PINN for advection-
+diffusion equation. arXiv preprint arXiv:2211.11716 , 2022.
+[6]Maciej Paszy ´nski, Bartosz Sawicki, Michał Krzemi ´nski, and Szymon Draga. Physics Informed Neural Networks
+with strong and weak residuals for advection-dominated diffusion problems. arXiv preprint arXiv:2307.07647 ,
+2023.
+[7]Zhuojia Fu, Yuxin Zhang, and Yifan Wang. Long-term simulation of physical and mechanical behaviors using
+curriculum-transfer-learning based physics-informed neural networks. arXiv preprint arXiv:2502.07325 , 2023.
+[8]Cuomo, S., Di Cola, V . S., Giampaolo, F., Rozza, G., Raissi, M., & Piccialli, F. (2022). Scientific machine learning
+through physics-informed neural networks: A review. Journal of Computing , 104(2), 447–466.
+[9]Karniadakis, G. E., Kevrekidis, I. G., Lu, L., Perdikaris, P., Wang, S., & Yang, L. (2021). Physics-informed machine
+learning. Nature Reviews Physics , 3, 422–440.
+[10] Zhang, Y ., & Baptista, A. M. (2008). An efficient and robust particle-tracking model for coastal and estuarine
+water systems. Environmental Modelling & Software , 23(1), 41–52.
+[11] Okubo, A. (1971). Oceanic diffusion diagrams. Deep Sea Research and Oceanographic Abstracts , 18(8), 789–802.
+[12] Reichstein, M., Camps-Valls, G., Stevens, B., Jung, M., Denzler, J., Carvalhais, N., & Prabhat. (2019). Deep
+learning and process understanding for data-driven Earth system science. Nature , 566(7743), 195–204.
+[13] Zhu, Y ., Zabaras, N., Koutsourelakis, P. S., & Perdikaris, P. (2019). Physics-constrained deep learning for high-
+dimensional surrogate modeling and uncertainty quantification without labeled data. Journal of Computational
+Physics , 394, 56–81.
+[14] LeVeque, R. J. (2002). Finite Volume Methods for Hyperbolic Problems . Cambridge University Press.
+[15] Smith, R. D., & O’Brien, J. J. (1983). Numerical simulation of pollutant dispersion in the ocean. Journal of
+Physical Oceanography , 13(5), 857–869.
+[16] Bezanson, J., Edelman, A., Karpinski, S., & Shah, V . B. (2017). Julia: A fresh approach to numerical computing.
+SIAM Review , 59(1), 65–98.
+[17] Rackauckas, C., Ma, Y ., Martensen, J., Warner, C., Gwozdz, K., & Innes, M. (2020). Universal differential
+equations for scientific machine learning. arXiv preprint , arXiv:2001.04385.
+12
+arXiv Template A P REPRINT
+[18] Sun, L., Gao, H., Pan, S., & Wang, J.-X. (2020). Surrogate modeling for fluid flows based on physics-constrained
+deep learning without simulation data. Computer Methods in Applied Mechanics and Engineering , 361, 112732.
+[19] Fischer, H. B., List, E. J., Koh, R. C. Y ., Imberger, J., & Brooks, N. H. (1979). Mixing in Inland and Coastal
+Waters. Academic Press.
+[20] Chassignet, E. P., & Verron, J. (Eds.). (2006). Ocean Weather Forecasting: An Integrated View of Oceanography.
+Springer.
+[21] Morton, K. W., & Mayers, D. F. (2005). Numerical Solution of Partial Differential Equations: An Introduction.
+Cambridge University Press.
+[22] Shankar, V ., & Wright, G. B. (2022). A survey of mesh-free and physics-informed neural network methods for
+PDEs. Journal of Computational Physics , 469, 111543.
+[23] Lguensat, R., Sun, M., Fablet, R., & Chen, G. (2022). Machine learning for oceanography: Challenges and
+opportunities. Journal of Marine Systems , 230, 103672.
+[24] Zhu, X., & Zabaras, N. (2018). Bayesian deep convolutional encoder–decoder networks for surrogate modeling
+and uncertainty quantification. Journal of Computational Physics , 366, 415–447.
+[25] Rackauckas, C., & Nie, Q. (2017). DifferentialEquations.jl – A performant and feature-rich ecosystem for solving
+differential equations in Julia. Journal of Open Research Software , 5(1), 15.
+[26] Kingma, D. P.; Ba, J. Adam: A Method for Stochastic Optimization. arXiv preprint arXiv:1412.6980, 2014.
+[27] Loshchilov, I.; Hutter, F. Decoupled Weight Decay Regularization. arXiv preprint arXiv:1711.05101, 2017.
+[28] Nocedal, J. Updating quasi-Newton matrices with a limited storage. Mathematics of Computation 1980 , 35(151),
+773–782.
+[29] Schmidt, M. A Review of First-Order and Quasi-Newton Methods for Deep Learning. Technical Report, University
+of British Columbia, 2020.
+[30] Jarlebring, E.; Tichý, P. On the Use of L-BFGS in the Training of Physics-Informed Neural Networks. arXiv
+preprint arXiv:2201.03921, 2022.
+13

@@ -1,0 +1,712 @@
+A Deep Learning Model for Forecasting Global
+Monthly Mean Sea Surface Temperature
+Anomalies
+John Taylor1;2;3;and Ming Feng4;5
+February 22, 2022
+1CSIRO Data61, Canberra, Australian Capital Territory, Australia
+2College of Engineering and Computer Science, The Australian National Univer-
+sity, Canberra, Australia
+3Defence Science and Technology Group, Department of Defence, Canberra Aus-
+tralia
+4Oceans and Atmosphere, CSIRO, Perth, WA, Australia
+5Centre for Southern Hemisphere Oceans Research, CSIRO, Hobart, TAS, Aus-
+tralia
+*Corresponding Author Address: John Ashley Taylor, CSIRO Data61, CSIRO
+Synergy Building, Clunies Ross Street, Black Mountain, Canberra ACT 2601.
+E-mail: John.Taylor@data61.csiro.au
+1arXiv:2202.09967v1  [physics.ao-ph]  21 Feb 2022
+Abstract
+Sea surface temperature (SST) variability plays a key role in the global weather and
+climate system, with phenomena such as El Ni~ no-Southern Oscillation regarded
+as a major source of interannual climate variability at the global scale. The abil-
+ity to be able to make long-range forecasts of sea surface temperature anomalies,
+especially those associated with extreme marine heatwave events, has potentially
+signicant economic and societal benets. We have developed a deep learning time
+series prediction model (Unet-LSTM) based on more than 70 years (1950-2021) of
+ECMWF ERA5 monthly mean sea surface temperature and 2-metre air tempera-
+ture data. The Unet-LSTM model is able to learn the underlying physics driving
+the temporal evolution of the 2-dimensional global sea surface temperatures. The
+model accurately predicts sea surface temperatures over a 24 month period with
+a root mean square error remaining below 0.75C for all predicted months. We
+have also investigated the ability of the model to predict sea surface temperature
+anomalies in the Ni~ no3.4 region, as well as a number of marine heatwave hot spots
+over the past decade. Model predictions of the Ni~ no3.4 index allow us to capture
+the strong 2010-11 La Ni~ na, 2009-10 El Nino and the 2015-16 extreme El Ni~ no up
+to 24 months in advance. It also shows long lead prediction skills for the north-
+east Pacic marine heatwave, the Blob. However, the prediction of the marine
+heatwaves in the southeast Indian Ocean, the Ningaloo Ni~ no, shows limited skill.
+These results indicate the signicant potential of data driven methods to yield
+long-range predictions of sea surface temperature anomalies.
+Keywords| sea surface temperatures, SST, Ni~ no3.4, deep learning, machine learn-
+ing, AI, Unet-LSTM, ERA5
+Introduction
+Modes of inter-annual climate variability, such as El Ni~ no-Southern Oscillation (ENSO)
+and Indian Ocean Dipole (IOD), are known to modulate the global sea surface tem-
+perature (SST) variability and the marine heatwave frequency, duration, and inten-
+sity (McPhaden, Zebiak, and Glantz 2006), (Saji and Yamagata 2003), (Holbrook, Scan-
+nell, Sen Gupta, Benthuysen, Feng, Oliver, Alexander, Burrows, Donat, Hobday, Moore,
+Perkins-Kirkpatrick, Smale, Straub, and Wernberg 2019). The climate modes inuence
+SST variability locally and remotely, mostly through atmospheric teleconnection. Ocean
+circulation and large-scale oceanic waves also transmit climate signals to remote regions.
+SST variability and marine heatwave characteristics are also inuenced by regional at-
+mospheric and oceanic dynamics and coupled processes. The Blob marine heatwaves in
+the northeast Pacic during 2013-2015 and in 2019 have been attributed to anomalous
+atmospheric pressure systems (Bond, Cronin, Freeland, and Mantua 2015) (Amaya,
+Miller, Xie, and Kosaka 2020). The teleconnection between the equatorial and north-
+2
+east Pacic may be one of the key drivers to sustain the Blob warming over a multi-year
+period (Di Lorenzo and Mantua 2016). Marine heatwaves o the west coast of Aus-
+tralia, the Ningaloo Ni~ no, are due to both oceanic and atmospheric teleconnection from
+the equatorial Pacic (Feng, McPhaden, Xie, and Hafner 2013) and the local air-sea
+coupling (Kataoka, Tozuka, Behera, and Yamagata 2014), (Tozuka, Feng, Han, Kido,
+and Zhang 2021).
+A timely forecast of global SST anomalies helps marine and terrestrial resource
+managers to mitigate potential risks from extreme climatic events. The prediction of
+ENSO and IOD events, indexed with equatorial SST anomalies in the equatorial regions,
+is important to forecasting rainfall, drought, and bushre variability around the globe.
+Coupled ocean-atmosphere models have been used to forecast global SST variability.
+Most of the skill assessment has been for the inter-annual climate modes, with 3-4 season
+forecasting skills for ENSO and 1-2 seasons for IOD (Stockdale, Anderson, Balmaseda,
+Doblas-Reyes, Ferranti, Mogensen, Palmer, Molteni, and Vitart 2011). Regional SST
+variability forecast has limited skills and is highly regionally dependent (e.g. (Spillman
+and Smith 2021)), which is to some extent due to coupled ocean-atmosphere models not
+properly capturing important regional coupled processes driving the SST anomalies (e.g.
+(Doi, Behera, and Yamagata 2013)).
+Coupled model outputs have also been used to train machine learning models to
+assess the predictability of the climate modes. A convolutional neural network (CNN)
+model has been proved to have a long-lead prediction skill (up to 18-month) for December-
+February Ni~ no3.4 SST - an index for ENSO variability, trained by SST and upper ocean
+heat content anomalies from coupled models (Ham, Kim, and Luo 2019). Similarly, an
+articial neural network model has been trained to forecast the SST variations at the
+peak season of the IOD events (Ratnam, Dijkstra, and Behera 2020). Given the phase-
+locking characteristics of the climate modes, these models aim to make single-season
+predictions, and for a single climate index. SST variability outside the ENSO and IOD
+regions also show some seasonal phase-locking, such as the Ningaloo Ni~ no marine heat-
+waves are phase-locked to austral summer (Kataoka, Tozuka, Behera, and Yamagata
+2014), (Feng, Hendon, Xie, Marshall, Schiller, Kosaka, Caputi, and Pearce 2015). A
+CNN architecture trained with climate model outputs has been developed to forecast
+SST and marine heatwave variability around Australia (Boschetti et al. 2022, personal
+communication).
+Complex spatio-temporal variations of the climate modes have been recognised, such
+as the complexity in ENSO dynamics and predictability (Timmermann, An, Kug, Jin,
+Cai, Capotondi, Cobb, Lengaigne, McPhaden, Stuecker, Stein, Wittenberg, Yun, Bayr,
+Chen, Chikamoto, Dewitte, Dommenget, Grothe, Guilyardi, Ham, Hayashi, Ineson,
+Kang, Kim, Kim, Lee, Li, Luo, McGregor, Planton, Power, Rashid, Ren, Santoso, Taka-
+hashi, Todd, Wang, Wang, Xie, Yang, Yeh, Yoon, Zeller, and Zhang 2018). The SST
+warming during the 2009-2010 El Ni~ no, the peak SST warming occurred in the central
+Pacic, so that the event is being classied as a central Pacic El Ni~ no, as compared
+with the more traditional 2015-16 El Ni~ no when the extreme warming was more located
+in the eastern equatorial Pacic. There is a variety of temporal variability in the climate
+3
+modes. Marine heatwaves across the global ocean have diverse spatial variability and
+are to some extent not tightly phase-locked with seasons (Gupta, Thomsen, Benthuy-
+sen, Hobday, Oliver, Alexander, Burrows, Donat, Feng, Holbrook, Perkins-Kirkpatrick,
+Moore, Rodrigues, Scannell, Taschetto, Ummenhofer, Wernberg, and Smale 2020). Such
+as the Blob marine heatwave can occur in dierent seasons (Amaya, Miller, Xie, and
+Kosaka 2020), whereas the Ningaloo Ni~ no has substantial spatial variations among dif-
+ferent events (Feng, Hendon, Xie, Marshall, Schiller, Kosaka, Caputi, and Pearce 2015).
+A all-season model has been proposed, arguing that it would overcome some arbitrary
+uctuations in the predictions at dierent lead times. Still, the prediction aims for a
+single index, the Ni~ no3.4 (Ham, Kim, Kim, and On 2021). Thus, it is important to ex-
+plore machine learning models which can predict the full seasonal cycle and the spatial
+patterns of SST anomalies.
+In this study, we propose a new deep learning modeling framework to forecast
+monthly global SST, using a Unet-LSTM convolutional encoder-decoder neural network
+(Taylor, Larraondo, and de Supinski 2021), which has been proven to have better predic-
+tion skills while using fewer parameters, compared with other deep learning architectures
+(Larraondo, Renzullo, Inza, and Lozano 2019). We train the model with observed (re-
+analysis) SST and surface air temperature data over the past 7 decades, to demonstrate
+potential long lead predictions for SST variability in the tropical-subtropical oceans.
+We present the methodology and examine the predictability of SST anomalies in the
+equatorial Pacic and the Blob region in detail, whereas full exploration of the machine
+learning model and SST predictability will be presented in a separate work.
+Materials and Methods
+Dataset
+The ERA5 data set (Hersbach, Bell, Berrisford, Hirahara, Hor anyi, Mu~ noz-Sabater,
+Nicolas, Peubey, Radu, Schepers, Simmons, Soci, Abdalla, Abellan, Balsamo, Bechtold,
+Biavati, Bidlot, Bonavita, De Chiara, Dahlgren, Dee, Diamantakis, Dragani, Flemming,
+Forbes, Fuentes, Geer, Haimberger, Healy, Hogan, H olm, Janiskov a, Keeley, Laloyaux,
+Lopez, Lupu, Radnoti, de Rosnay, Rozum, Vamborg, Villaume, and Th epaut 2020) pro-
+vides monthly estimates, currently commencing in 1979, of many atmospheric, land and
+oceanic variables at global scale with a spatial resolution of 0 :25,30km. An ERA5
+preliminary analysis commencing in 1950 and covering the period up to December 1978
+is also available. The ERA5 data set includes surface variables, including SST, and
+atmospheric variables computed on 137 levels to a height of 80 km. ERA5 dataset was
+created by combining a comprehensive set of historical meteorological observations with
+a sophisticated data assimilation and modelling workow developed by ECMWF. We
+use a replica of the ERA5 data set available at the National Computational Infrastruc-
+ture (NCI) (NCI 2020). ERA5 data can also be obtained on request from ECMWF's
+meteorological data archive and retrieval system (MARS).
+Our experiments use SST (ERA5 label 'sst') and 2-metre atmospheric temperature
+4
+(ERA5 label 't2m') variables drawn from the ERA5 data set. As both the SST and 2-
+metre atmospheric temperature data are from the same ERA5 reanalysis data set they
+are physically consistent within the limits of the reanalysis system. Figure 1 provides an
+example of the ERA5 monthly mean SST, 2-metre air temperatures and the combined
+temperatures for March 2010. We start with the full global data set with latitude and
+longitude dimensions of [720,1440]. The temporal domain data span January 1950 until
+May 2021, with a temporal resolution of 1 month, a total of 857 months.
+The convolutional layers used in our model require complete grids of data, ideally
+in dimensions that are powers of 2 to avoid the need for padding at the boundaries.
+To satisfy this requirement we combine the SST data over the ocean grid points with 2
+metre atmospheric temperature over the land surface grid points to yield a global grid
+without masked region over the land surface. Using the Climate data Operators (CDO)
+software package (Schulzweida 2019), we rst average the [720,1440] data set to a 1x1
+grid [360,720] and then use a bilinear interpolation to a [64,128] latitude (-64S to 62N
+in 2increments) and longitude (-180S to 180N in 2 :8125increments) grid. Finally we
+normalise the data, as we found that using the normalised data signicantly improved the
+model training performance.The resulting surface temperature data are represented as a
+three-dimensional numerical array with shape [857, 64, 128] corresponding to dimensions
+[time, latitude, longitude]. Input data used for training the model were selected as a
+moving window using 12 time steps (1 year), which captures the seasonal cycle in SST,
+as this was found to yield the best model predictions of SST.
+Models
+We apply a similar deep learning modelling architecture, referred to as Unet-LSTM (Tay-
+lor 2021), as applied in previous modelling studies (Taylor, Larraondo, and de Supinski
+2021) except we do not include the batch normalisation layers after each convolution
+layer as adding this layer did not improve the model t. We also modify the hyper-
+parameters in order to obtain the model with the best t. The Unet-LSTM convolu-
+tional encoder-decoder neural network delivers pixel-wise semantic segmentation that
+enables us to generate quantitative estimates of meteorological variables of interest such
+as SST at each latitude-longitude grid-point [64,128]. In order to make forecasts of 2-D
+elds the Unet-LSTM includes a 2-D convolutional long short-term memory (LSTM)
+layer (Hochreiter and Schmidhuber 1997). Other examples of the application of convo-
+lutional encoder-decoder neural networks approaches include SegNet (Badrinarayanan,
+Kendall, and Cipolla 2017), VGG16 (Simonyan and Zisserman 2015), and U-net (Ron-
+neberger, Fischer, and Brox 2015). Previous work by (Larraondo, Renzullo, Inza, and
+Lozano 2019) investigated the application of SegNet, VGG16 and U-net to the prediction
+of precipitation elds and concluded that U-net delivered the best estimates of precipi-
+tation while employing signicantly fewer model parameters. Based on these advantages
+and our successful application of our U-net based model in previous studies (Taylor,
+Larraondo, and de Supinski 2021)to the prediction of surface precipitation and fore-
+casting 500 hPa geopotenial height, we have adopted the Unet-LSTM model (Taylor,
+5
+Larraondo, and de Supinski 2021), as the underlying model architecture for our study.
+The Unet-LSTM model code is available here (Taylor 2021).
+Methodology
+The CNN model described in Figure 2 was written in Python using the TensorFlow (Abadi,
+Agarwal, Barham, Brevdo, Chen, Citro, Corrado, Davis, Dean, Devin, Ghemawat,
+Goodfellow, Harp, Irving, Isard, Jozefowicz, Jia, Kaiser, Kudlur, Levenberg, Man e,
+Schuster, Monga, Moore, Murray, Olah, Shlens, Steiner, Sutskever, Talwar, Tucker,
+Vanhoucke, Vasudevan, Vi egas, Vinyals, Warden, Wattenberg, Wicke, Yu, and Zheng
+2015) and Keras APIs (Chollet 2015). We use Horovod (Sergeev and Balso 2018) to
+implement a data-parallel model. We selected the Adam optimiser (Kingma and Ba
+2015) with a learning rate of 0.003 and a learning rate warmup over the rst 5 epochs.
+The higher learning rate and the warmup improved model tting on the larger batch
+sizes when using multiple GPUs. We chose a batch size of 4 that yields the best model
+t for forecasting SST. The total batch size when using Horovod on multiple GPUs is
+the number of GPUs multiplied by the batch size on each GPU. The total batch size is
+therefore a function of the number of GPUs used in model training. For this problem
+we use 4 Nvidia V100 GPUs each with 32 GB of memory making up one node on the
+NCI Gadi computer.
+We use 760 of the available time steps from January 1950 to April 2013 for training
+and the remaining 97 time steps for validation and testing. The CNN model uses the
+prior 12 months of SST data in order to predict the following 2 months of SST data.
+Note that selecting a longer prediction time period results in errors accumulating over
+a longer prediction window. We used the tanh activation function, set the kernel, bias
+and recurrent L2 regularisation value at 10-8and run the model training for 200 epochs
+saving only the model with the minimum MSE value, then output the nal model and
+report the resulting MSE values. We found that 200 epochs ensured that the MSE value
+always reached a minimum without overtting. Figure 3 shows the MSE value calculated
+from the model t to the training and test data sets over 200 epochs. Using the saved
+model we then make model predictions (inference) using an autoregressive approach for
+up to 24 months.
+In order to eciently load the model training data using a data-parallel approach
+we distribute the model data required by each GPU onto the CPU memory of the
+corresponding node, as we have done in prior studies (Taylor, Larraondo, and de Supinski
+2021). The data required on each GPU is read once from a single NetCDF le containing
+the preprocessed data as described above. This approach facilitates the rapid loading of
+each batch of data to GPU memory and makes possible the highly scalable data-parallel
+training by preventing a lesystem IO bottleneck from occurring during training. This
+is particularly important when training the forecast CNN model as we construct a batch
+using a rolling window from the 12 past time steps and the future 2 time steps, so
+each sample in a batch consists of a total of 14 time steps. In order to further reduce
+memory usage for the CNN model we dene a data loader so we load from memory
+6
+only the data that each batch requires at each time step. We divide the training and
+test data sets equally by time onto each GPU. It is essential that each GPU has exactly
+the same number of time steps to avoid problems with load balancing and the timely
+communication of model parameters at the end of each epoch.
+Results
+Having trained the CNN model we can then make forecasts (inferences) of the temporal
+evolution of the 2-D SST elds. The model inference step takes the preceding 12-
+months of SST data and makes predictions of the following two months. By using an
+autoregressive approach, where we feed model predictions back in as input to the model,
+we can make an unlimited number of predictions. For the results reported here we limit
+the predictions to a 24-month window. We make a series of 10 24-month predictions
+starting in July 2007 and commencing in each subsequent January and July, ending in
+January and July 2016. Each 24-month prediction period includes a 12-month overlap
+with the previous model predictions. Input data commences in January and July 2006,
+12-months prior to the rst predictions, and model predictions end in January and July
+2019, 24-months after the start of the nal prediction window. Model predictions span
+the data used both for model training and validation.
+In this section, we rst present results showing the predictions of the global scale SST
+elds. We also use the global scale SST elds to extract the SST values that correspond
+with well-known indices such as the ENSO index. As we are making predictions of
+the global scale elds we can extract any index of interest from our model predictions
+without the need to develop and train a new model.
+Global scale 2-D SST Predictions
+We show an example set of SST model predictions at t=6,12,18, 24 months into the
+future starting in July 2010. Figure 4 presents the model predicted SST eld at t=6,
+the corresponding target ECMWF ERA5 SST eld, the dierence between the model
+predicted and ERA5 SST, and the model predicted SST anomaly which is the dierence
+between the model predicted SST values and an ERA5 climatology computed over the
+30 year period 1981-2010. The model predicted SST values accurately capture the
+main features of the target ERA5 SST values with the majority of dierences in SST
+values falling with the range 1C. There does appear to be evidence that the model
+is systematically slightly warmer between 20N and 20S and slightly cooler at higher
+latitudes in Figure 4. The model captures the SST cooling in the eastern equatorial
+Pacic during the developing 2010-11 La Ni~ na, though with a slight warm bias, or
+underestimation of the cooling. Interestingly the model is also able to capture the
+warming SST o the northwest Australian coast at a 6-month lead, which is a precursor
+to the peak SST anomalies in February 2011 during extreme Ningaloo Ni~ no event (Feng
+et al. 2013). Model predictions of warm SST anomalies in the eastern Mediterranean
+7
+Sea and northwest Atlantic coast appear also being supported by observations (Figure
+4).
+Figures 5 , 6 and 7 compare CNN model predictions at t=12, 18 and 24 months
+into the future respectively. We can see that the model captures the temporal evolution
+of SST eld well over the full 24 month prediction period. The dierences between model
+predicted SST values grow slowly over the 24 month prediction period with the majority
+of dierences in SST values, as shown in Figure 7, falling within the range 2C with
+a small overall bias towards cooler temperatures. The RMSE value increases steadily
+over the 24 month prediction period from 0 :43C in July 2010 to 0 :65C in June 2012.
+At 18 month lead (Fig. 6), the CNN model predicts moderate cooling in the equatorial
+eastern Pacic, however, the model has a strong warm bias near the dateline. Thus there
+appears to be some skill to predict the 2011-12 moderate La Ni~ na at the 18-month lead,
+though the cooling extends less westward compared with observation due to some warm
+bias. The anomaly features predicted at mid- to high-latitude at 18-month lead are
+mostly due to model errors (Figure 6). Nevertheless, the CNN captures the underlying
+seasonal variations of the global SST quite accurately.
+Figure 8 presents histograms of the CNN model predicted SST values in comparison
+with the ERA5 SST values for June 2012, corresponding to the results presented in
+Figure 7, at the end of the 24 month prediction period. Figure 8 clearly demonstrates
+that the model is able to accurately maintain the correct distribution of SST values with
+no smearing of the distribution even at the end of the 24 month prediction window.
+This can be attributed to the use of the Conv2DLSTM layers in the CNN model which
+correctly capture both the spatial and temporal evolution of the 2D SST eld. The
+second panel in Figure 8 shows a histogram of the dierences between the model and
+the ERA5 SST values in comparison with errors produced by assuming persistence from
+June 2010. The histogram of the model dierences is centred close to 0C with the
+majority of errors falling within the range 2C, as previously shown in Figure 7.
+Figure 9 shows the estimates of the Pearson correlation index for our predicted SST
+against the ERA5 SST data based on the 10 24-month predictions starting in July 2006
+for months t+1 to t+6. Figure 10 shows a corresponding plot to Figure 9 except for the
+months t+7 to t+12. These gures illustrate that the CNN model is able to maintain
+a signicant correlation with the target ERA5 SST data for predictions out to t+12
+months. Not shown are plots of the Pearson correlation index for t+13 to t+24 which
+continue to show regions of signicant correlation. In general, long-lead high prediction
+skills are mostly located in the tropical, northeast, and south Pacic. There are also
+high prediction skills for the high latitude North Atlantic. There are good skills for the
+Indian Ocean Dipole regions up to 3-month lead, and the skills decay rapidly, likely due
+to a winter prediction barrier of the IOD (e.g. Luo et al. 2007).
+8
+Long-lead Predictions of the El Ni~ no 3.4 and El Ni~ no 4
+indices
+Using the CNN predicted SST values we can calculate the El Ni~ no 3.4 index computed
+over the region 5S-5N, 170W-120W. We compare the model predictions with the
+El Ni~ no 3.4 index derived from the ERA5 SST data. The ERA5 El Ni~ no 3.4 index is
+dened as the dierence between the monthly mean ERA5 SST values and an ERA5
+climatology computed over the 30 year period 1981-2010.
+We have performed a series of ten 24 month predictions of the El Ni~ no 3.4 index
+starting each January, commencing in January 2008, to assess the model's ability to
+overcome the spring barrier in predicting El Nino. The model predictions started from
+July have generally improved skill. Figure 11 shows the model predicted the El Ni~ no
+3.4 index for the 2009-10 and 2015-16 warm periods. For each warm period we show a
+sequence of three 24 month predictions starting 1 year apart that span the warm period.
+The rst panel in the sequence shows the 24 month period leading up to the warm event,
+the second panel spans the warm event and the panel plot shows the 24 months exiting
+the warm event.
+For the 2009-10 warm event, the top three panels in Figure 11, the predicted El
+Ni~ no 3.4 index closely follows the ERA5 El Ni~ no 3.4 index over the 24 months leading
+to the warm event, with the warm event correctly predicted 24 months in advance.
+The predictions starting in January 2008 spanning the 2009-10 warm event, starting a
+relatively cold state, capture the strong warming through 2009 but do underestimate
+the peak in the ERA5 El Ni~ no 3.4 index by 0 :7C. Similarly, the predictions starting in
+January 2009 capture a warming peak during the 2009-10 boreal winter, as well as the
+transition toward a cooler state afterwards. The 24 month prediction of the exit from
+the warm period, starting in January 2010, very closely follows the ERA5 El Ni~ no 3.4
+index and correctly predicts the strong La Ni~ na cooling event in 2010-11.
+For the 2015-16 warm event, the lower three panels in Figure 11, the predicted
+El Ni~ no 3.4 index consistently predicts warmer conditions throughout the 24 month
+prediction period, to some extent due to the persistence from the initial condition in
+the case of January 2014, but does not capture the strength of the 2015-16 warm event.
+The prediction starting from January 2015 again shows warm conditions throughout the
+24 month forecast though failing to capture the full intensity of the event commencing
+in April 2015 and the transition toward a cooler state in 2016. The model appears not
+be able to overcome the spring prediction barrier in this occasion, even starting from a
+relatively warm state in January 2015. As we observed for the 2009-10 warm event, the
+24 month prediction of the exit from the 2015-16 warm event very closely follows the
+ERA5 El Ni~ no 3.4 index. The model correctly predicts the strong decline in ERA5 El
+Ni~ no 3.4 index from its peak in January 2016 and ongoing normal conditions throughout
+2017.
+As the 2009-10 El Ni~ no is generally regarded as a central Pacic El Ni~ no (Tim-
+mermann, An, Kug, Jin, Cai, Capotondi, Cobb, Lengaigne, McPhaden, Stuecker, Stein,
+Wittenberg, Yun, Bayr, Chen, Chikamoto, Dewitte, Dommenget, Grothe, Guilyardi,
+9
+Ham, Hayashi, Ineson, Kang, Kim, Kim, Lee, Li, Luo, McGregor, Planton, Power,
+Rashid, Ren, Santoso, Takahashi, Todd, Wang, Wang, Xie, Yang, Yeh, Yoon, Zeller,
+and Zhang 2018), we also assess the prediction of Ni~ no 4 SST variability, an index for
+the central Pacic warming. The Ni~ no 4 index is computed over the region 5S-5N,
+160E-150W. Figure 12, upper panels, show the ERA5 Ni~ no 4 index over the 24 months
+covering the 2009-10 warm event and the 2015-16 warm event. The lower panels in Fig-
+ure 12 presents the spatial pattern of the model predicted SST anomalies in November
+2009 and October 2015 taken from the corresponding 24 month Ni~ no 4 index predictions
+in the panels above. It is shown that the model can predict the Ni~ no 4 index variability
+well, though with an early peak in the predicted SST anomalies in October 2009 (Figure
+12), the warming pattern is similar to a central El Ni~ no event (Figure 12). The longer
+lead prediction starting from January 2008 show similar results (not shown).
+The model prediction correctly captures an early central Pacic warming in Oct'15,
+but it quickly decays. The model fails to predict the sustained warming in the eastern
+equatorial Pacic, instead, it predicts a transition to La Nina cooling (Figure 12. This
+is likely due to that it is rare in the training data that has two consecutive El Ni~ nos,
+with the second one being stronger. Historically, most El Ni~ no events are followed by
+La Ninas. Figure 13 shows model predictions of the El Ni~ no 3.4 index for a 24 month
+prediction starting in July 2014 (rather than in January) and ending in June 2016 which
+spans the entire two year warm period. Figure 13 illustrates that the model is able
+to capture this unusual event with two consecutive El Ni~ nos with model predictions
+tracking the ERA5 El Ni~ no 3.4 index within 1C, throughout the full two year period,
+though it still does not match the full intensity of the 2015-16 El Ni~ no. As demonstrated
+in the correlation maps, we note that most of the ENSO events can be well captured by
+the Unet-LSTM model.
+Long-lead Predictions of the 'Blob' index
+We have computed the Blob index using the ERA5 SST data for the period January
+1950-May 2021. The Blob index is dened as the dierence between the monthly average
+SST climatology (1980-2010) and the monthly average SST computed over the region
+34N-47N, 147W-128W. Figure 14 presents the blob index over this time period,
+along with a two-sided 95% condence interval and a one-sided 90% condence interval.
+In the lower panel of Figure 14 we focus on the period January 2014-May 2021. During
+this time period we see multiple exceptional ocean warming events in the Blob region
+where ocean temperatures exceed the 95% condence interval by up to 1C. It is also
+worth noting during the January 2014-May 2021 period that the Blob index only dropped
+below 0C during the boreal winter of 2016-17.
+In order to demonstrate the ability of the CNN model to predict the Blob index
+Figure 15 presents multiple 24 month predictions of the Blob index focusing on the
+period 2014-21. The Unet-LSTM model Blob index is computed from the corresponding
+model predicted SST values e.g. as presented in Figures 4- 7 and monthly average SST
+climatology (1980-2010). We include 24 month predictions that capture the warm events
+10
+in 2014 and 2015, the cooling during the winter of 2016-17 and the two warm events
+in 2019 and 2020. Figure 15 illustrates the ability of the model to accurately predict
+the evolution of the Blob index during both warming and cooling events over the full 24
+month prediction period.
+Summary and Discussion
+In this study, we use monthly reanalysis global surface temperature (SST and 2-m air
+temperature) data to train a Unet-LSTM data-driven model and demonstrate its ability
+to predict SST variability at various lead times. We used a 12-month window to train
+the Unet-LSTM model, with the seasonal cycles retained in the training data, which
+eectively captured the seasonal SST variation in the global ocean. For the SST anomaly
+prediction, there are high long-lead skills in the equatorial Pacic and northeast Pacic.
+In the following, we discuss a few aspects of the model predictions and outline our plans
+for future work.
+Comparison with other ML ENSO prediction architecture
+(Ham, Kim, and Luo 2019) developed a CNN deep learning model, trained with coupled
+climate model outputs, to achieve an 18 month-lead prediction skills for Nino3.4. Their
+model was initialized with both monthly SST and upper ocean heat content anomalies,
+claiming that the upper ocean heat content memory actually helped the model to achieve
+the long-lead model skills. Most of the recent development in deep learning ENSO
+forecasting model are based on this framework ( (Ham, Kim, Kim, and On 2021) among
+others). The Unet-LSTM based CNN model trained and initialized with global surface
+temperature elds can achieve similar prediction skills, not only for Nino3.4, but also in
+the northeast Pacic, which is demonstrated in the prediction assessment of the recent
+Blob marine heatwave events.
+We have used a 12-month window to train the Unet-LSTM model, while most other
+CNN models used 3-month temporal window. It appears that the upper ocean memory
+may also reside in the surface temperature records. Surface SST and land surface tem-
+peratures drive global surface wind anomalies and then subsequently drive the planetary
+ocean waves to store the upper ocean heat content anomalies. This is a problem for fur-
+ther exploration. The model achieves long-lead prediction mostly in the Pacic, which
+suggests that the precursors of the long-lead prediction likely reside in the Pacic.
+By using a 12-month time window to train the Unet-LSTM model, we can use the
+full temperature eld, instead of only using the anomaly eld. In this way, both the
+annual cycle of temperature variations and the interannual anomalies are considered
+simultaneously. This may have two benets: one is to be able to train the model to
+assimilate the dynamics of the seasonally phase-locked variability; the other is that the
+model can carry the memory over the past years, so that it is not necessary to remove
+the steady warming trend at the surface ocean from the reanalysis (observation) data
+prior to the model training.
+11
+Note that there is an attempt to capture the seasonal cycle by introducing addi-
+tional labels in a CNN model (Ham, Kim, Kim, and On 2021), however, it may only
+be achievable for a single index prediction. In the results, we mostly show the predic-
+tion starting from January to demonstrate the model ability to overcome the spring
+prediction barrier. We do need to assess the stability of the model prediction starting
+from dierent months, especially when there is known prediction barriers for various
+climate indices (e.g. (Timmermann, An, Kug, Jin, Cai, Capotondi, Cobb, Lengaigne,
+McPhaden, Stuecker, Stein, Wittenberg, Yun, Bayr, Chen, Chikamoto, Dewitte, Dom-
+menget, Grothe, Guilyardi, Ham, Hayashi, Ineson, Kang, Kim, Kim, Lee, Li, Luo,
+McGregor, Planton, Power, Rashid, Ren, Santoso, Takahashi, Todd, Wang, Wang, Xie,
+Yang, Yeh, Yoon, Zeller, and Zhang 2018)). While the Unet-LSTM model is able to pre-
+dict most ENSO events well, it is noted that the model prediction starting in January
+fails to predict the 2015-16 peak during the rare occurrence of two consecutive El Ninos,
+likely due to lack of similar cases in the training data based on existing observations.
+ENSO diversity may still pose a challenge for the data-driven machine learning models.
+Nevertheless, the current version of Unet-LSTM shows great promise in leading the way
+to more sophisticated 2-dimensional SST predictions for the global ocean.
+Future work
+The success of the Unet-LSTM model at capturing key features of the global scale
+temperature eld clearly demonstrates that data driven approaches to modelling the
+spatio-temporal evolution of complex physical systems are a promising avenue for further
+research. As a next step we plan to increase the model resolution to the full resolution of
+the ERA5 data set, currently 0 :25, which will allow us to investigate the impact of model
+resolution on SST predictions and to study the variations in SST at the regional scale in
+more detail. We will also investigate better quantifying the uncertainty associated with
+model forecasts using an ensemble forecasting approach and the prediction of other key
+ocean indices, such as the Indian Ocean Dipole (IOD), using both the existing model
+and at higher model resolutions.
+Given the results presented here and the successful application of the Unet-LSTM
+model in previous studies (Taylor, Larraondo, and de Supinski 2021) we have increased
+condence that the Unet-LSTM model can be applied to the general problem of the
+spatial and temporal evolution of other 2D geophysical elds. As of TensorFlow 2.6, a
+ConvLSTM3D layer is now available. By replacing the ConvLSTM2D layer with the
+ConvLSTM3D layer, the Unet-LSTM can be used to predict the spatio-temporal evolu-
+tion of 3D elds. The ability to model 3D elds will allow us to investigate improving
+SST predictions by incorporating additional input variables, such as surface wind elds,
+into the Unet-LSTM model. The primary barrier to working with large 3D elds is the
+availability of GPU memory which on current devices is limited to 16-32GB. Next gen-
+eration GPU devices will have signicantly larger memory, which combined with model
+parallelism, will allow much larger more complex models to be developed.
+Training the Unet-LSTM model only with the reanalysed temperature eld (which
+12
+incorporates existing observations) over the seven decades appears to have constrained
+the model to capture the ENSO dynamics and its teleconnection in the Indian Ocean
+and mid-latitude oceans (e.g. the Blob region). On the other hand, the CNN ML models
+are trained using coupled atmosphere-ocean models, which have inherent biases in the
+coupled models, as well as unrealistic ENSO simulations in some of the coupled models,
+such as the ENSO frequencies. Transfer learning, which has been proposed in some stud-
+ies (Ham, Kim, and Luo 2019), may not be enough to correct these model biases (Tim-
+mermann, An, Kug, Jin, Cai, Capotondi, Cobb, Lengaigne, McPhaden, Stuecker, Stein,
+Wittenberg, Yun, Bayr, Chen, Chikamoto, Dewitte, Dommenget, Grothe, Guilyardi,
+Ham, Hayashi, Ineson, Kang, Kim, Kim, Lee, Li, Luo, McGregor, Planton, Power,
+Rashid, Ren, Santoso, Takahashi, Todd, Wang, Wang, Xie, Yang, Yeh, Yoon, Zeller,
+and Zhang 2018). A knowledge based strategy is needed to combine the coupled model
+results with observations to provide a well sampled dataset, for the machine learning
+models to capture the diverse SST variability in the global and regional oceans, in order
+to better predict rare climate events.
+A new and rapidly evolving area of research is physics-informed machine learning
+(Karniadakis, Kevrekidis, Lu, Perdikaris, Wang, and Yang 2021) that combines machine
+learning with physical constraints, derived for example, from ordinary dierential equa-
+tions (ODEs) and partial dierential equations (PDEs) that describe the system under
+study. The implementation of physics-informed machine learning is mesh-less which al-
+lows model regression to take place using an available set of imperfect observations that
+dene the initial and boundary conditions without the need to interpolate the data to
+an appropriate grid. Physics-informed machine learning could yield new more exible,
+potentially transformative, approaches to ocean modelling however much work needs to
+be done to realise this goal.
+Conict of Interest Statement
+The authors, JT and MF, declare that the research was conducted in the absence of any
+commercial or nancial relationships that could be construed as a potential conict of
+interest.
+Author Contributions
+The authors, JT and MF, have contributed equally to this work.
+Acknowledgments
+This research project was undertaken with the assistance of the resources and services
+from the National Computational Infrastructure (NCI), which is supported by the Aus-
+tralian Government.
+13
+Data Availability Statement
+The datasets generated for this study can be found in the CSIRO Data Access Portal
+https://data.csiro.au.
+References
+Abadi, M., A. Agarwal, P. Barham, E. Brevdo, Z. Chen, C. Citro, G. S. Corrado,
+A. Davis, J. Dean, M. Devin, S. Ghemawat, I. Goodfellow, A. Harp, G. Irving,
+M. Isard, R. Jozefowicz, Y. Jia, L. Kaiser, M. Kudlur, J. Levenberg, D. Man e,
+M. Schuster, R. Monga, S. Moore, D. Murray, C. Olah, J. Shlens, B. Steiner,
+I. Sutskever, K. Talwar, P. Tucker, V. Vanhoucke, V. Vasudevan, F. Vi egas,
+O. Vinyals, P. Warden, M. Wattenberg, M. Wicke, Y. Yu, and X. Zheng (2015).
+TensorFlow: Large-scale machine learning on heterogeneous systems.
+Amaya, D. J., A. J. Miller, S. P. Xie, and Y. Kosaka (2020). Physical drivers of the
+summer 2019 North Pacic marine heatwave. Nature Communications 11 (1).
+Badrinarayanan, V., A. Kendall, and R. Cipolla (2017). SegNet: A Deep Convolu-
+tional Encoder-Decoder Architecture for Image Segmentation. IEEE Transactions
+on Pattern Analysis and Machine Intelligence 39 (12), 2481{2495.
+Bond, N. A., M. F. Cronin, H. Freeland, and N. Mantua (2015). Causes and impacts
+of the 2014 warm anomaly in the NE Pacic. Geophysical Research Letters 42 (9),
+3414{3420.
+Chollet, F. (2015). Keras.
+Di Lorenzo, E. and N. Mantua (2016). Multi-year persistence of the 2014/15 North
+Pacic marine heatwave. Nature Climate Change 6 (11), 1042{1047.
+Doi, T., S. K. Behera, and T. Yamagata (2013). Predictability of the Ningaloo
+Ni~ no/Ni~ na. Scientic Reports 3 .
+Feng, M., H. H. Hendon, S. P. Xie, A. G. Marshall, A. Schiller, Y. Kosaka, N. Caputi,
+and A. Pearce (2015). Decadal increase in Ningaloo Ni~ no since the late 1990s.
+Geophysical Research Letters 42 (1).
+Feng, M., M. J. McPhaden, S. P. Xie, and J. Hafner (2013). La Ni~ na forces unprece-
+dented Leeuwin Current warming in 2011. Scientic Reports 3 .
+Gupta, A., M. Thomsen, J. A. Benthuysen, A. J. Hobday, E. Oliver, L. V. Alexander,
+M. T. Burrows, M. G. Donat, M. Feng, N. J. Holbrook, S. Perkins-Kirkpatrick,
+P. J. Moore, R. R. Rodrigues, H. A. Scannell, A. S. Taschetto, C. C. Ummenhofer,
+T. Wernberg, and D. A. Smale (2020). Drivers and impacts of the most extreme
+marine heatwaves events. Scientic Reports 10 (1).
+Ham, Y., J. Kim, and J. Luo (2019). Deep learning for multi-year ENSO forecasts.
+Nature 573 (7775).
+14
+Ham, Y. G., J. H. Kim, E. S. Kim, and K. W. On (2021). Unied deep learning model
+for El Ni~ no/Southern Oscillation forecasts by incorporating seasonality in climate
+data. Science Bulletin 66 (13).
+Hersbach, H., B. Bell, P. Berrisford, S. Hirahara, A. Hor anyi, J. Mu~ noz-Sabater,
+J. Nicolas, C. Peubey, R. Radu, D. Schepers, A. Simmons, C. Soci, S. Ab-
+dalla, X. Abellan, G. Balsamo, P. Bechtold, G. Biavati, J. Bidlot, M. Bonavita,
+G. De Chiara, P. Dahlgren, D. Dee, M. Diamantakis, R. Dragani, J. Flemming,
+R. Forbes, M. Fuentes, A. Geer, L. Haimberger, S. Healy, R. J. Hogan, E. H olm,
+M. Janiskov a, S. Keeley, P. Laloyaux, P. Lopez, C. Lupu, G. Radnoti, P. de Ros-
+nay, I. Rozum, F. Vamborg, S. Villaume, and J. N. Th epaut (2020). The ERA5
+global reanalysis. Quarterly Journal of the Royal Meteorological Society 146 (730).
+Hochreiter, S. and J. Schmidhuber (1997). Long Short-Term Memory. Neural Com-
+putation .
+Holbrook, N. J., H. A. Scannell, A. Sen Gupta, J. A. Benthuysen, M. Feng, E. C.
+Oliver, L. V. Alexander, M. T. Burrows, M. G. Donat, A. J. Hobday, P. J. Moore,
+S. E. Perkins-Kirkpatrick, D. A. Smale, S. C. Straub, and T. Wernberg (2019).
+A global assessment of marine heatwaves and their drivers. Nature Communica-
+tions 10 (1).
+Karniadakis, G. E., I. G. Kevrekidis, L. Lu, P. Perdikaris, S. Wang, and L. Yang
+(2021). Physics-informed machine learning. Nature Reviews Physics 3 (6), 422{
+440.
+Kataoka, T., T. Tozuka, S. Behera, and T. Yamagata (2014). On the Ningaloo
+Ni~ no/Ni~ na. Climate Dynamics 43 (5-6).
+Kingma, D. P. and J. L. Ba (2015). Adam: A method for stochastic optimization.
+Technical report, ArxIV.
+Larraondo, P. R., L. J. Renzullo, I. Inza, and J. A. Lozano (2019). A data-driven
+approach to precipitation parameterizations using convolutional encoder-decoder
+neural networks. Technical report.
+McPhaden, M. J., S. E. Zebiak, and M. H. Glantz (2006). ENSO as an integrating
+concept in earth science. Science 314 (5806).
+NCI (2020, nov). ERA5 Replicated Datasets.
+Ratnam, J. V., H. A. Dijkstra, and S. K. Behera (2020). A machine learning based
+prediction system for the Indian Ocean Dipole. Scientic Reports 10 (1).
+Ronneberger, O., P. Fischer, and T. Brox (2015). U-net: Convolutional networks for
+biomedical image segmentation. In Lecture Notes in Computer Science (including
+subseries Lecture Notes in Articial Intelligence and Lecture Notes in Bioinfor-
+matics) , Volume 9351, pp. 234{241. Springer Verlag.
+Saji, N. H. and T. Yamagata (2003). Possible impacts of Indian Ocean Dipole mode
+events on global climate. Climate Research 25 (2).
+15
+Schulzweida, U. (2019). CDO User's Guide. Technical Report June.
+Sergeev, A. and M. D. Balso (2018). Horovod: Fast and easy distributed deep learning
+in tensorow.
+Simonyan, K. and A. Zisserman (2015). Very deep convolutional networks for large-
+scale image recognition. In 3rd International Conference on Learning Representa-
+tions, ICLR 2015 - Conference Track Proceedings .
+Spillman, C. M. and G. A. Smith (2021). A New Operational Seasonal Thermal Stress
+Prediction Tool for Coral Reefs Around Australia. Frontiers in Marine Science 8 .
+Stockdale, T. N., D. L. Anderson, M. A. Balmaseda, F. Doblas-Reyes, L. Ferranti,
+K. Mogensen, T. N. Palmer, F. Molteni, and F. Vitart (2011). ECMWF seasonal
+forecast system 3 and its prediction of sea surface temperature. Climate Dynam-
+ics 37 (3).
+Taylor, J. A. (2021). unet lstm - A machine learning model for the spatial and tem-
+poral evolution of 2D and 3D elds.
+Taylor, J. A., P. Larraondo, and B. R. de Supinski (2021). Data-driven global weather
+predictions at high resolutions. International Journal of High Performance Com-
+puting Applications .
+Timmermann, A., S. I. An, J. S. Kug, F. F. Jin, W. Cai, A. Capotondi, K. Cobb,
+M. Lengaigne, M. J. McPhaden, M. F. Stuecker, K. Stein, A. T. Wittenberg, K. S.
+Yun, T. Bayr, H. C. Chen, Y. Chikamoto, B. Dewitte, D. Dommenget, P. Grothe,
+E. Guilyardi, Y. G. Ham, M. Hayashi, S. Ineson, D. Kang, S. Kim, W. M. Kim,
+J. Y. Lee, T. Li, J. J. Luo, S. McGregor, Y. Planton, S. Power, H. Rashid, H. L.
+Ren, A. Santoso, K. Takahashi, A. Todd, G. Wang, G. Wang, R. Xie, W. H. Yang,
+S. W. Yeh, J. Yoon, E. Zeller, and X. Zhang (2018). El Ni~ no{Southern Oscillation
+complexity. Nature 559 (7715), 535{545.
+Tozuka, T., M. Feng, W. Han, S. Kido, and L. Zhang (2021). The Ningaloo Ni~ no/Ni~ na:
+Mechanisms, relation with other climate modes and impacts. In Tropical and Ex-
+tratropical Air-Sea Interactions , pp. 207{219. Elsevier.
+16
+Figures
+Figure 1: An illustration of the ERA5 monthly mean SST, 2-metre air tempera-
+tures and the combined temperatures where the 2-metre air temperature is used
+only over the land surface for March 2010. The correlation coecient between the
+SST and 2-metre air temperatures, computed over the ocean only, is 0.92 in this
+example.
+17
+Figure 2: A summary of the architecture of the CNN model, referred to as the
+Unet-LSTM, that we have trained to forecast 2-D SST elds. The model shown
+was implemented in Python using the TensorFlow and Keras 2.4 API.
+18
+Figure 3: The MSE error calculated from a comparison of the model predictions
+with the training (train) and the validation (test) data sets over a 200 epoch
+training period. We see a rapid convergence of the model on the minimum MSE
+value. The upper panel shows the MSE values over the full 200 epochs. In order
+to show greater detail of the model tting process, the lower panel shows the same
+MSE values at higher resolution and focused on the tail of the model training.
+Note the dierent y-axis scales between the two panels.
+19
+Figure 4: Model predicted SST at +6 months (December 2010), the corresponding
+target ERA5 SST data set, the dierence between the model predictions and the
+target, and the model predicted SST anomaly. Note the dierent, much higher
+resolution scale used to plot model dierences and SST anomalies.
+20
+Figure 5: Model predicted SST at +12 months (June 2011), the corresponding
+target ERA5 SST data set, the dierence between the model predictions and the
+target, and the model predicted SST anomaly. Note the dierent, much higher
+resolution scale used to plot model dierences and SST anomalies.
+21
+Figure 6: Model predicted SST at +18 months (December 2011), the corresponding
+target ERA5 SST data set, the dierence between the model predictions and the
+target, and the model predicted SST anomaly. Note the dierent, much higher
+resolution scale used to plot model dierences and SST anomalies.
+22
+Figure 7: Model predicted SST at +24 months (June 2012), the corresponding
+target ERA5 SST data set, the dierence between the model predictions and the
+target, and the model predicted SST anomaly. Note the dierent, much higher
+resolution scale used to plot model dierences and SST anomalies.
+23
+Figure 8: Histograms of the model predicted SST values in comparison with the
+ERA5 SST values for June 2012 at the end of the 24 month prediction period.
+The second panel shows a histogram of the dierences between the model and the
+ERA5 SST values in comparison with errors produced by assuming persistence.
+24
+Figure 9: The Pearson correlation coecient (R) calculated using the 10 24-month
+forecasts commencing in July 2006 for months t+1 to t+6 showing large regions
+of signicant correlation between the model predicted and ERA5 SST values out
+to t+6.
+25
+Figure 10: The Pearson correlation coecient (R) calculated using the 10 24-
+month forecasts commencing in July 2006 for months t+7 to t+12 showing the
+presence of signicant correlation between the model predicted and ERA5 SST
+values out to t+12.
+26
+Figure 11: Model predictions of the El Ni~ no 3.4 index for the 2009-10 and 2015-
+16 warm periods. For each warm period we show a sequence of three 24 month
+predictions starting 1 year apart that span the warm period. In each graph we
+compare the model results with the El Ni~ no 3.4 index, dened as the monthly
+average SST computed over the region 5N-5S, 120W-170W , calculated from
+the monthly mean ERA5 SST data. The dotted lines dene warm ( >0:8C) and
+cold ( < 0:8C) periods. Model predictions and ERA5 estimates of the El Ni~ no
+3.4 index >0:8C have been shaded red, and values < 0:8C have been shaded
+blue, for emphasis.
+27
+Figure 12: Model predictions of the El Ni~ no 4 index for the 2009-10 and 2015-
+16 warm periods are presented in the upper panels. In each graph we compare
+the model results with the El Ni~ no 4 index, dened as the monthly average SST
+computed over the region 5N-5S, 160E-150W, calculated from the monthly
+mean ERA5 SST data. The dotted lines dene warm ( >0:8C) and cold ( <
+ 0:8C) periods. Model predictions and ERA5 estimates of the El Ni~ no 4 index
+>0:8C have been shaded red, and values < 0:8C have been shaded blue, for
+emphasis. The lower panels present the spatial pattern of the model predicted
+SST anomalies in November 2009 and October 2015 taken from the corresponding
+24 month predictions shown in the upper panels.
+28
+Figure 13: Model predictions of the El Ni~ no 3.4 index for a 24 month prediction
+starting in July 2014 and ending in June 2016. We compare the model results
+with the El Ni~ no 3.4 index, dened as the monthly average SST computed over
+the region 5N-5S, 120W-170W , calculated from the monthly mean ERA5 SST
+data. The dotted lines dene warm ( >0:8C) and cold ( < 0:8C) periods. Model
+predictions and ERA5 estimates of the El Ni~ no 3.4 index >0:8C have been shaded
+red, and values < 0:8C have been shaded blue, for emphasis.
+29
+Figure 14: The Blob index dened as the dierence between the monthly average
+SST climatology (1980-2010) and the monthly average SST computed over the
+region 34N-47N, 147W-128W. We compute the Blob index from the monthly
+mean ERA5 SST data for the period January 1950-May 2021. We include the two-
+sided 95% condence interval and the one-sided 90th percentile. The lower panel
+is the same Blob index with a focus on the period January 2014-May 2021 with
+the signicant ocean warming events in 2014, 2015, 2019 and 2020 highlighted.
+30
+Figure 15: Model predictions of the Blob index over a 24 month period commencing
+in July 2013, 2014, 2015 and January 2019 compared with the Blob index, dened
+as the monthly average SST computed over the region 34N-47N, 147W-128W,
+calculated from the monthly mean ERA5 SST data. We include the two-sided
+95% condence interval. We focus on the period January 2014-May 2021 with
+the signicant ocean warming events in 2014 and 2015 captured in the top two
+panels. The winter cooling in 2016-17 and the warming events in 2019 and 2020
+are presented in the lower panels.
+31

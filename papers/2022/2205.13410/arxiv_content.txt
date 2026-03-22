@@ -1,0 +1,757 @@
+EQUATION -FREE SURROGATE MODELING OF GEOPHYSICAL
+FLOWS AT THE INTERSECTION OF MACHINE LEARNING AND
+DATA ASSIMILATION
+Suraj Pawar
+School of Mechanical & Aerospace Engineering,
+Oklahoma State University,
+Stillwater, Oklahoma - 74078, USA.
+supawar@okstate.eduOmer San
+School of Mechanical & Aerospace Engineering,
+Oklahoma State University,
+Stillwater, Oklahoma - 74078, USA.
+osan@okstate.edu
+ABSTRACT
+There is a growing interest in developing data-driven reduced-order models for atmospheric and
+oceanic ﬂows that are trained on data obtained either from high-resolution simulations or satellite
+observations. The data-driven models are non-intrusive in nature and offer signiﬁcant computational
+savings compared to large-scale numerical models. These low-dimensional models can be utilized to
+reduce the computational burden of generating forecasts and estimating model uncertainty without
+losing the key information needed for data assimilation to produce accurate state estimates. This
+paper aims at exploring an equation-free surrogate modeling approach at the intersection of machine
+learning and data assimilation in Earth system modeling. With this objective, we introduce an end-to-
+end non-intrusive reduced-order modeling (NIROM) framework equipped with contributions in modal
+decomposition, time series prediction, optimal sensor placement, and sequential data assimilation.
+Speciﬁcally, we use proper orthogonal decomposition (POD) to identify the dominant structures of
+the ﬂow, and a long short-term memory network to model the dynamics of the POD modes. The
+NIROM is integrated within the deterministic ensemble Kalman ﬁlter (DEnKF) to incorporate sparse
+and noisy observations at optimal sensor locations obtained through QR pivoting. The feasibility and
+the beneﬁt of the proposed framework are demonstrated for the NOAA Optimum Interpolation Sea
+Surface Temperature (SST) V2 dataset. Our results indicate that the NIROM is stable for long-term
+forecasting and can model dynamics of SST with a reasonable level of accuracy. Furthermore, the
+prediction accuracy of the NIROM gets improved by almost one order of magnitude by the DEnKF
+algorithm. This work provides a way forward toward transitioning these methods to fuse information
+from large-scale Earth system models and diverse observations to achieve accurate forecasts.
+1 Introduction
+The integration of models and observations has greatly transformed the predictions of the Earth system, including
+weather forecasts and climate projections [1, 2]. Observations can be either used to estimate the initial condition for
+the prediction that is consistent with the present state of the Earth system through the process of data assimilation
+or to reduce model errors by advancing the representation of certain processes within a model. Data assimilation
+(DA) is a well-established method that involves combining information coming from the forecast model with available
+observations and are used extensively in numerical weather prediction (NWP) [3 –5]. DA can also be viewed from the
+Bayesian perspective that involves fusing data (observations) with the prior knowledge (i.e., mathematical representation
+of physical processes; model output) to obtain an estimate of the distribution of the true state of the process [6, 7].
+DA methods are usually classiﬁed into two types, variational approaches and sequential approaches [8]. Variational DA
+is formulated as the constrained optimization problem deﬁned by a cost function to minimize the discrepancy between
+the prior knowledge (i.e., the computational model) and observations. On the other hand, the sequential DA involves
+evolving the state of the system with background information until observations get available, and then updating the
+system’s state. One of the key components of the DA cycle is the forecast model. The forecast models used within
+DA are based on solving the governing equations or the best approximation of physical processes numerically using
+spatial and temporal discretization on a computational grid [9]. Despite their success, the current forecast models havearXiv:2205.13410v1  [physics.flu-dyn]  26 May 2022
+difﬁculty representing complex processes like turbulence, convection and clouds [10, 11] leading to high uncertainty
+in the prediction [12]. Additionally, the computational cost of ensemble forecasting (using many realizations with
+perturbed initial conditions) with numerical models is huge. As a result, the forecast model is one of the major limiting
+factors in DA, and this has spurred interest in using data-driven methods for the Earth system modeling that can deliver
+both computational efﬁciency and better representation of physical processes derived from data [13, 14].
+Data-driven methods have been applied to a wide range of problems in Earth system modeling [15]. For example,
+machine learning approaches have been explored for parameterization of subgrid-scale processes [16 –18], precipitation
+nowcasting [19], superresolution of wind and solar data [20], and weather forecasting [21]. Some of the studies
+with the data-driven weather prediction (DDWP) have already started showing promising results with similar if not
+superior performance compared to state-of-the-art NWP models [22 –24]. These DDWP models leverage deep learning
+methods like a convolutional neural network, Fourier neural operator, and recurrent neural network that are trained
+on data obtained from reanalysis products [25]. Furthermore, data-driven models can be augmented by taking up the
+information from physical knowledge, or at least respecting the conservation properties [26 –29]. Some of the work
+towards these directions include enforcing the physical laws or statistical constraint into the loss function [30, 31],
+tailoring the architecture design to enforce certain symmetry or conservation laws [32 –34], symbolic regression for
+equation discovery [35], and end-to-end learning strategy [36].
+These studies indicate that ML has the potential to improve scientiﬁc knowledge (and hence models), especially when
+we cannot express our understanding in the form of mathematical equations in physics-based models [37,38]. DA could
+beneﬁt a lot from ML, where a forecast model is replaced with a hybrid model that incorporates a neural network as a
+component of the physical model [39, 40] or as a complete replacement with a data-driven model for forecasting and
+state estimation [41, 42]. Another advantage of an ML-based emulator is the quick computation of backpropagation
+gradient with automatic differentiation that can be used as a replacement for expensive adjoint solvers within variational
+DA [43, 44]. Similarly, some of the challenges with ML such as handling uncertain and sparsely sampled data can be
+mitigated with DA. Brajard et al. [45] proposed a two-step process to learn the parameterization of unresolved processes
+where a neural network was trained to learn the model error obtained from the analysis state of the truncated model.
+Some other works at the intersection of DA and ML include iterative application of neural network and DA to learn
+the chaotic dynamics [46], enforcing conservation of mass constraint in DA [47], and for building tangent-linear and
+adjoint models of parameterization schemes in variational DA [48].
+In this work, we seek to build a data-driven surrogate model trained on the analysis data and integrate it with a sequential
+DA cycle. More speciﬁcally, we will focus on a class of data-driven methods that are based on projection-based
+reduced-order modeling (ROM). These methods ﬁrst extract the recurrent spatial structures from the high-dimensional
+data using singular value decomposition or convolutional autoencoder [49, 50]. The next step is to either solve the
+projected governing equations on the dominant modes [51, 52] or learn the projected dynamics with data-driven
+methods [53 –55]. The recurrent neural network is one of the most popular algorithms in modeling the dynamics of
+lower-dimensional latent space, and has been applied for a wide range of applications [56,57]. One of the advantages of
+using projection-based ROM as a surrogate model is that it allows for DA on a reduced-order space rather than on a
+full-state and this latent assimilation framework leads to substantial speed improvement in contrast to DA [58 –61]. The
+key challenge with latent assimilation is to link the real-time observations in physical space with the latent observation
+space [62]. Our approach for latent observation space construction is by ﬁrst identifying the near-optimal sensor
+locations using QR pivoting and then using the measurements at these discrete locations for reconstruction on a tailored
+basis [63].
+The paper is organized as follows. In Section 2.1, the surrogate modeling with proper orthogonal decomposition (POD)
+for dimensionality reduction, and a long short-term memory (LSTM) network for modeling dynamics is discussed. The
+detailed discussion on the deterministic ensemble Kalman ﬁlter (DEnKF) is provided in Section 2.2. The computation
+of the latent observation space is described in Section 2.3. In Section 3, the performance of the proposed framework
+is demonstrated for the NOAA Optimum Interpolation (OI) Sea Surface Temperature (SST) V2 dataset. Finally,
+concluding remarks are provided in Section 4.
+2 Methods
+In this section, we introduce different components of the proposed framework including surrogate modeling, sequential
+data assimilation, and optimal sensor placement strategy. The surrogate model is based on the projection-based model
+order reduction which relies on proper orthogonal decomposition (POD) and a recurrent neural network to model the
+dynamics of the latent space. This surrogate model is integrated within the sequential data assimilation to correct the
+forecast using real-time observations. The latent observation space is obtained by ﬁrst reconstructing the full state from
+point sensor measurements and then projecting it onto POD bases.
+2
+2.1 Surrogate Modeling
+Our surrogate model is constructed using the projection-based reduced-order modeling where the high-dimensional
+system is ﬁrst compressed to a low-dimensional system and the dynamics of the low-dimensional system is modeled.
+The compression is achieved by projecting the high-dimensional data onto a set of optimal linear basis functions
+obtained via POD [64, 65]. POD provides the optimal linear basis functions as they minimize the error between the true
+data and its projection in the L2sense compared to all other linear basis functions of the same dimension. Given the Ns
+snapshots of the data for a state variable x2Rn, we can form the matrix Aas follows
+A=
+x(1);x(2);:::;x(Ns)
+2RnNs; (1)
+wherex(k)corresponds to an individual snapshot in time. Then, we perform the reduced singular value decomposition
+(SVD) as follows
+A=UVT=NsX
+k=1kukvT
+k; (2)
+whereU2RnNsis a matrix with orthonormal columns which corresponds to the left-singular vectors, V2RNsNs
+is matrix with orthonormal columns representing the right-singular vectors, and 2RNsNsis a matrix with non-
+negative diagonal entries, called singular values, and are arranged such that 12Ns0. For the
+dimensionality reduction task, only the ﬁrst Nrcolumns ofUandV(denoted asUandV) are retained along with the
+upper-leftNrNrsub-matrix of (denoted as ). The reduced-order approximation of the matrix Acan be written
+as follows
+A=UVT: (3)
+The totalL2error between the snapshot data matrix Aand its reduced-order approximation Asatisﬁes the following
+equalities [66]
+kA Ak2= inf
+B2RnNs
+rank(B)NrkA Bk2=Nr+1; (4)
+wherekk2is the matrix-2 norm. Equation 4 states that across all possible matrices B2RnNsof rankNror less, the
+matrixAprovides the best approximation in the L2sense and the error between Aand itsNr-order approximation A
+equalsNr+1. From here on, the Nrcolumns ofUare called as the POD modes or basis functions and we denote them
+as=fkgNr
+k=1. Once the POD modes are obtained, the compressed latent space for a single state vector xcan be
+written as
+=Tx; (5)
+whereis the reduced-order approximation of the full state vector xand is also referred to as the POD modal
+coefﬁcients. The reconstruction of the state vector is then computed as
+x==Tx; (6)
+wherexis the optimal reconstruction of full state vector x. The number of retained modes, i.e., Nr, is decided based
+on the variance of the data captured by the retained modes. The singular values igive a measure of the quality of
+information that is retailed in Nr-order approximation of the matrix A. The amount of the energy retained by POD
+modes can be calculated using the quantity called the relative information content (RIC) as follows
+RIC(Nr) =PNr
+j=12
+jPNs
+j=12
+j(7)
+The second step of the surrogate modeling is to model the evolution of the latent variables. If the exact equations
+governing the physical system are known, intrusive approaches like Galerkin projection can be applied to build the
+ROM. The ROM is obtained by substituting the low-rank approximation into the full order model and then taking
+the inner product with test basis functions to yield a system of Nrordinary differential equations (ODEs). However,
+for geophysical systems, the exact governing equations are unavailable or insufﬁcient for the desired purpose (for
+example due to coarse grid resolution). On the other hand, the reasonably accurate and complete observational data for
+the evolution of the state of the system has been collected for many decades. This situation makes the equation-free
+techniques for predicting the future state of the dynamical system very attractive for multiscale and chaotic dynamical
+system modeling [67 –69]. Recently, machine learning methods based on recurrent neural network have been applied
+successfully in many studies to build the non-intrusive ROM [56].
+3
+We apply the long short-term memory (LSTM) neural network to model the evolution of the latent variables. LSTM has
+been successfully applied in many studies dealing with modeling high-dimensional spatio-temporal chaotic dynamics
+of physical systems [54, 70, 71]. LSTM is a type of recurrent neural network (RNN) that can capture the long-term
+dependencies in the evolution of time series data [72]. RNNs contain loops that allow them to persist information from
+one time step to another and can be expressed as
+h(t)=fh!h(o(t);h(t 1)); (8)
+~o(t+1)=fh!o(h(t)); (9)
+where h(t)2Rdhis the hidden state at time t,o(t)2Rdhis the input vector at time t,fh!his the hidden to hidden
+mapping, and fh!ois the hidden to output mapping. The output of the model is the forecast ~o(t+1)at time stept+ 1.
+One of the limitations of RNNs is vanishing (or exploding) gradient to capture the long-term dependencies. This
+problem occurs because the gradient is multiplied with the weight matrix repetitively during backpropagation through
+time (BPTT) [73]. The LSTM mitigates this issue by employing a memory cell composed of gating mechanism that
+decides which information to memorized or forgotten. The equations that implicitly deﬁne the mapping from hidden
+state of the previous time step (i.e., h(t 1)) and input vector at the current time step (i.e., o(t)) to the forecast hidden
+state (i.e., h(t)) can be written as follows
+g(t)
+f=(Wf[h(t 1);o(t)] +bf); (10)
+g(t)
+i=(Wi[h(t 1);o(t)] +bi); (11)
+~c(t)=tanh(Wc[h(t 1);o(t)] +bc); (12)
+c(t)=g(t)
+fc(t 1)+g(t)
+i~c(t); (13)
+g(t)
+o=(Wo[h(t 1);o(t)] +bo); (14)
+h(t)=g(t)
+otanh(c(t)); (15)
+where g(t)
+f;g(t)
+i;g(t)
+o2Rdhare the forget gate, input gate, and output gate, respectively. The o(t)2Rdiis the input
+vector at time t,h(t)2Rdhis the hidden state, c(t)2Rdhis the cell state, Wf;Wi;Wc;Wo2Rdh(dh+di)
+are the weight matrices, and bf;bi;bc;bo2Rdhare the bias vectors. The symbol denotes the element-wise
+multiplication, and is the sigmoid activation function, i.e., (x) = (1=(1 +e x)). The above set of equations are
+unfolded in time to model the temporal dependencies in predicting future state o(t+1)given o(t);o(t 1);;o(t l).
+Thelis referred to as the lookback window which governs how much amount of the old temporal information is
+required to forecast the future state of the system accurately.
+When we utilize the LSTM network for constructing a surrogate model, the reduced-order state of the system at a future
+time step, i.e., (k+1), is learned as the function of a short history of lpast temporally consecutive reduced-order states
+as follows
+(k+1)=F((k);(k 1);:::;(k l+1)
+|{z}
+(k):(k l+1);); (16)
+whereF(;)is the nonlinear function parameterized by a set of parameters , andis the low-dimensional
+approximation of the full state vector, i.e., the POD modal coefﬁcients given in Eq. 5. Since the surrogate model does
+not use any governing equations of the system, it is also referred to as the non-intrusive reduced-order model (NIROM).
+2.2 Data Assimilation
+We consider the dynamical system whose evolution can be represented as
+x(k+1)=Mtk!tk+1(x(k)) +w(k+1); (17)
+wherex(k)2Rnis the state of the system at discrete time tk, andMtk!tk+1:Rn!Rnis the nonlinear model
+operator that deﬁnes the evolution of the system over the interval [tk;tk+1]. The termw(k+1)denotes the model error
+that takes into account any type of uncertainty in the model that can be attributed to boundary conditions, imperfect
+models, etc. Let z(k)2Rmbe observations of the state vector obtained from sparse, noisy measurements and can be
+written as
+z(k+1)=q(x(k+1)) +v(k+1); (18)
+4
+whereq()is a nonlinear function that maps Rn!Rm, andv(k+1)2Rmis the measurement noise. We assume that
+the measurement noise is a white Gaussian noise with zero mean and the covariance matrix R(k+1), i.e.,v(k+1)
+N(0;R(k+1)). Additionally, the noise vectors w(k+1)andv(k+1)are assumed to be uncorrelated to each other at all
+time steps.
+The sequential DA can be considered as a Bayesian inference framework that estimates the state x(k+1)of the system
+given the observations up to time tk+1, i.e.,z(1);:::;z(k+1). When we utilize observations to estimate the state of the
+system, we say that the data are assimilated into the model, and use the notation bx(k+1)to denote an analyzed state
+estimate of the system at time tk+1. When all the observations before (but not including) time tk+1are applied for
+estimating the state of the system, then we call it the forecast estimate and denote it as x(k+1)
+f. The ensemble Kalman
+ﬁlter (EnKF) [74] follows the Monte Carlo estimation method to approximate the covariance matrix in the Kalman ﬁlter
+equations [75]. Instead of modeling the exact evolution of a probability density function under nonlinear dynamics,
+ensemble methods maintain an empirical approximation to the target distribution in the form of a set of ensemble
+memberscX(k)(i)fori= 1:::N . We begin by initializing the state of the system for different ensemble members
+cX(0)(i)drawn from the distribution N(bx(0);P(0)), wherebx(0)represents the best-known state estimate at time t0,
+andP(0)is the initial covariance error matrix.
+The propagation of the state for each ensemble member over the time interval [tk;tk+1]can be written as
+X(k+1)
+f(i) =Mtk!tk+1(cX(k)(i)) +w(k+1): (19)
+The prior state and the covariance matrix are approximated using the sample mean and error covariance matrix P(k+1)
+f
+as follows
+x(k+1)
+f=1
+NNX
+i=1X(k+1)
+f(i); (20)
+A(k+1)
+f(i) =X(k+1)
+f(i) x(k+1)
+f; (21)
+P(k+1)
+f=1
+N 1NX
+i=1A(k+1)
+f(i)(A(k+1)
+f(i))T; (22)
+where the superscript Tdenotes the transpose, and A(k+1)
+f(i)is the anomalies between the forecast estimate for the
+ith ensemble and the sample mean. Once the observations get available at time tk+1, the forecast state estimate is
+assimilated using the Kalman ﬁlter analysis equation as follows
+bx(k+1)=x(k+1)
+f+K(k+1)[z(k+1) q(x(k+1)
+f)]: (23)
+Unlike the EnKF algorithm, the DEnKF does not employ any perturbed observations. The Kalman gain matrix is
+computed using its square root version (without storing or computing P(k+1)
+fexplicitly) as follows
+K(k+1)=A(k+1)
+f(Q(k+1)A(k+1)
+f)T
+N 1(Q(k+1)A(k+1)
+f)(Q(k+1)A(k+1)
+f)T
+N 1+R(k+1) 1
+;(24)
+whereQ2Rmnis the Jacobian of the observation operator (i.e., Qkl=@qk
+@xl), and the matrixA(k+1)
+f2RnNis
+concatenated as follows
+A(k+1)
+f= [A(k+1)
+f(1);A(k+1)
+f(2);:::;A(k+1)
+f(N)]: (25)
+The anomalies for all ensemble members are then updated separately with half the Kalman gain as shown below
+bA(k+1)(i) =A(k+1)
+f(i) 1
+2K(k+1)Q(k+1)A(k+1)
+f(i): (26)
+The state for all ensemble members is updated by adding ensemble anomalies to analysis state estimate and can be
+written as
+cX(k+1)(i) =bx(k+1)+bA(k+1)(i); (27)
+5
+whereis the inﬂation factor to account for modeling errors. Inﬂation and covariance localization approaches are
+usually used in the EnKF framework to mitigate small number of ensembles [76 –78]. The above ensembles are used as
+initial ensembles for the next assimilation cycle and the procedure is continued.
+The DA procedure described so far corresponds to the full state vector of the system. However, in this study, the
+forward model is replaced with the surrogate model, and therefore, we perform the data assimilation in the latent
+space. The similar ideas have also been used in other studies that deals with the data assimilation for reduced-order
+models [43, 59, 61]. Once the LSTM network is trained, it is used to forecast the future state of the POD modal
+coefﬁcients in an auto-regressive manner [79]. The evolution of the reduced-order model over the interval [tk;tk+1]
+with the LSTM network is given as follows
+(k+1)
+f=Ftk!tk+1(b(k)); (28)
+where(k+1)
+fis the low-dimensional forecast estimate of the system, and b(k)is the low-dimensional analyzed state of
+the system at time tk. Once the observations at time tk+1gets available, they need to be processed to obtain the latent
+observationse(k+1). Usually, the observations are available at very few sparse locations, i.e., m<<n , and therefore,
+they need to be mapped from observation-space Rmto state-space Rnthrough some reconstruction technique. Peyron
+et al. [61] used the simple interpolation to learn this mapping while applying data assimilation to the indoor air quality
+problem. We utilize the POD reconstruction augmented with QR pivoting for learning the map from observations to
+full state, and its further details are provided in Section 2.3. The analysis equation in the latent space can be written as
+follows
+b(k+1)=(k+1)
+f+fK(k+1)[e(k+1) q(e(k+1)
+f)]: (29)
+The Kalman gain matrix in Eq.29 is calculated as follows
+fK(k+1)=eA(k+1)
+f(eQ(k+1)eA(k+1)
+f)T
+N 1(eQ(k+1)eA(k+1)
+f)(eQ(k+1)eA(k+1)
+f)T
+N 1+eR(k+1) 1
+;(30)
+whereeQ2RNrNris the Jacobian of the latent observation operator, and the matrix eA(k+1)
+f2RNrNis formed in
+latent space similar to Eq.25.
+2.3 Reconstruction from Discrete Sensor Locations
+As discussed previously, we need to reconstruct the full state of the system from limited number of discrete sensor
+locations. The low-rank approximation methods based on POD modes are one of the most popular method for the
+reconstruction task, where the sensor data is used to estimate the POD modal coefﬁcients [63, 80]. Additionally, the
+QR decomposition with column pivoting is used for the near-optimal sensor placement in contrast to random sensor
+placement. We are interested in estimating the full state of the system given the sensor measurements s2Rmat
+discrete locations. For this case, we have si=xjfor some 1imand1jn. We can write this as follows
+s=x; (31)
+where 2Rmnis constructed by taking mrows ofnnidentity matrix. Therefore, each row of the matrix will
+consist of all zeros except for the corresponding observation location, where it will have the value of one. We use the
+ﬁrstmPOD modes obtained from singular value decomposition of the matrix Agiven in Eq. 1 for the reconstruction
+task and is denoted as 	2Rnm(i.e., the ﬁrst mcolumns ofU). The 	is also referred to as the tailored basis
+functions in the literature. The approximation of the full state is given by
+xex=	a; (32)
+where a2Rm. Once the sensor measurements gets available, the POD modal coefﬁcients for the new sample can be
+calculated as follows
+s	a; (33)
+a= (	) 1s: (34)
+Once the POD modal coefﬁcients for the new sample is determined, the full state of the system can be reconstructed
+using Eq. 32. The latent observations for data assimilation are computed by projecting the reconstructed data onto the
+POD basis functions as follows
+e=Tex: (35)
+6
+So far, we did not discuss the choice of the matrix . The choice of the sensor locations can have a signiﬁcant impact
+on the accuracy of the full state reconstruction. The sensor locations can be chosen either randomly or based on some
+heuristics or intuition of the physical problem. There are several techniques like optimal experimental design [81] and
+Bayesian criteria [82] that can be used to determine the optimal sensor locations for moderately sized problems. The
+QR factorization is a powerful and robust data-driven method to determine the near-optimal sensor locations solely
+based on the data [63, 80]. In this method, we perform the QR decomposition with column pivoting of the matrix 	T.
+The QR decomposition calculates a column permutation matrix CT2Rnn, an orthogonal matrix Q2Rmm, and
+an upper triangular matrix R2Rmnsuch that 	TCT=QR . The greedy approximation of the optimal sensor
+locations is obtained from the ﬁrst mrows of matrix C, i.e., by setting =C, whereCcorresponds to ﬁrst mrows of
+the matrix C[63, 83]. We note here that one can also use the QR decomposition method for oversampled case, where
+the number of sensor exceeds the number of tailored basis functions used for reconstruction.
+3 Results and Discussion
+We ﬁrst describe the NOAA Optimum Interpolation (OI) Sea Surface Temperature (SST) V2 dataset used in this study
+for building a surrogate model and then integrating it within the data assimilation cycle. Then we present our numerical
+experimental results where we analyze the performance of our surrogate model and surrogate model assisted data
+assimilation framework.
+3.1 Dataset and Preprocessing
+We use the NOAA OI SST V2 analysis dataset for building our surrogate model. The analysis uses in situ (ship and
+buoy) and satellite SSTs plus SSTs simulated by the sea-ice cover. Before computing the analysis, the satellite data is
+adjusted for biases using the method of Reynolds [84] and Reynolds and Marsico [85]. This dataset consists of the
+weekly average sea surface temperature on a 1latitude1longitude global grid ( 180360). The SST dataset
+exhibits a strong periodic structure due to seasonal ﬂuctuations. Despite this seasonal periodicity, complex ocean
+dynamics lead to rich ﬂow physics in this dataset. This dataset has been used in number of recent studies on ﬂow
+reconstruction [86], geophysical emulation [87], and dynamic mode decomposition [88]. Here, we use the data from
+October 1981 to December 2000 (1000 snapshots) for building a surrogate model and the data from January 2001 to
+June 2018 (914 snapshots) for comparing the performance of the surrogate model for forecasting.
+3.2 Numerical Experiments
+In this subsection, we detail the numerical experiment design to assess the performance of NIROM and the integration
+of NIROM with DA, i.e., NIROM-DA. First, we use the data from October 1981 to December 2000 (1000 snapshots)
+to identify the POD basis functions. The masking operation is used to remove the data that correspond to the land
+area prior to its utilization for surrogate modeling. The temporal mean is also subtracted from the data and the POD is
+carried out for the unsteady component of the SST ﬁeld. The ﬁrst four POD modes capture approximately 90% of the
+variance of the data and are enough to capture the long-term and seasonal trends in the SST. Therefore, we ﬁx Nr= 4
+in this study. The ﬁrst four POD bases computed with POD are shown in Fig. 1. The next step is to train the LSTM
+network to learn the dynamics of a reduced-order system and a lookback window of l= 4is used. Once the LSTM
+is trained, the model is deployed in auto-regressive manner for dynamical system forecasting. In the auto-regressive
+deployment, the initial condition for ltime steps is used to predict the forecast state of the system at (l+ 1) th time step.
+Then the state of the system from (2) (l+ 1) is used to determine the forecast state at (l+ 2) th time step. The LSTM
+network architecture used in this study employs skip-connection after every hidden layer and is displayed in Fig. 2. The
+input and output data for training the LSTM network is scaled between [ 1;1]to accelerate the training. The LSTM
+network utilizes three layers of stacked cells, 80 neurons per LSTM cell, and a ReLU activation function. The LSTM
+network is trained using an Adam optimizer with the learning rate of 110 3and the weights of the network are
+initialized with the random normal initializer. The hyperparameters of the network are determined based on previous
+studies [89], and considerations of computational efﬁciency.
+Once the surrogate model for SST is built, it is integrated into the DA cycle. The performance of the NIROM-DA
+framework is analyzed using a twin experiment for the period of January 2001 to June 2018. This data was not utilized
+in any stage of the NIROM construction. This ensures that there is no overlap in the training and online deployment of
+the surrogate model. For our twin experiment, the observations are generated by adding noise drawn from the Gaussian
+distribution with zero mean and the covariance matrix Rk, i.e.,vkN(0;Rk). We useRk=2
+bI, wherebis the
+standard deviation of measurement noise and is set at b= 1. The observations are assumed to be collected only at
+discrete locations and the sensor locations are determined using the QR pivoting. We utilize only 300 discrete sensors
+for the reconstruction and this corresponds to less than 1% of the full state of the system. This number is also very
+7
+Figure 1: The ﬁrst four leading POD modes extracted from the SST dataset. The temporal mean was subtracted from
+the data and the POD modes are computed for he unsteady component of the SST ﬁeld.
+close to the optimal rank truncation threshold determined for this dataset from previous studies [63]. The number of
+tailored basis functions is also set equal to the number of sensors to avoid the intractable computation associated with
+the oversampled case. As discussed in Section 2.3, the tailored basis functions are just the POD modes, and we can
+measure the variance of the data captured by these modes using their singular values. The ﬁrst 300 POD modes capture
+approximately more than 99.5% of the variance of the data and this leads to the improved reconstruction of small-scale
+features. Fig. 3 depicts the near-optimal sensor locations determined through QR pivoting.
+Figure 2: LSTM network architectures used for modeling the dynamics of reduced-order dynamical system. The LSTM
+is trained to predict the future forecast state of the system based on the previous four consecutive states of the system.
+8
+Figure 3: Optimal sensor locations for reconstruction obtained using QR. These locations are informative about the
+ocean dynamics in contrast to random selection of sensor locations.
+The initialization of ensembles is very important for the sequential DA [90]. We experimented with three methods
+for initialization of ensembles, the ﬁrst method is using random snapshots collected over some time to initialize the
+ensembles, the second one is adding random perturbation to the full state and then projecting it onto POD basis functions,
+and the third method is to add a random perturbation to the reduced-order state of the system. The ﬁrst method is not
+suitable for our problem because of the seasonality in the dataset and this leads to the phase difference between the
+initial condition of ensembles. The second method did not lead to sufﬁcient variability in the initial condition of the
+ensembles. The third approach ensures that the initial condition for all ensembles is sufﬁciently different without having
+any phase difference. Since we are doing both the forecast and data assimilation in latent space, the approach of adding
+a random perturbation to the true latent space is more suitable for our problem. Once all the ensembles are initialized,
+the forecasting is started using the NIROM in an auto-regressive manner. The observations are assimilated every third
+week to correct the initial condition for the future forecast. As discussed previously, the latent observations are obtained
+by ﬁrst reconstructing the full state using the information at discrete sensor locations and tailored basis functions. The
+full state is then projected onto POD modes to compute latent observations for assimilation. The number of ensembles
+is set at 40 and the inﬂation factor of 1.5 is used to account for model error.
+Fig. 4 shows the evolution of POD modal coefﬁcients for the forecasting period, i.e., 2001-2018. The POD modal
+coefﬁcients can be interpreted as the contribution of different spatial frequencies (i.e., basis functions) in the evolving
+ﬂow. One can observe that the ﬁrst three modal coefﬁcients are responsible for capturing the seasonal dynamics, and
+hence do not exhibit strong chaotic behavior. The fourth modal coefﬁcient is signiﬁcantly more chaotic than the ﬁrst
+three modal coefﬁcients due to the stochastic nature of small-scale ﬂuctuations. The prediction from the NIROM is
+quite accurate in the initial period and the error gradually increases with time. This is a well-known limitation of
+the auto-regressive deployment of the LSTM for modeling the evolution of dynamical systems [87, 91] and can be
+attributed to the error accumulation over time. The difference is particularly considerable for the ﬁrst modal coefﬁcient
+where there is a large phase difference between the true dynamics and predicted dynamics near the ﬁnal time. Similar
+errors are also observed for the second and third modal coefﬁcients along with a very inaccurate prediction for the
+fourth modal coefﬁcient. The NIROM-DA framework can provide an analysis state that is very close to the true modal
+coefﬁcients. The phase difference between the true and analyzed modal coefﬁcients is very small leading to accurate
+modeling of seasonal dynamics. The analysis state of the fourth modal coefﬁcient is also very close to the true state,
+meaning that the small-scale ﬂuctuations are captured accurately with the NIROM-DA framework.
+Next, we analyze the performance of NIROM and NIROM-DA frameworks in the reconstruction of the temperature
+ﬁeld. The temperature ﬁeld is reconstructed using the predicted modal coefﬁcients and the POD basis functions with
+Eq. 6. We note here that the performance of our surrogate model strategy is limited by the number of POD modes used
+and the energy captured by those POD modes. Thus, we can at the most recover the true projection (TP) of the analysis
+9
+Figure 4: Evolution of the POD modal coefﬁcients for the forecasting (i.e., 2001-2018 period) of the sea surface
+temperature data. Predictions are started with an ensemble of 40 noisy observations.
+temperature ﬁeld (also referred to as the FOM) onto the POD modes. One can also interpret TP as the ﬁltered version
+of the analysis temperature ﬁeld. Thus, for our analysis, the root mean squared error (RMSE) is computed between
+the TP temperature ﬁeld and the reconstructed temperature ﬁeld from NIROM and NIROM-DA frameworks. Fig. 5
+displays the evolution of RMSE in degrees Celsius for the forecasting period. Overall the RMSE for NIROM-DA is one
+order of magnitude less than using only NIROM for the prediction. The probability density of the RMSE for NIROM
+and NIROM-DA approaches is displayed in Fig. 6. The RMSE for NIROM lies mostly between 0:5Celsius to 1:5
+Celsius, while the RMSE for NIROM-DA is mostly centered around 0:2Celsius. This shows that a pure data-driven
+surrogate model can be built by exploiting the observational data collected over many decades and it can provide a
+sufﬁcient level of accuracy in forecasting. Furthermore, the prediction from the forecast model can be improved using
+online sensor measurement in a computationally efﬁcient manner using latent assimilation.
+The quantitative ﬁndings for the NIROM and NIROM-DA frameworks are further supported by the visualization of the
+temperature ﬁeld at two different times. Fig. 7 displays the temperature ﬁeld on September 14, 2009 and the temperature
+ﬁeld on June 21, 2018 is shown in Fig. 8. As we are retaining only four POD modes for the surrogate model, some
+of the small-scale features of the exact temperature ﬁeld (i.e., FOM) are not captured by TP. While these small-scale
+features can be captured by retaining a large number of POD modes, training a recurrent neural network to learn the
+dynamics of lower-energy POD modes will require additional treatment. One potential solution for this can be the
+non-linear proper orthogonal decomposition (NLPOD) where an autoencoder is used to compress a large number of
+POD modal coefﬁcients [92]. From Fig. 7, it is seen that even though larger structures in the ﬂow are captured by
+NIROM, the error is higher for NIROM compared to NIROM-DA, especially in the northern hemisphere region. Similar
+10
+Figure 5: The RMSE (in degree Celsius) for the forecast (i.e., 2001-2018 period) between the projection of observed
+weekly average SST data onto four POD modes and the forecast obtained from NIROM, and NIROM-DA approaches.
+Figure 6: The distribution of the forecast RMSE in degree Celsius for NIROM (left) and NIROM-DA (right).
+11
+Figure 7: Sample averaged temperature forecasts in degrees Celsius for the week of September 14, 2009. The FOM
+corresponds to actual observed averaged sea surface temperature and the TP corresponds to the projection of the FOM
+data onto four POD modes. The error for NIROM and NIROM-DA are calculated as the difference between the TP
+ﬁeld and the predicted ﬁeld.
+observations are also noted in Fig. 8, where the error for NIROM is larger than the NIROM-DA in both the northern
+and southern hemisphere regions.
+4 Concluding Remarks
+In this paper, we propose a novel framework to construct a non-intrusive reduced order model (NIROM) for geophysical
+ﬂow emulation and integrate this low-dimensional model within the deterministic ensemble Kalman ﬁlter (DEnKF)
+algorithm to assimilate sparse and noisy observations in the latent space. The NIROM is based on a proper-orthogonal
+decomposition to identify the dominant modes from the data and then uses a recurrent neural network to learn the
+dynamics of low-dimensional latent space. This surrogate modeling strategy exploits the archival of observational data
+without relying on any kind of governing equations. One of the critical components of the proposed framework is the
+reconstruction of full state form sparse and noisy discrete sensor measurement. This is achieved using the least square
+estimation to map the information at near-optimal sensor locations determined through QR pivoting to the full state of
+the system. The latent observations for assimilation are generated by projecting this full state onto the POD modes.
+We demonstrate the performance of our framework for the NOAA Optimum Interpolation Sea Surface Temperature
+(SST) analysis dataset. The NIROM is able to achieve a stable long-range forecast along with predicting larger structures
+in the temperature ﬁeld with a sufﬁcient level of accuracy. Once the NIROM is integrated within the DEnKF, the
+prediction is improved quantitatively by almost one order of magnitude. The results show that the NIROM can be
+readily coupled with the DA and latent space trajectory can be corrected every time sparse and noisy observations get
+12
+Figure 8: Sample averaged temperature forecasts in degrees Celsius for the week of June 21, 2018. The FOM
+corresponds to actual observed averaged sea surface temperature and the TP corresponds to the projection of the FOM
+data onto four POD modes. The error for NIROM and NIROM-DA are calculated as the difference between the TP
+ﬁeld and the predicted ﬁeld.
+available. With this framework, the computational saving is achieved through the replacement of a forward numerical
+solver with a data-driven model, and assimilation in latent space in contrast to the full state of the system. The proposed
+framework is extremely ﬂexible and other algorithms can be easily accommodated. For example, one can use algorithms
+like convolutional autoencoder for dimensionality reduction, or shallow decoder for the reconstruction of full state from
+sparse discrete measurements. Furthermore, the NIROM can be easily differentiated with automatic differentiation and
+can be utilized in variational DA settings.
+Finally, we point out that there is a number of future research directions that one can take. One such future direction is
+to improve the performance of the surrogate model by incorporating more modes to capture the low-energy content and
+frameworks like non-linear proper orthogonal decomposition [92] can be exploited for that. Another future research
+direction is to enhance the robustness of a long short-term memory network by reducing error accumulation during its
+auto-regressive deployment [91]. Our future work will also include exploring multi-ﬁdelity data assimilation where a
+few ensembles of high-ﬁdelity numerical solvers will be complemented with a large ensemble of data-driven models for
+forecasting [93] and employ a shallow decoder for full state reconstruction [94].
+Acknowledgements
+This material is based upon work supported by the U.S. Department of Energy, Ofﬁce of Science, Ofﬁce of Advanced
+Scientiﬁc Computing Research under Award Number DE-SC0019290. O.S. gratefully acknowledges their support.
+Disclaimer: This report was prepared as an account of work sponsored by an agency of the United States Government.
+13
+Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty,
+express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any
+information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.
+Reference herein to any speciﬁc commercial product, process, or service by trade name, trademark, manufacturer, or
+otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States
+Government or any agency thereof. The views and opinions of authors expressed herein do not necessarily state or
+reﬂect those of the United States Government or any agency thereof.
+References
+[1]Andrew Gettelman, Alan J Geer, Richard M Forbes, Greg R Carmichael, Graham Feingold, Derek J Posselt,
+Graeme L Stephens, Susan C van den Heever, Adam C Varble, and Paquita Zuidema. The future of earth system
+prediction: Advances in model-data fusion. Science Advances , 8(14):eabn3488, 2022.
+[2]Peter Bauer, Bjorn Stevens, and Wilco Hazeleger. A digital twin of earth for the green transition. Nature Climate
+Change , 11(2):80–83, 2021.
+[3]Andrew C. Lorenc. The potential of the ensemble kalman ﬁlter for nwp—a comparison with 4d-var. Quarterly
+Journal of the Royal Meteorological Society , 129(595):3183–3203, 2003.
+[4]Florence Rabier. Overview of global data assimilation developments in numerical weather-prediction centres.
+Quarterly Journal of the Royal Meteorological Society , 131(613):3215–3233, 2005.
+[5]Ionel M. Navon. Data Assimilation for Numerical Weather Prediction: A Review , pages 21–65. Springer Berlin
+Heidelberg, Berlin, Heidelberg, 2009.
+[6]Christopher K Wikle and L Mark Berliner. A bayesian tutorial for data assimilation. Physica D: Nonlinear
+Phenomena , 230(1-2):1–16, 2007.
+[7]Eugenia Kalnay. Atmospheric modeling, data assimilation and predictability . Cambridge university press, 2003.
+[8]John M Lewis, Sivaramakrishnan Lakshmivarahan, and Sudarshan Dhall. Dynamic data assimilation: a least
+squares approach , volume 13. Cambridge University Press, 2006.
+[9]Peter Bauer, Alan Thorpe, and Gilbert Brunet. The quiet revolution of numerical weather prediction. Nature ,
+525:47–55, 09 2015.
+[10] Jun-Ichi Yano, Michał Z. Ziemia ´nski, Mike Cullen, Piet Termonia, Jeanette Onvlee, Lisa Bengtsson, Alberto
+Carrassi, Richard Davy, Anna Deluca, Suzanne L. Gray, Víctor Homar, Martin Köhler, Simon Krichak, Silas
+Michaelides, Vaughan T. J. Phillips, Pedro M. M. Soares, and Andrzej A. Wyszogrodzki. Scientiﬁc challenges of
+convective-scale numerical weather prediction. Bulletin of the American Meteorological Society , 99(4):699 – 710,
+2018.
+[11] David A. Randall, Cecilia M. Bitz, Gokhan Danabasoglu, A. Scott Denning, Peter R. Gent, Andrew Gettelman,
+Stephen M. Grifﬁes, Peter Lynch, Hugh Morrison, Robert Pincus, and John Thuburn. 100 years of earth system
+model development. Meteorological Monographs , 59:12.1 – 12.66, 2018.
+[12] Mark D Zelinka, Timothy A Myers, Daniel T McCoy, Stephen Po-Chedley, Peter M Caldwell, Paulo Ceppi,
+Stephen A Klein, and Karl E Taylor. Causes of higher climate sensitivity in cmip6 models. Geophysical Research
+Letters , 47(1):e2019GL085782, 2020.
+[13] Peter D Dueben and Peter Bauer. Challenges and design choices for global weather and climate models based on
+machine learning. Geoscientiﬁc Model Development , 11(10):3999–4009, 2018.
+[14] Sid-Ahmed Boukabara, Vladimir Krasnopolsky, Stephen G Penny, Jebb Q Stewart, Amy McGovern, David Hall,
+John E Ten Hoeve, Jason Hickey, Hung-Lung Allen Huang, John K Williams, et al. Outlook for exploiting
+artiﬁcial intelligence in the earth and environmental sciences. Bulletin of the American Meteorological Society ,
+102(5):E1016–E1032, 2021.
+[15] Markus Reichstein, Gustau Camps-Valls, Bjorn Stevens, Martin Jung, Joachim Denzler, Nuno Carvalhais, et al.
+Deep learning and process understanding for data-driven earth system science. Nature , 566(7743):195–204, 2019.
+[16] Stephan Rasp, Michael S Pritchard, and Pierre Gentine. Deep learning to represent subgrid processes in climate
+models. Proceedings of the National Academy of Sciences , 115(39):9684–9689, 2018.
+[17] David John Gagne, Hannah M Christensen, Aneesh C Subramanian, and Adam H Monahan. Machine learning for
+stochastic parameterization: Generative adversarial networks in the Lorenz’96 model. Journal of Advances in
+Modeling Earth Systems , 12(3):e2019MS001896, 2020.
+14
+[18] Thomas Bolton and Laure Zanna. Applications of deep learning to ocean data inference and subgrid parameteriza-
+tion. Journal of Advances in Modeling Earth Systems , 11(1):376–399, 2019.
+[19] Xingjian Shi, Zhourong Chen, Hao Wang, Dit-Yan Yeung, Wai-Kin Wong, and Wang-chun Woo. Convolutional
+lstm network: A machine learning approach for precipitation nowcasting. Advances in neural information
+processing systems , 28, 2015.
+[20] Karen Stengel, Andrew Glaws, Dylan Hettinger, and Ryan N King. Adversarial super-resolution of climatological
+wind and solar data. Proceedings of the National Academy of Sciences , 117(29):16805–16815, 2020.
+[21] Jonathan A Weyn, Dale R Durran, and Rich Caruana. Can machines learn to predict weather? using deep learning
+to predict gridded 500-hpa geopotential height from historical weather data. Journal of Advances in Modeling
+Earth Systems , 11(8):2680–2693, 2019.
+[22] MG Schultz, Clara Betancourt, Bing Gong, Felix Kleinert, Michael Langguth, LH Leufen, Amirpasha Mozaffari,
+and Scarlet Stadtler. Can deep learning beat numerical weather prediction? Philosophical Transactions of the
+Royal Society A , 379(2194):20200097, 2021.
+[23] Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani,
+Thorsten Kurth, David Hall, Zongyi Li, and Kamyar Azizzadenesheli. Fourcastnet: A global data-driven high-
+resolution weather model using adaptive fourier neural operators. arXiv preprint arXiv:2202.11214 , 2022.
+[24] Stephan Rasp and Nils Thuerey. Data-driven medium-range weather prediction with a resnet pretrained
+on climate simulations: A new model for weatherbench. Journal of Advances in Modeling Earth Systems ,
+13(2):e2020MS002405, 2021.
+[25] Stephan Rasp, Peter D Dueben, Sebastian Scher, Jonathan A Weyn, Soukayna Mouatadid, and Nils Thuerey.
+Weatherbench: a benchmark data set for data-driven weather forecasting. Journal of Advances in Modeling Earth
+Systems , 12(11):e2020MS002203, 2020.
+[26] K Kashinath, M Mustafa, A Albert, JL Wu, C Jiang, S Esmaeilzadeh, K Azizzadenesheli, R Wang, A Chat-
+topadhyay, A Singh, et al. Physics-informed machine learning: case studies for weather and climate modelling.
+Philosophical Transactions of the Royal Society A , 379(2194):20200093, 2021.
+[27] George Em Karniadakis, Ioannis G Kevrekidis, Lu Lu, Paris Perdikaris, Sifan Wang, and Liu Yang. Physics-
+informed machine learning. Nature Reviews Physics , 3(6):422–440, 2021.
+[28] Matthew Chantry, Hannah Christensen, Peter Dueben, and Tim Palmer. Opportunities and challenges for machine
+learning in weather and climate modelling: hard, medium and soft ai, 2021.
+[29] Christopher Irrgang, Niklas Boers, Maike Sonnewald, Elizabeth A Barnes, Christopher Kadow, Joanna Staneva,
+and Jan Saynisch-Wagner. Towards neural earth system modelling by integrating artiﬁcial intelligence in earth
+system science. Nature Machine Intelligence , 3(8):667–674, 2021.
+[30] Maziar Raissi, Paris Perdikaris, and George E Karniadakis. Physics-informed neural networks: A deep learning
+framework for solving forward and inverse problems involving nonlinear partial differential equations. Journal of
+Computational physics , 378:686–707, 2019.
+[31] Jin-Long Wu, Karthik Kashinath, Adrian Albert, Dragos Chirila, Heng Xiao, et al. Enforcing statistical constraints
+in generative adversarial networks for modeling chaotic dynamical systems. Journal of Computational Physics ,
+406:109209, 2020.
+[32] Arvind T Mohan, Nicholas Lubbers, Daniel Livescu, and Michael Chertkov. Embedding hard physical constraints
+in neural network coarse-graining of 3d turbulence. arXiv preprint arXiv:2002.00021 , 2020.
+[33] Tom Beucler, Michael Pritchard, Stephan Rasp, Jordan Ott, Pierre Baldi, and Pierre Gentine. Enforcing analytic
+constraints in neural networks emulating physical systems. Physical Review Letters , 126(9):098302, 2021.
+[34] Suraj Pawar, Omer San, Adil Rasheed, and Prakash Vedula. Frame invariant neural network closures for Kraichnan
+turbulence. arXiv preprint arXiv:2201.02928 , 2022.
+[35] Laure Zanna and Thomas Bolton. Data-driven equation discovery of ocean mesoscale closures. Geophysical
+Research Letters , 47(17):e2020GL088376, 2020.
+[36] Hugo Frezat, Julien Le Sommer, Ronan Fablet, Guillaume Balarac, and Redouane Lguensat. A posteriori learning
+for quasi-geostrophic turbulence parametrization. arXiv preprint arXiv:2204.03911 , 2022.
+[37] AJ Geer. Learning earth system models from observations: machine learning or data assimilation? Philosophical
+Transactions of the Royal Society A , 379(2194):20200089, 2021.
+[38] Caterina Buizza, César Quilodrán Casas, Philip Nadler, Julian Mack, Stefano Marrone, Zainab Titus, Clémence
+Le Cornec, Evelyn Heylen, Tolga Dur, Luis Baca Ruiz, et al. Data learning: Integrating data assimilation and
+machine learning. Journal of Computational Science , 58:101525, 2022.
+15
+[39] William W Hsieh and Benyang Tang. Applying neural network models to prediction and data analysis in
+meteorology and oceanography. Bulletin of the American Meteorological Society , 79(9):1855–1870, 1998.
+[40] Suraj Pawar and Omer San. Data assimilation empowered neural network parametrizations for subgrid processes
+in geophysical ﬂows. Physical Review Fluids , 6(5):050501, 2021.
+[41] Ashesh Chattopadhyay, Mustafa Mustafa, Pedram Hassanzadeh, Eviatar Bach, and Karthik Kashinath. Towards
+physics-inspired data-driven weather forecasting: integrating data assimilation with a deep spatial-transformer-
+based u-net in a case study with era5. Geoscientiﬁc Model Development , 15(5):2221–2237, 2022.
+[42] Stephen G Penny, Timothy A Smith, T-C Chen, Jason A Platt, H-Y Lin, Michael Goodliff, and Henry DI Abarbanel.
+Integrating recurrent neural networks with data assimilation for scalable data-driven state estimation. Journal of
+Advances in Modeling Earth Systems , 14(3):e2021MS002843, 2022.
+[43] Romit Maulik, Vishwas Rao, Jiali Wang, Gianmarco Mengaldo, Emil Constantinescu, Bethany Lusch, Prasanna
+Balaprakash, Ian Foster, and Rao Kotamarthi. Aieada 1.0: Efﬁcient high-dimensional variational data assimilation
+with machine-learned reduced-order models. Geoscientiﬁc Model Development Discussions , pages 1–20, 2022.
+[44] Austin Chennault, Andrey A Popov, Amit N Subrahmanya, Rachel Cooper, Anuj Karpatne, and Adrian Sandu.
+Adjoint-matching neural network surrogates for fast 4d-var data assimilation. arXiv preprint arXiv:2111.08626 ,
+2021.
+[45] Julien Brajard, Alberto Carrassi, Marc Bocquet, and Laurent Bertino. Combining data assimilation and ma-
+chine learning to infer unresolved scale parametrization. Philosophical Transactions of the Royal Society A ,
+379(2194):20200086, 2021.
+[46] Julien Brajard, Alberto Carrassi, Marc Bocquet, and Laurent Bertino. Combining data assimilation and machine
+learning to emulate a dynamical model from sparse and noisy observations: A case study with the lorenz 96 model.
+Journal of Computational Science , 44:101171, 2020.
+[47] Yvonne Ruckstuhl, Tijana Janji ´c, and Stephan Rasp. Training a convolutional neural network to conserve mass in
+data assimilation. Nonlinear Processes in Geophysics , 28(1):111–119, 2021.
+[48] Sam Hatﬁeld, Matthew Chantry, Peter Dueben, Philippe Lopez, Alan Geer, and Tim Palmer. Building tangent-
+linear and adjoint models for data assimilation with neural networks. Journal of Advances in Modeling Earth
+Systems , 13(9):e2021MS002521, 2021.
+[49] Steven L Brunton, Bernd R Noack, and Petros Koumoutsakos. Machine learning for ﬂuid mechanics. Annual
+Review of Fluid Mechanics , 52:477–508, 2020.
+[50] Changhong Mou, Zhu Wang, David R Wells, Xuping Xie, and Traian Iliescu. Reduced order models for the
+quasi-geostrophic equations: A brief survey. Fluids , 6(1):16, 2020.
+[51] Omer San and Traian Iliescu. A stabilized proper orthogonal decomposition reduced-order model for large scale
+quasigeostrophic ocean circulation. Advances in Computational Mathematics , 41(5):1289–1319, 2015.
+[52] Kevin Carlberg, Charbel Bou-Mosleh, and Charbel Farhat. Efﬁcient non-linear model reduction via a least-squares
+petrov–galerkin projection and compressive tensor approximations. International Journal for numerical methods
+in engineering , 86(2):155–181, 2011.
+[53] Zheng Wang, Dunhui Xiao, Fangxin Fang, Rajesh Govindan, Christopher C Pain, and Yike Guo. Model
+identiﬁcation of reduced order ﬂuid dynamics systems using deep learning. International Journal for Numerical
+Methods in Fluids , 86(4):255–268, 2018.
+[54] Sk M Rahman, Suraj Pawar, Omer San, Adil Rasheed, and Traian Iliescu. Nonintrusive reduced order modeling
+framework for quasigeostrophic turbulence. Physical Review E , 100(5):053306, 2019.
+[55] Shaowu Pan and Karthik Duraisamy. Long-time predictive modeling of nonlinear dynamical systems using neural
+networks. Complexity , 2018, 2018.
+[56] Jian Yu, Chao Yan, and Mengwu Guo. Non-intrusive reduced-order modeling for ﬂuid problems: A brief
+review. Proceedings of the Institution of Mechanical Engineers, Part G: Journal of Aerospace Engineering ,
+233(16):5896–5912, 2019.
+[57] Shady E Ahmed, Suraj Pawar, Omer San, Adil Rasheed, Traian Iliescu, and Bernd R Noack. On closures for
+reduced order models—a spectrum of ﬁrst-principle to machine-learned avenues. Physics of Fluids , 33(9):091301,
+2021.
+[58] César Andres Quilodrán Casas. Fast ocean data assimilation and forecasting using a neural-network reduced-space
+regional ocean model of the north brazil current. 2018.
+16
+[59] Maddalena Amendola, Rossella Arcucci, Laetitia Mottet, Cesar Quilodran Casas, Shiwei Fan, Christopher
+Pain, Paul Linden, and Yi-Ke Guo. Data assimilation in the latent space of a neural network. arXiv preprint
+arXiv:2012.12056 , 2020.
+[60] C Liu, R Fu, D Xiao, R Stefanescu, P Sharma, C Zhu, S Sun, and C Wang. Enkf data-driven reduced order
+assimilation system. Engineering Analysis with Boundary Elements , 139:46–55, 2022.
+[61] Mathis Peyron, Anthony Fillion, Selime Gürol, Victor Marchais, Serge Gratton, Pierre Boudier, and Gael Goret.
+Latent space data assimilation by using deep learning. Quarterly Journal of the Royal Meteorological Society ,
+147(740):3759–3777, 2021.
+[62] Sibo Cheng, Jianhua Chen, Charitos Anastasiou, Panagiota Angeli, Omar K Matar, Yi-Ke Guo, Christopher C Pain,
+and Rossella Arcucci. Generalised latent assimilation in heterogeneous reduced spaces with machine learning
+surrogate models. arXiv preprint arXiv:2204.03497 , 2022.
+[63] Krithika Manohar, Bingni W Brunton, J Nathan Kutz, and Steven L Brunton. Data-driven sparse sensor placement
+for reconstruction: Demonstrating the beneﬁts of exploiting known patterns. IEEE Control Systems Magazine ,
+38(3):63–86, 2018.
+[64] Lawrence Sirovich. Turbulence and the dynamics of coherent structures. i. coherent structures. Quarterly of
+Applied Mathematics , 45(3):561–571, 1987.
+[65] Gal Berkooz, Philip Holmes, and John L Lumley. The proper orthogonal decomposition in the analysis of turbulent
+ﬂows. Annual Review of Fluid Mechanics , 25(1):539–575, 1993.
+[66] Lloyd N Trefethen and David Bau III. Numerical linear algebra , volume 50. Siam, 1997.
+[67] Ioannis G Kevrekidis and Giovanni Samaey. Equation-free multiscale computation: Algorithms and applications.
+Annual review of physical chemistry , 60:321–344, 2009.
+[68] Pantelis R Vlachas, Wonmin Byeon, Zhong Y Wan, Themistoklis P Sapsis, and Petros Koumoutsakos. Data-driven
+forecasting of high-dimensional chaotic systems with long short-term memory networks. Proceedings of the Royal
+Society A: Mathematical, Physical and Engineering Sciences , 474(2213):20170844, 2018.
+[69] Jaideep Pathak, Brian Hunt, Michelle Girvan, Zhixin Lu, and Edward Ott. Model-free prediction of large spatiotem-
+porally chaotic systems from data: A reservoir computing approach. Physical Review Letters , 120(2):024102,
+2018.
+[70] Arvind T Mohan and Datta V Gaitonde. A deep learning based approach to reduced order modeling for turbulent
+ﬂow control using lstm neural networks. arXiv preprint arXiv:1804.09269 , 2018.
+[71] Pantelis R Vlachas, Jaideep Pathak, Brian R Hunt, Themistoklis P Sapsis, Michelle Girvan, Edward Ott, and
+Petros Koumoutsakos. Backpropagation algorithms and reservoir computing in recurrent neural networks for the
+forecasting of complex spatiotemporal dynamics. Neural Networks , 2020.
+[72] Sepp Hochreiter and Jürgen Schmidhuber. Long short-term memory. Neural Computation , 9(8):1735–1780, 1997.
+[73] Paul J Werbos. Backpropagation through time: what it does and how to do it. Proceedings of the IEEE ,
+78(10):1550–1560, 1990.
+[74] Gerrit Burgers, Peter Jan van Leeuwen, and Geir Evensen. Analysis scheme in the ensemble Kalman ﬁlter.
+Monthly Weather Review , 126(6):1719–1724, 1998.
+[75] Rudolph Emil Kalman. A new approach to linear ﬁltering and prediction problems. Journal of Basic Engineering ,
+82(1):35–45, 03 1960.
+[76] Peter L Houtekamer and Herschel L Mitchell. Ensemble Kalman ﬁltering. Quarterly Journal of the Royal
+Meteorological Society: A journal of the atmospheric sciences, applied meteorology and physical oceanography ,
+131(613):3269–3289, 2005.
+[77] Ahmed Attia and Adrian Sandu. Dates: a highly extensible data assimilation testing suite v1. 0. Geoscientiﬁc
+Model Development , 12(2):629–649, 2019.
+[78] Shady E Ahmed, Suraj Pawar, and Omer San. PyDA: A Hands-On Introduction to Dynamical Data Assimilation
+with Python. Fluids , 5(4):225, 2020.
+[79] Suraj Pawar, Omer San, Adil Rasheed, and Ionel M Navon. A nonintrusive hybrid neural-physics modeling of
+incomplete dynamical systems: Lorenz equations. GEM-International Journal on Geomathematics , 12(1):1–31,
+2021.
+[80] Zlatko Drmac and Serkan Gugercin. A new selection operator for the discrete empirical interpolation method—
+improved a priori error bound and extensions. SIAM Journal on Scientiﬁc Computing , 38(2):A631–A648, 2016.
+17
+[81] Siddharth Joshi and Stephen Boyd. Sensor selection via convex optimization. IEEE Transactions on Signal
+Processing , 57(2):451–462, 2008.
+[82] Andreas Krause, Ajit Singh, and Carlos Guestrin. Near-optimal sensor placements in gaussian processes: Theory,
+efﬁcient algorithms and empirical studies. Journal of Machine Learning Research , 9(2), 2008.
+[83] Jan Williams, Olivia Zahn, and J Nathan Kutz. Data-driven sensor placement with shallow decoder networks.
+arXiv preprint arXiv:2202.05330 , 2022.
+[84] Richard W Reynolds. A real-time global sea surface temperature analysis. Journal of climate , 1(1):75–87, 1988.
+[85] Richard W Reynolds and Diane C Marsico. An improved real-time global sea surface temperature analysis.
+Journal of climate , 6(1):114–119, 1993.
+[86] Jared L Callaham, Kazuki Maeda, and Steven L Brunton. Robust ﬂow reconstruction from limited measurements
+via sparse representation. Physical Review Fluids , 4(10):103907, 2019.
+[87] Romit Maulik, Romain Egele, Bethany Lusch, and Prasanna Balaprakash. Recurrent neural network architec-
+ture search for geophysical emulation. In SC20: International Conference for High Performance Computing,
+Networking, Storage and Analysis , pages 1–14. IEEE, 2020.
+[88] J Nathan Kutz, Xing Fu, and Steven L Brunton. Multiresolution dynamic mode decomposition. SIAM Journal on
+Applied Dynamical Systems , 15(2):713–735, 2016.
+[89] Suraj Pawar, Omer San, and Gary G Yen. Hyperparameter search using the genetic algorithm for surrogate
+modeling of geophysical ﬂows. In AIAA SCITECH 2022 Forum , page 0459, 2022.
+[90] Peter L Houtekamer and Fuqing Zhang. Review of the ensemble Kalman ﬁlter for atmospheric data assimilation.
+Monthly Weather Review , 144(12):4489–4532, 2016.
+[91] Matteo Sangiorgio and Fabio Dercole. Robustness of LSTM neural networks for multi-step forecasting of chaotic
+time series. Chaos, Solitons & Fractals , 139:110045, 2020.
+[92] Shady E Ahmed, Omer San, Adil Rasheed, and Traian Iliescu. Nonlinear proper orthogonal decomposition for
+convection-dominated ﬂows. Physics of Fluids , 33(12):121702, 2021.
+[93] Andrey A Popov, Changhong Mou, Adrian Sandu, and Traian Iliescu. A multiﬁdelity ensemble kalman ﬁlter with
+reduced order control variates. SIAM Journal on Scientiﬁc Computing , 43(2):A1134–A1162, 2021.
+[94] N Benjamin Erichson, Lionel Mathelin, Zhewei Yao, Steven L Brunton, Michael W Mahoney, and J Nathan Kutz.
+Shallow neural networks for ﬂuid ﬂow reconstruction with limited sensors. Proceedings of the Royal Society A ,
+476(2238):20200097, 2020.
+18

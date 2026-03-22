@@ -1,0 +1,1353 @@
+Physics-informed neural networks for phase-resolved data assimilation and prediction
+of nonlinear ocean waves
+Svenja Ehlers∗
+Dynamics Group, Hamburg University of Technology, Hamburg, Germany
+Norbert Hoffmann
+Dynamics Group, Hamburg University of Technology, Hamburg, Germany and
+Department of Mechanical Engineering, Imperial College London, London, United Kingdom
+Tianning Tang
+Department of Engineering Science, University of Oxford, Oxford, United Kingdom
+Adrian H. Callaghan and Rui Cao
+Civil and Environmental Engineering, Imperial College London, London, United Kingdom
+Enrique M. Padilla
+BarcelonaTech, Laboratori d’Enginyeria Mar´ ıtima, Universitat Polit´ ecnica de Catalunya, Barcelona, Spain
+Yuxin Fang
+College of Oceanography and Space Informatics, China University of Petroleum, Qingdao, China and
+Civil and Environmental Engineering, Imperial College London, London, United Kingdom
+Merten Stender
+Cyber-Physical Systems in Mechanical Engineering, Technische Universit¨ at Berlin, Berlin, Germany
+(Dated: January 16, 2025)
+The assimilation and prediction of phase-resolved surface gravity waves are critical challenges in
+ocean science and engineering. Potential flow theory (PFT) has been widely employed to develop
+wave models and numerical techniques for wave prediction. However, traditional wave prediction
+methods are often limited. For example, most simplified wave models have a limited ability to
+capture strong wave nonlinearity, while fully nonlinear PFT solvers often fail to meet the speed
+requirements of engineering applications. This computational inefficiency also hinders the devel-
+opment of effective data assimilation techniques, which are required to reconstruct spatial wave
+information from sparse measurements to initialize the wave prediction. To address these chal-
+lenges, we propose a novel solver method that leverages physics-informed neural networks (PINNs)
+that parameterize PFT solutions as neural networks. This provides a computationally inexpen-
+sive way to assimilate and predict wave data. The proposed PINN framework is validated through
+comparisons with analytical linear PFT solutions and experimental data collected in a laboratory
+wave flume. The results demonstrate that our approach accurately captures and predicts irregular,
+nonlinear, and dispersive wave surface dynamics. Moreover, the PINN can infer the fully nonlinear
+velocity potential throughout the entire fluid volume solely from surface elevation measurements,
+enabling the calculation of fluid velocities that are difficult to measure experimentally.
+I. INTRODUCTION
+Accurate knowledge of phase-resolved water wave dynamics is crucial in ocean engineering, for example, to assess the
+impact of waves on maritime structures. In most cases of nonlinear, phase-resolved ocean wave modelling, the problem
+is reduced to potential flow theory (PFT), governed by the Laplace differential equation and boundary conditions
+at the water surface and seabed. As the PFT cannot be solved analytically, various wave theories have emerged,
+using simplifying assumptions to derive analytical solutions, such as linear wave theory [1], Stokes weakly nonlinear
+wave theory [2] or the nonlinear Schr¨ odinger equation [3, 4]. In addition, numerical simulation methods are employed
+for modelling ocean waves based on the PFT: For example, boundary element methods (BEM) can be applied for
+linear problems in engineering applications with sufficiently fast computation. However, modelling nonlinear wave
+dynamics with BEM [5, 6] becomes computationally inefficient for large computational domains [7, 8]. In contrast,
+∗corresponding author: svenja.ehlers@tuhh.dearXiv:2501.08430v1  [cs.LG]  14 Jan 2025
+2
+the pseudo-spectral high-order spectral method (HOSM), independently developed by Dommermuth and Yue [9] and
+West et al. [10], is capable of handling waves in larger domains and provides the highest prediction accuracy across
+highly nonlinear wave conditions [cf. 11–14]. Moreover, the HOSM is computationally efficient, provided that initial
+conditions are available [cf. 14–16].
+However, spatio-temporal initial wave fields are rarely available in reality, as wave measurements are often sparse in
+space or time. This limitation has already been addressed by Padilla et al. [17] for certain one-dimensional laboratory
+conditions using spatial interpolation. A more general approach typically involves data assimilation methods to
+integrate observational data with the numerical model. In such methods, the wave prediction process typically
+consists of three steps:
+(S1) measurement of sparse wave-related quantities, e.g. by wave buoys, radar systems, optical measurements, etc.
+(S2) reconstruction of the underlying, spatio-temporal wave field by assimilation methods to initialize a wave model
+(S3) forward propagation of the reconstructed wave field in time
+Assimilation methods often rely on variational optimization techniques to minimize a cost function that quantifies
+the agreement between wave surface measurements and the solution parameterized by a wave model [cf. 11, 12, 18–21].
+Solving this inverse problem requires multiple forward evaluations to iteratively update model parameters, resulting in
+substantial computational costs for assimilation (S2) of nonlinear waves and thus hindering their real-time prediction
+(S3). Additionally, assimilation techniques often focus on aligning with elevation measurements only, neglecting the
+fundamental physics of surface gravity waves described by surface elevation and velocity potential. Although the
+nonlinear assimilation methods developed by K¨ ollisch et al. [16] and Desmars et al. [22, 23] can estimate a consistent
+surface velocity potential, they provide limited information in the vertical direction. Moreover, the accuracy of current
+assimilation and prediction approaches is constrained by the accuracy of the chosen wave model or numerical scheme,
+which is ultimately constrained by the computational speed during such iterative processes.
+Recent studies have also used machine learning approaches to model waves following the Universal Approximation
+Theorem [24, 25], which states that neural networks (NNs) with sufficient capacity can theoretically approximate any
+continuous function of arbitrary nonlinearity. As velocity potential Φ( x, t, z ) and surface elevation η(x, t) are nonlinear
+functions of space and time, this theorem provides strong motivation to approximate solutions to potential flow
+theory using NNs. Although recently applied in phase-resolved ocean wave prediction [cf. 26–35] and reconstruction
+[cf. 36, 37], the success of these supervised machine learning approaches depends on the quality and quantity of
+labelled training data, making them likely to fail when wave conditions differ significantly from the training data.
+For instance, neural networks trained on synthetic data from numerical solvers may struggle when applied to real
+ocean data, but gathering real ocean training data is also challenging. While input data such as radar images ξ(x, t)
+or buoy measurements η(t) are accessible, obtaining wave elevation outputs η(x, t) requires an impractically dense
+array of measurement buoys. Moreover, measurements can be influenced by noise and typically cover elevation-
+related quantities only, neglecting the velocity potential. This can lead to NN-based solutions that lack physical
+consistency for two reasons - their black-box nature, which relies on the properties of the training data, and their
+limited consideration of physical principles beyond surface elevation.
+In light of these limitations, and given the prerequisite of addressing an inverse assimilation problem (S2) before
+approaching the forward prediction (S3), the emerging paradigm of physics-informed neural networks (PINNs) [38]
+offers a promising solution to enhance the reliability of phase-resolved wave prediction. PINNs are advantageous in
+handling ill-posed inverse problems by integrating sparse or noisy observational data with governing physical laws,
+typically formulated as partial differential equations (PDEs) [39]. The solution to this PDE is parameterized by a
+neural network, with the loss function accounting for the residual of the PDE, initial and boundary conditions and
+sparse system measurements, evaluated at collocation points within the computational domain. Leveraging automatic
+differentiation (AD) [40] to compute the differential operators in the residuals allows PINN solvers to operate without
+a numerical grid, offering an advantage over traditional numerical methods.
+In recent years, PINNs have gained attention across various scientific disciplines, where solving forward, inverse
+and assimilation problems is in demand [41]. These broad application possibilities include fluid dynamics [42–45],
+acoustics [46], heat transfer [47, 48], biomedical engineering [49, 50] climate modeling [51] and material modelling
+[52, 53]. PINNs have also been applied to surface wave-related research in shallow water regimes. For example,
+Wang et al.[54] and Chen et al. [55] integrated residuals of the wave energy balance equation and linear dispersion
+to reconstruct near-shore wave heights and solve depth inversion problems. Other recent studies downscaled river
+models by integrating PINNs with the Saint-Venant equation [56], resolved assimilation problems by incorporating
+the Serre-Green-Naghdi equations [57] or modelled flood-wave propagation over varying bathymetry using the shallow
+water equations [58].
+For the intermediate to deep water regime, we demonstrated that PINNs facilitate wave data assimilation by
+utilizing the nonlinear Schr¨ odinger equation [59]. However, the approach is inherently constrained by assumptions
+3
+of narrow bandwidth and moderate wave steepness, which limit its applicability to realistic sea states characterized
+by broad-banded and irregular wave conditions. Another recent research captures irregular waves by incorporating
+the closed-form linear wave theory solution and demonstrates good agreement [60]. This method, on the other hand,
+relies on a predefined solution rather than allowing the neural network to discover the solution to the PDEs, which is
+slightly on the edge of the original PINN paradigm of Raissi et al. [38], and also limits the flexibility of the solutions.
+Therefore, further extensions are required for nonlinear waves, which may be addressed by directly solving the fully
+nonlinear potential flow equations. Concurrent with our research on the PFT-PINN, Lu et al. [61] independently
+developed a similar, initial approach for this purpose. Their method, evaluated on synthetic data in shallow and
+intermediate depths, introduces a normalization strategy based on wavenumber and frequency. While effective in
+certain conditions, this approach seems primarily suited to narrow-banded wave scenarios in limited depths and may
+require further development to ensure applicability to realistic sea states. Therefore, we aim to develop a PFT-
+PINN solver with broad applicability for assimilation and prediction of various wave conditions, even though this is
+challenging compared to most PINN applications due to the
+(C1) search for two solutions fields simultaneously - the potential field Φ( x, t, z ) and the surface elevation η(x, t)
+(C2) dependence of the two solutions on different domains and a different number of input variables
+(C3) requirement of fulfilling boundary conditions at the changing, instantaneous free surface z=η(x, t)
+(C4) availability of sparse measurements for elevation only ( ηm) but not for the potential (ill-posed inverse problem)
+However, after successfully designing and training a framework that addresses all these challenges, we hypothesize
+that the resulting PFT-PINN solver is capable of
+(H1) reconstructing broad-banded waves with irregular shapes
+(H2) inferring the physically consistent potential Φ( x, t, z ) while reconstructing the elevation η(x, t) from sparse
+surface measurements ηm(t) only
+(H3) reconstructing waves of not predefined, theoretically arbitrary nonlinear order
+(H4) jointly solving assimilation (S2) and prediction (S3) tasks within the same optimization problem
+We proceed as follows: Section II introduces the potential flow equations of ocean gravity waves, while Section III
+describes the set-up and data structure of the wave flume measurements. Section IV presents the developed PINN
+framework integrating the potential flow equations, which is verified in Section V by solving wave assimilation and
+prediction problems using sparse synthetic waves and wave flume measurements. We summarize our findings and
+discuss the opportunities for using PINNs in real-world scenarios in Section VI.
+II. POTENTIAL FLOW THEORY
+Assuming water to be a Newtonian fluid, which is homogeneous, incompressible, inviscid and irrotational, the flow
+field is expressed as a velocity potential Φ( x, z, t ) satisfying the Laplace equation
+∇2Φ = Φ xx+ Φzz= 0 (1)
+within the fluid domain Ω. This domain is limited by the boundary conditions (BCs)
+ηt+ηxΦx−Φz= 0 on z=η(x, t) (2)
+Φt+gη+1
+2 
+Φ2
+x+ Φ2
+z
+= 0 on z=η(x, t) (3)
+Φz= 0 on z=−d. (4)
+The kinematic surface BC (Eq. (2)) prevents water particles from leaving the free wave surface η(x, t), while the dy-
+namic surface BC (Eq. (3)) ensures constant dynamic pressure at the free surface. Here, grepresents the gravitational
+acceleration. The third BC (Eq. (4)) establishes a rigid and impermeable sea bottom at depth d.
+Although the Laplace equation is a linear PDE, solving the complete problem (Eqs. (1)-(4)) is challenging, e.g. due
+to the nonlinear surface BCs that need to be satisfied at the instantaneous free surface. Solutions can be approximated
+by numerical procedures or closed-form solutions can be derived, such as linear wave theory (LWT) [1]. The LWT
+will be applied in this work to provide an analytical solution for the validation of the developed PINN approach.
+4
+The linearization of the surface BCs yields analytic equations for Φ( x, z, t ) and η(x, t) [62] and superposition
+principle allows to model irregular water waves as a Fourier series of Ncomponents with different amplitudes an,
+frequencies ωn, wavenumbers knand phase shifts φnas
+Φ(x, z, t ) =NX
+n=1gan
+ωn·cosh ( kn(z+d))
+cosh( knd)·sin(knx−ωnt+φn) (5)
+η(x, t) =NX
+n=1an·cos(knx−ωnt+φn), (6)
+whereas knandωnare constrained by the linear dispersion relation
+ωn=p
+gkn·tanh( knd). (7)
+III. WAVE FLUME EXPERIMENTS
+We further evaluate our PFT-PINN approach using real measurements collected from laboratory experiments
+to validate its performance beyond the analytical LWT solution. This experimental data is a subset of a larger
+experimental campaign, MARATHON, which concerns unidirectional random sea states. The experiments were
+conducted in 2021 in a glass-walled wind-wave flume (Fig. 1a) located at the Hydrodynamics laboratory at the Civil
+and Environmental Engineering Department of Imperial College London. The wave flume has a length of 27 m, a width
+of 0.3 m, and a water depth of d= 0.7 m. The paddle at one end of the flume was responsible for wave generation,
+while the opposite paddle, along with a beach element, was used to dissipate incident wave energy and minimise
+reflections. This configuration has been demonstrated to provide satisfying wave energy dissipation efficiency with
+maximally only 3% of energy being reflected [63].
+The MARATHON random waves were generated based on a JONSWAP-type spectrum and designed following the
+NewWave theory [64, 65]. The wave spectrum was characterized by a peak enhancement factor of γ= 3 and a peak
+wave period of Tp= 1.2 s, corresponding to a peak frequency ωp= 5.236rad
+s, peak wavelength Lp= 2.171 m and
+peak wavenumber kp= 2.894rad
+msfor the given water depth, assuming linear dispersion relation applies. We selected
+a sequence of non-breaking random waves from the MARATHON dataset that are specified by their target wave
+steepness, ϵ= 0.5Hskp, where Hsrepresents the significant wave height. The wave steepness values increased from
+ϵ= 0.05 to ϵ= 0.11 in increments of 0.02, representing increasing wave field nonlinearity.
+These random waves were imaged at a frame rate of 32 Hz by seven CCD (charge-coupled device) cameras mounted
+laterally that captured the wave profile through the flume glass sidewalls. The surface elevations were extracted from
+the imagery data using the CMG method developed in Cao et al. [66]. To fill the missing regions between the fields of
+view of adjacent cameras, interpolation was performed using the S-interp function developed in Padilla et al. [17]. As
+a result, a continuous 9-meter span of surface elevation data was obtained with a spatial resolution of ∆ x= 0.001 m
+and a temporal resolution of ∆ t= 0.03125 s. These high-resolution spatio-temporal measurements far surpass the
+typical resolution of most experimental set-ups and oceanographic wave observations, which are usually limited to
+time-series measurements at sparse points, as exemplified by wave rider buoys in Fig. 1b.
+To explore the applicability of our PINN approach in real-world scenarios, we select only a few discrete spatial points
+(xwb,j) as hypothetical buoy measurements. The spatial extent of the wave field between these buoy measurements
+(ηm) is to be reconstructed using the PFT-PINN. The surface elevations obtained from image processing serve as the
+ground truth ( ηtrue) for comparison with the reconstructed wave field, which is denoted as ˜ ηin the following. The
+relationship between camera-derived measurements and hypothetical buoy measurements is illustrated in Fig. 1c.
+IV. PINN METHOD
+In the following, we introduce the PINN framework designed to address the challenges C1-C4 associated with solving
+the potential flow equations (Eqs. (1)-(4)). Besides the network architecture, we define the computational domain
+using various sets of collocation points and describe the method for hard-encoding sparse surface measurements into
+the network design. We present the multi-objective optimization method for training, followed by a metric to compare
+PINN reconstructions and predictions with a ground truth.
+5
+(a)
+wave paddle
+d= 0.7 m
+0 m 27 mwave surface ηexcitation
+wave paddle &absorbtion
+beach element
+cameras (high-resolution measurements)
+exemplary wave buoys
+(spatially sparse measurements)
+(b)
+202 203 204 205 206 207
+t[s]12.012.513.013.514.0x[m]
+elevation measurement by cameras ηc(x,t)
+example buoy measurements ηm(x=xbi,t)
+−0.04−0.03−0.02−0.010.000.010.020.030.04
+η(x,t) [m] (c)
+FIG. 1: In the laboratory wave flume (a), lateral cameras capture the wave elevation with high resolution (b),
+resulting in a spatio-temporal data structure after preprocessing (c) that provides a ground truth ( ηtrue) for
+comparing the PINN reconstruction (˜ η) between sparse buoy time series data ( ηm).
+A. PINN architecture
+The PFT-PINN first requires a computational domain for one-dimensional wave propagation, which is illustrated
+on top of Fig. 2 and defined in Cartesian coordinates as
+Ω =
+(x, t, z ) :x∈
+x0, xmax
+m, t∈
+t0, tmax
+s, z∈
+−d, zmax
+m	
+. (8)
+The origin of the coordinate system is located on the still water level z= 0, with the z-axis pointing upwards, while
+the upper limit of Ω is a dynamic boundary defined by the instantaneous free surface zmax=η(x, t).
+In contrast to typical PINN applications, our scenario requires the simultaneous computation of two solution fields:
+the surface elevation ˜ η(x, t) pertaining solely to the spatio-temporal fluid surface and the velocity potential ˜Φ(x, t, z )
+integrating additional depth information (C1-C2). Two neural networks are employed in parallel to approximate
+these fields, as depicted in Figure 2. Empirical analysis revealed that four hidden layers, each containing 200 neurons,
+are sufficient to model both solution fields accurately. The tanh-activation function is used and the network weights
+are initialized by Xavier initialization [67], with biases set to zero. Moreover, all input points v= (xi, ti) for ˜ ηor
+v= (xi, ti, zi) for ˜Φ are normalized to ˆ v∈[−1,1] for each dimension and mapped to a higher-dimensional Fourier
+feature space. This transformation is proposed by [68] and defined as
+µ(ˆv) = [sin(2 πFˆv); cos(2 πFˆv);ˆv]T. (9)
+It allows to represent complex functions more effectively by capturing a wider range of frequencies and thus helps to
+mitigate the spectral bias problem, which is the tendency of NNs to prefer converging to the lower-frequency solution
+components [69]. The entries of F∈Rnf×nvare trainable parameters and initialized with nf= 10 evenly spaced values
+in [−0.4,0.4], while nvis the number of input coordinates of the respective network. Thus, the chosen normalization
+and embedding approach allows the network to capture realistic, broad-banded sea states and complex multi-scale
+behaviour for irregular wave dynamics.
+6
+measurement data
+ηm(xi
+d=x1, ti
+d)
+˜Φ
+∂2
+∂x2
+∂2
+∂z2
+∂
+∂x
+LBC,dyn=1
+Ns/summationtextNs
+i=1/vextendsingle/vextendsingle/vextendsingle˜Φt/parenleftbig
+xi
+s, ti
+s, zi
+s= ˜η/parenleftbig
+xi
+s, ti
+s/parenrightbig/parenrightbig
++g·˜η/parenleftbig
+xi
+s, ti
+s/parenrightbig
+neural networks
+physics-informed loss components
+∂
+∂t
+∂
+∂z
+∂
+∂x
+∂
+∂tLLap=1
+NL/summationtextNL
+i=1/vextendsingle/vextendsingle/vextendsingle˜Φxx/parenleftbig
+xi
+L, ti
+L, zi
+L/parenrightbig
++˜Φzz/parenleftbig
+xi
+L, ti
+L, zi
+L/parenrightbig/vextendsingle/vextendsingle/vextendsingle2
++1
+2/parenleftig
+˜Φ2
+x/parenleftbig
+xi
+s, ti
+s, zi
+s= ˜η/parenleftbig
+xi
+s, ti
+s/parenrightbig/parenrightbig
++˜Φ2
+z/parenleftbig
+xi
+s, ti
+s, zi
+s= ˜η/parenleftbig
+xi
+s, ti
+s/parenrightbig/parenrightbig/parenrightig/vextendsingle/vextendsingle/vextendsingle2
+LBC,kin=1
+Ns/summationtextNs
+i=1/vextendsingle/vextendsingle/vextendsingle˜ηt/parenleftbig
+xi
+s, ti
+s/parenrightbig
++ ˜ηx/parenleftbig
+xi
+s, ti
+s/parenrightbig
+·˜Φx/parenleftbig
+xi
+s, ti
+s, zi
+s= ˜η/parenleftbig
+xi
+s, ti
+s/parenrightbig/parenrightbig
+−˜Φz/parenleftbig
+xi
+s, ti
+s, zi
+s= ˜η/parenleftbig
+xi
+s, ti
+s/parenrightbig/parenrightbig/vextendsingle/vextendsingle/vextendsingle2
+LBC,bot=1
+Nb/summationtextNb
+i=1/vextendsingle/vextendsingle/vextendsingle˜Φz/parenleftbig
+xi
+b, ti
+b, zi
+b=−d/parenrightbig/vextendsingle/vextendsingle/vextendsingle2
+ηm(xi
+d=x2, ti
+d)
+AD
+total PINN loss
+L=λLapLLap+λBC,kinLBC,kin+λBC,dynLBC,dyn+λBC,botLBC,bot
+computational domain Ω
+Pb={xi
+b, ti
+b, zi
+b=−d}Nb
+i=1PL={xi
+L, ti
+L, zi
+L}NL
+i=1Ps={xi
+s, ti
+s, zi
+s= ˜η(xi
+s, ti
+s)}Ns
+i=1
+Pd={xi
+d, ti
+d}Nd
+i=1z
+t
+x
+˜η
+hard constraints
+M(x, t): approx. of measurements by CM=1
+Nd/summationtextNd
+i=1/vextendsingle/vextendsingleM/parenleftbig
+xi
+d, ti
+d/parenrightbig
+−ηm/parenleftbig
+xi
+d, ti
+d/parenrightbig/vextendsingle/vextendsingle2
+R(x, t): approx. of distance function by CR=1
+Nd+Ns/summationtextNd+Ns
+i=1/vextendsingle/vextendsingleR/parenleftbig
+xi
+d, ti
+d/parenrightbig
+−r/parenleftbig
+xi
+d, ti
+d/parenrightbig/vextendsingle/vextendsingle2
+x
+t
+Fourier features µ(ˆv)
+v
+Fourier features µ(ˆv)
+x
+t
+z
+v
+N˜η& collocation points P
+˜η(x, t) =M(x, t) +R(x, t)N˜η(x, t)
+FIG. 2: Physics-informed neural network (PINN) framework to solve the potential flow theory (PFT) of ocean
+gravity waves. Two neural networks run in parallel to approximate the solutions of the velocity potential ˜Φ(x, t, z )
+and surface elevation ˜ η(x, t). Collocation points at the instantaneous free surface ( Ps), seabed ( Pb) and in the fluid
+domain ( PL) serve as inputs vfor the NNs, are normalized to ˆvand lifted to a higher-dimensional feature space by
+Fourier embedding µ(ˆv). Surface measurements ηmat sparse points ( Pd) hard-constrain the direct output of the
+elevation network N˜ηwith a smooth distance function R(x, t) and extension M(x, t) ofηm, both approximated from
+pre-trained low-capacity NNs. Parametrizing the PFT-solutions as neural networks ˜ η(x, t) and ˜Φ(x, t, z ) enables
+continuous differentiation, allowing for computation of loss components using automatic differentiation (AD). These
+loss components include residuals of the Laplace equation ( LLap), and boundary conditions
+(LBC,kin,LBC,dyn,LBC,bot). The total loss Lis minimized during training to approximate ˜ η(x, t) and ˜Φ(x, t, z ).
+B. Definition of collocation points
+To approximate the solution to the potential flow theory, the PINN requires various sets of collocation points
+P, which are specific sample points in the computational domain Ω used to evaluate the residuals of governing
+equations. These collocation points serve as inputs vto the NNs for computing the outputs ˜ η(x, t) and ˜Φ(x, t, z ),
+that are employed for calculating spatial and temporal derivatives with respect to input variables using automatic
+differentiation (AD) [40]. This is essential for evaluating the loss components as the total loss function is defined as
+the sum of the mean-squared errors (MSEs) from the residuals of the Laplace equation ( LLap), kinematic surface,
+dynamic surface and bed boundary conditions ( LBC,kin,LBC,dyn,LBC,bot):
+7
+LBC,bot=1
+NbNbX
+i=1˜Φz 
+xi
+b, ti
+b, zi
+b=−d2
+(10)
+LBC,kin=1
+NsNsX
+i=1˜ηt 
+xi
+s, ti
+s
++ ˜ηx 
+xi
+s, ti
+s
+·˜Φx 
+xi
+s, ti
+s, zi
+s= ˜η 
+xi
+s, ti
+s
+−˜Φz 
+xi
+s, ti
+s, zi
+s= ˜η 
+xi
+s, ti
+s2
+(11)
+LBC,dyn=1
+NsNsX
+i=1˜Φt 
+xi
+s, ti
+s, zi
+s= ˜η 
+xi
+s, ti
+s
++g˜η 
+xi
+s, ti
+s
++1
+2
+˜Φ2
+x 
+xi
+s, ti
+s, zi
+s= ˜η 
+xi
+s, ti
+s
++˜Φ2
+z 
+xi
+s, ti
+s, zi
+s= ˜η 
+xi
+s, ti
+s2
+(12)
+LLap=1
+NLNLX
+i=1˜Φxx 
+xi
+L, ti
+L, zi
+L
++˜Φzz 
+xi
+L, ti
+L, zi
+L2
+. (13)
+Empirically, we found that defining Nb= 1,000 collocation points at the seabed, denoted as Pb={xi
+b, ti
+b, zi
+b=
+−d}Nb
+i=1, is sufficient for evaluating LBC,bot. For LBC,kinandLBC,dyn, another set of Ns= 5,000 collocation points
+is defined as Ps={xi
+s, ti
+s, zi
+s= ˜η(xi
+s, ti
+s)}Ns
+i=1, where the zi
+s-values are not fixed but adhere to the instantaneous free
+surface (C3) in the original Cartesian coordinates by linking the ˜ η-network output to the z-input of the ˜Φ-network,
+as shown in Fig. 2. For LLap, we sample NL= 30,000 collocation points PL={xi
+L, ti
+L, zi
+L}NL
+i=1across the entire Ω
+and extend the initial range of zi
+Lto [−d,1.1·max( ηm)] to account for the fluid volume directly underneath the free
+instantaneous surface elevation η(x, t) but above the still water level. The condition
+zi
+L=(
+zi
+L ifzi
+L<˜η(xi
+L, ti
+L)
+˜η(xi
+L, ti
+L) if zi
+L≥˜η(xi
+L, ti
+L)(14)
+then ensures that the zi
+L-value remains in the valid fluid domain, as it changes during each training epoch.
+C. Hard constraints for elevation measurements
+To guide the PINN solution away from trivial outcomes, sparse measurements of the specific wave instance are
+required alongside Eqs. (10)-(13). Wave measurement data ηm, typically provided as snapshots or time-series at
+discrete data points Pd={xi
+d, ti
+d}Nd
+i=1, may be incorporated as soft constraint by adding an additional penalty term
+(Ldata) to the total loss function. However, manual tuning of weighting factor λdforLdataoften leads to poor learning
+efficiency [41]. To overcome this, we implement a hard constraint approach for the PFT-PINN, directly embedding
+data constraints into the network architecture rather than treating them as an additional loss component [70, 71].
+This hard encoding is accomplished by modifying the direct neural network output N˜η(x, t) according to
+˜η(x, t) =M(x, t) +R(x, t)N˜η(x, t). (15)
+Here, M(x, t) is a smooth extension of the measurement data ηm, while R(x, t) is a smooth distance function derived
+from the minimum spatio-temporal distance from the surface points Psto the measurement points Pd, denoted as
+r(x, t). Both, M(x, t) and R(x, t), are normalized within [0 ,1] and approximated using a low-capacity NN with two
+hidden layers containing 50 neurons, by minimizing the cost functions CMandCRdefined in the lower-right of Fig.
+2. After this pre-training, the parameters of M(x, t) and R(x, t) are frozen to hard-constrain the subsequent PFT-
+PINN training process. The absence of measurements for the potential field restricts hard constraints to the elevation
+network, making the problem highly ill-posed [57]: While elevation measurements guide the solution towards the
+targeted instance, the potential must be inferred solely through the coupling of ˜ ηand˜Φ inLBC,kinandLBC,dyn(C4).
+D. Multi-objective optimization procedure
+During each training epoch, all collocation points ( Ps,PbandPL) are passed through the ˜ η- and ˜Φ network
+to evaluate the loss components (Eqs. (10)-(13)). This creates a multi-objective optimization problem with four
+potentially conflicting components Li, which may also conflict with the hard constraints of the measurement data due
+to model or data inaccuracies. Furthermore, these components can vary significantly in magnitude due to differences
+in physical units and network initialization. To avoid gradient pathologies arising from imbalanced loss terms [72],
+selecting appropriate weighting factors λiis crucial to compute the total loss as a weighted sum of the mcomponents
+L=λLap· LLap+λBC,kin· LBC,kin+λBC,dyn· LBC,dyn+λBC,bot· LBC,bot. (16)
+8
+As manual tuning of λirequires extensive grid-search procedures, we use the self-adaptive loss balancing algorithm
+ReLoBRaLo (Relative Loss Balancing with Random Lookbacks, [73]), updating each weighting factor λifor the
+corresponding loss component Liat each epoch ( e) according to
+λ(e)
+i=α
+ρλ(e−1)
+i + (1−ρ)ν(e; 0)
+i
++ (1−α)ν(e;e−1)
+i
+ν(e, e′)
+i =m·exp
+L(e)
+i
+τL(e′)
+i
+mP
+j=1exp
+L(e)
+j
+τL(e′)
+j, i∈ {1, . . . , m }.(17)
+ReLoBRaLo dynamically adjusts loss weights λibased on the relative magnitudes of the mloss components Li
+by combining benefits of several loss balancing strategies [cf. 72, 74, 75]. It normalizes the rate of change in each
+loss component between consecutive epochs using a softmax function. The parameter αbalances historical weight
+information with new updates, where higher αemphasize historical weights and increase training stability. The
+temperature τcontrols the sensitivity of weight assignments, where smaller values turn the balancing scheme more
+aggressive. The Bernoulli random variable ρwithE[ρ] near 1 introduces random lookbacks ν(e; 0)
+i to the initial loss
+valueL(0)
+ito escape local minima. For the PFT-PINN, we empirically determined these values as α= 0.95,τ= 20
+andE[ρ] = 0.98.
+The loss function in PINNs is typically minimized using a two-step strategy incorporating an Adam and the L-BFGS
+optimizer [76]. For the total loss Eq. (16), the AmsGrad modification of the Adam optimizer [77, 78] with a learning
+ratelr= 0.0005 is used for a predefined number of 5,000 epochs. Subsequently, the L-BFGS optimizer [79] with a
+history size of 30 refines the small-scale solution components and is executed until either a termination criterion or a
+maximum of 40,000 epochs is reached. Both optimizers are implemented in the PyTorch library [80] and the training
+is performed on a NVIDIA GeForce RTX 3090 GPU, taking around 30 minutes.
+E. PINN evaluation metric
+The evaluation of the PFT-PINN’s wave elevation ˜ ηor potential ˜Φ after training requires a metric comparing them
+with a ground truth, ηtrueor Φ true. While Euclidean distance-based metrics like MSE are scale-dependent and treat
+deviations in frequency and phase as amplitude errors [81, 82], the surface similarity parameter (SSP) [83] integrates
+phase, amplitude, and frequency errors into a scalar value. For spatio-temporal 2D surfaces, the SSP is defined as
+SSP(ytrue,˜y) =qR
+|Fytrue(ω, k)−F˜y(ω, k)|2dωdk
+qR
+|Fytrue(ω, k)|2dωdk +qR
+|F˜y(ω, k)|2dωdk∈[0,1], (18)
+which can also be simplified for 1D slices in space or time. Here, ωdenotes the wave frequency and kthe wavenumber
+vector of the discrete Fourier transforms FytrueandF˜y. Thereby ytruerepresents either the ground truth surface
+elevation ηtrue(x, t) or the sliced potential Φ true(x, t, z =zj) at depth zj, while ˜yrefers to the PFT-PINN’s outputs
+˜η(x, t) or ˜Φ(x, t, z =zj). Moreover, the normalized error metric provides a straightforward error assessment, with
+SSP = 0 indicating perfect alignment and SSP = 1 implying a comparison against a zero or phase-inverted surface.
+Therefore, the SSP has been recently applied in ocean wave prediction and reconstruction [cf. 14, 22, 23, 30, 33, 36,
+59, 81, 84–86]. Appendix Figure 12 illustrates the appearance of different SSP values by comparing two wave surfaces
+with increasing alignment.
+V. RESULTS
+In the following, Subsection V A first demonstrates a data assimilation task using the PFT-PINN, by estimating
+surface elevation and velocity potential at locations between spatially sparse elevation measurements. Particularly,
+we validate our PINN’s ability to handle irregular sea states obtained synthetically from an analytical solution, before
+we utilize data stemming from wave flume experiments. Afterwards, we asses the PINN’s capabilities in forecasting
+nonlinear wave evolution in Subsection V B. Consequently, the PINN is validated under full-scale wave conditions for
+the analytical wave data and is further demonstrated to be suitable for downscaled data from wave experiments, thus
+operating independently of the data scaling.
+9
+A. Assimilation
+The initial phase of our analysis focuses on data assimilation, a technique to integrate partial observations with
+numerical models to solve an inverse problem, where the unknown parameter is the state of the dynamical system
+[87]. In ocean engineering, assimilation typically involves reconstructing a wave field ˜ η(x, t) (the state) from sparse
+measurements (the observations), such as snapshots ηm(x, t=tsn,k) or wave buoy time series ηm(x=xwb,j, t). In
+our study, the wave field is parameterized by the PFT-PINN (the numerical model) and the training procedure
+integrates it with the measurements ηmand the underlying physical constraints. However, the availability of sparse
+measurements for only one quantity of interest requires deducing the potential ˜Φ entirely from the surface elevation
+˜η. Section V A 1 demonstrates the assimilation property using a wave surface and potential from linear wave theory.
+Section V A 2 extends this to a nonlinear irregular wave field generated in a laboratory wave flume.
+1. Linear irregular waves in deep water
+First, the PFT-PINN’s assimilation capability is assessed using an analytical solution for wave surface elevation
+ηtrue(x, t) obtained via superposition of three linear components (Eq. (6)) with parameters listed in Table I. The use of
+analytical solutions has the advantage that they additionally provide a ground truth potential Φ true(x, t, z ) (Eq. (5))
+for evaluating the PINN’s solution. However, to emulate realistic scenarios, we assume that time-series measurements
+ηm(x=xwb,j, t) are available only at specific wave buoy positions, requiring the PINN to reconstruct the surface
+elevation in between ˜ η(x, t) and the entire potential ˜Φ(x, t, z ).
+TABLE I: Parameters of the three wave components, superimposed according to linear wave theory in Eqs. (5)-(6),
+to generate the analytic ground truth for elevation ηtrue(x, t) and potential Φ true(x, t, z ). This data is used to extract
+synthetic surface measurements ηm(x=xwb,j, t) for PINN training and to validate the PFT-PINN solutions ˜ η(x, t)
+and˜Φ(x, t, z ) after training.
+base parameters resulting parameters
+component i ωi[rad
+s]ai[m]di[m]ϕi[rad] Ti[s]ki[rad
+m]Li[m]ϵi[rad]
+1 0.418 1.117 200 +0 .50π15.0 0.018 350.8 0.02
+2 0.838 0.280 200 −0.20π7.5 0.072 87.8 0.02
+3 1.047 0.358 200 +0 .75π6.0 0.112 56.2 0.04
+According to the Nyquist-Shannon sampling theorem, at least two sampling points per wavelength are required
+(∆xwb≤L
+2) [88]. Hence, a ∆ xwb= 25 m or xwb,j={0,25,50}m, allows for detection of the shortest wave component
+with L3= 56.2 m. To ensure deep water conditionsd
+L>0.5 also for the longest wave component with L1= 350 .8 m,
+the water depth is set to d= 200 m. Moreover, selecting the wave periods as Ti={6.0,7.5,15.0}s ensures that each
+wave component completes exactly five, four, or two periods within 30 s. These aspects define the computational
+domain as
+Ω =
+(x, t, z )∈R30≤x[m]≤50,0≤t[s]≤30,−200≤z[m]≤η	
+. (19)
+The periodicity of the wave in the time interval allows using periodic boundary conditions in time
+LPB,η=1
+NpNpX
+i=1˜η 
+xi
+p, ti
+p=t0
+−˜η 
+xi
+p, ti
+p=tmax2(20)
+LPB,Φ=1
+NpNpX
+i=1˜Φ 
+xi
+p, ti
+p=t0, zi
+p
+−˜Φ 
+xi
+p, ti
+p=tmax, zi
+p2
+(21)
+for the analytic solution case in this section by adding Np= 1,000 collocation points Pp. These terms are multiplied
+with adaptive weighting factors λPB,ηandλPB,Φand added to the total loss in Eq. (16).
+We follow the training method detailed in Section IV, with the progress of the individual loss components Liover
+5,000 epochs with the Adam optimizer and 35,000 epochs with the L-BFGS optimizer shown in Fig. 3. The desired
+behaviour of the ReLoBRaLo loss balancing scheme (Sec. IV D) is evident: despite differences in measurement units
+and magnitudes, the optimizers balance the components, with each Liprogressing at a similar rate relative to its
+initial MSE. Moreover, the data error MSE data=1
+NdPNd
+i=1ηm 
+xi
+d, ti
+d
+−˜η 
+xi
+d, ti
+d2is plotted, confirming that the
+hard constraints are successfully learned during pre-training (Sec. IV C).
+10
+0 5000 10000 15000 20000 25000 30000 35000 40000
+epochs10−710−510−310−1101MSELLap
+LBC,kin
+LBC,dyn
+LBC,bot
+LPB,η
+LPB,Φ
+MSE data
+FIG. 3: Training loss curve of the PFT-PINN provided with sparse measurements from a superposition of three
+wave components for an assimilation task. The Adam optimizer for 5,000 epochs is followed by L-BFGS
+optimization. ReLoBRaLo loss balancing ensures that each loss component Liprogresses with an approximately
+consistent rate relative to its initial MSE.
+The success of reconstructing the sea state is shown in Figure 4, where the PINN’s surface elevation solution
+˜η(x, t) (lower left) is compared to the ground truth ηtrue(x, t) (upper left). Despite providing only three time-series
+measurements ηm(x=xwb,j, t), the spatial elevation profile is accurately reconstructed in between, achieving an
+overall SSP = 0 .024. The cross-section subplots (right) confirm this observation, although slightly higher errors occur
+between ηm, e.g. a SSP = 0 .031 at x= 12.5 m.
+0 5 10 15 20 25 30
+t[s]01020304050x[m]
+true elevation ηtrue(x,t)
+measurements ηm(x=xwb,j,t)
+0 5 10 15 20 25 30
+t[s]01020304050x[m]PINN solution ˜ η(x,t): SSP = 0.024, MSE = 1 .55e−03
+−101
+−101−202
+x= 50.0 m: SSP = 0 .004, MSE = 5 .88e−05ηtrue(x,t) PINN ˜η(x,t)
+−202
+x= 37.5 m: SSP = 0 .018, MSE = 1 .23e−03
+−202elevationη[m]
+x= 25.0 m: SSP = 0 .009, MSE = 2 .93e−04
+−202
+x= 12.5 m: SSP = 0 .031, MSE = 2 .96e−03
+0 5 10 15 20 25 30
+t[s]−202
+x= 0.0 m: SSP = 0 .009, MSE = 2 .35e−04
+FIG. 4: Ground truth surface elevation ηtrue(x, t) (upper left) from a superposition of three wave components, used
+to extract synthetic measurements ηm(x=xwb,j, t). The PFT-PINN’s resulting solution for elevation ˜ η(x, t) (lower
+left) closely matches the ground truth, as further confirmed by the alignment of ηtrueand ˜ηin the cross-sections at
+five spatial points (right).
+11
+Next, Figure 5 compares the PINN’s velocity potential evaluated at the surface ˜Φ(x, t, z = ˜η) with the analytic
+ground truth Φ true(x, t, z =ηtrue). Notably, no direct potential measurements were provided for training, such that the
+PINN inferred it entirely from the coupling of ˜ ηand˜Φ in the free surface boundary condition loss components (Eqs.
+(11)-(12)) and expanded it in depth direction via the Laplace equation (Eq. (13)) and the bottom BC component
+(Eq. (10)). Despite these challenges, the PINN’s surface potential ˜Φ closely aligns with the ground truth Φ true, as
+also emphasised by a total error of SSP = 0 .021.
+0 5 10 15 20 25 30
+t[s]01020304050x[m]true potential Φ true(x,t,z = ˜η)
+0 5 10 15 20 25 30
+t[s]01020304050x[m]PINN solution ˜Φ(x,t,z = ˜η), SSP = 0.021, MSE = 4 .89e−01
+−20020
+−20020−25025
+x= 50.0 m: SSP = 0 .016, MSE = 5 .67e−01Φtrue(x,t,z = ˜η) PINN ˜Φ(x,t,z = ˜η)
+−25025
+x= 37.5 m: SSP = 0 .018, MSE = 4 .87e−01
+−25025potential ˜Φ/bracketleftBig
+m2
+s/bracketrightBig
+x= 25.0 m: SSP = 0 .012, MSE = 2 .26e−01
+−25025
+x= 12.5 m: SSP = 0 .024, MSE = 7 .75e−01
+0 5 10 15 20 25 30
+t[s]−25025
+x= 0.0 m: SSP = 0 .017, MSE = 5 .13e−01
+FIG. 5: Ground truth potential Φ true(x, t, z =ηtrue) (upper left) from a superposition of three wave components. No
+potential measurements were provided for PFT-PINN training, its solution ˜Φ(x, t, z = ˜η) (lower left) is entirely
+inferred from the coupling of ˜ ηand˜Φ in the surface BCs. Despite this, ˜Φ closely matches Φ true, as confirmed by the
+cross-section comparison (right).
+In summary, the results for using the PFT-PINN for wave data assimilation in this section support hypothesis H1,
+by a successful reconstruction of an irregular wave elevation from sparse measurements. Moreover, they confirm
+hypothesis H2, demonstrating that the corresponding velocity potential can be inferred solely from elevation data,
+without direct potential measurements.
+2. Nonlinear wave flume measurement in intermediate to deep water
+As ocean waves are not only irregular but also inherently nonlinear, we now employ more complex real measure-
+ments for assimilation, stemming from laboratory wave flume experiments with high-resolution ground truth for wave
+elevation ηtrue(x, t) captured by cameras (Sec. III). In contrast to the LWT case in the previous section, no ground
+truth velocity potential is available for real data. Given the successful validation of potential reconstruction in the
+previous section, our method is still expected to remain reliable for nonlinear data, provided the PINN elevation
+˜η(x, t) closely matches the reference ηtrue(x, t).
+Although spatio-temporal data ηtrue(x, t) is available, we mimick a less-equipped wave channel with only three
+buoys providing sparse time-series ηm(x=xwb,j, t). To determine an appropriate buoy spacing for the experiment
+run specified by Tp= 1.2 s,γ= 3 and ϵ= 0.09, we aim to retain the wave components encompassing at least 5% of
+the maximum energy in the JONSWAP spectrum, corresponding to ω0.05= 9.619rad
+s, as shown in Figure 6. This
+12
+translates to a minimum wavelength of L0.05= 0.666 m to be detectable. Following the Nyquist-Shannon sampling
+theorem (∆ xwb≤L0.05
+2) we determine the buoy spacing as ∆ xwb= 0.3 m and allow for the propagation of at least
+four peak periods, defining the computational domain
+Ω =
+(x, t, z )∈R30≤x[m]≤0.6,0≤t[s]≤5,−0.7≤z[m]≤η	
+, (22)
+where the z-component is constrained by the wave flume depth. A challenging irregular section is selected from
+the experiment, characterized by various wave heights and crest-trough asymmetries in ηtrue(x, t). While the wave
+component corresponding to ωp= 5.24rad
+shas a length of Lp= 2.17 m and withd
+Lp= 0.32 is considered to travel
+in intermediate depth 1
+20≤d
+L≤1
+2
+, all components corresponding to ω≥6.62rad
+sin the JONSWAP spectrum have
+wavelengths L≤1.4 m, classifying them as deep-water waves d
+L>1
+2
+.
+0 2 ˆω0.05ωp6 8ω0.05 12 14 16
+ω/bracketleftbigrad
+s/bracketrightbig0.05·max(SJ)0.000060.00012max(SJ)0.00018spectral density SJ(ω)/bracketleftbig
+m2·s/bracketrightbig JONSWAP spectrum: γ= 3, ωp= 5.236rad
+s(Tp= 1.2 s), /epsilon1= 0.09
+FIG. 6: JONSWAP spectrum used to generate the wave flume experiments. The horizontal line representing 5% of
+the maximum spectral energy (0 .05·max( SJ)) intersects the spectrum at ω0.05= 9.619rad
+s. Consequently, we aim to
+capture and retain the wave components from the experiment for wavelengths down to its corresponding wavelength
+ofL0.05= 0.666 m.
+The PINN again is trained as described in Sec. IV. Notably, periodic boundary conditions do not apply to wave
+tank data and the domain and wave amplitude are significantly smaller compared to the synthetic data in Sec. V A 1.
+Still, the loss curve in Fig. 7 converges well during training for 5,000 epochs using the Adam optimizer, followed by
+L-BFGS optimization terminating after approximately 36,000 epochs.
+0 5000 10000 15000 20000 25000 30000 35000 40000
+epochs10−710−510−310−1101MSELLap
+LBC,kin
+LBC,dyn
+LBC,bot
+MSE data
+FIG. 7: Training loss curve of the PFT-PINN provided with sparse buoy measurements from the wave flume
+experiments for an assimilation task. The Adam optimizer is applied for 5,000 epochs, followed by L-BFGS
+optimization. Despite different wave amplitudes and domain size compared to Section V A 1, the curves again show
+successful convergence.
+13
+The PINN reconstruction ˜ η(x, t) in the lower-left of Figure 8 shows strong agreement with the ground truth ηtrue(x, t)
+in the upper-left, as reflected by SSP = 0 .049. The cross-section subplots underline this observation, although the
+agreement at x= 0.15 m and 0 .45 m is slightly weaker compared to the measurement points xwb,j. Nevertheless,
+the SSP values remain in a highly satisfactory range below 0 .1. Furthermore, the training termination after 36,000
+epochs suggests that the optimizer has reached its best outcome with the given hyperparameter configuration. Thus,
+the minor discrepancies between the ground truth ηtrueand the PINN solution ˜ ηmay be attributed to real-world
+phenomena, that are not fully captured by the PFT, such as viscous effects from side-wall and bottom friction, for
+example.
+0 1 2 3 4 5
+t[s]0.00.10.20.30.40.50.6x[m]
+true elevation ηtrue(x,t)
+measurements ηm(x=xwb,j,t)
+0 1 2 3 4 5
+t[s]0.00.10.20.30.40.50.6x[m]PINN solution ˜ η(x,t): SSP = 0.049, MSE = 2 .71e−06
+−0.04−0.020.000.020.04
+−0.04−0.020.000.020.04−0.050.000.05
+x= 0.6 m: SSP = 0 .015, MSE = 2 .67e−07ηtrue(x,t) PINN ˜η(x,t)
+−0.050.000.05
+x= 0.45 m: SSP = 0 .058, MSE = 4 .05e−06
+−0.050.000.05elevationη[m]
+x= 0.3 m: SSP = 0 .016, MSE = 3 .08e−07
+−0.050.000.05
+x= 0.15 m: SSP = 0 .063, MSE = 5 .67e−06
+0 1 2 3 4 5
+t[s]−0.050.000.05
+x= 0.0 m: SSP = 0 .013, MSE = 2 .37e−07
+FIG. 8: Ground truth surface elevation ηtrue(x, t) (upper left) from wave flume experiments. The PFT-PINN’s
+reconstruction for elevation ˜ η(x, t) (lower left) between the provided measurements ηm(x=xwb,j, t) closely matches
+the ground truth, as confirmed by the alignment of ηtrueand ˜ηin the cross-sections at five spatial points (right).
+Although there is no ground truth for the potential in the case of real data, the validity of the PINN’s surface
+potential ˜Φ(x, t, z = ˜η), illustrated in Figure 9, can be roughly verified using the linear solution: The maximum wave
+elevation amplitude in Fig. 8 is an≈0.04 m. Substituting this into Eq. (5), with z= 0 m and ωn=2π
+Tp= 5.24rad
+s,
+yields a maximum potential amplitude ofgan
+ωn≈0.07 m, which is consistent with ˜Φ in Fig. 9. Additionally, we observe
+an approximate phase shift of Tshift≈0.3 s between the dominant wave crests (troughs) in Fig. 8 and the dominant
+potential crests (troughs) in Fig. 9. Given the peak period of Tp= 1.2 s, this corresponds to a phase shift ofπ
+2,
+further validating the approximate correctness of ˜Φ. Nonetheless, it is important to note, that this represents only
+a rough estimation, which we adopt based on the relatively low steepness of our measurement data. For real-world
+data, deviations from linear wave theory could be significantly larger. In summary, this section revalidates hypotheses
+H1 and H2 and confirms hypothesis H3. The PINN assimilates non-linear, irregular wave surfaces between buoy
+measurements derived from a wave tank. The reconstruction achieves an error of SSP ≤0.1, even for a particularly
+challenging surface elevation ηtrue(x, t).
+14
+0 1 2 3 4 5
+t[s]0.00.10.20.30.40.50.6x[m]PINN solution ˜Φ(x,t,z = ˜η)
+−0.06−0.030.000.030.06−0.050.000.05
+x= 0.6 mPINN ˜Φ(x,t,z = ˜η)
+−0.050.000.05
+x= 0.45 m
+−0.050.000.05potential ˜Φ/bracketleftBig
+m2
+s/bracketrightBig
+x= 0.3 m
+−0.050.000.05
+x= 0.15 m
+0 1 2 3 4 5
+t[s]−0.050.000.05
+x= 0.0 m
+FIG. 9: PFT-PINN’s reconstruction of the potential on the free surface ˜Φ(x, t, z = ˜η) for the wave flume
+experiments, that do not provide a ground truth for comparison. However, both potential amplitude and phase shift
+are within a reasonable range.
+B. Prediction
+In the following, the wave prediction capabilities of the PFT-PINN are evaluated using wave flume measurements
+characterized by Tp= 1.2 s,γ= 3, and ϵ= 0.09 from Sec. III. Unlike the pure assimilation task relying on temporal
+buoy measurements in the last section, the prediction scenario assumes four spatial snapshots measurements ηm(x, t=
+tsn,k), similar to data obtained from radar systems. Thus, assimilation must occur between the sparse snapshots while
+simultaneously predicting the future wave evolution for t > t sn,4. As we aim to propagate waves up to ω0.05= 9.619rad
+s
+(Fig. 6), corresponding to T0.05= 0.653 s, the Nyquist-Shannon sampling theorem 
+∆tsn≤T0.05
+2
+and the camera’s
+sampling (∆ t= 0.0315 s) yield a snapshot interval of ∆ tsn= 0.315 s. Moreover, each generated snapshot spans a
+range of 4 m.
+Besides, the concept of prediction region constrains the predictable spatio-temporal domain based on the group
+velocities cg=∂ω
+∂kof the fastest and slowest components in a wave measurement [11]. We select the limiting frequencies
+ˆω0.05= 3.73rad
+sandω0.05= 9.62rad
+sfrom the spectrum in Fig. 6 as intersections with the line representing 5% of the
+maximal spectral energy. The corresponding wave numbers ˆk0.05andk0.05are determined by the dispersion relation.
+According to [89], linear wave theory provides a good approximation for the predictable region, with the limiting
+group velocities defined as
+cg,h= 
+1
+2+ˆk0.05d
+sinh(2 ˆk0.05d)!
+·ˆω0.05
+ˆk0.05= 1.581m
+s, (23)
+cg,ℓ=1
+2+k0.05d
+sinh(2 k0.05d)
+·ω0.05
+k0.05= 0.510m
+s(24)
+for the selected measurement. For predicting one peak period into the future (3 ·∆tsn+Tp), the set
+Ω =
+(x, t, z )∈R3cg,h·t−1.494≤x≤cg,ℓ·t+ 4,0≤t≤2.145,−0.7≤z≤η	
+, (25)
+15
+defines the computational domain for the prediction problem.
+The original PINN formulation [38] is a continuous-time approach, trained across all spatio-temporal collocation
+points simultaneously. While effective for assimilation, PINNs often struggle with forward problems, especially when
+solutions strongly depend on initial data [90]. To handle the time-dependent nature of wave propagation, we adopt
+sequential training strategies [cf. 91–93] by discretizing the time domain [0 ,3·∆tsn+Tp] into 52 segments
+[t0=tsn,1, t1=tsn,4],[t1, t2], . . . , [tn−1, tn], . . . , [t51, t52=tsn,4+Tp]. (26)
+The first time segment [ t0, t1] covers the entire assimilation period (∆ t1= 3·∆tsn= 0.945 s) between the four
+wave snapshots ηm(x, t=tsn,k), while each subsequent segments [ tn−1, tn] spans ∆ tn= 0.025 s. To ensure temporal
+causality, the PFT-PINN is initially trained using only the collocation points within the first segment to guarantee
+an accurate solution in this area. Every 750 training epochs, the collocation points of the next segment are added,
+allowing the solution to progressively evolve over time. This strategy mimics classical numerical methods, where a time
+discretization ensures the solution at each time step is resolved before approximating the solution at the subsequent
+time step [90].
+Accordingly, for the prediction problem, training begins with 52 ·750 = 39 ,000 epochs using the Adam optimizer,
+progressively expanding the time domain coverage. This is followed by refinement across the full spatio-temporal
+domain with 6 ,000 additional Adam epochs and the L-BFGS optimizer, up to a total of 50 ,000 epochs. An example
+loss curve is provided in Figure 10, where the discontinuities occurring every 750 epochs reflect the addition of
+collocation points from new time segments [ tn−1, tn] during training.
+0 10000 20000 30000 40000 50000
+epochs10−710−510−310−1101MSELLap
+LBC,kin
+LBC,dyn
+LBC,bot
+MSE data
+FIG. 10: Training loss curve for a prediction task of the PFT-PINN using sparse snapshot measurements from wave
+flume experiments. The Adam optimizer, applied for 45,000 epochs, is followed by L-BFGS optimization. The
+observed discontinuities every 750 epochs indicate the addition of collocation points for a new time segment
+(∆tn= 0.025 s) in the prediction region t > t sn,4. These discontinuities may arise from fluctuations in gradient
+updates due to changes in the training data distribution as new collocation points are introduced. Despite some
+larger discontinuities, the successful convergence demonstrates the feasibility of predicting future wave dynamics.
+The assimilation and prediction results corresponding to the loss curve, are presented in the lower-left subplot of
+Figure 11. The spatio-temporal elevation ˜ η(x, t) is compared directly to the ground truth ηtrue(x, t) in the upper-left
+subplot, where the four snapshots ηm(x, t=tsn,k) provided for PFT-PINN training are marked. The boundaries
+of the prediction region, defined by the minimum and maximum group velocities, cg,handcg,ℓ, are also visible,
+highlighting the PINN’s capability to handle irregular computational domains. The ground truth and the PINN
+solution show an overall agreement characterized by SSP = 0 .084. More precisely, the snapshot cross-sections on the
+right side show strong agreement between the ground truth ηtrueand the PINN solution ˜ ηwithin the assimilation
+region t∈[tsn,1= 0, tsn,4= 0.945] s. However, as time progresses beyond tsn,4, the accuracy decreases despite the use
+of sequential training strategies. This decline was expected given the highly dynamic nature of wave prediction and
+the well-known weaknesses of PINNs in forward problems [90]. Nevertheless, even the SSP = 0 .141 at t= 1.61 s can
+be considered acceptable, as the trends between the ground truth and prediction are still in close alignment (which
+this is also evident, for instance, at SSP = 0 .15 in Fig. 12). Moreover, despite the amplitudes are not entirely matched,
+the wave crests and troughs of ηtrueand ˜ηare almost exactly phase-aligned, indicating that the PINN has accurately
+captured the wave dispersion for the prediction. Additionally, while not depicted here, the amplitudes and phase
+shifts of the PINN’s potential ˜Φ(x, t, z = ˜η) fall within expected ranges relative to the elevation data, in a similar
+manner as the observations in the last subsection in Fig. 9.
+16
+For this reason, we recognize many indications that support hypothesis H4, demonstrating that both assimilation
+and prediction can be addressed within the same framework, although the accuracy is generally less accurate than
+for the pure assimilation task.
+0.0 0.5 1.0 1.5 2.0
+t[s]012345x[m]
+true elevation ηtrue(x,t)
+measurements ηm(x,t=tsn,k)
+0.0 0.5 1.0 1.5 2.0
+t[s]012345x[m]PINN solution ˜ η(x,t): SSP = 0.084, MSE = 1 .42e−05
+−0.04−0.020.000.020.04
+−0.04−0.020.000.020.04−0.050.000.05
+t= 0.0 s: SSP = 0 .027, MSE = 1 .10e−06true elevation ηtrue(x,t) PINN ˜η(x,t)
+−0.050.000.05
+t= 0.54 s: SSP = 0 .048, MSE = 3 .62e−06
+−0.050.000.05elevationη[m]
+t= 1.07 s: SSP = 0 .089, MSE = 1 .15e−05
+−0.050.000.05
+t= 1.61 s: SSP = 0 .141, MSE = 3 .11e−05
+0 1 2 3 4 5
+x[m]−0.050.000.05
+t= 2.14 s: SSP = 0 .114, MSE = 2 .38e−05
+FIG. 11: Ground truth surface elevation ηtrue(x, t) (upper left) from wave flume experiments in the prediction region
+limited by the min. and max. group velocity cg,ℓandcg,hon the top and bottom. Four snapshot measurements
+ηm(x, t=tsn,k) are provided for PINN training. The assimilation and prediction results ˜ η(x, t) (lower left) closely
+matches the ground truth in the assimilation region t∈[0,0.945] s, as further confirmed by the first two
+cross-sections plots (right). As time progresses into the prediction region t >0.945 s the correspondence between
+ηtrueand ˜ηis less strong, but still within an acceptable range.
+VI. CONCLUSION AND OUTLOOK
+This study demonstrates that physics-informed neural networks (PINNs) are well-suited for integration with non-
+linear potential flow theory (PFT) equations, commonly applied to reconstruct and predict ocean gravity waves. This
+compatibility arises from the universal approximation theorem , stating that neural networks can approximate any
+nonlinear function. However, applying PFT in PINNs presents a particularly challenging case due to the requirement
+to solve for two coupled solution fields, velocity potential ˜Φ(x, t, z ) and surface elevation ˜ η(x, t) within a dynamic,
+time-varying domain. Furthermore, measurements are sparse and typically available for only one solution component,
+usually the surface elevation.
+To address these challenges, we train two neural networks in parallel, one for each solution field. Thereby, the output
+of the ˜ η-network informs the z-component of the ˜Φ-network to handle the time-varying free surface. Furthermore,
+Fourier feature embedding seems beneficial when handling multi-frequency wave data. Integrating sparse surface
+measurements as hard constraints in the ˜ η-network ensures accurate data adherence, enhancing training efficiency
+and preventing it from converging to neighbouring solutions. Additionally, the ReLoBraLo loss balancing scheme
+addresses the multi-objective optimization challenge posed by various loss components of varying magnitudes. We
+evaluate this PFT-PINN approach using three scenarios:
+(1) We demonstrated the assimilation of an irregular wave surface between sparse spatial measurements using an
+17
+analytical solution of linear wave theory as ground truth surface elevation ( ηtrue) for extracting sparse synthetic
+measurements ( ηm) and comparing the PINNs reconstruction (˜ η) post-training. This reconstruction is quantified
+by an error of SSP = 0 .024, confirming hypothesis H1. Analytical solutions additionally provide a ground truth
+potential (Φ true), enabling the confirmation of hypothesis H2 by reconstructing the physically consistent velocity
+potential ( ˜Φ) solely from surface elevation measurements ( ηm).
+(2) The second assimilation task involved sparse surface measurements ( ηm) from a laboratory wave flume, with
+additional high-resolution camera systems providing ground truth ( ηtrue) for comparing the PINN reconstruction
+(˜η). Since real waves contain nonlinear effects, the accurate reconstruction of SSP = 0 .049 supports hypothesis H3,
+indicating that the approach demonstrates excellent opportunities to investigate its performance using wave data
+with nonlinear and other effects incorporated. Although, real wave data do not provide a ground truth velocity
+potential (Φ true) for an exact comparison, the amplitude, frequency and phase shift of the PINN’s potential ( ˜Φ)
+fall within expected ranges.
+(3) Finally, we demonstrated PFT-PINN’s ability to predict nonlinear future wave dynamics while assimilating mea-
+surement data, confirming hypothesis H4. This involved assimilation of a wave surface (˜ η) from four sparse surface
+snapshots ( ηm) in [tsn,1, tsn,4], while simultaneously predicting the wave dynamics one peak period into the future
+(t > t sn,4). Compared to the ground truth ( ηtrue) the investigation yields an SSP of 0.084 averaged across the
+entire surface domain. However, the accuracy of the prediction decreases as the temporal distance from the last
+snapshot of the assimilation region increases.
+In summary, this study confirms that PFT-PINNs can capture nonlinear wave fields in assimilation and prediction
+tasks. Particularly, the method proves advantageous for pure assimilation tasks (S2), as indicated by the achieved
+SSP values in the first two scenarios. Moreover, existing numerical tools, already offer highly efficient solutions for
+wave prediction (S3) as long as initial conditions for the wave field are available. However, reconstructing these initial
+conditions from sparse measurements often requires extensive iterations using numerical tools, emphasising that the
+PFT-PINN approach could offer a promising alternative solution for wave data assimilation.
+Since this study demonstrates the feasibility of reconstructing 1D + twave surfaces η(x, t), future work should
+extend the PFT-PINN approach to 2D + twaves to include the y-direction. While this is expected to not involve
+great effort from an implementation point of view, additional wave propagation directions and their interactions in
+short-crested sea states could potentially affect reconstruction accuracy. Moreover, the higher dimension of 2D + t
+data might increase training time significantly. To facilitate real-time applications, improving the training speed of the
+PFT-PINN remains essential and could be achieved via code optimization, multi-GPU parallelization, or pre-training
+the PINN on general wave assimilation tasks, allowing rapid fine-tuning for new wave instances. Moreover, while
+classical PINNs require retraining for each wave instance, exploring the physics-informed neural operator (PINO)
+approach [94] offers a promising alternative to potentially generalize the reconstruction of sparse measurements to
+initial wave surfaces across various sea states.
+With respect to future perspectives, we believe that potential flow PINNs might open up numerous novel applications
+in coastal or ocean engineering and oceanography. While numerical wave prediction methods are often constrained
+to regular numerical domains, the PFT-PINN can handle wave dynamics in highly irregular domains, such as bays,
+harbours, coastlines, etc. Moreover, the PFT-PINN approach offers a straightforward way to integrate variable bottom
+topography d(x) into the training.The framework also allows extension for bathymetry inversion tasks, where bottom
+topography d(x) is deduced from measured wave elevations ηm, to generate water depth maps or assist the design
+of coastal infrastructure such as seawalls and breakwaters. Furthermore, the trained PFT-PINN provides inherently
+continuously differentiable solutions ˜ η(x, t) and ˜Φ(x, t, z ), enabling the evaluation of the potential at arbitrary points
+across the entire depth direction. This capability could support the analysis of fluid velocities near the seabed,
+valuable for studying sediment transport and erosion rates under varying wave conditions. Additionally, in offshore
+engineering, the knowledge of velocity potential across the entire depth facilitates the calculation of wave-induced
+pressure fields on submerged offshore structures.
+18
+FUNDING
+This work was supported by the Deutsche Forschungsgemeinschaft (DFG - German Research Foundation) [project
+number 277972093: Excitability of Ocean Rogue Waves]. The laboratory work was funded by the UK Natural
+Environment Research Council (NERC) [grant number NE/T000309/1] awarded to AHC.
+ACKNOWLEDGEMENTS
+The authors would like to express their gratitude to the lecturers George Em. Karniadakis and Khemraj Shukla, as
+well as to all organizers and funders for the Summer School on Physics-Informed Neural Networks and Applications
+at KTH, Stockholm in 2023.
+AUTHOR CONTRIBUTIONS
+Conceptualization: S.E, N.H. and M.S.
+Data curation: A.H.C., R.C. and E.M.P. (wave experiments)
+Formal analysis: S.E. (PINN), R.C. and Y.F. (wave experiments)
+Funding acquisition: N.H. and A.H.C.
+Investigation: S.E.
+Methodology: S.E.
+Project administration: N.H.
+Resources: N.H. and A.H.C.
+Software: S.E. (PINN), R.C. and Y.F. (image processing)
+Supervision: N.H., T.T. and M.S.
+Validation: S.E. and T.T.
+Visualization: S.E.
+Writing - original draft: S.E.
+Writing - review and editing: N.H., T.T. A.H.C., R.C. and M.S.
+DECLARATION OF INTERESTS
+The authors declare that they have no known competing financial interests or personal relationships that could
+have appeared to influence the work reported in this paper.
+DECLARATION OF GENERATIVE AI AND AI- ASSISTED TECHNOLOGIES IN THE WRITING
+PROCESS
+The investigations were conducted and the manuscript was written completely by the authors. Once the manuscript
+was completed, the authors used ChatGPT 3.5 ( https://chat.openai.com/ ) in order to improve its grammar and
+readability. After using this tool, the authors reviewed and edited the content as needed and take full responsibility
+for the content of the publication.
+19
+Appendix A: Graphical representation of SSP error metric
+−0.50.00.5SSP = 1.0, MSE = 5 .5982e−02true elevation ηtrue(t) PINN solution ˜ η(t)
+SSP = 0.2, MSE = 7 .2824e−03
+−0.50.00.5SSP = 0.4, MSE = 2 .2501e−02 SSP = 0.15, MSE = 4 .2228e−03
+−0.50.00.5elevationη[m]SSP = 0.35, MSE = 1 .8079e−02 SSP = 0.1, MSE = 1 .9605e−03
+−0.50.00.5SSP = 0.3, MSE = 1 .4414e−02 SSP = 0.05, MSE = 4 .9761e−04
+0 5 10 15 20 25 30
+t[s]−0.50.00.5SSP = 0.25, MSE = 1 .0828e−02
+0 5 10 15 20 25 30
+t[s]SSP = 0.0, MSE = 0 .0
+FIG. 12: Graphical representation for assessing the meaning of different SSP values. The baseline signal ηtrueis
+compared to incrementally improving PINN solutions ˜ η, resulting in decreasing SSP values. Additionally, MSE
+values are calculated to provide further insights.
+[1] G. B. Airy, Tides and Waves (B. Fellowes, 1845).
+[2] S. G. G. Stokes, On the theory of oscillatory waves, Transactions of the Cambridge Philosophical Society 8, 441 (1987).
+[3] V. E. Zakharov, Stability of periodic waves of finite amplitude on the surface of a deep fluid, Journal of Applied Mechanics
+and Technical Physics 9, 190 (1968).
+[4] H. Hasimoto and H. Ono, Nonlinear Modulation of Gravity Waves, Journal of the Physical Society of Japan 33, 805 (1972).
+[5] S. Grilli, J. Skourup, and I. Svendsen, An efficient boundary element method for nonlinear water waves, Engineering
+Analysis with Boundary Elements 6, 97 (1989).
+[6] S. T. Grilli, P. Guyenne, and F. Dias, A fully non-linear model for three-dimensional overturning waves over an arbitrary
+bottom, International Journal for Numerical Methods in Fluids 35, 829 (2001).
+[7] L. Papillon, R. Costello, and J. Ringwood, Boundary element and integral methods in potential flow theory: a review with
+a focus on wave energy applications, Journal of Ocean Engineering and Marine Energy 6, 303 (2020).
+[8] J. C. Harris, E. Dombre, M. Benoit, and S. T. Grilli, A comparison of methods in fully nonlinear boundary element
+numerical wave tank development, in 14´ emes Journ´ ees de l’Hydrodynamique (2014).
+20
+[9] D. G. Dommermuth and D. K. P. Yue, A high-order spectral method for the study of nonlinear gravity waves, Journal of
+Fluid Mechanics 184, 267–288 (1987).
+[10] B. J. West, K. A. Brueckner, R. S. Janda, D. M. Milder, and R. L. Milton, A new numerical method for surface hydrody-
+namics, Journal of Geophysical Research: Oceans 92, 11803 (1987).
+[11] G. Wu, Direct simulation and deterministic prediction of large-scale nonlinear ocean wave-field , Ph.D. thesis, massachusetts
+Institute of Technology (2004).
+[12] E. Blondel, F. Bonnefoy, and P. Ferrant, Deterministic non-linear wave prediction using probe data, Ocean Engineering
+37, 913 (2010).
+[13] E. Blondel-Couprie, F. Bonnefoy, and P. Ferrant, Experimental validation of non-linear deterministic prediction schemes
+for long-crested waves, Ocean Engineering 58, 284 (2013).
+[14] M. Klein, M. Dudek, G. F. Clauss, S. Ehlers, J. Behrendt, N. Hoffmann, and M. Onorato, On the deterministic prediction
+of water waves, Fluids 5, 10.3390/fluids5010009 (2020).
+[15] G. Ducrozet, F. Bonnefoy, D. Le Touz´ e, and P. Ferrant, Hos-ocean: Open-source solver for nonlinear waves in open ocean
+based on high-order spectral method, Computer Physics Communications 203, 245 (2016).
+[16] N. K¨ ollisch, J. Behrendt, M. Klein, and N. Hoffmann, Nonlinear real time prediction of ocean surface waves, Ocean
+Engineering 157, 387 (2018).
+[17] E. M. Padilla, R. Cao, and A. H. Callaghan, Spatial interpolation of wave fields based on limited spatial measurements,
+IEEE Journal of Oceanic Engineering 48, 1226 (2023).
+[18] S. Aragh and . Nwogu, Variation assimilating of synthetic radar data into a pseudospectral wave model, Journal of Coastal
+Research 10052 , 235 (2008).
+[19] Y. Qi, G. Wu, Y. Liu, M.-H. Kim, and D. K. P. Yue, Nonlinear phase-resolved reconstruction of irregular water waves,
+Journal of Fluid Mechanics 838, 544 (2018).
+[20] W. Fujimoto and T. Waseda, Ensemble-based variational method for nonlinear inversion of surface gravity waves, Journal
+of Atmospheric and Oceanic Technology 37, 17 (2020).
+[21] N. Desmars, F. Bonnefoy, S. Grilli, G. Ducrozet, Y. Perignon, C.-A. Gu´ erin, and P. Ferrant, Experimental and numerical
+assessment of deterministic nonlinear ocean waves prediction algorithms using non-uniformly sampled wave gauges, Ocean
+Engineering 212, 107659 (2020).
+[22] N. Desmars, M. Hartmann, J. Behrendt, M. Klein, and N. Hoffmann, Nonlinear Reconstruction and Prediction of Regular
+Waves, International Conference on Offshore Mechanics and Arctic Engineering 10.1115/OMAE2022-78988 (2022).
+[23] N. Desmars, M. Hartmann, J. Behrendt, N. Hoffmann, and M. Klein, Nonlinear deterministic reconstruction and prediction
+of remotely measured ocean surface waves, Journal of Fluid Mechanics 975, A8 (2023).
+[24] K. Hornik, M. Stinchcombe, and H. White, Multilayer feedforward networks are universal approximators, Neural Networks
+2, 359 (1989).
+[25] G. V. Cybenko, Approximation by superpositions of a sigmoidal function, Mathematics of Control, Signals and Systems
+2, 303 (1989).
+[26] Y. Law, H. Santo, K. Lim, and E. Chan, Deterministic wave prediction for unidirectional sea-states in real-time using
+artificial neural network, Ocean Engineering 195, 106722 (2020).
+[27] W. Duan, X. Ma, L. Huang, Y. Liu, and S. Duan, Phase-resolved wave prediction model for long-crest waves based on
+machine learning, Computer Methods in Applied Mechanics and Engineering 372, 113350 (2020).
+[28] H. Kagemoto, Forecasting a water-surface wave train with artificial intelligence- a case study, Ocean Engineering 207,
+107380 (2020).
+[29] F. Mohaghegh, J. Murthy, and M.-R. Alam, Rapid phase-resolved prediction of nonlinear dispersive waves using machine
+learning, Applied Ocean Research 117, 102920 (2021).
+[30] M. Klein, M. Stender, M. Wedler, S. Ehlers, M. Hartmann, N. Desmars, M.-A. Pick, R. Seifried, and N. Hoffmann,
+Application of Machine Learning for the Generation of Tailored Wave Sequences, International Conference on Offshore
+Mechanics and Arctic Engineering 10.1115/OMAE2022-78601 (2022).
+[31] J. Zhang, X. Zhao, S. Jin, and D. Greaves, Phase-resolved real-time ocean wave prediction with quantified uncertainty
+based on variational bayesian machine learning, Applied Energy 324, 119711 (2022).
+[32] Y. Liu, X. Zhang, G. Chen, Q. Dong, X. Guo, X. Tian, W. Lu, and T. Peng, Deterministic wave prediction model for irregu-
+lar long-crested waves with recurrent neural network, Journal of Ocean Engineering and Science 10.1016/j.joes.2022.08.002
+(2022).
+[33] M. Wedler, M. Stender, M. Klein, and N. Hoffmann, Machine learning simulation of one-dimensional deterministic water
+wave propagation, Ocean Engineering 284, 115222 (2023).
+[34] J. Chen, P. H. Taylor, I. A. Milne, D. Gunawan, and W. Zhao, Wave-by-wave prediction for spread seas using a machine
+learning model with physical understanding, Ocean Engineering 285, 115450 (2023).
+[35] Z. Feng, Z. Wang, K. Zheng, R. Li, Y. Zhao, and Y. Wang, Enhancing deterministic prediction in unidirectional ocean
+waves using an artificial neural network with exponential linear unit, Ocean Engineering 301, 117539 (2024).
+[36] S. Ehlers, M. Klein, A. Heinlein, M. Wedler, N. Desmars, N. Hoffmann, and M. Stender, Machine learning for phase-
+resolved reconstruction of nonlinear ocean wave surface elevations from sparse remote sensing data, Ocean Engineering
+288, 116059 (2023).
+[37] M. Zhao, Y. Zheng, and Z. Lin, Sea surface reconstruction from marine radar images using deep convolutional neural
+networks, Journal of Ocean Engineering and Science 10.1016/j.joes.2023.09.002 (2023).
+[38] M. Raissi, P. Perdikaris, and G. Karniadakis, Physics-informed neural networks: A deep learning framework for solving
+forward and inverse problems involving nonlinear partial differential equations, Journal of Computational Physics 378,
+21
+686 (2019).
+[39] G. E. Karniadakis, I. G. Kevrekidis, L. Lu, P. Perdikaris, S. Wang, and L. Yang, Physics-informed machine learning,
+Nature Reviews Physics 3, 422 (2021).
+[40] A. G. Baydin, B. A. Pearlmutter, A. A. Radul, and J. M. Siskind, Automatic differentiation in machine learning: a survey,
+Journal of Machine Learning Research 18, 1 (2018).
+[41] S. Cuomo, V. S. Di Cola, F. Giampaolo, G. Rozza, M. Raissi, and F. Piccialli, Scientific machine learning through physics–
+informed neural networks: Where we are and what’s next, Journal of Scientific Computing 92, 10.1007/s10915-022-01939-z
+(2022).
+[42] Z. Mao, A. D. Jagtap, and G. E. Karniadakis, Physics-informed neural networks for high-speed flows, Computer Methods
+in Applied Mechanics and Engineering 360, 112789 (2020).
+[43] M. Raissi, A. Yazdani, and G. E. Karniadakis, Hidden fluid mechanics: Learning velocity and pressure fields from flow
+visualizations, Science (New York, N.Y.) 367, 1026 (2020).
+[44] S. Cai, Z. Mao, Z. Wang, M. Yin, and G. E. Karniadakis, Physics-informed neural networks (pinns) for fluid mechanics: a
+review, Acta Mechanica Sinica 37, 1727 (2021).
+[45] J. G. von Saldern, J. M. Reumsch¨ ussel, T. L. Kaiser, M. Sieber, and K. Oberleithner, Mean flow data assimilation based
+on physics-informed neural networks, Physics of Fluids 34(2022).
+[46] M. Rasht-Behesht, C. Huber, K. Shukla, and G. E. Karniadakis, Physics-informed neural networks (PINNs) for wave
+propagation and full waveform inversions, Journal of Geophysical Research: Solid Earth 127, 10.1029/2021jb023120 (2022).
+[47] N. Zobeiry and K. D. Humfeld, A physics-informed machine learning approach for solving heat transfer equation in advanced
+manufacturing and engineering applications, Engineering Applications of Artificial Intelligence 101, 104232 (2021).
+[48] S. Cai, Z. Wang, S. Wang, P. Perdikaris, and G. E. Karniadakis, Physics-Informed Neural Networks for Heat Transfer
+Problems, Journal of Heat Transfer 143, 060801 (2021).
+[49] G. Kissas, Y. Yang, E. Hwuang, W. R. Witschey, J. A. Detre, and P. Perdikaris, Machine learning in cardiovascular flows
+modeling: Predicting arterial blood pressure from non-invasive 4d flow mri data using physics-informed neural networks,
+Computer Methods in Applied Mechanics and Engineering 358, 112623 (2020).
+[50] F. Sahli Costabal, Y. Yang, P. Perdikaris, D. E. Hurtado, and E. Kuhl, Physics-informed neural networks for cardiac
+activation mapping, Frontiers in Physics 8, 42 (2020).
+[51] K. Kashinath, M. Mustafa, A. Albert, J.-L. Wu, C. Jiang, S. Esmaeilzadeh, K. Azizzadenesheli, R. Wang, A. Chattopad-
+hyay, A. Singh, A. Manepalli, D. Chirila, R. Yu, R. Walters, B. White, H. Xiao, H. A. Tchelepi, P. Marcus, A. Anandkumar,
+P. Hassanzadeh, and Prabhat, Physics-informed machine learning: case studies for weather and climate modelling, Philo-
+sophical transactions. Series A, Mathematical, physical, and engineering sciences 379, 20200093 (2021).
+[52] V. M. Nguyen-Thanh, X. Zhuang, and T. Rabczuk, A deep energy method for finite deformation hyperelasticity, European
+Journal of Mechanics - A/Solids 80, 103874 (2020).
+[53] S. Goswami, C. Anitescu, S. Chakraborty, and T. Rabczuk, Transfer learning enhanced physics informed neural network
+for phase-field modeling of fracture, Theoretical and Applied Fracture Mechanics 106, 102447 (2020).
+[54] N. Wang, Q. Chen, and Z. Chen, Reconstruction of nearshore wave fields based on physics-informed neural networks,
+Coastal Engineering 176, 104167 (2022).
+[55] Q. Chen, N. Wang, and Z. Chen, Simultaneous mapping of nearshore bathymetry and waves based on physics-informed
+deep learning, Coastal Engineering 183, 104337 (2023).
+[56] D. Feng, Z. Tan, and Q. He, Physics-informed neural networks of the saint-venant equations for downscaling a large-scale
+river model, Water Resources Research 59, e2022WR033168 (2023).
+[57] A. D. Jagtap, D. Mitsotakis, and G. E. Karniadakis, Deep learning of inverse water waves problems using multi-fidelity
+data: Application to serre–green–naghdi equations, Ocean Engineering 248, 110775 (2022).
+[58] R. Leiteritz, M. Hurler, and D. Pfl¨ uger, Learning free-surface flow with physics-informed neural networks, in 2021 20th
+IEEE International Conference on Machine Learning and Applications (ICMLA) (2021) pp. 1668–1673.
+[59] S. Ehlers, N. A. Wagner, A. Scherzl, M. Klein, N. Hoffmann, and M. Stender, Data assimilation and parameter identifica-
+tion for water waves using the nonlinear schr¨ odinger equation and physics-informed neural networks, Fluids 9, 10.3390/flu-
+ids9100231 (2024).
+[60] Y. Liu, X. Zhang, Q. Dong, G. Chen, and X. Li, Phase-resolved wave prediction with linear wave theory and physics-
+informed neural networks, Applied Energy 355, 121602 (2024).
+[61] H. Lu, Q. Wang, W. Tang, and H. Liu, Physics-informed neural networks for fully non-linear free surface wave propagation,
+Physics of Fluids 36, 062106 (2024).
+[62] S. Chakrabarti, Hydrodynamics of Offshore Structures , Computational Mechanics publication (Computational Mechanics,
+1987).
+[63] R. Cao, E. Padilla, and A. Callaghan, The influence of bandwidth on the energetics of intermediate to deep water laboratory
+breaking waves, Journal of Fluid Mechanics 971, A11 (2023).
+[64] K. Hasselmann, T. Barnett, E. Bouws, H. Carlson, D. Cartwright, K. Enke, J. Ewing, H. Gienapp, D. Hasselmann,
+P. Kruseman, A. Meerburg, P. M¨ uller, D. Olbers, K. Richter, W. Sell, and H. Walden., Measurements of wind-wave growth
+and swell decay during the joint north sea wave project (jonswap), Erg¨ anzung zur Deutschen Hydrographischen Zeitschrift,
+Reihe A (8) 12, 1 (1973).
+[65] P. S. Tromans, A. R. Anaturk, and P. Hagemeijer, A new model for the kinematics of large ocean waves-application as a
+design wave (1991) pp. ISOPE–I–91–154.
+[66] R. Cao, E. M. Padilla, Y. Fang, and A. H. Callaghan, Identification of the free surface for unidirectional nonbreaking water
+waves from side-view digital images, IEEE Journal of Oceanic Engineering Early Access , 1 (2024).
+22
+[67] X. Glorot and Y. Bengio, Understanding the difficulty of training deep feedforward neural networks, in Proceedings of the
+Thirteenth International Conference on Artificial Intelligence and Statistics , Proceedings of Machine Learning Research,
+Vol. 9, edited by Y. W. Teh and M. Titterington (PMLR, Chia Laguna Resort, Sardinia, Italy, 2010) pp. 249–256.
+[68] M. Tancik, P. P. Srinivasan, B. Mildenhall, S. Fridovich-Keil, N. Raghavan, U. Singhal, R. Ramamoorthi, J. T. Barron,
+and R. Ng, Fourier features let networks learn high frequency functions in low dimensional domains, NeurIPS (2020).
+[69] N. Rahaman, A. Baratin, D. Arpit, F. Draxler, M. Lin, F. A. Hamprecht, Y. Bengio, and A. Courville, On the spectral
+bias of neural networks (2019), arXiv:1806.08734 [stat.ML].
+[70] J. Berg and K. Nystr¨ om, A unified deep artificial neural network approach to partial differential equations in complex
+geometries, Neurocomputing 317, 28 (2018).
+[71] L. Lu, R. Pestourie, W. Yao, Z. Wang, F. Verdugo, and S. G. Johnson, Physics-informed neural networks with hard
+constraints for inverse design, SIAM Journal on Scientific Computing 43, B1105 (2021).
+[72] S. Wang, Y. Teng, and P. Perdikaris, Understanding and mitigating gradient pathologies in physics-informed neural net-
+works (2020), 2001.04536.
+[73] R. Bischof and M. Kraus, Multi-objective loss balancing for physics-informed deep learning, ArXiv abs/2110.09813
+(2021).
+[74] Z. Chen, V. Badrinarayanan, C.-Y. Lee, and A. Rabinovich, Gradnorm: Gradient normalization for adaptive loss balancing
+in deep multitask networks (2018), arXiv:1711.02257 [cs.CV].
+[75] A. A. Heydari, C. A. Thompson, and A. Mehmood, Softadapt: Techniques for adaptive loss weighting of neural networks
+with multi-part loss functions (2019), arXiv:1912.12355 [cs.LG].
+[76] S. Markidis, The old and the new: Can physics-informed deep-learning replace traditional linear solvers?, Frontiers in Big
+Data 4, 10.3389/fdata.2021.669097 (2021).
+[77] D. Kingma and J. Ba, Adam: A method for stochastic optimization, in 3rd International Conference on Learning Repre-
+sentations (ICLR 2015) (2015) pp. 1–15.
+[78] S. J. Reddi, S. Kale, and S. Kumar, On the convergence of adam and beyond, International Conference on Learning
+Representations (2018).
+[79] D. C. Liu and J. Nocedal, On the limited memory bfgs method for large scale optimization, Mathematical Programming
+45, 503 (1989).
+[80] A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein, L. Antiga, A. Des-
+maison, A. Kopf, E. Yang, Z. DeVito, M. Raison, A. Tejani, S. Chilamkurthy, B. Steiner, L. Fang, J. Bai, and S. Chintala,
+Pytorch: An imperative style, high-performance deep learning library, in Advances in Neural Information Processing
+Systems , Vol. 32 (Curran Associates, Inc., 2019) pp. 8024–8035.
+[81] M. Wedler, M. Stender, M. Klein, S. Ehlers, and N. Hoffmann, Surface similarity parameter: A new machine learning loss
+metric for oscillatory spatio-temporal data, Neural Networks 156, 123 (2022).
+[82] T. Iida, Identifying causes of errors between two wave-related data using performance metrics, Applied Ocean Research
+148, 104024 (2024).
+[83] M. Perlin and M. Bustamante, A robust quantitative comparison criterion of two signals based on the sobolev norm of
+their difference, Journal of Engineering Mathematics 101, 115 (2016).
+[84] N. Desmars, M. Hartmann, J. Behrendt, M. Klein, and N. Hoffmann, Reconstruction of Ocean Surfaces From Randomly
+Distributed Measurements Using a Grid-Based Method, International Conference on Offshore Mechanics and Arctic Engi-
+neering 10.1115/OMAE2021-62409 (2021).
+[85] H. L¨ unser, M. Hartmann, N. Desmars, J. Behrendt, N. Hoffmann, and M. Klein, The influence of characteristic sea state
+parameters on the accuracy of irregular wave field simulations of different complexity, Fluids 7, 10.3390/fluids7070243
+(2022).
+[86] I.-C. Kim, G. Ducrozet, F. Bonnefoy, V. Leroy, and Y. Perignon, Real-time phase-resolved ocean wave prediction in
+directional wave fields: Enhanced algorithm and experimental validation, Ocean Engineering 276, 114212 (2023).
+[87] D. Sanz-Alonso, A. Stuart, and A. Taeb, Inverse problems and data assimilation , Vol. 107 (Cambridge University Press,
+2023).
+[88] L. H. Holthuijsen, Waves in Oceanic and Coastal Waters (Cambridge University Press, 2007).
+[89] P. Naaijen, K. Trulsen, and E. Blondel-Couprie, Limits to the extent of the spatio-temporal domain for deterministic wave
+prediction, International shipbuilding progress 61, 203 (2014).
+[90] S. Wang, S. Sankaran, and P. Perdikaris, Respecting causality for training physics-informed neural networks, Computer
+Methods in Applied Mechanics and Engineering 421, 116813 (2024).
+[91] C. Wight and J. Zhao, Solving allen-cahn and cahn-hilliard equations using the adaptive physics informed neural networks,
+ArXiv abs/2007.04542 (2020).
+[92] A. S. Krishnapriyan, A. Gholami, S. Zhe, R. M. Kirby, and M. W. Mahoney, Characterizing possible failure modes in
+physics-informed neural networks, ArXiv abs/2109.01050 (2021), 2109.01050.
+[93] R. Mattey and S. Ghosh, A novel sequential method to train physics informed neural networks for allen cahn and cahn
+hilliard equations, Computer Methods in Applied Mechanics and Engineering 390, 114474 (2022).
+[94] Z. Li, H. Zheng, N. B. Kovachki, D. Jin, H. Chen, B. Liu, K. Azizzadenesheli, and A. Anandkumar, Physics-informed
+neural operator for learning partial differential equations, arXiv abs/2111.03794 (2021), 2111.03794.

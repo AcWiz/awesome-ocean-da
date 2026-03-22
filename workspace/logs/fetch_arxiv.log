@@ -1,0 +1,295 @@
+2026-03-21 20:00:19,731 - INFO - === 论文统计 ===
+2026-03-21 20:00:19,731 - INFO - 总论文数: 92
+2026-03-21 20:00:19,731 - INFO - 有 arXiv ID: 74
+2026-03-21 20:00:19,731 - INFO - 无 arXiv ID: 18
+2026-03-21 20:00:19,731 - INFO - 已有 arxiv_content.txt: 0
+2026-03-21 20:00:24,780 - INFO - 找到 92 篇论文
+2026-03-21 20:00:24,781 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:00:24,781 - INFO - [DRY RUN] 将会下载: 1212.3116v1
+2026-03-21 20:00:24,782 - INFO - 处理论文: optimal_boundary_conditions_at_the_staircase-shape, arXiv ID: 1402.7201v1
+2026-03-21 20:00:24,782 - INFO - [DRY RUN] 将会下载: 1402.7201v1
+2026-03-21 20:00:24,784 - INFO - 处理论文: framework_for_interpreting_regularized_state_estim, arXiv ID: 1511.04790v1
+2026-03-21 20:00:24,784 - INFO - [DRY RUN] 将会下载: 1511.04790v1
+2026-03-21 20:00:24,786 - INFO - 处理论文: using_machine_learning_at_scale_in_hpc_simulations, arXiv ID: 2104.09355v1
+2026-03-21 20:00:24,786 - INFO - [DRY RUN] 将会下载: 2104.09355v1
+2026-03-21 20:00:24,786 - INFO - 
+=== 处理结果 ===
+2026-03-21 20:00:24,786 - INFO - 总处理: 5
+2026-03-21 20:00:24,786 - INFO - 预览模式: 4
+2026-03-21 20:00:24,786 - INFO - 无 arXiv ID: 1
+2026-03-21 20:00:24,786 - INFO - 成功: 0
+2026-03-21 20:00:24,786 - INFO - 失败: 0
+2026-03-21 20:00:30,137 - INFO - 找到 92 篇论文
+2026-03-21 20:00:30,138 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:00:31,197 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:00:32,300 - INFO - 处理论文: optimal_boundary_conditions_at_the_staircase-shape, arXiv ID: 1402.7201v1
+2026-03-21 20:00:33,360 - WARNING - 获取 1402.7201v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1402.7201
+2026-03-21 20:00:34,463 - INFO - 处理论文: framework_for_interpreting_regularized_state_estim, arXiv ID: 1511.04790v1
+2026-03-21 20:00:35,479 - WARNING - 获取 1511.04790v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1511.04790
+2026-03-21 20:00:36,580 - INFO - 
+=== 处理结果 ===
+2026-03-21 20:00:36,580 - INFO - 总处理: 3
+2026-03-21 20:00:36,580 - INFO - 无 arXiv ID: 0
+2026-03-21 20:00:36,580 - INFO - 成功: 0
+2026-03-21 20:00:36,580 - INFO - 失败: 3
+2026-03-21 20:02:04,716 - INFO - 找到 92 篇论文
+2026-03-21 20:02:04,717 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:02:05,586 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:02:06,690 - INFO - 处理论文: optimal_boundary_conditions_at_the_staircase-shape, arXiv ID: 1402.7201v1
+2026-03-21 20:02:07,340 - WARNING - 获取 1402.7201v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1402.7201
+2026-03-21 20:02:08,443 - INFO - 处理论文: framework_for_interpreting_regularized_state_estim, arXiv ID: 1511.04790v1
+2026-03-21 20:02:09,345 - WARNING - 获取 1511.04790v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1511.04790
+2026-03-21 20:02:10,446 - INFO - 
+=== 处理结果 ===
+2026-03-21 20:02:10,446 - INFO - 总处理: 3
+2026-03-21 20:02:10,446 - INFO - 无 arXiv ID: 0
+2026-03-21 20:02:10,446 - INFO - 成功: 0
+2026-03-21 20:02:10,446 - INFO - 失败: 3
+2026-03-21 20:03:22,661 - INFO - 找到 92 篇论文
+2026-03-21 20:03:22,662 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:03:23,328 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:03:24,431 - INFO - 处理论文: optimal_boundary_conditions_at_the_staircase-shape, arXiv ID: 1402.7201v1
+2026-03-21 20:03:25,096 - WARNING - 获取 1402.7201v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1402.7201
+2026-03-21 20:03:26,199 - INFO - 处理论文: framework_for_interpreting_regularized_state_estim, arXiv ID: 1511.04790v1
+2026-03-21 20:03:26,924 - WARNING - 获取 1511.04790v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1511.04790
+2026-03-21 20:03:28,026 - INFO - 
+=== 处理结果 ===
+2026-03-21 20:03:28,026 - INFO - 总处理: 3
+2026-03-21 20:03:28,026 - INFO - 无 arXiv ID: 0
+2026-03-21 20:03:28,026 - INFO - 成功: 0
+2026-03-21 20:03:28,026 - INFO - 失败: 3
+2026-03-21 20:04:26,591 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:04:27,271 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:04:43,880 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:05:56,119 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:06:21,928 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:06:22,331 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:06:53,007 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:06:53,183 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:07:18,062 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:07:18,242 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:07:26,739 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:07:26,974 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:07:27,152 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:07:42,978 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:07:43,160 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:07:56,216 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:07:56,394 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:08:07,533 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:08:30,356 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:08:30,656 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:08:53,854 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:08:54,036 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:09:07,915 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:09:08,097 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:09:23,441 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:09:23,616 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:09:39,068 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:09:39,240 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:09:51,390 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:09:51,569 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:11:19,340 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:11:20,006 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:12:09,006 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:12:09,747 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:13:01,406 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:13:02,084 - WARNING - 获取 1212.3116v1 HTML 失败: 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:13:43,824 - INFO - === 论文统计 ===
+2026-03-21 20:13:43,824 - INFO - 总论文数: 92
+2026-03-21 20:13:43,824 - INFO - 有 arXiv ID: 74
+2026-03-21 20:13:43,824 - INFO - 无 arXiv ID: 18
+2026-03-21 20:13:43,824 - INFO - 已有 arxiv_content.txt: 1
+2026-03-21 20:14:44,694 - INFO - 找到 92 篇论文
+2026-03-21 20:14:44,695 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:14:45,350 - WARNING -   HTML 获取失败 (https://arxiv.org/html/1212.3116): 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:14:46,335 - INFO -   abs 页面获取成功: abstract(904 chars)
+2026-03-21 20:14:47,439 - INFO - 处理论文: optimal_boundary_conditions_at_the_staircase-shape, arXiv ID: 1402.7201v1
+2026-03-21 20:14:48,089 - WARNING -   HTML 获取失败 (https://arxiv.org/html/1402.7201): 404 Client Error: Not Found for url: https://arxiv.org/html/1402.7201
+2026-03-21 20:14:49,275 - INFO -   abs 页面获取成功: abstract(577 chars)
+2026-03-21 20:14:50,379 - INFO - 处理论文: framework_for_interpreting_regularized_state_estim, arXiv ID: 1511.04790v1
+2026-03-21 20:14:51,114 - WARNING -   HTML 获取失败 (https://arxiv.org/html/1511.04790): 404 Client Error: Not Found for url: https://arxiv.org/html/1511.04790
+2026-03-21 20:14:52,245 - INFO -   abs 页面获取成功: abstract(888 chars)
+2026-03-21 20:14:53,346 - INFO - 
+=== 处理结果 ===
+2026-03-21 20:14:53,346 - INFO - 总处理: 3
+2026-03-21 20:14:53,346 - INFO - 无 arXiv ID: 0
+2026-03-21 20:14:53,346 - INFO - 成功: 3
+2026-03-21 20:14:53,346 - INFO - 失败: 0
+2026-03-21 20:15:03,365 - INFO - 找到 92 篇论文
+2026-03-21 20:15:03,366 - INFO - 处理论文: optimal_boundary_conditions_for_orca-2_model, arXiv ID: 1212.3116v1
+2026-03-21 20:15:04,087 - WARNING -   HTML 获取失败 (https://arxiv.org/html/1212.3116): 404 Client Error: Not Found for url: https://arxiv.org/html/1212.3116
+2026-03-21 20:15:04,991 - INFO -   abs 页面获取成功: abstract(904 chars)
+2026-03-21 20:15:06,095 - INFO - 处理论文: optimal_boundary_conditions_at_the_staircase-shape, arXiv ID: 1402.7201v1
+2026-03-21 20:15:06,742 - WARNING -   HTML 获取失败 (https://arxiv.org/html/1402.7201): 404 Client Error: Not Found for url: https://arxiv.org/html/1402.7201
+2026-03-21 20:15:07,854 - INFO -   abs 页面获取成功: abstract(577 chars)
+2026-03-21 20:15:08,967 - INFO - 处理论文: framework_for_interpreting_regularized_state_estim, arXiv ID: 1511.04790v1
+2026-03-21 20:15:09,632 - WARNING -   HTML 获取失败 (https://arxiv.org/html/1511.04790): 404 Client Error: Not Found for url: https://arxiv.org/html/1511.04790
+2026-03-21 20:15:10,766 - INFO -   abs 页面获取成功: abstract(888 chars)
+2026-03-21 20:15:11,871 - INFO - 处理论文: using_machine_learning_at_scale_in_hpc_simulations, arXiv ID: 2104.09355v1
+2026-03-21 20:15:12,887 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2104.09355): 404 Client Error: Not Found for url: https://arxiv.org/html/2104.09355
+2026-03-21 20:15:14,071 - INFO -   abs 页面获取成功: abstract(974 chars)
+2026-03-21 20:15:15,200 - INFO - 处理论文: 4D-SRDA, arXiv ID: 2212.03656
+2026-03-21 20:15:16,186 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2212.03656): 404 Client Error: Not Found for url: https://arxiv.org/html/2212.03656
+2026-03-21 20:15:17,093 - INFO -   abs 页面获取成功: abstract(1729 chars)
+2026-03-21 20:15:18,197 - INFO - 处理论文: 4dvarnet-ssh_end-to-end_learning_of_variational_in, arXiv ID: 2211.05904v1
+2026-03-21 20:15:19,190 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2211.05904): 404 Client Error: Not Found for url: https://arxiv.org/html/2211.05904
+2026-03-21 20:15:20,089 - INFO -   abs 页面获取成功: abstract(1503 chars)
+2026-03-21 20:15:21,193 - INFO - 处理论文: Ocean_Observations_Expansion, arXiv ID: 2206.01599
+2026-03-21 20:15:22,191 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2206.01599): 404 Client Error: Not Found for url: https://arxiv.org/html/2206.01599
+2026-03-21 20:15:23,096 - INFO -   abs 页面获取成功: abstract(1791 chars)
+2026-03-21 20:15:24,204 - INFO - 处理论文: deep-learning-enhanced-ensemble-based-data-assimilation, arXiv ID: 2206.04811
+2026-03-21 20:15:25,100 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2206.04811): 404 Client Error: Not Found for url: https://arxiv.org/html/2206.04811
+2026-03-21 20:15:25,991 - INFO -   abs 页面获取成功: abstract(1540 chars)
+2026-03-21 20:15:27,095 - INFO - 处理论文: Echo_State_DA, arXiv ID: 2304.00198
+2026-03-21 20:15:28,527 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2304.00198): 404 Client Error: Not Found for url: https://arxiv.org/html/2304.00198
+2026-03-21 20:15:29,419 - INFO -   abs 页面获取成功: abstract(750 chars)
+2026-03-21 20:15:30,522 - INFO - 处理论文: Graph_SST_Forecast, arXiv ID: 2305.09468
+2026-03-21 20:15:31,529 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2305.09468): 404 Client Error: Not Found for url: https://arxiv.org/html/2305.09468
+2026-03-21 20:15:32,419 - INFO -   abs 页面获取成功: abstract(1010 chars)
+2026-03-21 20:15:33,523 - INFO - 处理论文: application_of_deep_learning_to_the_estimation_of_, arXiv ID: 2312.05068v1
+2026-03-21 20:15:35,462 - INFO -   HTML 格式获取成功: abstract(1584 chars), intro(6725 chars)
+2026-03-21 20:15:36,567 - INFO - 处理论文: deep-learning_real-time_bias_correction_method_for, arXiv ID: 2311.15001v1
+2026-03-21 20:15:37,583 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2311.15001): 404 Client Error: Not Found for url: https://arxiv.org/html/2311.15001
+2026-03-21 20:15:38,727 - INFO -   abs 页面获取成功: abstract(1613 chars)
+2026-03-21 20:15:39,830 - INFO - 处理论文: deep_learning_of_systematic_sea_ice_model_errors_f, arXiv ID: 2304.03832v1
+2026-03-21 20:15:40,818 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2304.03832): 404 Client Error: Not Found for url: https://arxiv.org/html/2304.03832
+2026-03-21 20:15:41,746 - INFO -   abs 页面获取成功: abstract(1676 chars)
+2026-03-21 20:15:42,851 - INFO - 处理论文: on_the_relative_role_of_east_and_west_pacific_sea_, arXiv ID: 2302.11357v1
+2026-03-21 20:15:44,341 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2302.11357): 404 Client Error: Not Found for url: https://arxiv.org/html/2302.11357
+2026-03-21 20:15:45,488 - INFO -   abs 页面获取成功: abstract(1629 chars)
+2026-03-21 20:15:46,592 - INFO - 处理论文: CGKN, arXiv ID: 2410.20072
+2026-03-21 20:15:49,247 - INFO -   HTML 格式获取成功: abstract(1862 chars), intro(6668 chars)
+2026-03-21 20:15:50,355 - INFO - 处理论文: Deep_Koopman_Learning_Noisy_Data, arXiv ID: 2405.16649
+2026-03-21 20:15:53,038 - INFO -   HTML 格式获取成功: abstract(844 chars), intro(6178 chars)
+2026-03-21 20:15:54,146 - INFO - 处理论文: FuXi-DA, arXiv ID: 2404.08522
+2026-03-21 20:15:55,566 - INFO -   HTML 格式获取成功: abstract(1706 chars), intro(12049 chars)
+2026-03-21 20:15:56,673 - INFO - 处理论文: OceanCastNet_Wave_Forecasting, arXiv ID: 2406.03848
+2026-03-21 20:15:58,750 - INFO -   HTML 格式获取成功: abstract(931 chars), intro(2360 chars)
+2026-03-21 20:15:59,868 - INFO - 处理论文: Semilinear_Neural_Operators, arXiv ID: 2402.15656
+2026-03-21 20:16:03,517 - INFO -   HTML 格式获取成功: abstract(1492 chars), intro(7711 chars)
+2026-03-21 20:16:04,621 - INFO - 处理论文: Tropical_Pacific_Ocean_DA, arXiv ID: 2406.07063
+2026-03-21 20:16:06,960 - INFO -   HTML 格式获取成功: abstract(1022 chars), intro(6347 chars)
+2026-03-21 20:16:08,063 - INFO - 处理论文: cgkn_a_deep_learning_framework_for_modeling_comple, arXiv ID: 2410.20072v2
+2026-03-21 20:16:10,544 - INFO -   HTML 格式获取成功: abstract(1862 chars), intro(6668 chars)
+2026-03-21 20:16:11,648 - INFO - 处理论文: conditional-gaussian-ensemble-kalman-filtering, arXiv ID: 2409.14300
+2026-03-21 20:16:13,445 - INFO -   HTML 格式获取成功: abstract(1135 chars), intro(5553 chars)
+2026-03-21 20:16:14,549 - INFO - 处理论文: koopman-based-deep-learning-nonlinear-system-estimation, arXiv ID: 2405.00627
+2026-03-21 20:16:18,285 - INFO -   HTML 格式获取成功: abstract(831 chars), intro(3689 chars)
+2026-03-21 20:16:19,389 - INFO - 处理论文: long-range_vision-based_uav-assisted_localization_, arXiv ID: 2408.11429v1
+2026-03-21 20:16:21,347 - INFO -   HTML 格式获取成功: abstract(1736 chars), intro(7517 chars)
+2026-03-21 20:16:22,451 - INFO - 处理论文: validating-deep-learning-weather-forecast-models, arXiv ID: 2404.17652
+2026-03-21 20:16:25,569 - INFO -   HTML 格式获取成功: abstract(1725 chars), intro(5417 chars)
+2026-03-21 20:16:26,680 - INFO - 处理论文: NeuralOM, arXiv ID: 2505.21020
+2026-03-21 20:16:29,170 - INFO -   HTML 格式获取成功: abstract(1443 chars), intro(4729 chars)
+2026-03-21 20:16:30,276 - INFO - 处理论文: Neural_Ocean_Forecasting, arXiv ID: 2512.22152
+2026-03-21 20:16:31,160 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2512.22152): 404 Client Error: Not Found for url: https://arxiv.org/html/2512.22152
+2026-03-21 20:16:32,076 - INFO -   abs 页面获取成功: abstract(1587 chars)
+2026-03-21 20:16:33,180 - INFO - 处理论文: ORCAst, arXiv ID: 2501.12054
+2026-03-21 20:16:34,648 - INFO -   HTML 格式获取成功: abstract(998 chars), intro(7629 chars)
+2026-03-21 20:16:35,754 - INFO - 处理论文: Stratified_PINN_DA, arXiv ID: 2503.19160
+2026-03-21 20:16:40,167 - INFO -   HTML 格式获取成功: abstract(1594 chars), intro(9611 chars)
+2026-03-21 20:16:41,271 - INFO - 处理论文: Subregional_Ocean_Forecasting, arXiv ID: 2505.24429
+2026-03-21 20:16:44,507 - INFO -   HTML 格式获取成功: abstract(2060 chars), intro(9740 chars)
+2026-03-21 20:16:45,610 - INFO - 处理论文: Tensor-Var, arXiv ID: 2501.13312
+2026-03-21 20:16:51,127 - INFO -   HTML 格式获取成功: abstract(1321 chars), intro(4667 chars)
+2026-03-21 20:16:52,231 - INFO - 处理论文: advancing_ocean_state_estimation_with_efficient_an, arXiv ID: 2511.06041v1
+2026-03-21 20:16:53,688 - INFO -   HTML 格式获取成功: abstract(1165 chars), intro(5498 chars)
+2026-03-21 20:16:54,792 - INFO - 处理论文: assimilation_of_swot_altimetry_data_for_riverine_f, arXiv ID: 2504.21670v1
+2026-03-21 20:16:56,763 - INFO -   HTML 格式获取成功: abstract(1542 chars), intro(6399 chars)
+2026-03-21 20:16:57,866 - INFO - 处理论文: causal_operator_discovery_in_partial_differential_, arXiv ID: 2506.20181v1
+2026-03-21 20:17:03,811 - INFO -   HTML 格式获取成功: abstract(1383 chars), intro(3397 chars)
+2026-03-21 20:17:04,916 - INFO - 处理论文: data-driven_reconstruction_of_significant_wave_hei, arXiv ID: 2509.19384v1
+2026-03-21 20:17:06,025 - INFO -   HTML 格式获取成功: abstract(1552 chars), intro(7126 chars)
+2026-03-21 20:17:07,129 - INFO - 处理论文: deep-learning-subregional-ocean-forecasting-canary-current, arXiv ID: 2505.24429
+2026-03-21 20:17:10,152 - INFO -   HTML 格式获取成功: abstract(2060 chars), intro(9740 chars)
+2026-03-21 20:17:11,256 - INFO - 处理论文: deep_learning_in_the_abyss_a_stratified_physics_in, arXiv ID: 2503.19160v1
+2026-03-21 20:17:13,172 - INFO -   HTML 格式获取成功: abstract(1594 chars), intro(9611 chars)
+2026-03-21 20:17:14,275 - INFO - 处理论文: digestible_pieces_comparing_three_options_for_part, arXiv ID: 2510.18133v1
+2026-03-21 20:17:14,827 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2510.18133): 404 Client Error: Not Found for url: https://arxiv.org/html/2510.18133
+2026-03-21 20:17:15,386 - INFO -   abs 页面获取成功: abstract(1338 chars)
+2026-03-21 20:17:16,490 - INFO - 处理论文: extratropical_atmospheric_circulation_response_to_, arXiv ID: 2511.20899v1
+2026-03-21 20:17:17,649 - INFO -   HTML 格式获取成功: abstract(954 chars), intro(6416 chars)
+2026-03-21 20:17:18,753 - INFO - 处理论文: gtsforecaster_a_novel_deep_learning_based_geodetic, arXiv ID: 2509.10560v1
+2026-03-21 20:17:19,385 - INFO -   HTML 格式获取成功: abstract(1477 chars), intro(2817 chars)
+2026-03-21 20:17:20,488 - INFO - 处理论文: integrating_score-based_diffusion_models_with_mach, arXiv ID: 2511.05266v1
+2026-03-21 20:17:21,242 - INFO -   HTML 格式获取成功: abstract(1250 chars), intro(13431 chars)
+2026-03-21 20:17:22,346 - INFO - 处理论文: leveraging_an_atmospheric_foundational_model_for_s, arXiv ID: 2510.25563v1
+2026-03-21 20:17:23,536 - INFO -   HTML 格式获取成功: abstract(1655 chars), intro(5233 chars)
+2026-03-21 20:17:24,640 - INFO - 处理论文: meta-learning_fourier_neural_operators_for_hessian, arXiv ID: 2509.22949v1
+2026-03-21 20:17:25,553 - INFO -   HTML 格式获取成功: abstract(1006 chars), intro(2075 chars)
+2026-03-21 20:17:26,657 - INFO - 处理论文: modeling_partially_observed_nonlinear_dynamical_sy, arXiv ID: 2507.08749v1
+2026-03-21 20:17:27,904 - INFO -   HTML 格式获取成功: abstract(1785 chars), intro(8824 chars)
+2026-03-21 20:17:29,008 - INFO - 处理论文: neural_ocean_forecasting_from_sparse_satellite-der, arXiv ID: 2512.22152v1
+2026-03-21 20:17:29,404 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2512.22152): 404 Client Error: Not Found for url: https://arxiv.org/html/2512.22152
+2026-03-21 20:17:29,676 - INFO -   abs 页面获取成功: abstract(1587 chars)
+2026-03-21 20:17:30,779 - INFO - 处理论文: observation-only_learning_of_neural_mapping_scheme, arXiv ID: 2503.11532v1
+2026-03-21 20:17:31,571 - INFO -   HTML 格式获取成功: abstract(865 chars), intro(6714 chars)
+2026-03-21 20:17:32,675 - INFO - 处理论文: oceanforecastbench_a_benchmark_dataset_for_data-dr, arXiv ID: 2511.18732v2
+2026-03-21 20:17:33,288 - INFO -   HTML 格式获取成功: abstract(1589 chars), intro(6407 chars)
+2026-03-21 20:17:34,391 - INFO - 处理论文: optimizing_auv_speed_dynamics_with_a_data-driven_k, arXiv ID: 2503.09628v1
+2026-03-21 20:17:36,231 - INFO -   HTML 格式获取成功: abstract(1111 chars), intro(7673 chars)
+2026-03-21 20:17:37,335 - INFO - 处理论文: physical_informed_neural_networks_for_modeling_oce, arXiv ID: 2507.08834v1
+2026-03-21 20:17:38,017 - INFO -   HTML 格式获取成功: abstract(1064 chars), intro(4647 chars)
+2026-03-21 20:17:39,120 - INFO - 处理论文: prediction_of_sea_ice_velocity_and_concentration_i, arXiv ID: 2510.17756v1
+2026-03-21 20:17:40,064 - INFO -   HTML 格式获取成功: abstract(1264 chars), intro(9295 chars)
+2026-03-21 20:17:41,168 - INFO - 处理论文: principled_operator_learning_in_ocean_dynamics_the, arXiv ID: 2510.09792v1
+2026-03-21 20:17:42,005 - INFO -   HTML 格式获取成功: abstract(1276 chars), intro(2773 chars)
+2026-03-21 20:17:43,111 - INFO - 处理论文: small_ensemble-based_data_assimilation_a_machine_l, arXiv ID: 2510.15284v1
+2026-03-21 20:17:44,288 - INFO -   HTML 格式获取成功: abstract(1339 chars), intro(5000 chars)
+2026-03-21 20:17:45,392 - INFO - 处理论文: sstode_ocean-atmosphere_physics-informed_neural_od, arXiv ID: 2511.05629v1
+2026-03-21 20:17:46,082 - INFO -   HTML 格式获取成功: abstract(1643 chars), intro(5840 chars)
+2026-03-21 20:17:47,184 - INFO - 处理论文: stratified-physics-informed-neural-network-data-assimilation, arXiv ID: 2503.19160
+2026-03-21 20:17:48,377 - INFO -   HTML 格式获取成功: abstract(1594 chars), intro(9611 chars)
+2026-03-21 20:17:49,481 - INFO - 处理论文: swr-viz_ai-assisted_interactive_visual_analytics_f, arXiv ID: 2511.15182v1
+2026-03-21 20:17:50,355 - INFO -   HTML 格式获取成功: abstract(1308 chars), intro(3515 chars)
+2026-03-21 20:17:51,459 - INFO - 处理论文: advanced_global_wildfire_activity_modeling_with_hi, arXiv ID: 2601.01501v1
+2026-03-21 20:17:52,096 - INFO -   HTML 格式获取成功: abstract(1347 chars), intro(5734 chars)
+2026-03-21 20:17:53,200 - INFO - 处理论文: benchmarking_artificial_intelligence_models_for_da, arXiv ID: 2602.05178v1
+2026-03-21 20:17:54,279 - INFO -   HTML 格式获取成功: abstract(1631 chars), intro(3202 chars)
+2026-03-21 20:17:55,382 - INFO - 处理论文: cnn-based_forecasting_of_early_winter_nao_using_se, arXiv ID: 2603.16312v1
+2026-03-21 20:17:55,786 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2603.16312): 404 Client Error: Not Found for url: https://arxiv.org/html/2603.16312
+2026-03-21 20:17:56,042 - INFO -   abs 页面获取成功: abstract(1774 chars)
+2026-03-21 20:17:57,144 - INFO - 处理论文: data_driven_air_entrainment_velocity_parameterizat, arXiv ID: 2602.04067v1
+2026-03-21 20:17:58,187 - INFO -   HTML 格式获取成功: abstract(1204 chars), intro(5059 chars)
+2026-03-21 20:17:59,291 - INFO - 处理论文: eddy-resolving_global_ocean_forecasting_with_multi, arXiv ID: 2601.12775v1
+2026-03-21 20:18:00,322 - INFO -   HTML 格式获取成功: abstract(1376 chars), intro(5693 chars)
+2026-03-21 20:18:01,426 - INFO - 处理论文: ensemble_graph_neural_networks_for_probabilistic_s, arXiv ID: 2603.06153v1
+2026-03-21 20:18:02,492 - INFO -   HTML 格式获取成功: abstract(1788 chars), intro(6570 chars)
+2026-03-21 20:18:03,595 - INFO - 处理论文: explore_the_ideology_of_deep_learning_in_enso_fore, arXiv ID: 2601.02050v1
+2026-03-21 20:18:04,201 - INFO -   HTML 格式获取成功: abstract(1196 chars), intro(5564 chars)
+2026-03-21 20:18:05,306 - INFO - 处理论文: function-space_decoupled_diffusion_for_forward_and, arXiv ID: 2602.12274v2
+2026-03-21 20:18:06,547 - INFO -   HTML 格式获取成功: abstract(1696 chars), intro(4409 chars)
+2026-03-21 20:18:07,652 - INFO - 处理论文: hybridom_hybrid_physics-based_and_data-driven_glob, arXiv ID: 2602.00598v1
+2026-03-21 20:18:08,707 - INFO -   HTML 格式获取成功: abstract(1292 chars), intro(6150 chars)
+2026-03-21 20:18:09,810 - INFO - 处理论文: lagrangian_conditional_gaussian_koopman_network_fo, arXiv ID: 2603.14115v1
+2026-03-21 20:18:10,712 - INFO -   HTML 格式获取成功: abstract(2021 chars), intro(9712 chars)
+2026-03-21 20:18:11,816 - INFO - 处理论文: large-ensemble_simulations_reveal_links_between_at, arXiv ID: 2602.05083v1
+2026-03-21 20:18:12,873 - INFO -   HTML 格式获取成功: abstract(1310 chars), intro(8137 chars)
+2026-03-21 20:18:13,977 - INFO - 处理论文: machine_learning_enhanced_data_assimilation_framew, arXiv ID: 2602.06989v1
+2026-03-21 20:18:14,665 - INFO -   HTML 格式获取成功: abstract(1983 chars), intro(6387 chars)
+2026-03-21 20:18:15,770 - INFO - 处理论文: probabilistic_reconstruction_of_global_sea_surface, arXiv ID: 2603.16272v1
+2026-03-21 20:18:16,161 - WARNING -   HTML 获取失败 (https://arxiv.org/html/2603.16272): 404 Client Error: Not Found for url: https://arxiv.org/html/2603.16272
+2026-03-21 20:18:16,419 - INFO -   abs 页面获取成功: abstract(1686 chars)
+2026-03-21 20:18:17,523 - INFO - 处理论文: reduced-order_surrogates_for_forced_flexible_mesh_, arXiv ID: 2602.05416v1
+2026-03-21 20:18:18,883 - INFO -   HTML 格式获取成功: abstract(1566 chars), intro(7498 chars)
+2026-03-21 20:18:19,986 - INFO - 处理论文: spatio-temporal_modeling_and_forecasting_with_four, arXiv ID: 2601.01813v1
+2026-03-21 20:18:21,338 - INFO -   HTML 格式获取成功: abstract(1344 chars), intro(5697 chars)
+2026-03-21 20:18:22,442 - INFO - 处理论文: towards_efficient_and_stable_ocean_state_forecasti, arXiv ID: 2603.05560v2
+2026-03-21 20:18:23,461 - INFO -   HTML 格式获取成功: abstract(1091 chars), intro(1275 chars)
+2026-03-21 20:18:24,565 - INFO - 处理论文: turning_time_series_into_algebraic_equations_symbo, arXiv ID: 2603.07261v1
+2026-03-21 20:18:26,155 - INFO -   HTML 格式获取成功: abstract(1610 chars), intro(8997 chars)
+2026-03-21 20:18:27,258 - INFO - 处理论文: two_localization_strategies_for_sequential_mcmc_da, arXiv ID: 2603.05817v1
+2026-03-21 20:18:28,275 - INFO -   HTML 格式获取成功: abstract(2225 chars), intro(11864 chars)
+2026-03-21 20:18:29,380 - INFO - 处理论文: versatile_laboratory_approach_to_reproduce_and_ana, arXiv ID: 2603.13512v1
+2026-03-21 20:18:30,843 - INFO -   HTML 格式获取成功: abstract(1250 chars), intro(4302 chars)
+2026-03-21 20:18:31,945 - INFO - 
+=== 处理结果 ===
+2026-03-21 20:18:31,945 - INFO - 总处理: 92
+2026-03-21 20:18:31,945 - INFO - 无 arXiv ID: 18
+2026-03-21 20:18:31,945 - INFO - 成功: 74
+2026-03-21 20:18:31,945 - INFO - 失败: 0
+2026-03-21 20:18:46,753 - INFO - === 论文统计 ===
+2026-03-21 20:18:46,753 - INFO - 总论文数: 92
+2026-03-21 20:18:46,753 - INFO - 有 arXiv ID: 74
+2026-03-21 20:18:46,753 - INFO - 无 arXiv ID: 18
+2026-03-21 20:18:46,753 - INFO - 已有 arxiv_content.txt: 74

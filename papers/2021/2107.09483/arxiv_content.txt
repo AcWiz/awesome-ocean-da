@@ -1,0 +1,513 @@
+Signiﬁcant Wave Height Prediction based on
+Wavelet Graph Neural Network
+Delong Chen1, Fan Liu1, Zheqi Zhang2,*, Xiaomin Lu1, Zewen Li1
+1College of Computer and Information Hohai University, Nanjing, China
+2Mihaylo College of Business and Economics, California State University, Fullerton, USA
+email: tedzhang1988@gmail.com
+Abstract —Computational intelligence-based ocean character-
+istics forecasting applications, such as Signiﬁcant Wave Height
+(SWH) prediction, are crucial for avoiding social and economic
+loss in coastal cities. Compared to the traditional empirical-
+based or numerical-based forecasting models, “soft computing”
+approaches, including machine learning and deep learning mod-
+els, have shown numerous success in recent years. In this paper,
+we focus on enabling the deep learning model to learn both short-
+term and long-term spatial-temporal dependencies for SWH
+prediction. A Wavelet Graph Neural Network (WGNN) approach
+is proposed to integrate the advantages of wavelet transform and
+graph neural network. Several parallel graph neural networks
+are separately trained on wavelet decomposed data, and the
+reconstruction of each model’s prediction forms the ﬁnal SWH
+prediction. Experimental results show that the proposed WGNN
+approach outperforms other models, including the numerical
+models, the machine learning models, and several deep learning
+models.
+Index Terms —Signiﬁcant wave height, Wavelet transform,
+Deep learning
+I. I NTRODUCTION
+Ocean waves with high Signiﬁcant Wave Height (SWH,
+orHs) can overturn ships and destroy ocean or coastal
+engineering. It threatens human life, crop production, and
+the survival of aquaculture products. Therefore, the accurate
+prediction of SWH is vital since it can help reduce social and
+commercial losses. Moreover, SWH prediction can also bring
+several beneﬁts. For example, optimizing ship routes according
+to the SWH prediction can avoid rough sea areas, thereby
+reducing the sailing time and fuel expenses. Furthermore,
+SWH prediction can provide valuable information for planning
+military and amphibious operations.
+Due to its importance and valuable applications, SWH
+prediction approaches have been continuously developed for
+decades. The empirical-based and numerical-based SWH pre-
+diction approaches in the early years have high interpretability
+but low accuracy and limited generalization ability. As the rise
+of computational intelligence, machine learning-based SWH
+prediction models, such as the Support Vector Machine (SVM)
+and the Artiﬁcial Neural Network (ANN), have shown their
+advantages. Especially in recent years, deep learning-based
+This work was partially funded by Natural Science Foundation of Jiangsu
+Province under Grant No. BK20191298, Fundamental Research Funds for the
+Central Universities under Grant No. B200202175.
+(a)
+(c)(b)
+(d)Fig. 1. The seasonal variation of SWH caused by the monsoon. (a)-(d)
+respectively show the average SWH value and wave direction of Q1-Q4. This
+ﬁgure clariﬁed the motivation and necessity of wavelet decomposition for
+SWH prediction.
+models, which hold strong feature extraction ability, have also
+been applied to SWH prediction successfully [1], [2].
+However, by reviewing the existing approaches, we ﬁnd that
+there are the following two challenges that still remain and
+need to be solved for SWH prediction: 1)effectively capture
+the relationships between different types of inputs and learn its
+complicated non-linear mapping and temporal dependencies
+with the SWH data, and 2)distinguish occasional extreme sea
+conditions and seasonal SWH variation and learn both short-
+term and long-term SWH patterns (see Fig.1 for an example
+of long-term SWH variation).
+In this paper, the above issues are addressed by the proposed
+Wavelet Graph Neural Network (WGNN). The inputs and the
+target outputs are decomposed by the Debauches (Db)-type
+mother wavelet-based wavelet transform. For the derived com-
+ponents, several Graph Neural Networks (GNN) are separatelyarXiv:2107.09483v1  [cs.LG]  20 Jul 2021
+deployed to learn the data dependencies in corresponding
+frequency band individually. The GNN can effectively capture
+the spatial-temporal pattern of data, especially the relationship
+between different types of inputs. Finally, the outputs of each
+GNN are reconstructed to form the ﬁnal SWH prediction. To
+our best knowledge, it is the ﬁrst time that a GNN is applied
+to the SWH prediction task, and also the ﬁrst time that deep
+learning is integrated with wavelet transform for the SWH
+prediction. In the experiment, the effectiveness of the proposed
+WGNN is well validated. We compare WGNN with several
+SWH prediction baselines, and we ﬁnd WGNN achieve the
+best performance.
+The rest of this paper is organized as follows. In Sec-
+tion II, we review existing SWH prediction methods, including
+machine learning-based, deep learning-based, and wavelet
+transform-based approaches. In Section III, we present the
+technical details of our proposed WGNN approach. Section IV
+and Section V compares different methods to make SWH
+predictions and summarizes ﬁndings respectively.
+II. R ELATED WORKS
+A. Machine Learning-based Approaches
+In last century, due to the difﬁculty of data collection
+and the limitation of computing power, SWH prediction
+was mainly based on empirical or numerical models [3]–
+[5]. Due to the lack of learning ability, these approaches
+have strong interpretability but low prediction accuracy and
+weak generalize performance. As the rapid development of
+machine learning theory, many machine learning algorithms,
+such as Support Vector Regression (SVR), Bayesian Network,
+XGBoost, extreme learning machine, and ANN, have been
+successfully deployed on the SWH prediction [6]–[8]. These
+approaches were also named “soft computing” as the contrast
+of previous empirical-based or numerical-based “hard comput-
+ing” approaches.
+It is worth noting that among these “soft computing”
+methods, ANN is the most widely used learning model [8]–
+[11]. Since ANN has the ability to establish complicated non-
+linear mapping to ﬁt arbitrary functions, it has been widely
+valued and became a popular choice in SWH prediction.
+Malekmohamadi et al. [7] evaluated SVM, Bayesian Network,
+ANN, and Adaptive Neuro-Fuzzy Inference System for SWH
+prediction and found that ANN achieved the best performance.
+In recent years, several variances of ANN, such as General
+Regression Neural Network [12], and various optimizers of
+ANN, such as cuckoo search algorithm [13], mind evolu-
+tionary algorithm [14] have been investigated to improve the
+accuracy of SWH prediction.
+However, as a common drawback of the above models,
+the temporal dependencies of data are neglected, making the
+model sensitive to noise and therefore limiting their reliability.
+To solve this issue, Recurrent Neural Network (RNN)-based
+approach [15] and Long Short Term Memory (LSTM)-based
+approach [16] have been developed. Many researchers have
+proved the advantages of RNN and LSTM through compara-
+tive experiments. For example, Abhigna et al. [17] comparedANN and RNN and found that RNN could achieve lower
+error, and Gao et al. [18] showed the performance of LSTM
+is signiﬁcantly better than SWAN [4], ANN and SVR.
+B. Deep Learning-based Approaches
+A noticing research trend of SWH prediction is the usage
+of deep learning models. Compared to the above machine
+learning, deep learning has a stronger feature extraction capa-
+bility. Zhang et al. [19] used Conditional Restricted Boltzmann
+Machine-based Deep Belief Network (CRBF-DBN) to predict
+SWH. Kumar et al. [20] transferred a pre-trained Deep Belief
+Networks (DBN) to predict SWH of different locations to
+solve the issue of lacking sufﬁcient training data. It demon-
+strates that the model could effectively learn generalized data
+patterns and dependencies from the pre-training dataset. In
+recent years, Convolutional Neural Network (CNN) [21] was
+also found to have great potential. For example, Quach et
+al. [1] used a CNN to extract information from Synthetic
+Aperture Radar (SAR) images and predict SWH. Compared to
+previous works, their deep learning-based approach achieved
+signiﬁcantly better performance. This success demonstrated
+the feasibility and effectiveness of convolutional deep models
+for the SWH prediction.
+Choi et al. [22] used a CNN-LSTM model to predict SWH
+from solely raw ocean image, but this method fails in foggy
+or night conditions. The CNN was originally designed for
+image-oriented tasks [23], and just as in the above methods,
+CNN is used to extract visual features. Despite visual data,
+researchers also found CNN’s feasibility on processing raw
+sensor signal data. For example, recently Guan et al. [2]
+proposed to use a CNN-LSTM model for SWH prediction.
+Their model outperforms the model based on solely LSTM,
+showing that CNN can effectively extract local features from
+sensor signal data and improve the performance. Besides,
+Wang et al. and Mooneyham et al. combined the advantages
+of “hard computing” numerical models and “soft computing”
+learning-based models by using a multi-factor extreme learn-
+ing machine [24] and CNN [25] to correct the prediction of
+numerical model, which is also an emerging and promising
+approach for SWH prediction.
+C. Wavelet Transform-based Approaches
+The SWH data, as well as the inputs of the SWH pre-
+diction model, are non-stationary time series composing of
+different components with different periods and frequencies.
+These different components are affected by different factors,
+such as tides, weather, monsoon, seasons, etc. Researchers
+found separately deploying several models to learn different
+components could lead to higher accuracy. For the SWH
+prediction, wavelet transform has been widely used to perform
+decomposition and be combined with a variety of machine
+learning methods, such as fussy logic [26], and genetic pro-
+gramming [27]. The combination of wavelet transform and
+ANN has received a lot of attention. For example, Deshmukh
+et al. [28] decomposed the residual of the numerical model
+and ground truth data by wavelets, then they trained an
+Graph Neural Network
+Graph Neural Network
+Graph Neural Network
+Graph Neural Networky
+y
+y
+yx
+x
+x
+xDetail
+x
+rD1 rA1
+rD2 rA2
+rD3 rA3ApproximateWavelet Decomposition
+Detail
+y
+rD1 rA1
+rD2 rA2
+rD3 rA3ApproximateWavelet ReconstructionFig. 2. The illustration of the proposed WGNN.
+ANN to correct the numerical prediction. Dixit et al. [29]
+named the combination of wavelet transform as Neuro-Wavelet
+Techniques and presented a review of its hydrology and ocean
+applications. However, to our best knowledge, existing wavelet
+transform-based approaches only use shallow networks, but
+whether a deep model can be successfully combined with
+wavelet transform is still unclear.
+III. A PPROACH
+Suppose we have a dataset D=f(Xi;Yi)gN
+i=1, where
+Xi=fxtgT
+t=1andYi=fytgT
+t=1are respectively the input
+SWH-related signal data sequences and ground truth SWH
+sequences. Each xtis a three-dimensional vector containing
+the information of average wind speed, maximum wind speed
+and wind direction at time step t, and ytis the ground truth
+SWH value. Our goal is to estimate a function ffromDto
+predict SWH from given signal data, i.e. ^Yi=f(Xi). Our
+proposed approach is based on wavelet decomposition and
+reconstruction. As illustrated in Fig.2, we ﬁrst decompose Xi
+andYiinto a series of components, i.e. Xi=X1
+i+X2
+i+:::+
+Xn
+iandYi=Y1
+i+Y2
+i+:::+Yn
+i. For all the ndecomposed
+components, we set up nmodels f1; f2; :::fnto individually
+learn the corresponding component. The ﬁnal prediction is
+given by the reconstruction of different models’ prediction.
+In our approach, we use Debauches (Db)-type mother
+wavelet to perform wavelet decomposition. The decomposition
+is performed for three times. An Approximate (A) component
+and a Detail (D) component are derived by low- and high-
+pass ﬁltering in each step, resulting in three approximate
+components and three detail components, named rA1,rA2,
+rA3,rD1,rD2, and rD3. An example of the original the
+SWH data and decomposed six components are shown in
+Fig. 3. The approximate components contain only the low-
+frequency component, and their high-frequency components
+are separated and moved into detail components at each
+decomposition step.
+Note that the wavelet decomposition is reversible. Fig. 4
+shows a comparison of original and reconstructed SWH data,
+and Table.I summarizes the reconstruction error of inputs data.TABLE I
+THE RECONSTRUCTION ERROR OF DIFFERENT TYPE OF INPUT
+Input Unit Reconstruction Error
+Average wind speed m/s 1:776410 14
+Maxim wind speed m/s 2:131610 14
+Wind Direction degree 2:273710 13
+From these result we can conclude that the error of both input
+data and target output SWH data is at a very low numerical
+level and can be ignored, showing the reliability of the wavelet
+transform approach.
+As shown in Fig.2, among the six components, including
+rA1,rA2,rA3,rD1,rD2;andrD3derived from wavelet
+transform, we use rD1,rD2,rD3, and rA3as the models
+input and output, i.e. n= 4 . Those four components are
+independently learned by four learning models, which is based
+on a Graph Neural Network (GNN) structure [30]. Each model
+can only observe its own frequency band of input. The outputs
+of the four GNNs are subsequently reconstructed and form the
+ﬁnal prediction outputs.
+The GNN is an effective learning model designed for
+multivariate time series prediction. It consists of a graph
+learning module, a graph convolution module, and a temporal
+convolution module. It also integrate a mix-hop propagation
+layer and a dilated inception layer [30]. The loss function
+WGNN is:
+L=1
+NNX
+i=0jj4X
+k=1fk(xi) yijj2
+2 (1)
+, where f1,f2,f3, and f4are respectively for rD1,rD2,
+rD3, and rA3derived from wavelet decomposition.
+IV. E XPERIMENTS
+A. Experiment Setup
+We implemented our proposed approach by MATLAB and
+Tensorﬂow. The WGNN consists of ﬁve spatial and ﬁve
+temporal convolution modules. The dilatation is set to 2. We
+train the WGNN model for 30 epochs with a batchsize of 4.
+SWH /m SWH /m SWH /m
+SWH /m SWH /m SWH /m
+SWH /moriginal
+rA1
+rA2
+rA3rD1
+rD2
+rD3Fig. 3. An example of SWH wavelet decomposition.
+SWH /m SWH /m SWH /m(a) Original Signal
+(b) Reconstructed Signal
+(c) Reconstruction Error
+Fig. 4. An example of SWH wavelet reconstruction and the reconstruction
+error.
+The data comes from the a buoy deployed by the Chinese
+Fujian Wave Forecast Station in the middle of the Taiwan
+Strait, whose latitude and longitude are 119.30°E and 24.48°N
+respectively. The dataset is collected from July 1, 2016 to
+December 31, 2017, and consist of a total of 13,076 records
+with the time resolution of one hour, which is normalized to
+[0,1]. The train-validate-test split ratio is 6:2:2.
+B. Comparisons and Results
+To validate the effeteness of proposed WGNN, we compare
+its performance with the following three types baseline:
+Numerical model . For the numerical model, the widely
+used WA VEWATCH III (WW3) [31] forecasting model
+is involved.
+Machine learning models . Machine learning models in-
+volve four types of classical machine learning algorithms
+ANN, SVM, RNN, and LSTM.
+Deep learning models . For deep learning comparisons,
+SAE-BP [32], Long- and Short-term Time-series Network
+(LSTNet) [33], Temporal Pattern Attention LSTM (TPA-
+LSTM) [34] are involved. SAE-BP [32] is a deep learning
+approach by integrating stacked auto-encoders (SAE)and back-propagation neural networks (BPNN) for the
+prediction of stream ﬂow. LSTNet uses the CNN and the
+RNN to extract short-term local dependency patterns and
+discover long-term patterns for time series trends. TPA-
+LSTM combines temporal pattern attention mechanism
+with LSTM.
+We use the Mean Square Error (MSE) and R2as the
+evaluation metrics, whose deﬁnitions are respectively showed
+in Eq.2 and Eq.3,
+MSE =1
+NNX
+i=0( ^yi yi)2(2)
+R2= 1 PN
+i=0( ^yi yi)2
+PN
+i=0(y yi)2(3)
+, where ^yiis the output of SWH prediction model, yiis the
+ground truth data, and yis the average value of ground truth
+data.
+TABLE II
+THE PERFORMANCE COMPARISON OF DIFFERENT MODELS .
+Model Reference MSE # R2"
+WW3 [31] 0.2960 0.7928
+SVM - 0.2176 0.8442
+ANN - 0.2730 0.8229
+RNN - 0.7204 0.5333
+LSTM - 0.2138 0.8469
+SAE-BP [32] 0.2539 0.8357
+LSTNet [33] 0.1458 0.8984
+TPA-LSTM [34] 0.1882 0.8780
+GNN Ours, no wavelet 0.1420 0.9135
+WGNN Ours 0.1187 0.9341
+Table II presents the experiment results. Since numerical
+models do not have the learning ability, the WW3 model
+performed the worst. Machine learning-based models SVM
+and ANN yield better results, but they still lack the capability
+of learning time dependencies. The RNN fails due to the
+gradient vanishing problem, while LSTM successfully solves
+Ground truth
+Prediction
+SWH/mGround truth
+Prediction
+SWH/mGround truthPrediction
+SWH/mGround truthPrediction
+SWH/m
+ SWH/mGround truthPrediction
+SWH/mGround truthPredictionWW3
+SVM
+LSTMLSTNet
+TPA-LSTM
+WGNN (proposed)Fig. 5. The predicted results of baselines and proposed WGNN.
+this problem and achieves a more stable training procedure and
+better accuracy. Compared to all the involved simple baselines
+and existing methods [32]–[34], the proposed WGNN achieved
+the lowest MSE and highest R2. In addition, GNN achieved
+the second best performance, showing that the graph-based
+learning scheme can effectively capture and learn from the
+relationships between different inputs.
+In Fig.5, we show the comparisons of ground truth SWH
+and predictions of different models. The numerical method
+ﬁts the approximate contour of the target, but it fails to
+predict several extreme situations. Other learning-based “soft
+computing” models slightly alleviated this problem, but they
+did not completely solve it. In contrast, since the proposed
+WGNN-based method explicitly decomposed the data in the
+frequency domain, it can separately learn and effectively
+handle both normal and extreme situations.
+V. C ONCLUSION
+In this paper, a Wavelet Graph Neural Network (WGNN) is
+proposed for Signiﬁcant Wave Height (SWH) prediction. By
+integrating wavelet transformation and graph neural network,
+our model experimentally outperforms various prediction mod-
+els, including numerical models, machine learning models,
+and several deep learning models. We also demonstrate the
+effectiveness of wavelet decomposition and reconstruction.
+Compared to the vanilla GNN, wavelet transform yields a
+16.4% MSE reduction. It also demonstrates that deep learning
+can cooperate well with wavelet decomposition.
+REFERENCES
+[1] B. Quach, Y . Glaser, J. E. Stopa, A. A. Mouche, and P. Sadowski, “Deep
+learning for predicting signiﬁcant wave height from synthetic aperture
+radar,” IEEE Transactions on Geoscience and Remote Sensing , vol. 59,
+no. 3, pp. 1859–1867, 2021.[2] X. Guan, “Wave height prediction based on cnn-lstm,” in 2020 2nd
+International Conference on Machine Learning, Big Data and Business
+Intelligence (MLBDBI) , 2020, pp. 10–17.
+[3] T. W. Group, “The wam model—a third generation ocean wave pre-
+diction model,” Journal of Physical Oceanography , vol. 18, no. 12, pp.
+1775 – 1810, 1988.
+[4] N. Booij, L. Holthuijsen, and R. Ris, The ”Swan” Wave Model for
+Shallow Water , 1996, pp. 668–676.
+[5] L. Mentaschi, G. Besio, F. Cassola, and A. Mazzino, “Performance
+evaluation of wavewatch iii in the mediterranean sea,” Ocean Modelling ,
+06 2015.
+[6] J. Mahjoobi and E. Adeli Mosabbeb, “Prediction of signiﬁcant wave
+height using regressive support vector machines,” Ocean Engineering ,
+vol. 36, no. 5, pp. 339–347, 2009.
+[7] I. Malekmohamadi, M. R. Bazargan-Lari, R. Kerachian, M. R. Nikoo,
+and M. Fallahnia, “Evaluating the efﬁcacy of svms, bns, anns and anﬁs
+in wave height prediction,” Ocean Engineering , vol. 38, no. 2, pp. 487–
+497, 2011.
+[8] M. Deo and C. Sridhar Naidu, “Real time wave forecasting using neural
+networks,” Ocean Engineering , vol. 26, no. 3, pp. 191–203, 1998.
+[9] I. Rizianiza and A. S. Aisjah, “Prediction of signiﬁcant wave height
+in the java sea using artiﬁcial neural network,” in 2015 International
+Seminar on Intelligent Technology and Its Applications (ISITIA) , 2015,
+pp. 5–9.
+[10] J. Berbi ´c, E. Ocvirk, D. Carevi ´c, and G. Lon ˇcar, “Application of
+neural networks and support vector machine for signiﬁcant wave height
+prediction,” Oceanologia , vol. 59, no. 3, pp. 331–349, 2017.
+[11] S. C. James, Y . Zhang, and F. O’Donncha, “A machine learning
+framework to forecast wave conditions,” Coastal Engineering , vol. 137,
+pp. 1–10, 2018.
+[12] V . Juliani, D. Adytia, and Adiwijaya, “Wave height prediction based on
+wind information by using general regression neural network, study case
+in jakarta bay,” in 2020 8th International Conference on Information and
+Communication Technology (ICoICT) , 2020, pp. 1–5.
+[13] S. Yang, T. Xia, Z. Zhang, C. Zheng, X. Li, H. Li, and J. Xu, “Prediction
+of signiﬁcant wave heights based on cs-bp model in the south china sea,”
+IEEE Access , vol. 7, pp. 147 490–147 500, 2019.
+[14] W. Wang, R. Tang, C. Li, P. Liu, and L. Luo, “A bp neural network model
+optimized by mind evolutionary algorithm for predicting the ocean wave
+heights,” Ocean Engineering , vol. 162, pp. 98–107, 2018.
+[15] S. Mandal and N. Prabaharan, “Ocean wave forecasting using recurrent
+neural networks,” Ocean Engineering , vol. 33, no. 10, pp. 1401–1410,
+2006.
+[16] K. Osawa, H. Yamaguchi, M. Umair, M. A. Hashmani, and K. Horio,
+“Wave height and peak wave period prediction using recurrent neural
+networks,” in 2020 International Conference on Computational Intelli-
+gence (ICCI) , 2020, pp. 1–4.
+[17] P. Abhigna, S. Jerritta, R. Srinivasan, and V . Rajendran, “Analysis of
+feed forward and recurrent neural networks in predicting the signiﬁcant
+wave height at the moored buoys in bay of bengal,” in 2017 International
+Conference on Communication and Signal Processing (ICCSP) , 2017,
+pp. 1856–1860.
+[18] S. Gao, J. Huang, Y . Li, G. Liu, F. Bi, and Z. Bai, “A forecasting model
+for wave heights based on a long short-term memory neural network,”
+Acta Oceanologica Sinica , vol. 40, no. 1, pp. 62–69, 2021.
+[19] X. Zhang and H. Dai, “Signiﬁcant wave height prediction with the crbm-
+dbn model,” Journal of Atmospheric and Oceanic Technology , vol. 36,
+no. 3, pp. 333 – 351, 2019.
+[20] N. K. Kumar, R. Savitha, and A. Al Mamun, “Ocean wave characteristics
+prediction and its load estimation on marine structures: A transfer
+learning approach,” Marine Structures , vol. 61, pp. 202–219, 2018.
+[21] Z. Li, F. Liu, W. Yang, S. Peng, and J. Zhou, “A survey of convo-
+lutional neural networks: Analysis, applications, and prospects,” IEEE
+Transactions on Neural Networks and Learning Systems , 2021.
+[22] H. Choi, M. Park, G. Son, J. Jeong, J. Park, K. Mo, and P. Kang, “Real-
+time signiﬁcant wave height estimation from raw ocean images based
+on 2d and 3d deep neural networks,” Ocean Engineering , vol. 201, p.
+107129, 2020.
+[23] A. Krizhevsky, I. Sutskever, and G. E. Hinton, “Imagenet classiﬁcation
+with deep convolutional neural networks,” in Advances in Neural Infor-
+mation Processing Systems , F. Pereira, C. J. C. Burges, L. Bottou, and
+K. Q. Weinberger, Eds., vol. 25. Curran Associates, Inc., 2012.
+[24] T. Wang, S. Gao, F. Bi, Y . Li, D. Guo, and P. Ren, “Residual learning
+with multifactor extreme learning machines for waveheight prediction,”
+IEEE Journal of Oceanic Engineering , vol. 46, no. 2, pp. 611–623, 2021.
+[25] J. Mooneyham, S. C. Crosby, N. Kumar, and B. Hutchinson, “Swrl net:
+A spectral, residual deep learning model for improving short-term wave
+forecasts,” Weather and Forecasting , vol. 35, no. 6, pp. 2445 – 2460,
+2020.
+[26] M. ¨Ozger, “Signiﬁcant wave height forecasting using wavelet fuzzy logic
+approach,” Ocean Engineering , vol. 37, no. 16, pp. 1443–1451, 2010.
+[27] S. Shahabi, M.-J. Khanjani, and M.-R. H. Kermani, “Signiﬁcant wave
+height modelling using a hybrid wavelet-genetic programming ap-
+proach,” KSCE Journal of Civil Engineering , vol. 21, no. 1, pp. 1–10,
+2017.
+[28] A. N. Deshmukh, M. C. Deo, P. K. Bhaskaran, T. M. B. Nair, and K. G.
+Sandhya, “Neural-network-based data assimilation to improve numerical
+ocean wave forecast,” IEEE Journal of Oceanic Engineering , vol. 41,
+no. 4, pp. 944–953, 2016.
+[29] P. Dixit, S. Londhe, and M. C. Deo, “Review of applications of neuro-
+wavelet techniques in water ﬂows,” INAE Letters , vol. 1, no. 3, pp.
+99–104, 2016.
+[30] Z. Wu, S. Pan, G. Long, J. Jiang, X. Chang, and C. Zhang,
+“Connecting the dots: Multivariate time series forecasting with
+graph neural networks,” in Proceedings of the 26th ACM SIGKDD
+International Conference on Knowledge Discovery and amp; Data
+Mining , ser. KDD ’20. New York, NY , USA: Association for
+Computing Machinery, 2020, p. 753–763. [Online]. Available: https:
+//doi.org/10.1145/3394486.3403118
+[31] H. L. Tolman, B. Balasubramaniyan, L. D. Burroughs, D. V . Chalikov,
+Y . Y . Chao, H. S. Chen, and V . M. Gerald, “Development and implemen-
+tation of wind-generated ocean surface wave modelsat ncep,” Weather
+and Forecasting , vol. 17, no. 2, pp. 311 – 333, 2002.
+[32] F. Liu, F. Xu, and S. Yang, “A ﬂood forecasting model based on deep
+learning algorithm via integrating stacked autoencoders with bp neural
+network,” in 2017 IEEE Third International Conference on Multimedia
+Big Data (BigMM) , 2017, pp. 58–61.
+[33] G. Lai, W.-C. Chang, Y . Yang, and H. Liu, “Modeling long- and
+short-term temporal patterns with deep neural networks,” in The 41st
+International ACM SIGIR Conference on Research and amp; Develop-
+ment in Information Retrieval , ser. SIGIR ’18. New York, NY , USA:
+Association for Computing Machinery, 2018, p. 95–104.
+[34] S.-Y . Shih, F.-K. Sun, and H.-y. Lee, “Temporal pattern attention for
+multivariate time series forecasting,” Machine Learning , vol. 108, no. 8,
+pp. 1421–1441, 2019.

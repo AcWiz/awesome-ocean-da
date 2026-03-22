@@ -1,0 +1,10 @@
+# arXiv Content
+# 自动从 arXiv HTML 页面提取
+
+## Abstract
+
+:Dominant modes of SST in the west and east Pacific show strong but regionally different gradients caused by waves, internal dynamics, and anthropogenic warming, which drives air-sea interaction in the Pacific. The study discusses the relative contribution of SST gradients over the western and eastern Pacific to the prediction skill of SST in the central Pacific, where El-Nino, La-Nina, or El-Nino Modoki events project significantly. For this, the analysis develops a convolutional neural network (CNN) based prediction model to predict the Nino3.4 SST. CNN-based prediction models use a spatial filter at the initial stage, which is highly efficient in capturing the edges or gradients and hence are useful to understand the role of SST spatial gradients in the prediction skill. The study reports three CNN-based model experiments. The first one is a CTRL experiment that uses the whole equatorial Pacific domain SST pattern. The second and third models use the equatorial eastern and western Pacific domain SST only. Another novel feature of this study is that we have generated a large number of ensemble members (5000) through random initialization of CNN filters. It is found that random initialization affects the forecast skill, and the probability density function of the correlation skill of the 5000 models at each lead time shows a gaussian distribution. The model experiments suggest that the west Pacific SST model provides better Nino3.4 skills as compared to the east Pacific skill. The CNN-based model forecast based on the SST pattern, thus, shows the impact of the SST spatial pattern on the ENSO forecast.
+
+## Introduction
+
+

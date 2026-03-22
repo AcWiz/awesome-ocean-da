@@ -1,0 +1,581 @@
+Eigenvalue Initialisation and Regularisation for Koopman Autoencoders
+Jack W. Miller∗Charles O'Neill†Navid C. Constantinou†Omri Azencot†
+December 27, 2022
+Abstract
+Regularising the parameter matrices of neural networks is ubiquitous in training deep models. Typical
+regularisation approaches suggest initialising weights using small random values, and to penalise weights
+to promote sparsity. However, these widely used techniques may be less eective in certain scenarios.
+Here, we study the Koopman autoencoder model which includes an encoder, a Koopman operator layer,
+and a decoder. These models have been designed and dedicated to tackle physics-related problems with
+interpretable dynamics and an ability to incorporate physics-related constraints. However, the majority
+of existing work employs standard regularisation practices. In our work, we take a step toward augment-
+ing Koopman autoencoders with initialisation and penalty schemes tailored for physics-related settings.
+Specically, we propose the \eigeninit" initialisation scheme that samples initial Koopman operators from
+specic eigenvalue distributions. In addition, we suggest the \eigenloss" penalty scheme that penalises
+the eigenvalues of the Koopman operator during training. We demonstrate the utility of these schemes on
+two synthetic data sets: a driven pendulum and ow past a cylinder; and two real-world problems: ocean
+surface temperatures and cyclone wind elds. We nd on these datasets that eigenloss and eigeninit
+improves the convergence rate by up to a factor of 5, and that they reduce the cumulative long-term
+prediction error by up to a factor of 3. Such a nding points to the utility of incorporating similar schemes
+as an inductive bias in other physics-related deep learning approaches.
+1 Introduction
+Modern neural networks are often overparameterised, i.e., their number of learnable parameters is signicantly
+larger than the number of available training samples [1, 2]. To guide optimisation through this immense
+parameter space, and to potentially improve performance by avoiding overtting, neural networks are trained
+with regularisation techniques [10]. The importance of regularisation has been shown in the theory and
+practice of deep learning. Prominent examples include the initialisation of parameter matrices [14, 13], and
+constraining the parameters' norm via loss penalties [15, 22]. Initialising weights and penalising them with
+small random values and weight decay are arguably the most common regularisation techniques employed
+in training deep models with stochastic gradient descent algorithms. However, specic neural architectures,
+data domains, and learning problems may require dierent initialisation and penalty schemes. In this paper,
+we empirically study the eect of regularisation on physics-aware architectures.
+The ground-breaking success of deep learning in solving complex tasks in vision and other domains has
+inspired the physics community to develop deep models suited to deal with real-world problems arising in
+the eld [45, 19]. In this context, we focus on dynamical systems analysed and processed using Koopman-
+based approaches [44, 26]. Koopman theory [21] proves that under certain assumptions, nonlinear and
+nite-dimensional systems can be transformed to a linear (albeit innite-dimensional) representation via the
+∗Research School of Earth Sciences, Australian National University, Canberra, ACT 2601, Australia (jack.miller@anu.edu.au,
+charles.oneill@anu.edu.au, navid.constantinou@anu.edu.au).
+†Computer Science Department, Ben-Gurion University (BGU), BGU, Beer Sheva, Israel (azencot@cs.bgu.ac.il).
+1arXiv:2212.12086v2  [cs.LG]  26 Dec 2022
+Koopman operator. Using nite-dimensional approximations of this Koopman operator is advantageous as
+they facilitate the analysis and understanding of dynamical systems by utilising linear analysis tools. Despite
+the theoretical and practical advances that have signicantly improved Koopman-based learning methods,
+the majority of existing models still apply regularisation practices designed for general neural networks. Our
+investigation aims to answer the research question: can one exploit properties of Koopman operators to
+improve regularisation and to promote better overall performance?
+The Koopman operator is a linear object with a complex spectrum. Some groups in the past have saught
+to place a bias on the operator's form. For example, [33] propose a skew-symmetric tridiagonal form to
+guarantee stable Koopman models. However, there has not been a systematic investigation that evaluates the
+eect of initialisation and penalty regularisation schemes on the behavior of Koopman-based neural networks.
+The overarching objective of this paper is to help bridge this gap. Key to our regularisation schemes is the
+observation that spectral properties of linear Koopman operators follow a typical structure , shared by many
+dynamical systems. Namely, Koopman eigenvalues of stable dynamical systems are constrained in the unit
+circle of the complex plane [27].
+Motivated by the theoretical observation that, for this important class of stable systems, eigenvalues
+need to be within the unit circle, we propose two novel regularisation techniques: random eigenvalue gener-
+ation from known distributions to initialise key weights in the network (\eigeninit"), and a loss penalty on
+the eigenvalues to alter their expansion (\eigenloss"). Importantly, our regularisation schemes can be in-
+corporated with all Koopman-based approaches as a means to regularise the associated Koopman operator.
+We evaluate our approach on several challenging physics-related datasets and in comparison to standard
+regularisation and initialisation approaches as well as a state-of-the-art baseline. Our results indicate that
+our spectral schemes for initialisation and penalty improve the performance of Koopman-based networks,
+leading to faster and smoother convergence in the objective loss, as well as yielding models that generalise
+better in long-term prediction tests. Although these schemes require tuning, a guide to which we provide,
+they are easily applicable in any context where a Koopman approximate is used. As such, they present a
+useful tool for practitioners in the eld.
+2 Related Work
+Regularisation of neural networks is a fundamental research topic in machine learning. Common regularisation
+techniques include dropout [40], batch normalisation [17], and data augmentation [36]. In what follows, we
+mainly discuss parameter initialisation approaches and weight penalty methods.
+Parameter initialisation Proper initialisation of deep models is known to be crucial to their successful
+training [43]. Standard initialisation schemes for tanh( ) [9] and ReLU [14] activations sample small random
+values for the weight matrices of the network. These choices are backed by theoretical results showing
+that initial small scale weights generalise better [46], and random initialisation converges to local minimisers
+on dierentiable losses [24]. While guaranteed, convergence may be exponentially slow [7]. Other ap-
+proaches promote information ow using initial orthogonal weight matrices [38, 30, 35]. Koopman-based
+approaches [33] suggest to initialise the Koopman operator using the dynamic mode decomposition (DMD)
+estimates [39]. Still, the general problem of weight initialisation in neural networks remains an active research
+topic in practice [4], and theory [13, 41].
+Parameter loss penalties Penalising the norms of weight matrices using L1andL2metrics is a common
+practice in machine learning, collectively termed weight decay [15]. More recently, [3] showed that recurrent
+neural networks can avoid the issue of exploding gradients if their hidden-to-hidden matrices are parameterised
+to be unitary. Similarly, [48] introduce a regularisation scheme based on penalising the spectral norm of
+weight matrices. Greydanus et al. [11] assume the underlying system is measure-preserving, and their
+2
+network learns the Hamiltonian during training. Lusch et al. [26] use block diagonal Koopman operators to
+support continuous spectra. To promote stability, Erichson et al. [8] employ Lyapunov-based constraints,
+whereas Pan and Duraisamy [33] guarantee that Koopman eigenvalues remain in the unit circle via tridiagonal
+Koopman operators. In contrast, a soft penalty on the forward and backward dynamics was introduced by
+Azencot et al. [5], yielding stable Koopman systems and state-of-the-art performance.
+3 Background
+3.1 Koopman Operator Theory
+Suppose we have a discrete time dynamical system given by:
+xk+1='(xk); k2N0: (1)
+Letf:S!R(whereSis the system's state space) be a real-valued observable of the system. By real-
+valued observable we mean a function of the state of the dynamical system, where an observed data-variable
+is its range. The collection of all such observables forms a linear vector space. The Koopman operator Kis
+a linear transformation on this functional space:
+Kf(x) =f'(x): (2)
+Essentially, the Koopman operator may be viewed as a lifting of the dynamics from the state space to
+the space of observables [29]. Whilst the Koopman operator maps between function spaces and is thus
+innite dimensional, it has been shown empirically that nite-dimensional approximations ( U) are generally
+quite expressive, where Uis usually found through dynamic mode decomposition or deep learning [28].
+3.2 Koopman Autoencoders
+Pioneered by several groups [44, 26], the Koopman autoencoder (KAE) is a deep neural network designed
+to solve physics-related problems. Primarily, KAEs are based on an autoencoder architecture [16] which
+has a \bottleneck" structure including an encoder  which learns a low-dimensional representation of the
+input signal, and a decoder !which recovers the original signal from the low-dimensional code. Koopman
+autoencoders extend these family of autoencoder models by introducing a Koopman operator module in-
+between and!whose purpose is to produce a nite-dimensional approximation of the Koopman operator.
+The Koopman module Uis essentially a linear layer (with no bias) aiming at advancing latent codes forward
+in time. Put together, the KAE architecture can be described by the following equations,
+ykdef= (xk);~xkdef=!(yk);^yk+1def=Uyk;^xk+1def=!(^yk+1); (3)
+wherexkis the input signal, ~ xkis its reconstruction, and ^ xk+1is the reconstruction of the latent code
+obtained with the Koopman matrix U. The model is trained with a reconstruction loss MSE( xk;~xk), and a
+prediction loss MSE( xk;^xk+1), where MSE is the mean squared error. Several existing methods adopt this
+general framework which we illustrate in gure 1, and they further generalize it to promote stability [33, 5],
+to incorporate control [12], and to other settings [31, 25, 47, 32, 18].
+3.3 Spectral Analysis of Koopman Operators
+We briey mentioned above that one of the main advantages to working with Koopman-based approaches,
+and KAE in particular, is the linearity of the Koopman matrix U. Specically, we harness tools from linear
+analysis and spectral approaches to study the underlying dynamics [42]. For instance, the eigendecomposition
+3
+Inputxk Output ^xk+1
+ !
+Uyk^yk+1
+Figure 1: Diagram of Koopman autoencoder architecture.
+ofUto eigenvectors and eigenvalues is instrumental to a qualitative characterisation of the behavior of the
+system. Denote ( vj;j) an eigenvector-value pair of the Koopman matrix, i.e., Uvj=jvj, withj2C.
+The eect of the eigenvalues on the behavior of the system can be realized by considering the long-term
+evolution of inputs. Denote with Vthe matrix whose columns are the eigenvectors vj, and  the diagonal
+matrix with the eigenvalues along its main diagonal, then U=VV 1and thus we can advance the latent
+codeykby
+^yk+`=U`yk=V`V 1yk: (4)
+Thus, advancing ykforward in time from time kto timek+`amounts to simply multiplying ykwith powers
+ofU. Equation 4 also shows that every eigenvector vjis scaled by its associated `
+j, and therefore, the
+modulusjjjdetermines its long-term behavior. We identify three qualitatively dierent evolution proles,
+determined by the modulus of eigenvalues: if jjj<1 then the associated action of its eigenvector diminishes
+with time (i.e., as `!1 ), ifjjj>1, then the action increases arbitrarily when `!1 , and ifjjj= 1
+then the dynamics remain stable. In this way, the eigenvalues of the Koopman matrix encode the \memory"
+of an evolution rule.
+Our regularisation schemes described in section 4 are based on a prior soft bias on the number of
+eigenvalues in each dynamical mode { vanishing, exploding and stable.
+0 1 2 3 4
+Average Magnitude of Eigenvalues 1e1
+050100150200250FrequencyXavier Initialisation (2
+nl+nl+1,2
+nl+nl+1)
+0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00
+Average Magnitude of Eigenvalues050100150200250300FrequencyGaussian Initialisation (0,1)
+Avg
+Figure 2: Eigenvalue distribution of various initialisation schemes for a 4 4 operator with six layers.
+4
+4 Methods
+Our discussion in section 3 suggests that the optimal eigenvalue spectra of the approximate Koopman matrix
+may change based on the nature of the system. In our experiments we focus on the class of systems for
+which the eigenvalues are approximately contained in the unit circle. However, one could easily adapt our
+schemes to promote dierent distributions.
+4.1 Eigenvalue Initialisation of Learnable Parameters
+Initialising a deep neural network of any architecture is critical to its training and model performance. In
+gure 2 we empirically evaluate the eigenvalue distribution of parameter matrices as attained by two of
+the most common initialisation schemes: Xavier [9] and a random Gaussian initialisation. We nd that
+the average magnitude of eigenvalues are approximately 0 :1 for Xavier, whilst they are 0 :4 for a Gaussian
+initialisation. Overall, these initialisations produce Koopman matrices whose eigenvalues span a distribution
+with a low variance. However, these spectra may negatively aect training in cases where the optimal
+Koopman matrix consists of eigenvalues with modulus jjj1.
+Using initial small random values for the parameter weights of deep neural networks is motivated by
+theoretical results which show that such initialisations converge to local minima on dierentiable loss func-
+tions when solved with stochastic gradient descent [24]. However, convergence may be extremely slow [7].
+Can we improve convergence speed and model generalisation by developing initialisation schemes tailored to
+Koopman autoencoder architectures? Typical Koopman-based approaches utilise one of the two initialisation
+schemes above (see e.g., Ref. [5]); however, these choices are agnostic to the structure of the Koopman
+operator layer. Other techniques employ a DMD-based initialisation (see for instance, Ref. [33]), which may
+be an unrealistic choice for highly-nonlinear and high-dimensional dynamical systems [49]. Inspired by the
+discussion in section 3, we would like to exploit the unique role of the approximate Koopman operator Uas
+an evolution matrix and its special structure.
+Therefore, we choose to focus on eigenvalue-based initialisation rather than element-wise initialisation
+whose eect on the eigenvalues is indirect, and leads to eigenvalues with lower magnitudes. Namely, we
+propose initialisation schemes that directly control the eigenvalues of the Koopman matrix Uand their
+distribution. To this end, we propose the following eigenvalue initialisation method (termed \eigeninit"):
+we start with an element-wise sampling from a Gaussian distribution to produce U0. Then, we perform an
+eigendecomposition of U0=VV 1, whereVis a matrix with the eigenvectors vjorganized in its columns,
+and  is a diagonal matrix with the eigenvalues jalong its main diagonal. Each eigenvalue jis, in general
+complex, and can be re-written as rjeij. We modify the modulus rj=jjj2Rof the eigenvalues without
+altering their phases j. Each modulus rjis sampled from a pre-dened distribution D;rj7!~rjD. Care
+is taken for complex-conjugate eigenvalue pairs: the modied modulus of both eigenvalues from a complex-
+conjugate eigenvalue pair is kept the same, rjeij7!~rjeij. Then, the initial Koopman matrix Uis dened
+viaUdef=V~V 1, where ~ is a diagonal matrix with ~j= ~rjeijalong its main diagonal. Following this
+procedure and given that the initial matrix U0is real, then Uis also real (up to machine precision). All
+other weights in the network are initialised according to the He initialisation as we utilise ReLU activation
+layers [14].
+Taking into consideration the above discussion, a natural question arises: what distributions Dshould we
+sample from? If one is not looking to model divergent dynamics, the focus should be on parameter matrices
+Uinitialised such that their spectral radius satises (U)1. On the other hand, existing works on recurrent
+neural networks [3] advocate the use of orthogonal weights for which (U) = 1. In what follows, we prefer the
+former option, i.e., Umatrices with (U)1 since orthogonal and unitary matrices are less expressive [20].
+In particular, (U)1 allowsUto immediately capture any dissipative dynamics in a system. In practice, we
+sample the eigenvalue moduli from a spike and slab distribution: D(spikeAndSlab)def=U(0;1) + (1 )(1)
+5
+whereU(0;1) is a uniform distribution from 0 to 11andis the delta function. This choice is motivated
+by the notion of an intrinsic dimension of the system, which will naturally give rise to a certain number
+of eigenvalues on the unit-circle (corresponding to conserved quantities) and others inside the unit-circle
+(corresponding to dissipative or nite-time horizon dynamics of the system). Whilst 2[0;1] (which
+governs the proportion of modulus 1 eigenvalues sampled) may be chosen through a hyperparameter search,
+another feasible approach is to use a dynamic mode decomposition to estimate the number of non-unitary
+eigenvalues, and use this to inform .
+4.2 Eigenvalue Regularisation of Learnable Parameters
+While proper initialisation of weights is crucial for a neural network to start optimisation from a successful
+trajectory that generalises well [41], we note that without an additional mechanism that penalises non-
+preferable solutions, optimisation may become stuck on inferior local minima. In our setting, this means that
+the resulting Koopman matrix may settle on a spectrum which is not commensurate with the system being
+studied.
+Similarly to our initialisation scheme which directly aects the eigenvalues of U(section 4.1), we propose
+a penalty method (termed \eigenloss") which biases the spectrum of the approximate Koopman operator:
+we augment the reconstruction and prediction loss components of the Koopman autoencoder (section 3)
+with a new and novel loss term whose role is to penalise eigenvalues of Uwhich are too distant from a
+certain value or distribution. While we could have used the same ansatz as in section 4.1, promoting the
+spectral radius of Uto satisfy(U)1, we nd that on our datasets, encouraging the eigenvalues to be
+close or on the unit circle yields better models in terms of convergence and generalisability features. Thus,
+we consider the penalty scheme (MSE)def=P
+jjjj 12
+2wherejis an eigenvalue of U. That is, we
+encourage the modulus of the eigenvalues to be approximately one. Noteably, backpropagation through the
+eigenvalues of a matrix is always numerically stable, even if there are repeating eigenvalues.
+The choice of eigenvalue penalty imposes dierent soft biases on the Koopman approximation U. Based
+on the domain-knowledge of the relevant dynamical system, one can tune the above penalties better. For
+instance, if the underlying system is measure-preserving, we can weight more strongly with respect to
+the reconstruction and prediction losses. In contrast, if the dynamics are dissipative, we can use a weaker
+weight. As with initialisation, one might use the derived to guide this choice. If is near zero, it is likely
+better to drive eigenvalues closer to the unit circle.
+5 Experiments
+The empirical results for eigeninit and eigenloss applied to the standard Koopman autoencoder2and con-
+sistent Koopman autoencoder are demonstrated in various experiments. Both were implemented in Pytorch
+[34].
+5.1 Datasets
+Datasets were chosen as a combination of synthetic and real-world data, varying in complexity and including
+varying amounts of dissipation. Our initial dataset was a driven frictionless pendulum governed by: d2x=dt2+
+!2
+0x=f0sin(!t), where!0the characteristic frequency, and f0and!the amplitude and frequency of the
+forcing3.
+1We also experimented with a uniform distribution between 0.9 and 1
+2We take the standard Koopman autoencoder to be the architecture used by Ref. [5] without the consistency modications.
+3We use!0= 3:13,f0= 1, and!= 1, and initial conditions x2[ ; ] and dx=dt2[ 1;1].
+6
+Table 1: Minimum validation loss and nal cumulative test prediction error for benchmark data sets. See
+bold for minimum.
+Validation Loss
+Dataset None Xavier Cons. Init Loss Both Cons. & Both
+Pendulum 10.8 11.68 10.9 11.01 11.05 11.09 11.01
+Fluid 0.19 0.24 0.18 0.24 0.29 0.19 0.26
+Ocean (10) 0.26 0.21 0.27 0.14 0.27 0.16 0.19
+Cyclone 16.18 14.60 13.77 14.25 15.44 14.34 14.33
+Cumulative Test Error
+Pendulum 176.69 178.45 161.68 165.71 174.76 181.78 191.47
+Fluid 1.25 2.30 1.00 0.58 0.82 0.96 1.04
+Ocean 3.12 1.69 2.82 1.02 2.85 1.24 1.66
+Cyclone 554.5 626.4 631.29 494.2 501.3 458.5 484.7
+We also applied our techniques to cyclone wind elds, ow over a cylinder, and sea surface temperatures.
+The cyclone prediction dataset was extracted from the ERA5 Re-Analysis dataset provided by ECMWF using
+the International Best-Tracks Archive for Climate Stewardship (IBTrACS). Prediction sequences were sub-
+sampled from the ucomponent of wind at the pressure level of 650 hPa in a 2020sliding window around
+the cyclone. The sea surface temperature benchmark was taken from Ref. [37]. It is a subset of the NOAA
+OI SST V2 High-Resolution Dataset over the Gulf of Mexico that has a spatial resolution of 0.25. We use
+regions that span 100 100 grid points, i.e., 2525, and a time horizon of 1305 days. Finally, the uids
+dataset modeled ow over a cylinder and was produced by Ref. [23]. We took the u-component of the ow
+vector eld.
+5.2 Test and Validation Prediction Error with Datasets
+One can see the application of dierent schemes (including their combination) and the inuence of these
+on the prediction test prediction across given prediction horizons and validation loss in gure Figure 3. In
+addition, the state of the art consistency architecture presented by Ref. [5] is shown as an additional baseline
+and an architecture to which our schemes are applied. For a summary of results see Table 1. Of particular
+note is that all of our schemes (except for their combination with the pendulum dataset) outperform the
+standard KAE and do so by up to a factor of 3 in cumulative test error. Additionally, our initialisation
+schemes increased convergence rates (see Appendix C for a summary). Regarding the consistency bench-
+mark, our schemes outperform or match its performance in all datasets except for the pendulum. In addition,
+augmentation of the consistent KAE with eigenloss or eigeninit improves its performance on the real-world
+data and rate of convergence on all datasets.
+5.3 Investigating Eigenvalue Evolution
+Although we have demonstrated the utility of our initialisation and regularisation schemes, we have yet to
+investigate the evolution of eigenvalues within the networks themselves. We can plot a heatmap of eigenvalue
+magnitudes of the Koopman operator during training (Appendix B, gure 6). By doing so, we see that the
+control network has increasing eigenvalues even though there is no bias towards this and that using the
+unit circle MSE penalty promotes this tendency. Alternatively, with initialisation close to the unit circle, the
+eigenvalues tend towards the dierent eigenvalue classes mentioned in subsection 3.3.
+7
+5.4 Computational complexity
+One reasonable concern with our regularisation technique is computational complexity. The eigendecompo-
+sition of the Koopman operator must be applied at each iteration in order to calculate the loss with respect
+to the eigenvalues, which scales as O(n2:376) [6]. Thus, it is possible that our techniques do not actually
+converge faster, at least in terms of actual CPU wall time (as opposed to epoch number). However, this
+concern is rendered largely irrelevant by the size of Koopman approximations used. Even when modelling
+cyclone paths, which are considered a relatively complex dynamical system, we only required a Koopman
+matrix of size 16 16. This is an advantage of compressing the problem to a smaller latent space with
+the autoencoder architecture. Hence, it is likely that the computational complexity of our methods is not a
+concern. Indeed, as shown in gure 8 (Appendix E), we see that our methods still converge faster in terms
+of absolute wall time compared to the control.
+5.5 Ablation with Hyperparameters
+We also tested the sensitivity of our methods to the choice of hyperparameters on the uids and ocean
+datasets. In particular, we completed ablations with diering values of for the penalty term, for the
+spike and slab distribution, the size of the Koopman approximate and the width of the encoder and decoder.
+The results of this can be seen in gure 4. The ocean dataset always improved compared to the standard
+Koopman autoencoder for all hyperparameter choices. However, performance on uids was sensitive to
+operator size and .
+5.6 Dynamic mode decomposition informs initialisation and regularisation
+The use of a spike and slab distribution naturally raises the question of how to choose the parameter
+2[0;1], which governs the proportion of modulus 1 eigenvalues sampled. Whilst we could do so through a
+simple hyperparameter search, another interesting approach could be to use a dynamic mode decomposition
+to give an estimate of the number of non-zero eigenvalues and hence the magnitude of . Dynamic mode
+decomposition (DMD) achieves the dimensionality reduction of a dynamical system by nding the eigen-
+vectors associated with xed frequency and growth [39]. We hypothesised that using the DMD to nd an
+approximation of the evolution matrix A, withxk+1=Axk, may give a computationally cheap way to esti-
+mate the number of unitary eigenvalues. We could then determine the proportion of eigenvalues to sample
+from the unit circle, and the proportion to sample from a zero-centred Gaussian, using this estimation. To
+test this, we computed the nnDMD evolution matrix ~Aof the ocean dataset, matching the size of the
+nnKoopman approximation in our autoencoder. We then estimated by the proportion of ~A's eigenvalues
+with magnitude within 1e-3 of 1. We see from gure 5 that our estimated gave the lowest average nal
+loss.
+6 Discussion
+In this research we have asked whether an initial and ongoing bias on the eigenvalues of Koopman autoen-
+coders would improve their accuracy and convergence. We tested this via empirical analysis on the eld's
+existing benchmarks and through the introduction of a new one (cyclone wind elds). It seems clear that
+certain well developed biases do in fact have utility for training these networks. In particular, our schemes
+outperform state of the art baseline models which do not use them. In addition, they can augment one such
+baseline introduced by [5], and improve its performance on real-world datasets.
+These techniques are important because they marry together the two purposes of dynamical systems
+modelling: prediction and explanation. Whilst deep autoencoders have frequently been used for predicting
+complex dynamical systems, they are often criticised because they lack explainability. Koopman autoencoders
+8
+are a front-running scheme to address this. However, inserting a Koopman approximation between the
+encoder and decoder introduces a bottleneck in the network and reduces its capacity for learning.
+Because the linear dynamics are so useful in understanding the system, we want to be able to keep
+this interpretability whilst providing necessary forecasting capacity. The results above demonstrate that
+this is possible by exploiting the spectral properties of the Koopman approximation U. Specically, we
+have shown that Koopman autoencoders using our eigeninit and eigenloss techniques (i)converge faster;
+(ii)reach a lower validation loss level on real-world data; (iii) achieve better results across multiple prediction
+horizons than state of the art baseline networks; and (iv) can productively augment other inductive biases
+on the Koopman approximate. Our ablations have shown the eect of various hyperparameters on model
+performance, depending on the nature of the dataset. Further, dynamic mode decomposition (DMD) has
+been shown to provide an informative way to choose the initialisation distribution. Further applications of
+the eigenvalues from DMD may provide insight into the conservative or dissipative aspects of the relevant
+system, and thus inform the appropriate eigenloss to use in regularisation.
+These techniques will be of practical help for those using Koopman methods in dynamical systems. It is
+likely that the schemes presented here can be extended in many ways, particularly by devising better initial-
+isation and regularisation candidates and tuning them to the nature of the problem. Whilst application to
+other autonomous dynamical systems is evident, it may also be possible to extend the Koopman initialisation
+and regularisation techniques for input-driven systems, a signicant area of future potential research.
+Reproducibility Statement
+In order to ensure reproducible results, we have provided a source code in Supplemental materials with a
+synthetic pendulum dataset, along with the scripts used for data processing and pipelining in this case. The
+Koopman autoencoder with all combinations of our techniques is included as a model, as well as other
+previous state-of-the-art baselines for comparison. Further, the training script used is included. Using these
+models and data, training runs were performed several times and averaged. Other datasets are available
+upon request from the referenced author. The full source code will be released upon acceptance of the
+manuscript.
+Acknowledgments
+This work was funded by the ANU Institute for Climate, Energy & Disaster Solutions. N.C.C. is supported
+by the Australian Research Council DECRA Fellowship DE210100749.
+A Hyperparameters for Main Results
+Table 2: Hyperparameters for results in gure 3 and Tab. 1. Noteably the ocean and pendulum datasets
+had uniform distributions between 0.9 and 1 rather than between 0 and 1 as it worked slightly better.
+Dataset Operator Size Eigeninit Eigenloss
+Pendulum 8 0 103
+Fluid 16 1 20
+Ocean 16 0.7 2
+Cyclone 16 0.7 20
+9
+0 5 10 15 20 250.20.40.60.81.0Mean squared errorNormalised Cumulative test error for prediction horizon
+gaussianElement
+xavierElement
+Eigeninit
+Consistent KAE
+Eigenloss
+Eigenloss and Init.
+Consistent KAE and Both.
+0 10 20 30 40 50 60 701.01.11.21.31.4Normalised Validation loss for training
+0 2 4 6 8 10 12 140.00.20.40.60.8Mean squared error
+0 10 20 30 40 500.02.55.07.510.012.5
+0 5 10 15 20 250.00.20.40.6Mean squared error
+2.5 5.0 7.5 10.0 12.5 15.0 17.5246
+0 5 10 15 20
+Time steps0.00.20.40.60.81.0Mean squared error
+0 25 50 75 100
+Epochs1.01.21.4Pendulum Dataset
+Fluids Dataset
+Ocean Dataset
+Cyclone DatasetFigure 3: Averaged prediction horizon test loss and training validation loss for selected library members of
+eigeninit and eigenloss. Models are trained on the longest prediction horizon shown in the test loss graphs.
+Hyper parameters are given in Appendix A.
+10
+101
+100101102
+Different 
+100
+8×101
+9×101
+Ratio with Gaussian Initialisation
+Ablation with changing 
+ocean
+fluid
+ratio of 1
+101102
+Different n100
+Ablation with changing n
+0.0 0.2 0.4 0.6 0.8 1.0
+Different 
+100
+4×101
+6×101
+2×100Ratio with Gaussian Initialisation
+Ablation with changing 
+101102
+Different 
+100
+4×101
+6×101
+Ablation with changing width 
+Figure 4: Testing the sensitivity of schemes to changes in network hyperparameters. Each data point is
+the averaged nal cumulative test error. For ablation with changing width and Koopman operator size, the
+scheme compared is eigenloss for the uid dataset and initialisation for the ocean dataset.
+0.0 0.2 0.4 0.6 0.8 1.0
+θ0.01250.01500.01750.02000.02250.0250Final test loss
+0.0 0.2 0.4 0.6 0.8 1.0
+θ0.0200.0220.0240.0260.028Average test loss
+Figure 5: Examining the eigenvalues of the DMD of the ocean dataset gave the best initialisation hyperpa-
+rameter(estimatedshown in red).
+11
+B Eigenvalue Distribution Heatmaps
+Figure 6: Change in eigenvalue magnitudes over time.
+12
+C Convergence Statistics
+The convergence of solutions also improves with eigeninit and eigenloss. One can see this in Table 2
+where the approximate epoch of convergence is noted for dierent data sets and scheme. Convergence
+was dened based on the ratio of the maximum validation dierence between two points and the current
+validation dierence between two points (excluding the rst 5 epochs).
+Table 3: Epoch of model convergence for benchmark data sets. See bold for minimum.
+Dataset Regular KAE Eigeninit Eigenloss Both
+Pendulum 15 13 15 9
+Fluid 42 9 33 11
+Ocean 13 5 14 18
+Cyclone 10 5 11 6
+13
+D Weight decay ineectiveness
+0 5 10 15 20 25 30
+Epoch0.010.020.030.040.050.060.07Validation lossOcean
+=0.01
+=0.1
+=1.0
+0 5 10 15 20 25 30
+Epoch81012141618Validation lossCyclone
+=0.01
+=0.1
+=1.0
+Figure 7: Minimal eect of weight decay in regularising the spiky loss, particularly for cyclone.
+14
+E Absolute Wall-Time Plots
+0 10 20 30 40 50
+Wall time (s)0.020.040.060.080.10Forward validation lossOcean
+No penalty
+Eigenloss only
+Eigenloss and eigeninit
+0 50 100 150 200 250 300 350
+Wall time (s)81012141618202224Forward validation lossCyclone
+No penalty
+Eigenloss only
+Eigenloss and eigeninit
+Figure 8: Comparing convergence time on the ocean dataset; this can be seen as a measure of the compu-
+tational complexity.
+15
+References
+[1] Z. Allen-Zhu, Y. Li, and Y. Liang, Learning and generalization in overparameterized neural networks,
+going beyond two layers , Advances in neural information processing systems, 32 (2019).
+[2] Z. Allen-Zhu, Y. Li, and Z. Song, A convergence theory for deep learning via over-parameterization , in
+International Conference on Machine Learning, PMLR, 2019, pp. 242{252.
+[3] M. Arjovsky, A. Shah, and Y. Bengio, Unitary evolution recurrent neural networks , in International
+conference on machine learning, PMLR, 2016, pp. 1120{1128.
+[4] D. Arpit, V. Campos, and Y. Bengio, How to initialize your network? robust initialization for weightnorm
+& resnets , Advances in Neural Information Processing Systems, 32 (2019).
+[5] O. Azencot, N. B. Erichson, V. Lin, and M. Mahoney, Forecasting sequential data using consistent
+Koopman autoencoders , in International Conference on Machine Learning, PMLR, 2020, pp. 475{485.
+[6] J. Demmel, I. Dumitriu, and O. Holtz, Fast linear algebra is stable , Numerische Mathematik, 108
+(2007), pp. 59{91.
+[7] S. S. Du, C. Jin, J. D. Lee, M. I. Jordan, A. Singh, and B. Poczos, Gradient descent can take exponential
+time to escape saddle points , Advances in neural information processing systems, 30 (2017).
+[8] N. B. Erichson, M. Muehlebach, and M. W. Mahoney, Physics-informed autoencoders for lyapunov-
+stable uid ow prediction , arXiv preprint arXiv:1905.10866, (2019).
+[9] X. Glorot and Y. Bengio, Understanding the diculty of training deep feedforward neural networks ,
+in Proceedings of the thirteenth international conference on articial intelligence and statistics, JMLR
+Workshop and Conference Proceedings, 2010, pp. 249{256.
+[10] I. Goodfellow, Y. Bengio, and A. Courville, Deep learning , MIT press, 2016.
+[11] S. Greydanus, M. Dzamba, and J. Yosinski, Hamiltonian neural networks , Advances in Neural Informa-
+tion Processing Systems, 32 (2019).
+[12] M. Han, J. Euler-Rolle, and R. K. Katzschmann, DeSKO: Stability-assured robust control with a deep
+stochastic Koopman operator , in International Conference on Learning Representations, 2021.
+[13] B. Hanin and D. Rolnick, How to start training: The eect of initialization and architecture , Advances
+in Neural Information Processing Systems, 31 (2018).
+[14] K. He, X. Zhang, S. Ren, and J. Sun, Delving deep into rectiers: Surpassing human-level performance
+on imagenet classication , in Proceedings of the IEEE international conference on computer vision,
+2015, pp. 1026{1034.
+[15] G. E. Hinton, Learning translation invariant recognition in a massively parallel networks , in International
+Conference on Parallel Architectures and Languages Europe, Springer, 1987, pp. 1{13.
+[16] G. E. Hinton and R. Zemel, Autoencoders, minimum description length and Helmholtz free energy ,
+Advances in neural information processing systems, 6 (1993).
+[17] S. Ioe and C. Szegedy, Batch normalization: Accelerating deep network training by reducing internal
+covariate shift , in International conference on machine learning, PMLR, 2015, pp. 448{456.
+[18] T. Iwata and Y. Kawahara, Neural dynamic mode decomposition for end-to-end modeling of nonlinear
+dynamics , arXiv preprint arXiv:2012.06191, (2020).
+16
+[19] G. E. Karniadakis, I. G. Kevrekidis, L. Lu, P. Perdikaris, S. Wang, and L. Yang, Physics-informed
+machine learning , Nature Reviews Physics, 3 (2021), pp. 422{440.
+[20] G. Kerg, K. Goyette, M. Puelma Touzel, G. Gidel, E. Vorontsov, Y. Bengio, and G. Lajoie, Non-normal
+recurrent neural network (nnrnn): learning long time dependencies while improving expressivity with
+transient dynamics , Advances in neural information processing systems, 32 (2019).
+[21] B. O. Koopman, Hamiltonian systems and transformation in Hilbert space , Proceedings of the National
+Academy of Sciences, 17 (1931), pp. 315{318.
+[22] A. Krogh and J. Hertz, A simple weight decay can improve generalization , Advances in neural informa-
+tion processing systems, 4 (1991).
+[23] J. N. Kutz, S. L. Brunton, B. W. Brunton, and J. L. Proctor, Dynamic Mode Decomposition: Data-
+driven Modeling of Complex Systems , SIAM-Society for Industrial and Applied Mathematics, Philadel-
+phia, PA, USA, 2016.
+[24] J. D. Lee, M. Simchowitz, M. I. Jordan, and B. Recht, Gradient descent only converges to minimizers ,
+in Conference on learning theory, PMLR, 2016, pp. 1246{1257.
+[25] Y. Li, H. He, J. Wu, D. Katabi, and A. Torralba, Learning compositional Koopman operators for
+model-based control , in International Conference on Learning Representations, 2020.
+[26] B. Lusch, J. N. Kutz, and S. L. Brunton, Deep learning for universal linear embeddings of nonlinear
+dynamics , Nature communications, 9 (2018), pp. 1{10.
+[27] A. Mauroy and I. Mezi c, Global stability analysis using the eigenfunctions of the Koopman operator ,
+IEEE Transactions on Automatic Control, 61 (2016), pp. 3356{3369.
+[28] A. Mauroy, Y. Susuki, and I. Mezi c, Introduction to the Koopman operator in dynamical systems and
+control theory , in The Koopman Operator in Systems and Control, Springer, 2020, pp. 3{33.
+[29] I. Mezi c, On applications of the spectral theory of the Koopman operator in dynamical systems and
+control theory , in 2015 54th IEEE Conference on Decision and Control (CDC), IEEE, 2015, pp. 7034{
+7041.
+[30] D. Mishkin and J. Matas, All you need is a good init , in International Conference on Learning Repre-
+sentations, 2016.
+[31] J. Morton, A. Jameson, M. J. Kochenderfer, and F. Witherden, Deep dynamical modeling and control
+of unsteady uid ows , Advances in Neural Information Processing Systems, 31 (2018).
+[32] S. E. Otto and C. W. Rowley, Linearly recurrent autoencoder networks for learning dynamics , SIAM
+Journal on Applied Dynamical Systems, 18 (2019), pp. 558{593.
+[33] S. Pan and K. Duraisamy, Physics-informed probabilistic learning of linear embeddings of nonlinear
+dynamics with guaranteed stability , SIAM Journal on Applied Dynamical Systems, 19 (2020), pp. 480{
+509.
+[34] A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen, Z. Lin, N. Gimelshein,
+L. Antiga, et al., Pytorch: An imperative style, high-performance deep learning library , Advances in
+neural information processing systems, 32 (2019).
+[35] J. Pennington, S. Schoenholz, and S. Ganguli, Resurrecting the sigmoid in deep learning through
+dynamical isometry: theory and practice , Advances in neural information processing systems, 30 (2017).
+17
+[36] L. Perez and J. Wang, The eectiveness of data augmentation in image classication using deep
+learning , arXiv preprint arXiv:1712.04621, (2017).
+[37] R. W. Reynolds, T. M. Smith, C. Liu, D. B. Chelton, K. S. Casey, and M. G. Schlax, Daily high-
+resolution-blended analyses for sea surface temperature , Journal of Climate, 20 (2007), pp. 5473{5496.
+[38] A. M. Saxe, J. L. McClelland, and S. Ganguli, Exact solutions to the nonlinear dynamics of learning in
+deep linear neural networks , in International Conference on Learning Representations, 2014.
+[39] P. J. Schmid, Dynamic mode decomposition of numerical and experimental data , Journal of uid
+mechanics, 656 (2010), pp. 5{28.
+[40] N. Srivastava, G. Hinton, A. Krizhevsky, I. Sutskever, and R. Salakhutdinov, Dropout: a simple way
+to prevent neural networks from overtting , The journal of machine learning research, 15 (2014),
+pp. 1929{1958.
+[41] D. St oger and M. Soltanolkotabi, Small random initialization is akin to spectral learning: Optimization
+and generalization guarantees for overparameterized low-rank matrix reconstruction , Advances in Neural
+Information Processing Systems, 34 (2021), pp. 23831{23843.
+[42] S. H. Strogatz, Nonlinear dynamics and chaos: with applications to physics, biology, chemistry, and
+engineering , CRC press, 2018.
+[43] I. Sutskever, J. Martens, G. Dahl, and G. Hinton, On the importance of initialization and momentum
+in deep learning , in International conference on machine learning, PMLR, 2013, pp. 1139{1147.
+[44] N. Takeishi, Y. Kawahara, and T. Yairi, Learning koopman invariant subspaces for dynamic mode
+decomposition , Advances in Neural Information Processing Systems, 30 (2017).
+[45] J. Willard, X. Jia, S. Xu, M. Steinbach, and V. Kumar, Integrating physics-based modeling with machine
+learning: A survey , arXiv preprint arXiv:2003.04919, 1 (2020), pp. 1{34.
+[46] B. Woodworth, S. Gunasekar, J. D. Lee, E. Moroshko, P. Savarese, I. Golan, D. Soudry, and N. Srebro,
+Kernel and rich regimes in overparametrized models , in Conference on Learning Theory, PMLR, 2020,
+pp. 3635{3673.
+[47] E. Yeung, S. Kundu, and N. Hodas, Learning deep neural network representations for Koopman op-
+erators of nonlinear dynamical systems , in 2019 American Control Conference (ACC), IEEE, 2019,
+pp. 4832{4839.
+[48] Y. Yoshida and T. Miyato, Spectral norm regularization for improving the generalizability of deep
+learning , arXiv preprint arXiv:1705.10941, (2017).
+[49] H. Zhang, S. Dawson, C. W. Rowley, E. A. Deem, and L. N. Cattafesta, Evaluating the accuracy of
+the dynamic mode decomposition , arXiv preprint arXiv:1710.00745, (2017).
+18

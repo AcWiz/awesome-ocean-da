@@ -1,0 +1,784 @@
+LEVERAGING ANATMOSPHERICFOUNDATIONALMODEL FOR
+SUBREGIONALSEASURFACETEMPERATUREFORECASTING
+Víctor Medina
+Centro de Tecnologías de la Imagen
+(CTIM)
+Instituto Universitario de Cibernética,
+Empresas y Sociedad (IUCES)
+University of Las Palmas de Gran
+Canaria, Spain
+victor.medina110@alu.ulpgc.esGiovanny A. Cuervo-Londoño
+Oceanografía Física y Geofísica
+Aplicada (OFYGA)
+Instituto Universitario de
+Investigación en Acuicultura
+Sostenible y Ecosistemas Marinos
+(ECOAQUA)
+University of Las Palmas de Gran
+Canaria, Spain
+giovanny.cuervo101@alu.ulpgc.esJavier Sánchez
+Centro de Tecnologías de la Imagen
+(CTIM)
+Instituto Universitario de Cibernética,
+Empresas y Sociedad (IUCES)
+University of Las Palmas de Gran
+Canaria, Spain
+jsanchez@ulpgc.es
+ABSTRACT
+The accurate prediction of oceanographic variables is crucial for understanding climate change,
+managing marine resources, and optimizing maritime activities. Traditional ocean forecasting relies
+on numerical models; however, these approaches face limitations in terms of computational cost and
+scalability. In this study, we adapt Aurora, a foundational deep learning model originally designed for
+atmospheric forecasting, to predict sea surface temperature (SST) in the Canary Upwelling System.
+By fine-tuning this model with high-resolution oceanographic reanalysis data, we demonstrate its
+ability to capture complex spatiotemporal patterns while reducing computational demands. Our
+methodology involves a staged fine-tuning process, incorporating latitude-weighted error metrics
+and optimizing hyperparameters for efficient learning. The experimental results show that the
+model achieves a low RMSE of 0.119K, maintaining high anomaly correlation coefficients (ACC
+≈0.997 ). The model successfully reproduces large-scale SST structures but faces challenges in
+capturing finer details in coastal regions. This work contributes to the field of data-driven ocean
+forecasting by demonstrating the feasibility of using deep learning models pre-trained in different
+domains for oceanic applications. Future improvements include integrating additional oceanographic
+variables, increasing spatial resolution, and exploring physics-informed neural networks to enhance
+interpretability and understanding. These advancements can improve climate modeling and ocean
+prediction accuracy, supporting decision-making in environmental and economic sectors.
+KeywordsForecasting ·Sea Surface Temperature ·Upwelling System ·Oceanography ·Foundational Model ·Deep
+Learning
+1 Introduction
+The ocean plays a crucial role in multiple aspects of the planet, from regulating the global climate [ 1] to the availability
+of strategic marine resources [ 2]. Understanding its processes and predicting changes is essential for decision-making in
+the fishing industry and maritime transport sectors [ 3]. Anticipating the behavior of oceanographic variables is important
+in the current scenario [ 4], marked by climate change and the urgent need for sustainable policies [ 5], including the
+development of new tools to assess the present and future states of the Earth, as current approaches are still limited [ 6].
+Ocean analysis is critical since it influences global climate, storm formation, and heat exchange with the atmosphere
+through sea surface temperature [ 7]. Additionally, marine biodiversity depends on the dynamic balance of the ocean’s
+physical and chemical properties. Human activities also require information about ocean conditions to ensure safety,
+optimize maritime routes, manage energy resources, and implement ecological policies [8].arXiv:2510.25563v1  [cs.LG]  29 Oct 2025
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Traditional ocean prediction methodologies rely on numerical models that solve complex fluid dynamics equations.
+However, these models struggle to capture data across multiple spatial and temporal scales and have high computational
+costs. These limitations, combined with the increasing volume of data, create new research opportunities. In this
+context, deep learning has emerged as a promising alternative to overcome these challenges, enabling the processing of
+large volumes of data across different scales. Furthermore, with the growing quantity and diversity of data fromin situ
+sources, satellites, and reanalysis, we now have an opportunity to address these challenges [9].
+These new models learn complex relationships from data without explicitly relying on physical equations. By removing
+the strict dependence on theoretical formulations, it becomes feasible to capture patterns that emerge from the interaction
+of multiple variables. This approach can provide more detailed solutions, reduce computational costs, and integrate
+heterogeneous data. Models based on deep learning could enable the development of more efficient methods in various
+scenarios [10].
+The field of atmospheric prediction has witnessed a transformative shift with the advent of deep learning models. Recent
+breakthroughs include models like FourCastNet [ 11], known for its speed and accuracy in predicting extreme weather
+events, and GraphCast [ 12], which demonstrates remarkable skill in medium-range global weather forecasting based on
+Graph Neural Networks. Furthermore, models such as NeuralGCM [ 13] explore the integration of neural networks
+within general circulation models, aiming to enhance the representation of sub-grid scale processes. More recently, the
+Aurora [ 14] model has emerged, showcasing the potential of deep learning to not only predict atmospheric conditions
+but also to extend these capabilities to coupled systems by learning complex interactions across different Earth system
+components. These advancements signify a new era in weather and climate modeling, promising more efficient and
+accurate predictions for a range of applications.
+This work aims to adapt the Aurora foundational model, initially developed for global atmospheric applications,
+to subregional ocean prediction. The model is fine-tuned for predicting the evolution of the SST in the Canary
+Upwelling System. We are interested in adapting the model for predicting the ocean’s potential temperature ( θ0) in a
+specific geographic area and period. Its three-dimensional architecture enables the efficient integration of complex and
+heterogeneous data. Additionally, its reduced training time, ability to leverage previously learned representations, and
+flexibility to incorporate data from various sources make it an ideal candidate for tackling current challenges in ocean
+prediction.
+We use data from the GLORYS12V1 [ 15] ocean prediction system of the Copernicus Marine Service [ 16]. This
+corresponds to the global ocean physical reanalysis, which provides three-dimensional daily fields with a horizontal
+resolution of 1/12° and 50 vertical levels. This dataset, based on the assimilation of satellite andin situobservations,
+provides information on potential temperature, salinity, currents, and two-dimensional variables, such as sea level and
+mixed-layer thickness.
+This model offers advantages in terms of computational cost reduction and prediction quality, although limitations
+exist due to the complexity of the domain and physical constraints. This should be seen as complementary to other
+methodologies rather than a complete replacement.
+Section 2 summarizes state-of-the-art works. Section 3 details the dataset used in this work and the area of study.
+Section 4 explains the Aurora model and how we adapted it to our problem. The experimental configuration in Section 5
+addresses various details about the training process, the loss function, and the metrics used to evaluate the model.
+Section 6 tackles the fine-tuning process and shows some preliminary results. Finally, the conclusions in Section 8
+summarize the main ideas and contributions of the work and propose some ideas for future research.
+2 Related Work
+Prediction in oceanography is essential for anticipating and understanding natural phenomena that affect global climate
+and various human activities [ 17]. Sea temperature plays a fundamental role in the distribution of water masses, global
+circulation, and the ocean-atmosphere energy balance [ 18,19]. Thus, estimating changes in the physical and chemical
+properties of the ocean, such as temperature, is crucial for multiple activities [ 20], in addition to being key to anticipating
+natural risks.
+Ocean observation and prediction results from global efforts [ 10], in which multiple national and international agencies
+contribute scientific data. Among them, the World Meteorological Organization (WMO) stands out as it establishes
+frameworks for international cooperation in data exchange, standardization of procedures, and guidelines that facilitate
+climate understanding on a planetary scale [21].
+The Copernicus Program, promoted by the EU in collaboration with the ESA, provides services and information about
+the ocean [ 16]. The Copernicus Marine Environment Monitoring Service (CMEMS) integrates satellite observations,in
+2
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+situmeasurements, and numerical models to offer various oceanographic products. This service supplies data on sea
+temperature, salinity, currents, and sea level variables. As a result, it provides a solid foundation for scientific studies,
+operational applications, and decision-making in marine environments [ 22]. On the other hand, the USA National
+Oceanic and Atmospheric Administration (NOAA) also collects and processes oceanic and atmospheric data. These
+data and products have become standard references for the international community [ 23]. Additionally, ECMWF
+provides reanalysis and numerical models, globally recognized for their quality and accuracy [24].
+Satellite observations have revolutionized ocean monitoring. Missions such as ESA and Copernicus’ Sentinel-3 or
+NASA’s MODIS [ 25] allow for detailed information on sea surface temperature, sea level height, surface salinity, and
+chlorophyll concentration—among other variables—characterized by high spatial and temporal resolution. However,
+satellite measurements can be affected by clouds or other atmospheric factors. To compensate for these shortcomings
+and obtain a more comprehensive view, it is necessary to combine these observations with other data sources [26].
+In situdata come from direct measurements taken by buoys, research vessels, fixed platforms, and autonomous
+underwater vehicles [ 27]. These measurements provide precise data on key variables. Although these measurements
+have limited spatial and temporal coverage, their high quality and detail are indispensable for calibration, validation,
+and assimilation in numerical models. Reanalysis and numerical models integrate satellite andin situdata, offering
+coherent representations of the ocean.
+Numerical Weather Prediction (NWP) models have been essential for predicting ocean dynamics for decades. These
+models are based on fluid dynamics and thermodynamics equations, solving the evolution of fundamental variables
+over three-dimensional grids that cover the globe [ 28]. The main advantage of NWP lies in its physical consistency,
+as it is based on fundamental laws governing ocean motion. However, it also has some limitations, such as the high
+computational cost required to make predictions, which makes high-resolution simulations expensive. Additionally, the
+complexity of ocean-atmosphere interactions leads to small errors that accumulate over time, reducing the accuracy of
+long-term predictions and limiting the ability to capture small-scale phenomena [29].
+These challenges have led to methodologies aimed at increasing the capacity to process large volumes of data in a
+computationally scalable manner [ 30]. In this regard, deep learning has emerged as a promising approach to improving
+efficiency and accuracy when working with heterogeneous data.
+Initially, CNNs [ 31] gained popularity in meteorology and oceanography due to their ability to capture spatial patterns
+in two-dimensional data such as temperature maps or ocean currents. Some use cases included precipitation prediction
+and identifying spatial patterns in the ocean [ 32]. However, these models were inefficient at capturing temporal
+dependencies or three-dimensional structures, limiting their effectiveness for more complex tasks.
+Later, with the emergence of graph neural networks (GNN), GraphCast [ 12] was introduced in 2023, a model capable
+of tackling medium-range global weather prediction with high detail. This approach leverages graph structures to
+capture complex spatial relationships, showing promising results in forecasting meteorological and climate variables.
+Additionally, diffusion-based methods such as GenCast [ 33] were developed to integrate uncertainty into the models.
+This stochastic approach generates multiple future states, making it a valuable tool for scenario analysis and risk
+assessment, particularly in capturing ocean variability. The Artificial Intelligence/Integrated Forecasting System
+(AIFS) [ 34] is an evolution of GraphCast in which the processor is replaced with a shifted window attention Transformer.
+GNNs have been adapted to ocean prediction. For instance, SeaCast [ 35] implements medium-range ocean forecasting
+in a limited area region defined by the Mediterranean Sea, and a more recent approach [ 36,37] predicts the SST in
+the region of the Canary Islands and the Northwest African coast. The importance of the underlying mesh in these
+architectures has been studied in [ 38]: Structured meshes produce artifacts in medium-range forecasting, which can be
+tackled using bathymetry-aware unstructured meshes, as shown in [39].
+One of the most significant breakthroughs in this trajectory came with Transformers [ 40]. Their attention mechanism
+enabled a more efficient representation of spatial and temporal relationships. FourCastNet [ 11] integrated adaptive
+Fourier operators to perform fast and accurate global climate predictions while reducing computational complexity.
+The three-dimensional architecture of Pangu-Weather [ 41] improved vertical representation and the ability to capture
+complex atmospheric phenomena.
+Over time, Transformers were further adapted for oceanography. For instance, XiHe [ 42], a model designed for
+global ocean eddy-resolving forecasting, combined the GLORYS12 reanalysis with data from ERA5 [ 43] and satellite
+observations to anticipate the evolution of physical variables, providing high-resolution estimates. Another example
+is Orca [ 44], which employed an encoder-based architecture, a fusion module, and a decoder with temporal attention
+mechanisms to simulate global ocean circulation.
+More recently, a three-dimensional foundational model, Aurora [ 14], combined pretraining on vast amounts of
+heterogeneous data with a fine-tuning process tailored to different scales and variables. Inspired by successes in other
+3
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+fields, such as protein structure prediction and natural language processing [ 45,46], Aurora is capable of generating
+high-resolution forecasts with lower computational costs and greater accuracy in extreme events. This model stands
+out for its ability to handle sparse and heterogeneous data while overcoming the limitations of other architectures by
+integrating with different types of climate data.
+Table 1 illustrates the evolution of deep learning in climate and oceanographic prediction over time. Organized
+chronologically, this table helps us understand improvements in resolution, the type and quantity of variables that can
+be handled, and whether the approach is deterministic (D) or stochastic (E).
+Table 1: Table with a chronological comparison and key features of various deep learning models applied to climate
+and oceanic prediction. In the last column, (D) stands for Deterministic and (S) for Stochastic
+Model Year Resolution Number of Variables Forecasting
+CNN 2010s Medium Limited D
+RNN/LSTM 2010s Medium Limited D
+XiHe (Transformer) 2021 High Large D
+FourCastNet (Transformer) 2022 High Large D
+Pangu-Weather (Transformer 3D) 2022 High Large D/S
+GraphCast (GNN) 2023 High Large D
+GenCast (Diffusion model) 2023 High Large S
+AIFS (GNN) 2023 High Large D/S
+Orca (Transformer) 2024 High Various D
+Aurora (Transformer) 2024 High Large D
+3 Dataset and Study Area
+This section presents the data used in this work, including the study area, period, and selected variables. It details the
+data source, the rationale for choosing the Northeastern Atlantic region, and the time frame. The complexity of patterns
+in the study area is also examined. Finally, it explains the temporal division of data for training, validation, and testing.
+3.1 Global Ocean Physics Reanalysis Data
+The CMEMS [ 47] is a European service dedicated to monitoring the marine environment, providing a wide range
+of global and regional oceanic data for the scientific community. Its products are organized into different thematic
+categories: the Blue Ocean, which focuses on physical variables such as temperature, salinity, sea level, and currents;
+the Green Ocean, which covers biogeochemical variables like chlorophyll concentration and dissolved oxygen; and the
+White Ocean, which includes data on sea ice and polar regions. This classification enables users to filter information
+based on specific project needs, ensuring high-quality and relevant data [16].
+In this work, we selected the Blue Ocean category, specifically the GLOBAL_MULTIYEAR_PHY_001_030 product,
+which is formulated as a global physical ocean reanalysis. This product spans from 1993 to 2021, offering data with a
+spatial resolution of 1/12oand fifty vertical levels. The GLORYS12V1 ocean prediction system is part of the reanalysis
+operated by Mercator Ocean, based on the NEMO model. This scheme integrates techniques such as SEEK to assimilate
+satellite data (sea level altimetry, sea surface temperature) andin situobservations (ARGO profiles and oceanographic
+cruises), achieving a coherent and physically consistent representation of the global ocean environment [ 48,49]. The
+primary function of this service is to offer reliable and up-to-date information on ocean conditions.
+The product includes multiple data configurations: daily and monthly averages of three-dimensional variables such as
+potential temperature, salinity, and currents, as well as surface variables like sea level height, mixed layer thickness, and
+sea ice characteristics. This structure allows the analysis of mesoscale variability and seasonal patterns, providing a
+versatile dataset suitable for dynamic and climate studies.
+The data is available in NetCDF format, which follows the CF-1.6 convention, ensuring standardization of variables and
+metadata [50, 51].
+The selection of this product is driven by the need for a dataset that combines high spatial resolution with extensive
+temporal coverage and rigorous scientific quality [ 47]. This approach enables the capture of key dynamic phenomena,
+such as ocean eddies and fronts, while also allowing for the analysis of long-term trends and seasonal cycles.
+4
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+3.2 Area and Period of Study
+Our study area is limited to the Northeastern Atlantic region, near the African coast and off the Canary Islands, an area
+of interest due to its intense coastal upwelling phenomena. This region is characterized by high biological productivity
+and a significant influence on the regional climate [52].
+Figure 1 shows a map of the selected area, highlighting key geographic features relevant to coastal upwellings, such
+as Capes Ghir and Juby. These capes are crucial in coastal currents and nutrient transport to the surface, promoting
+phytoplankton proliferation [19]. Tabla 2 shows the coordinates that define our area of interest.
+Figure 1: Study area showing the African coast, the Canary Islands, and relevant capes.
+Table 2: Geographic coordinates of the study area.
+Parameter Value
+Minimum Longitud −20.97◦
+Maximum Longitud −5.975◦
+Minimum Latitud 19.55◦
+Maximum Latitud 34.525◦
+This region is characterized by a strong influence of the trade winds and the Canary Current, both considered main
+factors of coastal upwelling, affecting biodiversity and local dynamics [ 20]. Our data period extends from January
+1, 2014, to January 1, 2021. This seven-year interval allows the exploration of seasonal variations and medium-term
+trends.
+3.3 The Potential Temperature
+Our dataset contains a series of variables that provide a general overview of ocean dynamics. These variables range
+from potential temperature to salinity, sea level height, mixed layer depth, and zonal and meridional components of
+current velocity [7].
+5
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Figure 2 shows a set of maps for each variable, representing the region of interest. Different patterns highlight the
+influence of the trade winds and coastal upwelling, showing these factors as generators of distinct thermal and saline
+gradients.
+Figure 2: Spatial representations of the dataset variables from the GLORYS12V1 product.
+In this work, we use the potential temperature, θ0. It is defined as the temperature of the water brought to atmospheric
+pressure. This concept eliminates the effects that pressure generates at different depths. Hence, potential temperature
+becomes a fundamental tool for comparing water masses and studying the thermal structure of the ocean [ 53]. The
+θ0map shows that the warmest waters are located in the south at the open ocean, while the coldest waters are found
+in the north and the African coast, in the upwelling region. This pattern is influenced by coastal upwelling and the
+interactions between the Canary Current and the trade winds [ 20]. The θ0map also shows thermal gradients along the
+coast, indicating active mixing processes. This behavior affects marine biodiversity, as colder waters transport nutrients
+from the depths to the surface [6].
+In addition to its relevance in thermal structure, θ0is essential for understanding heat exchange processes between the
+ocean and the atmosphere [ 18], thus, it becomes a fundamental tool for analyzing seasonal evolution and its impact on
+the ocean [19].
+On the other hand, salinity shows a higher concentration in the open ocean, possibly due to thermal influence and
+ocean circulation [ 7]. Sea level height shows patterns of mesoscale dynamics, evidencing depressions and elevations
+characteristic of ocean eddies [ 30]. Mixed layer depth shows low values near the coast, reflecting the influence of
+surface waters and upwelling masses.
+The integration of these variables allows for a holistic view of ocean dynamics in this region. In particular, θ0help us
+understand the thermal structure and its relationship with physical, biological, and climatic processes. This approach is
+essential for modeling and predicting the evolution of marine systems in the Northeastern Atlantic [54].
+Figure 3 shows a time series of potential temperature during the study period, elucidating seasonal variations.
+4 A Foundational Model for Forecasting the SST
+This section explains the Aurora model and how we adapted it to our purposes. It is a foundational model for atmospheric
+prediction, but its versatility permits it to be adapted to oceanography. It can process heterogeneous data with multiple
+variables, pressure levels, and spatial resolutions. These characteristics make Aurora a flexible and scalable system
+capable of forecasting the physical state of the ocean. This model can be adapted to more limited contexts with scarce
+data.
+The scalability of this model is largely due to the local window attention mechanism and the U-Net [ 55] architecture.
+Both allow for information extraction at multiple scales. This multiscale capability is essential for capturing large- and
+small-scale structures. The model generates long-term forecasts by iteratively applying its prediction function in an
+6
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Figure 3: Temporal series of the study period for theθ 0variable.
+autoregressive way:
+ˆXt+1= Φ(Xt, Xt−1),(1)
+where ˆXt+1is the prediction at time t+ 1 andΦis the model function. This scheme, analogous to recurrent networks,
+extends the temporal horizon, although it requires controlling the accumulation of errors. Aurora benefits from parallel
+training and mixed precision, reducing memory usage without degrading prediction quality. This facilitates its practical
+implementation in operational contexts, allowing for increased resolution without incurring prohibitive computational
+costs.
+Aurora presents multiple configurations, differentiated by the number of parameters, the size of the embeddings, and
+the number of layers in the encoder and decoder. These variations impact computational performance and the model’s
+ability to capture complex relationships.
+Table 3: Variants of the Aurora model.
+Model Layers Encoder/Decoder Embedding Dimensions Parameters in Millions
+Small Aurora (2, 6, 2)/(2, 6, 2) 256 117M
+Medium Aurora (6, 8, 8)/(6, 8, 8) 384 660M
+Large Aurora (6, 10, 8)/(8, 10, 6) 512 1.300M
+Table 3 shows the size of the different configurations. We chose the medium-size model, looking for a balance between
+complexity and computational cost. Additionally, we adopted mixed precision to optimize memory.
+The model’s architecture consists of three components: theencoder, theprocessor, and thedecoder. Theencoder
+transforms raw inputs into a normalized internal representation, theprocessortemporally evolves this representation,
+capturing significant relationships between the input data, and thedecoderrestores the variables to their original
+resolution and levels. The architecture benefits from three-dimensional Transformers and attention mechanisms [ 40,56],
+integrated with U-Net. These components allow feature extraction at various scales, processing data with different
+resolutions, levels, and static variables.
+4.1 The Encoder
+The objective of the encoder is to unify the inputs into a coherent three-dimensional representation. It converts
+heterogeneous data into a uniform internal representation, preparing it for the temporal and multiscale processing of the
+next module. It employs tokenization and compression of climatic states through cross-attention blocks based on a
+Perceiver IO [ 57] model. Thus, each atmospheric and surface variable is represented in a three-dimensional volume,
+incorporating Fourier encodings that add spatial and temporal information [56].
+7
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+To normalize the information, embeddings based on sinusoidal encodings have been used, assigning each pressure level
+pla representation of the type:
+Emb(p l) =
+sinpl
+λi
+,cospl
+λi
+.(2)
+These embeddings integrate vertical information, reducing pressure levels to a fixed set of latent levels CLthrough
+Perceiver IO attention mechanisms. This allows the model to work with a manageable number of levels, maintaining
+the representativeness of vertical conditions while balancing computational cost. Dynamic and static variables are
+tokenized, incorporating positional and Fourier encoding, which unifies the differences between levels and resolutions.
+4.2 The Processor
+The backbone is the temporal core of the model, responsible for evolving the internal representation over time. To
+achieve this, it relies on a 3D Swin Transformer [58, 59], organized with a U-Net structure, which allows it to capture
+features at multiple scales.
+An internal encoder gradually reduces spatial resolution and increases semantic depth. This is followed by an internal
+decoder, which recovers the original resolution and integrates the information obtained at each level. This hierarchical
+arrangement combines global and local information, capturing large-scale patterns and more detailed structures.
+Attention is implemented through local windows, allowing each layer to process spatial subsets. This reduces
+computational complexity by avoiding global attention that spans entire layers. This local attention is given by:
+Attention(Q,K,V) =SoftmaxQK⊤
+√dk
+V,(3)
+whereQ,K, andVare the query, key, and value matrices, respectively, and dkis the dimension of the keys. These
+local windows limit attention operations to specific regions. This strategy makes Aurora scalable, allowing it to handle
+higher resolutions without increasing computational cost.
+The result is an enriched representation in which spatiotemporal relationships are explicitly modeled at multiple levels.
+This representation is then configured to be translated back to the original variables in the decoder.
+4.2.1 The Decoder
+The latent representation of the variables, generated by the processor, is restored to their original pressure levels and
+resolution in the decoder. This involves using inverse modules based on Perceiver IO models, which can reconstruct
+the desired variables from the internal representations, assigning each level and variable its corresponding spatial
+characteristics.
+Each variable, v, and level, l, is obtained by applying a linear transformation and regrouping spatial patches until
+the original grid is recovered. Thus, the decoder ensures that the final predictions maintain coherence with the input
+dimensions and the information captured by the model is translated into physically interpretable forecasts.
+4.3 Subregional Oceanographic Prediction
+Adapting the model to oceanographic variables requires fundamental differences from atmospheric conditions. While
+Aurora was pre-trained assuming distributions and ranges typical of atmospheric variables (normalized in Kelvin and
+with pressure levels), oceanic variables, such as potential temperature, present narrower ranges and different scales.
+For example, sea surface temperature usually varies between approximately -2oC and 30oC, a narrower range than in
+atmospheric data. This disparity initially led to unrealistic predictions, as the model expected different distributions.
+In the first step, we converted temperatures in Celsius to Kelvin and reduced depth levels. The data were normalized to
+zero mean and unit variance. Geographic coordinates were refined to maintain consistency in the latitude-longitude grid,
+and the land mask was carefully interpolated to ensure seamless integration of oceanic variables within the model’s
+infrastructure.
+We scaled the original atmospheric data to a lower resolution of 0.5◦ degrees and carried out an inference with the
+pre-trained Aurora model. Figure 4 shows the global temperature map in Kelvin in two different time instants and
+compares to the HRES product. These results indicate that the resolution change was successful.
+We adapted the oceanographic data by interpolating, filling in missing values, and converting to Kelvin. The latitude and
+longitude coordinates are interpolated to match the model’s resolution, and missing values are replaced with the mean.
+8
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Figure 4: Prediction of the pre-trained Aurora model with meteorological data after reducing data resolution to0.5◦.
+The pre-trained model is loaded, and the predictions with our data are consistent with the expected global atmospheric
+patterns.
+Initial attempts with oceanic data did not yield good performance, as the model still carried a bias inherited from its
+pre-training. To overcome this challenge, we fine-tuned the model in two phases. In the first phase, the entire network
+was frozen except for the decoder, so that it could learn the ocean variables without altering the already acquired internal
+representations. Once the decoder assimilated the new dynamics, all the model’s parameters were trained using a lower
+learning rate to avoid losing prior knowledge. We used the AdamW optimizer as in the original work [ 14], which helps
+regularize the model and avoids overfitting.
+5 Experimental Configuration
+5.1 Dataset Split
+The split of the dataset for training the neural network considered oceanic conditions, such as seasonal cycles or adverse
+phenomena. For this reason, the training set was defined annually between 2014 and 2018, the validation set comprised
+2019, and data from 2020 was reserved for the test set. This roughly represents 70% for training, 15% for validation,
+and 15% for testing, maintaining the temporal order to prevent overlaps. This approach ensures that data used to validate
+and test the model are independent of those used in training, for assessing its ability to make predictions in unobserved
+scenarios.
+Splitting data in this way also benefits the study of oceanic phenomena, as training with data from an extended period
+allows the model to process multiple conditions. Additionally, using recent data for validation and testing, evaluates the
+model’s adaptability to current conditions. This classification also ensures that each subset contains samples from all
+seasons.
+Figure 5 illustrates how the data was divided. To attain the 70%-15%-15% rate, the training set spans from January 1,
+2014, to November 25, 2018; the validation set covers November 26, 2018, to December 13, 2019; and the test set
+extends from December 14, 2019, to January 1, 2021.
+Batches are organized with samples of three consecutive values in sliding windows over the temporal axis. The samples
+are shuffled, and a padding mechanism is applied to ensure that all batches contain the same number of samples. The
+process begins with the generation of sliding windows, a mechanism that divides the dataset into consecutive temporal
+partitions. The window size is adjusted depending on the number of days in each window.
+9
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Figure 5: Dataset split into the training, validation, and test sets.
+5.2 Loss Function
+We used the mean absolute error (MAE) as the loss function for optimizing the model’s parameters. Its formula is given
+by:
+MAE=1
+NNX
+i=1|yi−ˆyi|,(4)
+where yiis the ground truth value, ˆyiis the model prediction, and Nthe total number of predictions. In case of multiple
+variables, a loss function similar to MAE could be employed. The function below is a variant of MAE that takes into
+account the sum across variables with their respective weights and scales:
+L(ˆXt, Xt) =γ
+VS+VA
+α
+VSX
+k=1wS
+k
+H×WHX
+i=1WX
+j=1|ˆSt
+k,i,j−St
+k,i,j|
+
++β
+VAX
+k=11
+C×H×WCX
+c=1wA
+k,cHX
+i=1WX
+j=1|ˆAt
+k,c,i,j−At
+k,c,i,j|
+
+,(5)
+where ˆXt= (ˆSt,ˆAt)is the predicted state, and Xt= (St, At)is the actual state, with SandArepresenting surface
+and atmospheric variables, respectively. Here, α,β, andγare weighting factors; wS
+kandwA
+k,care the weights for each
+variable; and H, W, C, V S, VAare the spatial dimensions and the variable set. The loss function adjusts the contribution
+from each variable, prioritizing the most relevant for the study’s objective.
+5.3 Evaluation Metrics
+The metrics used to evaluate the model’s performance were the root mean squared error (RMSE), the weighted bias
+(BIAS), and the anomaly correlation coefficient (ACC) [ 60]. These metrics consider weights based on the cosine of
+latitude to account for the Earth’s spherical geometry.
+Figure 6 illustrates the weights, defined as w= cos(ϕ) , which decrease toward the poles. This ensures that the weighted
+metrics remain globally representative.
+The weighted RMSE calculates the average magnitude of the error between the predictions ˆyiand the ground truth
+valuesy iand is computed as:
+RMSE=vuut1
+NNX
+i=1wnorm
+i(yi−ˆyi)2,
+wherewnorm
+iis defined as:
+wnorm
+i=wi
+w=cos(ϕ i)
+w,with w=1
+NNX
+j=1wj.
+In this formulation, wirepresents the original weight associated with each observation, and wis the average of these
+weights. This approach ensures that the error is not biased toward regions with higher data density.
+The weighted Bias was used to evaluate the average difference between predictions and actual values. Its calculation
+helped identify whether the model systematically underestimates or overestimates observed values. The formula is
+given by:
+Bias=1
+NNX
+i=1wnorm
+i(yi−ˆyi).
+10
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Figure 6: Latitud-based weights used in the metrics to account for the size of the patches induced by the Earth’s
+spherical geometry.
+This measure provides an accurate metric for identifying the model’s systematic tendencies. The weighted ACC, on
+the other hand, measures the model’s ability to replicate variation patterns between predictions and actual values. It is
+calculated as
+ACC=Cov(A, B)p
+Var(A)·Var(B),
+where Cov(A, B)is the covariance and Var(·)the variance, given by
+Cov(A, B) =1
+NNX
+i=1wnorm
+iAiBi,
+Var(A) =1
+NNX
+i=1wnorm
+iA2
+i,
+Var(B) =1
+NNX
+i=1wnorm
+iB2
+i.
+withA i=yi−yandB i= ˆyi−ˆythe anomalies, i.e., the deviations from the weighted averages, and
+y=1
+NNX
+i=1wnorm
+iyi,ˆy=1
+NNX
+i=1wnorm
+iˆyi.
+This process ensures that the ACC reflects the model’s ability to capture global patterns over the prediction anomalies
+compared to the actual values.
+6 Results
+We used the test set to evaluate the model. In the first experiment, we assess the performance of the fine-tuning strategy.
+We follow three strategies: in the first one, we unfroze all the parameters of the network and trained with a low learning
+rate of 1 ×10−5; in the second one, we only unfroze the decoder and trained with a learning rate of 1 ×10−4, so that
+atmospheric knowledge was maintained in the backbone, and oceanic features were gradually learned by the decoder;
+in the last one, we maintained de parameters of the previous strategy and unfroze all the layers, training the model with
+a low learning rate of 1×10−5and a few epochs.
+We used a batch size of 3 and 15 epochs, obtaining an RMSE of 0.131K for the first strategy and 0.140K for the second
+strategy. Finally, the network of the latter was fully fine-tuned with a learning rate of 1×10−5, obtaining an RMSE of
+0.124K.
+11
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+These experiments were repeated, increasing the batch size to 8 samples and using more computational resources. This
+contributed to an approximate time reduction of 15% per epoch. We also increased the number of epochs to 30 and
+obtained an RMSE of 0.130K for the first strategy and 0.135K for the second one. The last fine-tuning step reduced the
+RMSE to 0.134K. Table 4 shows the final results obtained in these experiments.
+Table 4: Results of the fine-tuning process. In the first row, the network was completely fine-tuned using a small
+learning rate. In the second row, only the decoder was fine-tuned with a larger learning rate. In the third row, the
+resulting network was subsequently fine-tuned with a reduced learning rate. In the last three rows, we show the same
+experiments increasing the batch size to 8 and the number of epochs to 30. Bold letters represent the best results in each
+column.
+Setting RMSE (K) Bias (K) ACC
+Full fine-tuning,lr= 1×10−5, batch=3 0.131 -0.069 0.997
+Decoder fine-tuning,lr= 1×10−4, batch=3 0.140 -0.064 0.997
+Full fine-tuning with new decoder,lr= 1×10−5, batch=30.124-0.064 0.997
+Full fine-tuning,lr= 1×10−5, batch=8 0.130 -0.062 0.997
+Decoder fine-tuning,lr= 1×10−4, batch=8 0.135 -0.059 0.997
+Full fine-tuning with new decoder,lr= 1×10−5, batch=8 0.134-0.0330.997
+When the batch size was increased to 8, the results became somewhat more competitive. This finding shows that with
+better resources, using larger batches speeds up training and also improves the quality of the predictions. The high
+ACC (ACC ≈0.997 ) suggests that the model captures the relationships between actual and predicted anomalies. This
+agreement reveals that the model does not simply fit the mean of the data but also accounts for unique phenomena. As
+for the Bias, in most cases, values close to -0.060K were obtained, except for the last training, where we obtained a
+lower bias of -0.033K.
+Figure 7 presents an example of an inference. This figure shows the target value, the model prediction, and the difference
+between the two. The values are represented in Kelvin with color scales, where greenish tones indicate intermediate
+values, and blue and yellow highlight more extreme values between the prediction and target values. The difference
+between them is shown with a scale centered on zero, where red and blue indicate overestimation and underestimation,
+respectively.
+Figure 7: Error produced in a forecast of the potential temperature in Kelvin for one-day prediction.
+It reveals that the potential temperature prediction model has more errors in certain regions, such as in coastal zones.
+This is due to the inherent complexity of these areas, characterized by more intense temperature variations compared to
+other zones, as noted in [52].
+The difference manifests the variability in coastal zones through more saturated tones, indicating that the model struggles
+at the ocean-continent boundary. This difficulty is likely due to the interaction of various factors influencing potential
+temperature in these zones, such as ocean currents, coastal topography, and local winds. These factors can generate
+microclimates and significant temperature variations at small spatial scales.
+In contrast, conditions in the open ocean are more uniform and stable, and the difference between the model prediction
+and the observed data is reduced. The lower variability in these areas allows for capturing potential temperature patterns
+12
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+with greater accuracy. This suggests that specific training aimed at improving the results in coastal areas could improve
+the overall model’s performance. This training could incorporate high-resolution data of relevant variables in coastal
+zones or use modeling techniques that better capture the complexity of these zones.
+An additional experiment consisted of increasing the prediction to ten days. Each sample included ten temporal steps,
+and the data was analyzed at each lead time. As the time horizon increases, we arrive at an increasingly challenging
+scenario, as uncertainty accumulates and small initial inaccuracies can be amplified. Figure 8 shows the evolution of the
+difference between the prediction and the target value for ten-day forecasts. The difference is small in the first days, and
+errors accumulate with more autoregressive steps, which become accentuated in the last days. This figure is particularly
+interesting for identifying errors and analyzing problematic regions. This long-term visualization demonstrates that
+maintaining effectiveness with an increased time horizon presents a significant challenge.
+Figure 8: RMSE error in autoregressive ten-day forecasts.
+Figure 9 shows the average RMSE for the four seasons over ten-day forecasts. The RMSE increases progressively
+as the time horizon expands, with greater increases in those seasons that present more difficult conditions. Indeed,
+summer (plotted in green) shows a more pronounced increase, reaching values close to 0.9K after 10 days, suggesting
+that seasonal cycles significantly influence the results.
+7 Discussion
+Oceanography has traditionally relied on physically based numerical models. Although these models are robust and
+grounded in well-established physical principles, they are often complex, computationally expensive, and limited in
+representing certain spatial and temporal scales. In contrast, deep learning models derive relationships directly from
+data, operating without explicit physical constraints. They can anticipate phenomena that are difficult to reproduce
+numerically and, with sufficient data availability, have the potential to accelerate forecasting processes [4].
+The results presented in this study demonstrate that deep learning models can leverage prior knowledge from founda-
+tional models trained in different contexts. Oceanographic research can benefit from these advances through reduced
+computational costs, easier integration of diverse data sources, rapid generation of forecasts, and the ability to test
+numerous configurations efficiently. Given the strong dependence of oceanography on data quality and quantity, the
+capability of deep learning techniques to assimilate and exploit vast datasets paves the way for long-term innovation.
+This work expands the range of forecasting methodologies available to oceanography, introducing approaches not
+previously explored in the field [ 4]. The use of foundational models pretrained in other fields helps lower barriers to
+entry and enhances resource efficiency.
+13
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Figure 9: Seasonal average RMSE for ten lead times.
+Despite these advantages, several limitations remain: Training three-dimensional models is computationally demanding;
+hardware constraints significantly affected this study, as each training session required considerable time, limiting both
+resolution and the number of variables; addressing this challenge would require more powerful resources as suggested
+in [61].
+Another key challenge concerns data representativeness. Although the dataset employed here is based on reanalysis
+products, these are derived from numerical models and partial observations. Consequently, predictions may inherit
+biases from the underlying data. Regions with sparse observations or suboptimal conditions may yield less accurate
+results. Future work should incorporate additional information, such asin situmeasurements and satellite data, to better
+evaluate and improve prediction quality.
+This study focuses solely on potential temperature; however, ocean dynamics depend on multiple interacting variables,
+including salinity, density, and currents. Extending the model to incorporate these factors will increase complexity, as
+the model must learn new interdependencies. Nevertheless, this added complexity could yield more realistic oceanic
+scenarios and improve predictive accuracy.
+Another limitation lies in model interpretability. Neural networks remain largely opaque. Future research should there-
+fore investigate the internal representations and decision-making processes of these models. Enhancing explainability
+will foster a deeper understanding of how predictions are generated and allow for greater confidence and control [62].
+Despite these challenges, this work opens promising avenues for future exploration. Integrating larger and higher-
+quality datasets could extend prediction horizons and enhance model robustness. Including additional variables, such as
+salinity and current velocity, would enable the study of hydrodynamic processes and provide a more comprehensive
+understanding of ocean behavior. Increasing spatial resolution through high-resolution models is another promising
+direction, though it will demand greater computational power. This could be achieved through progressive training
+strategies or by dividing the domain into smaller subregions for subsequent integration.
+Finally, incorporating physical knowledge directly into training represents another exciting research direction. Physics-
+informed neural networks (PINNs) introduce physical constraints by penalizing violations of conservation laws in
+the loss function. Embedding simplified fluid dynamics equations within the learning process can reduce the model’s
+dependence on data alone, guiding it toward physically consistent solutions [63, 64].
+Continual learning also presents a valuable opportunity. Because the ocean is a dynamic and ever-changing system,
+models that can be regularly updated with new data will improve adaptability and responsiveness to evolving conditions.
+Such models could react more effectively to extreme events and provide continuously improving forecasts over time.
+8 Conclusion
+This study established the conceptual, methodological, and technical groundwork for adapting a foundational atmo-
+spheric model to oceanographic applications. Specifically, the Aurora model was successfully applied to forecast ocean
+potential temperature in a local region.
+14
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+Although the atmosphere and ocean are tightly coupled components of the climate system, they differ in structure and
+dynamics. Atmospheric variables—on which Aurora was originally trained—are organized by pressure levels and
+evolve rapidly, whereas oceanic variables are distributed by depth, governed by thermo-haline properties, and change
+more slowly due to higher density [ 53]. Aurora’s capacity to assimilate oceanic data and produce coherent results
+demonstrates cross-domain adaptability, suggesting potential for future knowledge transfer between disciplines.
+While this study focused on potential temperature, the experiments indicate that Aurora can be extended to more
+complex, multivariable scenarios given sufficient computational resources. The sensitivity observed across training
+configurations, such as partial layer freezing and learning rate adjustments, highlights the importance of hyperparameter
+tuning and normalization strategies in achieving optimal performance. Overall, Aurora’s pre-trained parameters can
+be effectively fine-tuned for new oceanographic tasks, reinforcing the model’s flexibility for broader environmental
+applications.
+References
+[1]IPCC. Climate change 2022: The physical science basis. contribution of working group I to the sixth assessment
+report of the IPCC.https://www.ipcc.ch/report/ar6/wg1/, 2021.
+[2]FAO. The state of world fisheries and aquaculture. https://www.fao.org/publications/home/
+fao-flagship-publications/the-state-of-world-fisheries-and-aquaculture/en, 2022.
+[3]Eric P. Chassignet, Michael J. Bell, Pierre Brasseur, Geir Evensen, Stephen M. Griffies, Harley E. Hurlburt,
+Christian Le Provost, Gurvan Madec, Julie McClean, Jacques Verron, and Alan J. Wallcraft. The modeling
+component of ocean forecasting. In Eric P. Chassignet and Jacques Verron, editors,Ocean Weather Forecasting:
+An Integrated View of Oceanography, pages 159–220. Springer, Dordrecht, 2006.
+[4] ETOOFS. Challenges and future perspectives in ocean prediction. InETOOFS Guide. IOC-UNESCO, 2022.
+[5]United Nations. The ocean conference: Scaling up ocean action based on science and innovation for the
+implementation of goal 14.https://www.un.org/en/conferences/ocean2022, 2022.
+[6]Qianlong Zhao, Shiqiu Peng, Jingzhen Wang, Shaotian Li, Zhengyu Hou, and Guoqiang Zhong. Applications of
+deep learning in physical oceanography: a comprehensive review.Frontiers in Marine Science, 11, 2024.
+[7]Baylor Fox-Kemper, Alistair Adcroft, Claus W. Böning, Eric P. Chassignet, Enrique Curchitser, Gokhan Danaba-
+soglu, Carsten Eden, Matthew H. England, Rüdiger Gerdes, Richard J. Greatbatch, Stephen M. Griffies, Robert W.
+Hallberg, Emmanuel Hanert, Patrick Heimbach, Helene T. Hewitt, Christopher N. Hill, Yoshiki Komuro, Sonya
+Legg, Julien Le Sommer, Simona Masina, Simon J. Marsland, Stephen G. Penny, Fangli Qiao, Todd D. Ringler,
+Anne Marie Treguier, Hiroyuki Tsujino, Petteri Uotila, and Stephen G. Yeager. Challenges and prospects in ocean
+circulation models.Frontiers in Marine Science, 6, 2019.
+[8]NOAA. Ocean policy to advance the blue economy. https://www.noaa.gov/
+interagency-ocean-policy-committee-0, 2021.
+[9] European Marine Board.Big Data in Marine Science. European Marine Board, 2020.
+[10] WMO. Ocean prediction - modelling for the future. https://public.wmo.int/media/magazine-article/
+ocean-prediction-modelling-future, 2021.
+[11] Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay, Morteza Mardani,
+Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, Pedram Hassanzadeh, Karthik Kashinath, and
+Animashree Anandkumar. FourCastNet: A global data-driven high-resolution weather model using adaptive
+Fourier neural operators.arXiv preprint arXiv:2202.11214, 2022.
+[12] Remi Lam, Alvaro Sánchez-González, Matthew Willson, Peter Wirnsberger, Meire Fortunato, Ferran Alet, Suman
+Ravuri, Timo Ewalds, Zach Eaton-Rosen, Weihua Hu, et al. GraphCast: Learning skillful medium-range global
+weather forecasting.arXiv preprint arXiv:2212.12794, 2022.
+[13] Dmitrii Kochkov, Janni Yuval, Ian Langmore, Peter Norgaard, Jamie Smith, Griffin Mooers, Milan Klöwer, James
+Lottes, Stephan Rasp, Peter Düben, et al. Neural general circulation models for weather and climate.Nature,
+632(8027):1060–1066, 2024.
+[14] Cristian Bodnar, Wessel P. Bruinsma, Ana Lucic, Megan Stanley, Johannes Brandstetter, Patrick Garvan, Maik
+Riechert, Jonathan Weyn, Haiyu Dong, Anna Vaughan, Jayesh K. Gupta, Kit Tambiratnam, Alex Archibald,
+Elizabeth Heider, Max Welling, Richard E. Turner, and Paris Perdikaris. Aurora: A foundation model of the
+atmosphere, 2024.
+15
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+[15] Jean-Michel Lellouche, Olivier Le Galloudec, Eric Greiner, Gilles Garric, Charly Regnier, Marie Drevillon,
+Romain Bourdalle-Badie, Clement Bricaud, Yann Drillet, and Pierre-Yves Le Traon. The Copernicus Marine
+Environment Monitoring Service global ocean 1/12 physical reanalysis GLORYS12V1: description and quality
+assessment. InAmerican Geophysical Union, Ocean Sciences Meeting, number 2046, pages OM14B–2046, 2018.
+[16] CMEMS. Copernicus Marine Service: The European Union’s earth observation programme for the oceans, 2015.
+[17] P. Lehodey, I. Senina, B. Calmettes, et al. Climate variability, fish, and fisheries.Journal of Climate, 19(20):5009–
+5030, 2006.
+[18] Allan R. Robinson and Kenneth H. Brink.The Global Coastal Ocean: Interdisciplinary Multiscale Processes,
+volume 13 ofThe Sea. Harvard University Press, 2005.
+[19] Michael J. McPhaden, Stephen E. Zebiak, and Michael H. Glantz. ENSO as an integrating concept in Earth
+science.Science, 314(5806):1740–1745, 2006.
+[20] Lara Mills, João Janeiro, and Flávio Martins. Baseline climatology of the Canary current upwelling system and
+evolution of sea surface temperature.Remote Sensing, 16(3), 2024.
+[21] WMO. WMO guidelines on the international exchange of climate data and products, 2020. WMO-No. 1237.
+[22] K. von Schuckmann et al. The Copernicus Marine Environment Monitoring Service ocean state report.Journal of
+Operational Oceanography, 11(S1):S1–S142, 2018.
+[23] NOAA. About NOAA.https://www.noaa.gov/, 2024.
+[24] ECMWF. European Centre for Medium-Range Weather Forecasts.https://www.ecmwf.int/, 1975.
+[25] NASA Earth Observing System. MODIS: Moderate resolution imaging spectroradiometer, 2024.
+[26] C.J. Donlon, B. Ward, and A. Minnett. The successes and challenges of measuring sea surface temperature from
+space.Oceanography, 22(2):18–29, 2009.
+[27] Argo Program. Argo: An array of profiling floats.http://www.argo.ucsd.edu/, 2000.
+[28] Eugenia Kalnay.Atmospheric Modeling, Data Assimilation and Predictability. Cambridge University Press,
+Cambridge, UK, 2003.
+[29] Peter Bauer, Alan Thorpe, and Gilbert Brunet. The quiet revolution of numerical weather prediction.Nature,
+525(7567):47–55, 2015.
+[30] Y . Liu, X. Zhang, Y . Wang, and J. Li. Deep learning for ocean temperature forecasting: a survey.Data Science
+and Engineering, 9:123–145, 2024.
+[31] Y . LeCun and Y . Bengio. Convolutional networks for images, speech, and time series. In M.A. Arbib, editor,The
+Handbook of Brain Theory and Neural Networks, pages 255–258. MIT Press, 1995.
+[32] Xingjian Shi, Zhourong Chen, Hao Wang, Dit-Yan Yeung, Wai-Kin Wong, and Wang-chun Woo. Convolutional
+LSTM network: A machine learning approach for precipitation nowcasting.Advances in neural information
+processing systems, 28, 2015.
+[33] Y . Du, X. Shi, et al. GenCast: Generative forecasting with diffusion models for spatio-temporal data.arXiv
+preprint arXiv:2303.01420, 2023.
+[34] Simon Lang, Mihai Alexe, Matthew Chantry, Jesper Dramsch, Florian Pinault, Baudouin Raoult, Mariana C. A.
+Clare, Christian Lessig, Michael Maier-Gerber, Linus Magnusson, Zied Ben Bouallègue, Ana Prieto Nemesio,
+Peter D. Dueben, Andrew Brown, Florian Pappenberger, and Florence Rabier. AIFS – ECMWF’s data-driven
+forecasting system. Technical report, ECMWF, 2024.
+[35] Daniel Holmberg, Emanuela Clementi, and Teemu Roos. Regional ocean forecasting with hierarchical Graph
+Neural Networks. InNeurIPS 2024 Workshop on Tackling Climate Change with Machine Learning, 2024.
+[36] Giovanny A. Cuervo-Londoño, Javier Sánchez, and Ángel Rodríguez-Santana. Forecasting sea surface temperature
+from satellite images with Graph Neural Networks. In Modesto Castrillón-Santana, Carlos M. Travieso-González,
+Oscar Deniz Suarez, David Freire-Obregón, Daniel Hernández-Sosa, Javier Lorenzo-Navarro, and Oliverio J.
+Santana, editors,Computer Analysis of Images and Patterns, pages 329–339, Cham, 2026. Springer Nature
+Switzerland.
+[37] Giovanny Cuervo-Londoño, Javier Sánchez, and Ángel Rodríguez-Santana. Deep learning weather models for
+subregional ocean forecasting: A case study on the Canary current upwelling system. Technical report, Cornell
+University, 2025.
+16
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+[38] José G. Reyes, Giovanny A. Cuervo-Londoño, and Javier Sánchez. Adaptive meshes in Graph Neural Networks
+for predicting sea surface temperature through remote sensing. In Modesto Castrillón-Santana, Carlos M. Travieso-
+González, Oscar Deniz Suarez, David Freire-Obregón, Daniel Hernández-Sosa, Javier Lorenzo-Navarro, and
+Oliverio J. Santana, editors,Computer Analysis of Images and Patterns, pages 361–372, Cham, 2026. Springer
+Nature Switzerland.
+[39] Giovanny A. Cuervo-Londoño, José G. Reyes, Ángel Rodríguez-Santana, and Javier Sánchez. V oronoi-induced
+artifacts from grid-to-mesh coupling and bathymetry-aware meshes in Graph Neural Networks for sea surface
+temperature forecasting.Electronics, (Preprint), 2025.
+[40] A Vaswani. Attention is all you need.Advances in Neural Information Processing Systems, 2017.
+[41] Kaifeng Bi, Lingxi Xie, Hengheng Zhang, Xin Chen, Xiaotao Gu, and Qi Tian. Pangu-Weather: A 3d high-
+resolution model for fast and accurate global weather forecast, 2022.
+[42] Xiang Wang, Renzhi Wang, Ningzi Hu, Pinqiang Wang, Peng Huo, Guihua Wang, Huizan Wang, Senzhang Wang,
+Junxing Zhu, Jianbo Xu, et al. XiHe: A data-driven model for global ocean eddy-resolving forecasting.arXiv
+preprint arXiv:2402.02995, 2024.
+[43] Bill Bell, Hans Hersbach, Adrian Simmons, Paul Berrisford, Per Dahlgren, András Horányi, Joaquín Muñoz-
+Sabater, Julien Nicolas, Raluca Radu, Dinand Schepers, et al. The ERA5 global reanalysis: Preliminary extension
+to 1950.Quarterly Journal of the Royal Meteorological Society, 147(741):4186–4227, 2021.
+[44] Zijie Guo, Pumeng Lyu, Fenghua Ling, Jing-Jia Luo, Niklas Boers, Wanli Ouyang, and Lei Bai. ORCA: A global
+ocean emulator for multi-year to decadal predictions.arXiv preprint arXiv:2405.15412, 2024.
+[45] J. Abramson, J. Adler, J. Dunger, R. Evans, and T. Green. Accurate structure prediction of biomolecular
+interactions with AlphaFold 3.Nature, 615(7950):123–130, 2024.
+[46] R. Bommasani, D. A. Hudson, E. Adeli, R. Altman, S. Arora, S. von Arx, P. Liang, et al. On the opportunities and
+risks of foundation models. arXiv preprint arXiv:2108.07258, 2021.
+[47] CMEMS. The Copernicus Marine Environment Monitoring Service (CMEMS): scientific advances.Ocean
+Science, 14(5):1093–1126, 2018.
+[48] Gurvan Madec and the NEMO Team.NEMO Ocean Engine. Institut Pierre-Simon Laplace, 2015. Version 3.6
+stable.
+[49] J.-M. Lellouche, E. Greiner, O. Le Galloudec, G. Garric, C. Regnier, M. Drevillon, M. Benkiran, C.-E. Testut,
+R. Bourdalle-Badie, F. Gasparin, O. Hernandez, B. Levier, Y . Drillet, E. Remy, and P.-Y . Le Traon. Recent updates
+to the Copernicus Marine Service global ocean monitoring and forecasting real-time 1/12ohigh-resolution system.
+Ocean Science, 14(5):1093–1126, 2018.
+[50] R. Rew and G. Davis. NetCDF: an interface for scientific data access.IEEE Computer Graphics and Applications,
+10(4):76–82, 1990.
+[51] CMEMS. User manual, 2024.
+[52] Rubén Vázquez, Iván Parras-Berrocal, and Alfredo Izquierdo. Assessment of the Canary current upwelling system
+in a regionally coupled climate model.Climate Dynamics, 58(1-2):69–85, 2021.
+[53] Lynne D. Talley, George L. Pickard, William J. Emery, and James H. Swift.Descriptive Physical Oceanography:
+An Introduction. Academic Press, 6th edition, 2011.
+[54] Yoo-Geun Ham, Jeong-Hwan Kim, and Jing-Jia Luo. Deep learning for multi-year ENSO forecasts.Nature,
+573(7775):568–572, 2019.
+[55] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-Net: Convolutional networks for biomedical image
+segmentation. InInternational Conference on Medical Image Computing and Computer-Assisted Intervention,
+pages 234–241, 2015.
+[56] Yang Li, Si Si, Gang Li, Cho-Jui Hsieh, and Samy Bengio. Learnable Fourier features for multi-dimensional
+spatial positional encoding, 2021.
+[57] Andrew Jaegle, Felix Gimeno, Andrew Brock, Andrew Zisserman, Oriol Vinyals, and Joao Carreira. Perceiver IO:
+A general architecture for structured inputs & outputs.International Conference on Learning Representations,
+2021.
+[58] Ze Liu, Yutong Lin, Yixuan Cao, Han Hu, Yixuan Wei, Zheng Zhang, Stephen Lin, and Baining Guo. Swin
+Transformer: Hierarchical vision Transformer using shifted windows.Proceedings of the IEEE/CVF International
+Conference on Computer Vision, pages 10012–10022, 2021.
+17
+Leveraging an Atmospheric Foundational Model for Subregional SST Forecasting
+[59] Ze Liu, Han Hu, Yutong Lin, Zhuliang Yao, Zhenda Xie, Yixuan Wei, Jia Ning, Yixuan Cao, Zheng Zhang,
+Li Dong, et al. Swin Transformer V2: Scaling up capacity and resolution.Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition, 2022.
+[60] Zied Ben Bouallègue, Mariana CA Clare, Linus Magnusson, Estibaliz Gascon, Michael Maier-Gerber, Martin
+Janoušek, Mark Rodwell, Florian Pinault, Jesper S Dramsch, Simon TK Lang, et al. The rise of data-driven weather
+forecasting: A first statistical assessment of machine learning–based weather forecasts in an operational-like
+context.Bulletin of the American Meteorological Society, 105(6):E864–E883, 2024.
+[61] Microsoft. Aurora fine-tuning documentation, 2024.
+[62] Markus Reichstein, Gustau Camps-Valls, Bjorn Stevens, Martin Jung, Joachim Denzler, Nuno Carvalhais, and
+Prabhat. Deep learning and process understanding for data-driven Earth system science.Nature, 566(7743):195–
+204, 2019.
+[63] Maziar Raissi, Paris Perdikaris, and George Em Karniadakis. Physics-informed neural networks: A deep learning
+framework for solving forward and inverse problems involving nonlinear partial differential equations.Journal of
+Computational Physics, 378:686–707, 2019.
+[64] Shengze Cai, Zhiping Mao, Zhicheng Wang, Minglang Yin, and George Em Karniadakis. Physics-informed neural
+networks (PINNs) for fluid mechanics: A review.Acta Mechanica Sinica, 37:1727–1738, 2021.
+18

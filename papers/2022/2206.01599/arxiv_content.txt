@@ -1,0 +1,595 @@
+A Deep-Learning Usability Expansion Model of
+Ocean Observations
+Ali Muhamed Ali,1Hanqi Zhuang,1Yu Huang,1
+Ali K. Ibrahim,2Ali Salem Altaher,1Laurent Chérubin2
+1Electrical Engineering and Computer Science Department, Florida Atlantic University,
+Boca Raton, FL, USA,
+2Harbor Branch Oceanographic Institute, Florida Atlantic University, FL, USA
+Ali Muhamed Ali; E-mail: amuhamedali2014@fau.edu.
+Today’s ocean numerical prediction skills depend on the availability of in-situ
+and remote ocean observations at the time of the predictions only. Because ob-
+servations are scarce and discontinuous in time and space, numerical models
+are often unable to accurately model and predict real ocean dynamics, leading
+to a lack of fulﬁllment of a range of services that require reliable predictions
+at various temporal and spatial scales. The process of constraining free nu-
+merical models with observations is known as data assimilation. The primary
+objective is to minimize the misﬁt of model states with the observations while
+respecting the rules of physics. The caveat of this approach is that measure-
+ments are used only once, at the time of the prediction. The information con-
+tained in the history of the measurements and its role in the determinism of the
+prediction is, therefore, not accounted for. Consequently, historical measure-
+ment cannot be used in real-time forecasting systems. The research presented
+1arXiv:2206.01599v1  [eess.SP]  3 Jun 2022
+in this paper provides a novel approach rooted in artiﬁcial intelligence to ex-
+pand the usability of observations made before the time of the prediction. Our
+approach is based on the re-purpose of an existing deep learning model, called
+U-Net, designed speciﬁcally for image segmentation analysis in the biomedical
+ﬁeld. U-Net is used here to create a Transform Model that retains the tempo-
+ral and spatial evolution of the differences between model and observations to
+produce a correction in the form of regression weights that evolves spatially
+and temporally with the model both forward and backward in time, beyond
+the observation period. Using virtual observations, we show that the usability
+of the observation can be extended up to a one year prior or post observations.
+Introduction
+Today’s ocean numerical prediction skills relies on the availability of in-situ and remote ocean
+observations at the time of the predictions only. Because observations are scarce and discon-
+tinuous in time and space, numerical models are often unable to accurately model and predict
+real ocean dynamics, leading to a lack of fulﬁllment of a range of services that require reliable
+predictions at various temporal and spatial scales. To this end, it is crucial to have sustained and
+reliable observations of the parts of the ocean where the predictions are made. The process of
+constraining free numerical models with observations is known as data assimilation. The pri-
+mary objective is to minimize the misﬁt of model states with the observations while respecting
+the rules of physics. Observations assimilated in ocean forecasting systems now include altime-
+try, ocean colour, surface velocities, sea ice and data from emerging platforms such as ocean
+gliders. Many systems now employ multi-model approaches or ensemble modeling techniques.
+A variety of data assimilation are used in operational oceanography and a detailed review of
+the data assimilation methods can be found in ( 1). The most common data assimilation method
+2
+closely parallels the procedures employed in numerical weather prediction ( 2) in which ocean
+state estimates are computed sequentially through time, and the resulting estimates updated
+when sufﬁcient new observations become available. The caveat of this approach is that mea-
+surements are used only once, at the time of the prediction. The information contained in the
+history of the measurements and its role in the determinism of the prediction is, therefore, not
+accounted for. Consequently, historical measurement cannot be used in real-time forecasting
+systems.
+Because oceans play a key role in global issues such as climate change, food security, and
+human health, effort to create long term repositories with global quality assurance/quality con-
+trol standards have received signiﬁcant support over the last decade. These efforts have come
+to fruition in the Global Ocean Observing System (GOOS) ( 3). GOOS has opened a ﬁeld of
+opportunity for new collaborations across regions, communities, and technologies facilitating
+enhanced engagement in the global ocean observing enterprise to beneﬁt all nations. In the
+United States, these efforts led to the creation of the U.S. Integrated Ocean Observing System
+(IOOS), which through its eleven Regional Associations implement regional observing sys-
+tems covering all U.S. coasts and Great Lakes with activities spanning from head of tide to
+the U.S. exclusive economic zone ( 4). Through these efforts comprehensive ocean datasets,
+spanning several decades have become available to the research community and novel tech-
+nologies rooted in big data science such as Artiﬁcial Intelligence (AI) have emerged ( 5). The
+research presented in this paper provides a novel approach rooted in AI to expand the usability
+of observations made before the time of the prediction.
+To demonstrate our method, we take advantage of a recent and comprehensive set of obser-
+vations in the Gulf of Mexico (GoM), which has received over many decades, and continues to
+receive, a lot of attention by oceanographers. The GoM ocean dynamics is controlled by the
+pulsating Loop Current, which is the most energetic circulation feature of the basin. Predicting
+3
+the Loop Current evolution is fundamental to almost all aspects of the GoM, including (a) an-
+thropogenic and natural disaster response; (b) the prediction of short-term weather anomalies
+and, hurricane intensity and trajectories; (c) national security and safety; and (d) ecosystem
+services ( 6, 7). The recent Deep Water Horizon oil spill in 2010 has bolstered a large amount
+of research toward improving our understanding and forecasting of the Loop Current System in
+hope of mitigating further environmental and ecological damage. Furthermore, because of the
+reinforcing interaction between hurricanes, the Loop Current and its eddies, long-term predic-
+tion of the Loop Current states is becoming more and more relevant ( 8), (?). Thus, developing
+accurate and robust medium-term forecasting models of the Loop Current System and its eddy
+formation is imperative and relies on the availability of ocean observations. Improved ocean
+observing systems are expected to reduce the uncertainty of ocean/weather forecasting and to
+enhance the value of ocean/weather information throughout the Gulf region ( 9).
+The remainder of the paper is organized as follows. In Section 2 we provide an overview
+of the concept of data usability temporal expansion. Section 3 describes the numerical models
+ﬁelds and the observations used in this study. The usability temporal expansion concept is
+applied to both a free and data assimilated simulations. Section 4 introduces the deep learning
+model used in this study. Section 5 presents the implementation of the temporal expansion
+concepts, which results in the transformation of the ocean models’ velocity ﬁelds beyond the
+observation period. Discussion and conclusion follow in Section 6.
+Temporal Expansion Model Concept
+The rationale behind this concept lies in the fact that ocean observations in the data assimilation
+process only serve once, at the time of the forecast, when the background ﬁeld is created. They
+are no longer used in forecasts past the time of the observation except in three-dimensional
+variational data assimilation where all data collected within a short time window (days) are
+4
+assimilated as though collected at a single time ( 1). Considering, observations are no longer
+relevant after a few days and become history. However, there is a history of the ocean dynamics
+captured in the observations that is not part of the constraint provided by the data assimilation
+concept. The dynamical history in the observations can be captured with deep learning models
+as shown by prediction exercises of the Loop Current dynamics ( 10), (11), (12), (13). Deep
+learning allows computational models that are composed of multiple processing layers to learn
+representations of data with multiple levels of abstraction. These methods have dramatically
+improved the state-of-the-art in speech recognition, visual object recognition, object detection
+and many other domains such as drug discovery and genomics. Deep learning discovers in-
+tricate structure in large data sets by using the back-propagation algorithm to indicate how a
+machine should change its internal parameters that are used to compute the representation in
+each layer from the representation in the previous layer ( 14).
+Ocean numerical models are mathematical approximations of the laws of physics that are
+used to estimate ocean states given a set of boundary conditions and constraints, such as the
+atmospheric and the tidal forcing. When not constrained by data assimilation, the simulated
+states of the "free-run" are likely to be very different from the the real ocean state, although the
+main features of the ocean dynamics will be captured and resolved. These features include the
+mesoscale dynamics, the water masses, the eddy kinetic energy, among others, whose variability
+and magnitude is likely to be dissimilar to the observed ones, although existent in both natural
+and virtual systems. Therefore one can assume that both the simulated and real systems are
+on a parallel track although different in many ways. While Deep Learning has been mostly
+applied to a single data set for pattern recognition, we show in this study that it can be re-
+purposed to learn the differences between the simulated and real systems and their evolution
+over time and space. The acquisition of that knowledge between a given ocean numerical model
+simulation and a set of observations in the model domain over a time period concurrent to
+5
+both, enables the prediction of the differences with a Deep Learning model. Therefore, the
+knowledge of the differences can be converted into a model ﬁeld observations-based correction
+tool, called a Transform Model, just like a data assimilation method, with the advantage of
+predicting the correction of the model ﬁeld beyond the period of observation. This methods
+also accounts for the common history of the model ﬁelds and measurements in the correction
+process. We will show that the improvements to the model ﬁelds, namely the reduction of errors
+is signiﬁcant, despite the fact that no physical constraints were applied to the correction. This
+correction method evaluation would certainly beneﬁt from a numerical model integration to
+enforce the model conservation constraint although they might be different from the ones set by
+the measurements. However, testing of the transformed ﬁeld in a numerical model is beyond
+the scope of this study.
+The concept of the Transform model is depicted in Figure 1. It is based on the availability
+of long enough concurrent time series of model ﬁeld and observations. Both are jointly used in
+a Deep Learning model that creates a transformation tool of the numerical model ﬁeld based on
+the observations. The Transform Model can then be used to correct the numerical model ﬁeld
+at any time in the future and in the past, outside of the period of measurements. It thus expands
+the usability of the observations beyond the measurement period, both before and after.
+Data sets
+For the demonstration of our Transform Model we used three data sets that overlap in time,
+composed of two numerical models current velocity vector ﬁelds and one set of in-situ current
+measurements from an observing array in the GoM. Model’s inherent dynamics may inﬂuence
+how effective the Transform Model, which will be shown in Section 5
+The ﬁrst numerical model data set was obtained from the HYbrid Coordinate Ocean Model
+(HYCOM) Consortium. The data was generated by the HYCOM +NCODA Gulf of Mexico
+6
+1=25Reanalysis (GoMu 0:04/expt_ 50:1), which spans year 1993 to 2012 and has a horizon-
+tal resolution of 4:4km. HYCOM +NCODA is a data-assimilative hybrid isopycnal-sigma-
+pressure (generalized) coordinate ocean model. The system uses the Navy Coupled Ocean Data
+Assimilation (NCODA) system ( 15), (16) for data assimilation. NCODA uses the model fore-
+cast as a ﬁrst guess in a three-dimensional variational scheme and assimilates available satellite
+altimeter observations (along track obtained via the NA VOCEANO Altimeter Data Fusion Cen-
+ter), satellite and in-situ Sea Surface Temperature (SST) as well as available in-situ vertical tem-
+perature and salinity proﬁles from XBTs, ARGO ﬂoats and moored buoys. The Modular Data
+Assimilation System (MODAS) is used for downward projection of surface information ( 17).
+The experiment includes tidal forcing. As noted here, no current vector ﬂow information is used
+in the data assimilation process.
+The second model’s current vector ﬁelds were obtained from a free-running Massachusetts
+Institute of Technology (MIT) generalized circulation model simulation of the GoM circula-
+tion (MITgcm-GoM), a z-level model. The MITgcm–GoM model was originally developed
+for state estimation and prediction of the upper ocean circulation in the GoM, including Loop
+Current evolution and eddy shedding. For these purposes, satellite-derived ocean surface ob-
+servations and subsurface in situ observations were assimilated using a four-dimensional varia-
+tional (4DV AR) method ( 18). For the data set used in this study, however, no data assimilation
+is performed. The model uses a telescopic grid with a horizontal resolution of 1/20° × 1/20°
+in the central GoM which decreases to 1/10° × 1/10° toward the boundaries and western part
+of the domain. For this study, daily output from the simulation for the four years forced by
+atmospheric and lateral boundary condition data from 2009 to 2012 are used ( 19). No tidal or
+atmospheric pressure forcing is applied.
+The in-situ data were obtained from the Dynamics of the Loop Current in U.S. Waters
+experiment (hereafter Dynloop), a comprehensive observational study of the Loop Current in
+7
+the eastern GoM ( 20), (21), (22). The observational array consisted of the instrumentation of
+nine tall-moorings and seven short-moorings, and an array of 25 pressure-equipped inverted
+echo sounders (PIES). The array system measured the water column velocity for 2.5 years,
+beginning in March 2009. Each tall-mooring included water velocity measurements made from
+an upward facing 75 kHz ADCP deployed near a depth of 450 m, as well as point current meters
+at ﬁve depths from around 600-3000 m, providing high resolution water velocity data between
+about 60-440 m depths and much lower resolution water velocity data below this. Additionally,
+each short-mooring included a single point current sensor located 100 m above the sea ﬂoor,
+providing near bottom water velocity data. The PIES array provided direct measurement of
+pressure and acoustic round trip travel times from the sea ﬂoor to the sea surface, which were
+used to create vertical proﬁles of density, salinity, and temperature. These pressure records
+combined with estimated horizontal density gradients were used to calculate geostrophic water
+velocities. This array was located to cover both east and west sides of the Loop Current between
+the West Florida Slope and the Mississippi Fan, and was also centered over the zone where Loop
+Current eddies typically separate from the Loop Current. The horizontal separation between
+moorings was around 50 80km and between the PIES sensors was around 40 50km.
+These recorded data were used to construct the measurement-based water velocity matrix used
+in this study. More details on the creation of the velocity matrix can be found in ( 12). The
+horizontal resolution varies between 30 and 50 km and only the ﬁrst 500 m, corresponding to
+26 vertical layers, was used in this study. The time resolution for the velocity data was 12 hours,
+which corresponds to 1810 data frames for each u and v velocity component. The ﬁnal matrix
+dimensions were of 1810 × 26 × 29 × 36 for each component.
+8
+Transform Model
+The deep learning network of choice for our Transform Model is the u-shaped Convolution
+Neural Network (CNN), also known as U-Net ( 23). The typical use of convolutional networks
+is on classiﬁcation tasks, where the output to an image is a single class label. However, in
+many visual tasks, especially in biomedical image processing, the desired output should include
+localization, i.e., a class label is supposed to be assigned to each pixel. The architecture of this
+network consists of two parts. The ﬁrst part is the analysis path called the encoder, which is
+similar to the CNN architecture widely used for image feature extraction. The second part is
+the synthesis path called the decoder, where the compact features are expanded to the input
+dimension. In the image case, the feature set, or code, is decoded back to a (segmented) image
+of the same dimension as the input image. The name of U-Net is based on the U structure
+of the network. This type of network has been widely used in medical image segmentation
+applications ( 24, 25 ), for land segmentation studies in remote sensing images ( 26), for cloud
+and shadow segmentation ( 27), for modeling and prediction of coastal weather events in the
+Netherlands ( 28), and for coastal wetland classiﬁcation ( 29), among many other applications.
+For our application, the U-Net is slightly modiﬁed at the output layers to make it suitable for
+a regression problem instead of the original structure that was designed for image segmentation.
+The problem can be seen as a time series transformation through a regression analysis. Because
+the U-Net will learn both the spatial and temporal features of the training data, it is called
+hereafter the Spatial Temporal U-Net (STU-Net). Hence, the last layers after the convolution
+layers have been replaced by a regression layer, instead of a softmax and a segmentation layer in
+the original structure. The ﬁnal model structure consists of four stages of encoders as shown in
+Figure 2. The input is made of a four-dimensional input layer, which is organized as x; y; u=v; t .
+Here x; yare the coordinates of the sample location, u=v are the zonal/meridional velocities
+9
+respectively, and tdenotes the time of the measurements.
+The implementation of the STU-Net is two-fold (Fig. 3): ﬁrst is the training phase, where
+both the numerical model and the observations are fed to the STU-Net. The relationship be-
+tween the measurements and the numerical model is represented by the neural network struc-
+ture, including its hyper parameters and weights. The errors between the two ﬁelds are used to
+adjust the weights of the model until the training process reaches a certain number of epochs.
+With a Mini-batch loss set at 0.1 and Mini-batch Root Mean Squared Error (RMSE) of 0.5, 120
+epochs were necessary. The cost function limit used in the training stage was set by the RMSE.
+At the end of the training stage, the obtained regression layers constitute the Transform Model
+that will be used to correct the numerical model ﬁelds before, during and after observations
+started in the second step of the STU-Net implementation, which is the inferring phase. To
+apply the transformation back in time, namely before the observation period, training is con-
+ducted backward in time to learn the temporal features in reverse order. For the experiments
+conducted in this study, the hyperparameters were set to be as follows: InitialLearnRate =
+5e 4; MiniBatchSize = 4; MaxEpochs = 300 ; LearnRateDropFactor = 0:1:. This
+model was implemented with the Matlab Deep Learning Toolbox.
+Implementation of the Transform Model Concept
+0.1 Experimental strategy and input data formatting
+In this section the strategy to evaluate our Transform Model concept is presented. First we
+will assess the transformation of the HYCOM and MITgcm-GoM velocity ﬁelds by the in-situ
+observations. The training is conducted with the ﬁrst 855 days and the transformation results
+are evaluated with the remaining 50 days of measurements. The purpose of this experiment is to
+assess the transformative potential of limited observation periods and its efﬁcacy on assimilated
+and non-assimilated numerical model ﬁelds, respectively. Second, the long-term transformation
+10
+capability of the concept is assessed by using HYCOM as virtual observations to transform the
+MITgcm-GoM velocity ﬁelds. In this case, the training took place over a period of three years
+and the testing period was either the preceding or following year of the training period.
+In order to proceed, both the model and the observations must be interpolated on the same
+spatial and temporal grids. Therefore the time interval was set to daily, MITgcm-GoM’s and
+the coarsest temporal resolution of the three time series. Because the spatial resolution of the
+Dynloop data set over the geographical area of the measurements is 2936,6488for HYCOM
+and5270for the MITgcm-GoM simulations, all three data sets were interpolated to 6464
+grid using a bicubic interpolation ( 30). Vertically, the same depth layers as in the Dynloop
+dataset were used to reinterpolate the other two model ﬁelds, which resulted in 26 layers of
+20m interval from the surface to 500m (maximum depth used in this study).
+For the short-term Transform Model, the period March 2009 - June 2011 was used for
+training and July-August 2011 for testing. For the long-term transformation experiment, the
+years 2009-2011 (2012-2010) were used for training and 2012 (2009) for testing in the forward
+(backward) experiment.
+0.2 Comparison between observed and modeled ﬁelds
+To evaluate how different the three concurrent ﬁeld times series are, we calculated the Taylor
+diagrams ( 31) of the spatially averaged velocity magnitude for each of them at four depths, 0,
+20, 100, and 500m respectively (Figure 4). Because the MITgcm-GoM is a free-run, the model
+velocity exhibits at all depths the lowest correlation coefﬁcient (CC), largest RMSE and stan-
+dard deviation. While the assimilated HYCOM model exhibits a lower standard deviation than
+the MITgcm-GoM, the RMSE between the two models is not signiﬁcantly different at 0, 20 and
+100m, except at 500m, where HYCOM underestimates it (Figure 4d). A large RMSE signiﬁes
+that the amplitude of the variation of the velocity components is overestimated. HYCOM’s CC
+11
+is also lower at 500m than at shallower depth, suggesting that the data correction at 500m is less
+efﬁcient than in shallower waters.
+0.3 Short-term Transform Model evaluation
+For this evaluation, two types of experiments were conducted. In the ﬁrst one the transformation
+was applied only to the two-dimensional surface velocity and in the second experiment the
+transformation was applied to three-dimensional tensor of the velocity ﬁeld. The efﬁcacy of the
+transformation was evaluated by calculating the MSE between the transform model solution and
+the reference, which is the observations in this case, over the last 50 days of the observational
+period, not used in the training phase. The same calculation was done for the original numerical
+model velocity ﬁeld.
+0.3.1 Two-dimensional ﬁeld transformation
+The results of the MSE for both the original numerical model and the transformed model ﬁelds
+are shown in Figure 5 for both HYCOM and MITgcm-GoM. Figure 5a shows a signiﬁcant
+reduction of the HYCOM model velocity MSE, both in the mean and in the variability. The
+MSE of the transformed HYCOM ﬁeld remained almost constant throughout the 50 day period,
+unlike the original HYCOM ﬁeld. Figure 5b shows that the transformation of the MITgcm-GoM
+ﬁelds was as efﬁcient as for the HYCOM ﬁelds but the MSE of the transformed ﬁelds increased
+over time, at a rate similar to the one of the original ﬁelds. HYCOM’s ﬁelds’ MSE, although
+quite variable does not exhibit an increasing trend over time like the MITgcm-GoM ﬁelds. This
+difference is most likely due to the fact that data were assimilated in the HYCOM simulation
+and not in the MITgcm-GoM model. The degree of transformation also called correction gain
+is shown in Table 1 and is calculated as follows:
+12
+Gain =jMtransformed Mmodelj
+Mmodel100 (1)
+where
+(Mmodel =PT
+n=1MSE 1(n)
+T), (Mtransformed =PT
+n=1MSE 2(n)
+T) ,Tis the length of the time
+series, MSE 1is the MSE between the model and the observed data, and the MSE 2is the MSE
+between the transformed and observed data. A high (low) gain signiﬁes that the transformed
+model ﬁeld errors are low (high).
+The transformation gain was higher for the HYCOM model than for the MITgcm-GoM
+ﬁeld. However, the non-assimilated model transformation exhibited a MSE < 1.5 cm:s 1for
+up to 30 days, which is the less than the MSE of the assimilated model ﬁelds (Figure 5b). This
+result suggests that the correction of the ﬂow ﬁeld with in-situ observations by the Transform
+Model can be as effective as if not better than the data assimilation method currently used in the
+HYCOM operational forecast. This result is signiﬁcant because the transformation was made
+outside of the observation period. In terms of the spatial structure of the ﬂow ﬁeld variability,
+the transformation is also able to carry through the spatial modes contained in the observed
+ﬁeld as shown in Figure 6. The efﬁcacy of the transformation is stronger for the HYCOM than
+for the MITgcm-GoM ﬁeld, which also shows that there is room for improvement in the data
+assimilation process, whether in the NCODA system or by applying our Transform Model.
+0.3.2 Three-dimensional ﬁeld transformation
+Surface observations are in general more commonly available than subsurface observations,
+in particular from three-dimensional arrays. Therefore, predicting subsurface dynamics has
+remained more challenging than at the ocean surface because of the lack of continuous sampling
+at the same location. Vertical projections of the surface corrections is still reliant on methods
+described in ( 32), (17). The transformation of three-dimensional ﬁelds is therefore critical to full
+13
+water column prediction. For the three-dimensional velocity ﬁeld transformation, a Transform
+Model was created for each depth level between the numerical model and the observations and
+the transformation was applied to the last 50 days not included in the training.
+The results in terms of MSE and correlation coefﬁcient (CC) for each depth level for the
+transformed HYCOM model over the 50-day period are shown in Figure 7. As seen in the two-
+dimensional case, the transformation efﬁcacy is signiﬁcant. The MSE is reduced by a factor
+four from the surface down to 200m and by half at the 500m level (Figure 7a). The HYCOM
+ﬁeld’s MSE decreases with depth along with the gain of the transformation (Table 1). While the
+MSE of the HYCOM meridional velocity ﬁeld is higher than the one of the zonal velocity ﬁeld,
+when transformed, the resulting MSEs of each components are nearly identical. Similarly, the
+CC of the meridional ﬁeld is much less than the CC of the zonal ﬁeld across all levels (Figure
+7b). The difference persists in the transformed ﬁelds but is strongly reduced. In addition the
+CC of the transformed ﬁelds is larger than the CC of the original ﬁelds and varies less vertically
+as well. The difference between zonal and meridional velocity CC is not surprising since the
+current meridional velocities dominate the ﬂow pattern of the Loop Current.
+For the MITgcm-GoM three-dimensional transformed velocity ﬁelds the MSE is reduced by
+a factor three from the surface down to 200m and by half at the 500m level (Figure 8a) although
+that reduction is less for the meridional velocity below 150m. For the CC, the MITgcm-GoM
+original model show very small correlation with the observations. The transformed ﬁelds how-
+ever, shows an increase for the zonal velocity by a factor sixteen (Figure 8b), relatively constant
+over depth, in contrast with the CC of the transformed meridional velocity, which is not as
+uniformely improved, although the correction can reach a factor ﬁfteen near 100 and 350m.
+The 50-days gain is therefore less for the MITgcm-GoM overall as shown by Table 1 but the
+correction factor is much higher for the latter than for HYCOM. The MSE of the transformed
+MITgcm-GoM ﬁelds (red lines Figure 8a) is similar to the HYCOM’s original MSE (blue lines
+14
+in Figure 7a). From a correlation standpoint, there is a similar improvement, in particular for
+the zonal velocity (red lines in Figure 8b vs blue lines in Figure 7b) and to a lesser degree for
+the meridional velocity. This shows that our method is at least as efﬁcient at correcting the
+free-run model with just the observed velocity ﬁeld as the NCODA is with all the different data
+sources used for HYCOM. The latter on the other hand requires less correction by the Trans-
+form Model, but the improvements by the Transform Model can still be signiﬁcant, especially
+near the surface.
+Table 1: The average percentile gain of the velocity corrections at different depths by applying
+the Transform Model to two data time series at the 50th day of the correction process.
+Dataset Zonal Zonal Zonal Meridional Meridional Meridional
+Depth 0 m -100m -500m 0 m -100m -500m
+HYCOM 78:85% 76:23% 71:78% 74:80% 69:16% 71:99%
+MITgcm 54:88% 43:43% 35:53% 48:35% 21:29% 42:91%
+While the statistical metrics such as MSE and CC may indicate a good agreement between
+the quantities compared, the spatial features that comprise the system may look dissimilar.
+Therefore, we show here the efﬁcacy of the transformation in the three-dimensional structures
+of the transformed ﬁeld on day 50 after the end of the observation period (Figure 9, 10). For the
+HYCOM model, the vertical and horizontal ﬂow features in the observations are present in the
+transformed model ﬁeld, showing similarities in magnitude and location in space. The presence
+of these features and their timing is critical to the development of the instabilities that lead to the
+growth of the frontal cyclones near the surface and then in the deep waters and ultimately to the
+separation of a Loop Current eddy ( 21), (22), (33), (34). The three-dimensional transformation
+conﬁrms the results seen in the two-dimensional transformation. The Transform Model is ca-
+pable of extending the correction of observations in HYCOM at least 50 days past their the last
+measurement. For the MITgcm-GoM model, ﬂow ﬁeld difference is quite signiﬁcant as shown
+15
+by Figure 10. The transformed ﬂow ﬁeld is shifted toward the path of the observed ﬂow, both
+horizontally and vertically, although the magnitude of the transformed ﬂow is reduced from the
+observations.
+0.4 Long-term Transform Model Evaluation
+For this evaluation HYCOM is used as virtual observations to transform the MITgcm-GoM
+surface velocity ﬁeld. In the forward transformation experiment the transformation was applied
+for up to 365 days after the virtual observations ended. As seen in the short-term transformation,
+the MSE of the transformed ﬁeld is reduced by up to a factor four and exhibits less temporal
+variability than the MITgcm-GoM MSE (Figure 11). The MSE of the transformed ﬁeld varies
+over time along with the evolution of the Loop Current System, whose dynamics can affect the
+efﬁcacy of the transformation. Indeed between days 120 and 160, the Loop Current evolution
+between the HYCOM and the MITgcm-GoM signiﬁcantly diverged. While the eddy shed and
+reattached in the HYCOM ﬂow, the Loop Current remained in its extended position in the
+MITgcm-GoM model. This event affected the capacity of the Transform Model to correct the
+divergent dynamics, which increased the MSE of the transformed model. Nonetheless, the
+transformation is able to strongly reduce the MITcgm-GoM velocity ﬁeld MSE even 300 days
+after the virtual observation ended, which reveals the long lasting potential of the transformation
+process. The transformation is most efﬁcient when the difference between models is associated
+with a spatial shift of the ﬂow features (days 200-365 on Figure 11a) and not a dynamical state
+difference.
+The backward transformation also shows a strong decrease in the MSE of the transformed
+MITgcm-GoM velocity ﬁelds for most part except during periods when the original numerical
+model MSE is also low. In this case, both MITgcm-GoM and HYCOM circulation features
+exhibit dynamical similarities. In addition the transformed MSE is less variable than the original
+16
+one.
+Although the transformation could lead to unrealistic features after several months, the EOF
+analysis of the velocity ﬁeld reveals that the modal structure of the virtual observations is present
+in the transformed ﬁeld, both in the forward and backward transformations (Figure 12). The
+transformation is also able to convey the timeliness of the separation of the Loop Current eddy
+(Figure 13) in the forward transformation, which is paramount to the generation of reliable and
+useful predictions of the Loop Current. In the backward direction, the Transform Model is
+capable of readjusting the Loop Current state in the MITgcm-GoM to closely follow the state
+of the Loop Current in the virtual observations (Figure 14).
+Conclusions
+Reliable and long-term ocean observations are difﬁcult to obtain due to a variety of factors such
+as but not limited to costs, data collection manned or unmanned platform availability, instru-
+ments failure and durability, accessibility, limited energy supplies, data storage and extraction.
+In the current state of environmental predictions, data used for prognostic activities such as
+ocean or weather forecast are only used at the time of the forecast. They become part of history
+as soon as the forecast is done and are no longer relevant to the forecast. What if we could
+extend the period of relevance both forward and backward in time, in other words the usabil-
+ity of environmental observations? In this study we have presented a new method based on
+deep learning that enables the extension of the usability period of real-world observations up
+to one year. We have focused on ocean observations, but we believe that our approach could
+be applied to any biogeochemical and physical prediction exercise, as long as observations and
+model output are concurrently available.
+Our approach is based on the re-purpose of an existing deep learning model, called U-
+Net, designed speciﬁcally for image segmentation analysis in the biomedical ﬁeld. We have
+17
+modiﬁed the network in such a way that its original segmentation layer is replaced by, instead
+a regression layer. That layer is used to create a Transform Model that retains the temporal
+and spatial evolution of the differences between model and observations to produce a correction
+in the form of regression weights that evolves spatially and temporally with the model both
+forward and backward in time, beyond the observation period. In classical data-assimilation
+problems, the corrections that the observations make to the ﬁrst-guess/background must lie in
+the space spanned by P, the error covariance matrix. As such, Phas been the subject of much
+research because of the central role it plays in data assimilation ( 1). For example, estimating the
+actual level of uncertainty of the ﬁrst-guess is very difﬁcult, and choosing a Pthat accurately
+reﬂects the inhomogeneity and anisotropic nature of the errors across the broad range of space-
+and time-scales that characterize the ocean is challenging, although innovative methods for
+multi-scale data-assimilation are being explored ( 35), (36). In addition there is no efﬁcient
+method to spread information forward or backward in time and to evolve the error covariance
+matrix in time, which can be attempted by using ensemble-based Khalman ﬁlters methods ( 37).
+Even though we haven’t applied our approach to assimilate ocean data in numerical models,
+our method could be applied to the estimation of Pwhile solving the time dependency, the
+spatial inhomogeneity and anisotropy and at the same time increase the usability of observations
+beyond their time measurement for up to maybe one year as shown in this study. It would also
+be applicable to the many other challenges faced by data-assimilation, associated with model
+and observations errors. The evolving relationship between the best model estimate and the
+main causes of errors including model and instrument errors could be captured by a Transform
+Model as described in this study without previous knowledge of absent physics or small scale
+processes not resolved by the model.
+Ultimately, one could envision that the ﬁrst-guess estimate could be entirely realized with
+our Transform Model. Our transformation could be applied sequentially, at each time step of
+18
+the prediction, which would reduce the magnitude of the increments and the shock induced
+to the numerical model ( 38), by keeping the model on a track closer to the observations than
+when no correction has been applied to the previous step as done in this work. While very
+few data-assimilation systems consistently assimilate sub-surface ocean current velocity data,
+the results shown in this study also reveal the efﬁcacy of the Transform Model at correcting
+the three-dimensional ﬂow ﬁeld, even on existing reanalyzes, such as the HYCOM data used
+herein. Finally, with the increased availability of surface current data from high-frequency (HF)
+radars, a Transform Model could be easily created for any numerical model with just a few years
+of concurrent model data and observations. Such model, which can be updated daily with new
+data would provide useful corrections to the model surface ﬂow ﬁeld that would be transferred
+vertically to other variables, either by the numerical model itself or through a similar type of AI
+technique as the one described here.
+References
+1. A. M. Moore, et al. ,Frontiers in Marine Science 6(2019).
+2. E. Kalnay, Atmospheric modeling, data assimilation and predictability (Cambridge univer-
+sity press, 2003).
+3. J. Jäger, H. L. Ferguson (1991).
+4. J. Snowden, et al. ,Frontiers in Marine Science 6(2019).
+5. A. Trice, C. Robbins, N. Philip, M. Rumsey, Ocean Conservancy, Washington D.C. (2021).
+6. N. Walker, Geophys. Monogr 195, 103.
+7. T. B. Reusch, A. Ehlers, A. Hämmerli, B. Worm, Proceedings of the National Academy of
+Sciences 102, 2826 (2005).
+19
+8. B. Jaimes, L. K. Shay, J. K. Brewster, Dynamics of Atmospheres and Oceans 76, 306
+(2016).
+9. M. J. Kaiser, A. G. Pulsipher, Marine Policy 28, 469 (2004).
+10. J. L. Wang, H. Zhuang, L. M. Chérubin, A. K. Ibrahim, A. Muhamed Ali, Journal of
+Geophysical Research: Oceans (2019).
+11. J. L. Wang, H. Zhuang, L. Chérubin, A. Muhamed Ali, A. Ibrahim, Forecasting 3, 570
+(2021).
+12. A. Muhamed Ali, H. Zhuang, J. VanZwieten, A. K. Ibrahim, L. Chérubin, Forecasting 3,
+934 (2021).
+13. Y . Huang, Y . Tang, H. Zhuang, J. VanZwieten, L. Cherubin, Frontiers in Artiﬁcial Intelli-
+gence 4(2021).
+14. Y . LeCun, Y . Bengio, G. Hinton, Nature 521, 436 (2015).
+15. J. A. Cummings, Quarterly Journal of the Royal Meteorological Society 131, 3583 (2005).
+16. J. A. Cummings, O. M. Smedstad, Variational Data Assimilation for the Global Ocean
+(Springer Berlin Heidelberg, Berlin, Heidelberg, 2013), pp. 303–343.
+17. D. N. Fox, W. J. Teague, C. N. Barron, M. R. Carnes, C. M. Lee, Journal of Atmospheric
+and Oceanic Technology 19, 240 (2002).
+18. G. Gopalakrishnan, B. D. Cornuelle, I. Hoteit, Journal of Geophysical Research: Oceans
+118, 3315 (2013).
+19. S. L. Morey, et al. ,Journal of Physical Oceanography 50, 1045 (2020).
+20
+20. P. Hamilton, A. Lugo-Fernández, J. Sheinbaum, Dynamics of Atmospheres and Oceans 76,
+156 (2016).
+21. K. Donohue, et al. ,Dynamics of Atmospheres and Oceans 76, 174 (2016).
+22. K. Donohue, D. Watts, P. Hamilton, R. Leben, M. Kennelly, Dynamics of Atmospheres and
+Oceans 76, 195 (2016).
+23. O. Ronneberger, P. Fischer, T. Brox, International Conference on Medical image computing
+and computer-assisted intervention (Springer, 2015), pp. 234–241.
+24. N. Siddique, P. Sidike, C. Elkin, V . Devabhaktuni, arXiv preprint arXiv:2011.01118 (2020).
+25. R. Chacón, P. Neila, M. Salzmann, P. Fua, Proc. 15th IEEE Int. Symp. Biomedical Imaging,
+number CONF , Washington, USA (2018).
+26. R. Li, et al. ,IEEE Journal of Selected Topics in Applied Earth Observations and Remote
+Sensing 11, 3954 (2018).
+27. L. Jiao, L. Huo, C. Hu, P. Tang, Remote Sensing 12, 2001 (2020).
+28. J. G. Fernández, I. A. Abdellaoui, S. Mehrkanoon, arXiv preprint arXiv:2011.03303
+(2020).
+29. K. B. Dang, et al. ,Remote Sensing 12, 3270 (2020).
+30. R. Keys, IEEE transactions on acoustics, speech, and signal processing 29, 1153 (1981).
+31. J. K. Jolliff, et al. ,Journal of Marine Systems 76, 64 (2009).
+32. M. Cooper, K. Haines, Journal of Geophysical Research 101, 1059 (1996).
+21
+33. L. M. Chérubin, Y . Morel, E. P. Chassignet, Journal of Physical Oceanography 36, 569
+(2006).
+34. L. M. Chérubin, W. Sturges, E. P. Chassignet, Journal of Geophysical Research: Oceans
+110(2005).
+35. Z. Li, J. C. McWilliams, K. Ide, J. D. Farrara, Monthly Weather Review 143, 3804 (2015).
+36. I. Mirouze, E. W. Blockley, D. J. Lea, M. J. Martin, M. J. Bell, Tellus A: Dynamic Meteo-
+rology and Oceanography 68, 29744 (2016).
+37. P. L. Houtekamer, F. Zhang, Monthly Weather Review 144, 4489 (2016).
+38. K. Raghukumar, et al. ,Progress in Oceanography 138, 546 (2015).
+Supplementary materials
+Figs. S1 to S14
+22
+Figure 1: Observation usability temporal expansion concept with a Deep Learning approach.
+Despite the shorter duration of the observations, the overlapping model ﬁeld can be corrected
+beyond the observation period.
+Figure 2: The STU-Net structure used in this study for temporal data usability expansion.
+23
+Figure 3: Implementation of the proposed Transform Model using a STU-Net architecture. The
+output layers of the STU-Net, denoted in the ﬁgure by "Transform Model", are used to transform
+the numerical model ﬁelds, even when observations are no longer available.
+24
+(a)
+ (b)
+(c)
+ (d)
+Figure 4: Taylor diagrams of the spatially averaged current velocity magnitude for HYCOM
+and MITgcm-GoM and Dynloop (observations) at depths of (a) 0m, (b) 20m, (c) 100m, and (d)
+500m.
+25
+(a) HYCOM model
+ (b) MITgcm model
+Figure 5: Surface velocity magnitude Mean Squared Errors (MSEs) between the original and
+the transformed model for (a) HYCOM model and (b) MITgcm-GoM model
+(a)
+(b)
+Figure 6: First Empirical Orthogonal Function (EOF) mode of the surface velocity ﬁelds over
+the 50-day testing period of the Transform Model. From left to right is shown the observed,
+model original, and transformed ﬁeld. (a) HYCOM and (b) MITgcm-GoM.
+26
+(a) Subsurface MSE
+(b) Subsurface CC
+Figure 7: Subsurface velocity average mean squared error (MSE - a) and correlation coefﬁcient
+(CC - b) between the original and the transformed HYCOM velocity tensor time series.
+27
+(a) Subsurface MSE
+(b) Subsurface CC
+Figure 8: Same as Figure 7 but for MITgcm-GoM model.
+28
+(a)
+(b)
+Figure 9: Transformed HYCOM three-dimensional velocity structures on day 50 after the end of
+the observation period. Both the structures inside (a) and on the boundary (b) of the transformed
+volume are shown. The left, middle and right plots show the original HYCOM, the Dynloop,
+and the transformed ﬂow ﬁelds.
+29
+(a)
+(b)
+Figure 10: Same as Figure 9 but for MITgcm-GoM model
+30
+(a)
+(b)
+Figure 11: One year surface velocity time series MSE for the original (blue line) and trans-
+formed (red line) MITgcm-GoM in the (a)forward direction and (b) backward direction.
+31
+(a)
+(b)
+Figure 12: First Empirical Orthogonal Function (EOF) mode of the surface velocity ﬁelds over
+the ﬁrst (last) 120-day of transformed ﬁeld in the forward (a) and backward (b) direction. From
+left to right is shown the observed, the model original, and the transformed ﬁeld.
+32
+Figure 13: Forward Transform Model - Bi-monthly (rows from February to December 2012)
+velocity magnitude of the ﬂow ﬁeld of the virtual observation (HYCOM - ﬁrst column on the
+left)), of the MITgcm-GoM (second column), and of the transformed MITgcm-GoM (third
+column), respectively. The last two columns show the error ﬁeld of the transformed model
+(fourth column) and of the MITgcm-GoM model, respectively.
+33
+Figure 14: Same as Fig. 13 but for the backward Transform Model.
+34

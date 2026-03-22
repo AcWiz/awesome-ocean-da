@@ -1,0 +1,1685 @@
+Data-driven discovery of Koopman
+eigenfunctions for control
+Eurika Kaiser1∗, J. Nathan Kutz2, and Steven L. Brunton1
+1Department of Mechanical Engineering, University of Washington, Seattle, WA 98195, United States
+2Department of Applied Mathematics, University of Washington, Seattle, WA 98195, United States
+February 11, 2021
+Abstract
+Data-driven transformations that reformulate nonlinear systems in a linear framework have the potential
+to enable the prediction, estimation, and control of strongly nonlinear dynamics using linear systems theory.
+The Koopman operator has emerged as a principled linear embedding of nonlinear dynamics, and its eigen-
+functions establish intrinsic coordinates along which the dynamics behave linearly. Previous studies have used
+nite-dimensional approximations of the Koopman operator for model-predictive control approaches. In this
+work, we illustrate a fundamental closure issue of this approach and argue that it is benecial to rst validate
+eigenfunctions and then construct reduced-order models in these validated eigenfunctions. These coordinates
+form a Koopman-invariant subspace by design and, thus, have improved predictive power. We show then how
+the control can be formulated directly in these intrinsic coordinates and discuss potential benets and caveats
+of this perspective. The resulting control architecture is termed Koopman Reduced Order Nonlinear Identica-
+tion and Control (KRONIC). It is further demonstrated that these eigenfunctions can be approximated with
+data-driven regression and power series expansions, based on the partial dierential equation governing the
+innitesimal generator of the Koopman operator. Validating discovered eigenfunctions is crucial and we show
+that lightly damped eigenfunctions may be faithfully extracted from EDMD or an implicit formulation. These
+lightly damped eigenfunctions are particularly relevant for control, as they correspond to nearly conserved
+quantities that are associated with persistent dynamics, such as the Hamiltonian. KRONIC is then demon-
+strated on a number of relevant examples, including 1) a nonlinear system with a known linear embedding, 2)
+a variety of Hamiltonian systems, and 3) a high-dimensional double-gyre model for ocean mixing.
+Keywords : Dynamical systems, nonlinear control, Koopman theory, system identication, machine learning.
+1 Introduction
+In contrast to linear systems, a generally applicable and scalable framework for the control of nonlinear systems
+remains an engineering grand challenge. Improved nonlinear control has the potential to transform our ability
+to interact with and manipulate complex systems across broad scientic, technological, and industrial domains.
+From turbulence control to brain-machine interfaces, emerging technologies are characterized by high-dimensional,
+strongly nonlinear, and multiscale phenomena that lack simple models suitable for control design. This lack
+of simple equations motivates data-driven control methodologies, which include system identication for model
+discovery [73, 9, 86, 16, 22]. Alternatively, one can seek transformations that embed nonlinear dynamics in a global
+linear representation, as in the Koopman framework [64, 80]. The goal of this work is to reformulate controlled
+nonlinear dynamics in a Koopman-eigenfunction framework, referred to as Koopman Reduced Order Nonlinear
+Identication and Control (KRONIC), that shows improved predictive power and is amenable to powerful linear
+optimal and robust control techniques [104, 37, 107].
+∗E-mail: eurika@uw.edu
+1arXiv:1707.01146v4  [math.OC]  10 Feb 2021
+x1
+x2x3xm ym
+y3y2y1M M g
+K
+F
+Figure 1: Koopman embedding to linearize nonlinear dynamics.
+A wide range of data-driven and nonlinear control approaches exist in the literature, including model-free
+adaptive control [68], extremum-seeking [6], gain scheduling [98], feedback linearization [27], describing func-
+tions [116], sliding mode control [38], singular perturbation [63], geometric control [17], back-stepping [62], model
+predictive control [26, 79], reinforcement learning [111], and machine learning control [48, 21]. Although consid-
+erable progress has been made in the control of nonlinear systems [68, 54, 100], methods are generally tailored
+to a specic class of problems, require considerable mathematical and computational resources, or don't readily
+generalize to new applications. Currently there is no overarching framework for nonlinear control, that is gener-
+ically applicable to a wide class of potentially high-dimensional systems, as exists for linear systems [37, 104].
+Generally applicable frameworks, such as dynamic programming [15], Pontryagin's maximum principle [92], and
+model-predictive control (MPC) [2, 26], often suer from the curse of dimensionality and require considerably
+computational eort, e.g. solving adjoint equations, when applied to nonlinear systems, which can be mitigated
+to some degree by combining these with low-dimensional, linear representations. Fortunately, the rise of big data,
+advances in machine learning, and new approaches in dynamical systems are changing how we approach these
+canonically challenging nonlinear control problems. For instance, recently deep reinforcement learning has been
+combined with MPC [91, 121], yielding impressive results in the large-data limit.
+Koopman operator theory has recently emerged as a leading framework to obtain linear representations of
+nonlinear dynamical systems from data [80]. This operator-theoretic perspective complements the more standard
+geometric [46] and probabilistic [35, 36] perspectives. The ability to embed nonlinear dynamics in a linear
+framework (see Fig. 1) is particularly promising for the prediction, estimation, and control of nonlinear systems.
+In 1931, Koopman showed that a nonlinear dynamical system may be represented by an innite-dimensional linear
+operator acting on the space of measurement functions of the state of the system [64]. Formulating dynamics in
+terms of measurements is appealing in the era of big data. Since the seminal work of Mezi c and Banaszuk [85]
+and Mezi c [80], Koopman theory has been the focus of eorts to characterize nonlinear systems. Many classical
+results have been extended to the Koopman formalism [25, 81]. For example, level sets of Koopman eigenfunctions
+form invariant partitions [24] and may be used to analyze mixing. The Hartman-Grobman theorem has also been
+generalized to provide a linearizing transform in the entire basin of attraction of a stable or unstable equilibrium
+or periodic orbit [72].
+Recently, Koopman theory has been applied for system identication [82, 94, 117, 76], estimation [108, 109] and
+control [120, 20, 65, 106, 1] of nonlinear systems. The Koopman operator is innite-dimensional, and control laws
+are typically based on a nite-dimensional approximation. Dynamic mode decomposition (DMD) [101, 97, 115, 69]
+approximates the Koopman operator with a best-t linear model. However, DMD is based on linear measurements,
+which do not span a Koopman invariant subspace for many nonlinear systems [118, 20, 69]. Current data-
+driven methods to approximate the Koopman operator include extended DMD (EDMD) [118, 119, 60] and the
+variational approach of conformation dynamics (VAC) [87, 88]. EDMD was recently used for model predictive
+control with promising results [65]. However, EDMD models may suer from closure issues for systems with
+multiple xed points or attractors, as a linear model only has a single xed point [20], which may lead to
+corrupted dynamics [20, 69] and emphasizes the importance of model validation. For instance, some eigenfunctions
+may be distorted when projected onto a nite-dimensional measurement subspace, and it may be advantageous
+to construct a reduced-order description from validated eigenfunctions, that exhibit behavior as predicted by
+their associated eigenvalue. For chaotic systems, delay coordinates provides a promising embedding [110, 19, 5].
+Obtaining useful data-driven coordinate transformations that approximate Koopman eigenfunctions remains an
+open challenge in data-driven dynamical systems [69, 20].
+In the present work, we build on the existing EDMD and reformulate the Koopman-based control problem in
+eigenfunction coordinates and provide strategies to identify lightly damped eigenfunctions from data, that can be
+2
+Section 5 Section 4
+Figure 2: Control of nonlinear systems via reduced Koopman-invariant representations in eigenfunction coordi-
+nates.
+subsequently used for control. In particular:
+•Koopman eigenfunctions provide a principled linear embedding of nonlinear dynamics resulting in an
+intrinsic coordinate system, in which the system is closed under the action of the Koopman operator. We
+formulate the incorporation of control in these intrinsic coordinates and discuss benets and caveats of
+this approach. Further, Koopman eigenfunctions can be associated with geometric system properties and
+coherent structures. Thus, the designed controller may be employed to manipulate particular coherent
+structures. For example, the Hamiltonian energy is a Koopman eigenfunction, and we are able to control
+the system by manipulating this function.
+•Smooth eigenfunctions in the point spectrum of the Koopman operator can be discovered from given
+data using sparse regression providing interpretable representations. We propose sparsity-promoting
+algorithms to regularize EDMD or to discover eigenfunctions directly in an implicit formulation.
+•We further demonstrate the importance of model validation to distinguish accurately identied eigen-
+functions from spurious ones. Lightly damped eigenfunctions are often not corrupted and can be used to
+construct reduced-order Koopman models.
+These nonlinear control techniques generalize to anylightly damped eigenfunction. As a more sophisticated
+example, we consider the double gyre ow, which is a model for ocean mixing. The discovery of intrinsic coordi-
+nates for optimized nonlinear control establishes our data-driven KRONIC framework1, shown in Fig. 2.
+The present work is outlined as follows: In Sec. 2, we demonstrate the importance of eigenfunction validation
+and motivate the use of sparse regression for their discovery. In Sec. 3, key results in Koopman spectral theory and
+corresponding data-driven approaches are summarized, and a brief background on optimal control is provided.
+The approach for identifying of Koopman eigenfunctions from data using sparse regression is outlined in Sec. 5.
+In Sec. 4, it is shown how control can be incorporated in the eigenfunction formulation. An analytical example
+is examined in Sec. 6 to illustrate the control problem in terms of Koopman eigenfunction coordinates. The
+KRONIC framework is then demonstrated on several Hamiltonian systems (Sec. 7), for basin-hopping in an
+asymmetric double potential well (Sec. 8), and the autonomous and non-autonomous double gyre ow (Sec. 9).
+A discussion and outlook on future directions is provided in Sec. 10.
+2 Motivation
+Finite-dimensional approximations of the Koopman operator are typically obtained as its projection onto a spec-
+ied basis or dictionary. Extended dynamic mode decomposition (EDMD) [117] has emerged as the leading
+numerical approach by solving a least-squares problem. A well-known issue arises when trying to identify the full
+operator in a nite set of basis functions, that sometimes the nite-dimensional approximation is not closed and
+spurious eigenfunctions may appear. For this reason, it can be important to perform consistency checks, such
+as validating the linearity property of eigenfunctions. The present work builds on EDMD addressing this limita-
+tion by re-formulating the regression problem for the direct identication of Koopman eigenfunctions. Further,
+we demonstrate how EDMD may be regularized to obtain more accurate eigenfunction representations. In the
+following, we illustrate the closure problem using a polynomial basis. As a motivating example (examined in
+1Code at https://github.com/eurika-kaiser/KRONIC .
+3
+Figure 3: EDMD models give rise to inaccurate eigenvectors, demonstrated for the slow manifold system: (a)
+EDMD regression model on up to third degree monomials, (b) tting onto higher-degree monomials, (c) evolution
+of eigenvectors identied from the model in (a), which are evaluated on a single test trajectory, and as predicted
+using the corresponding eigenvalue.
+detail in Sec. 6), we consider a system with quadratic nonlinearity that gives rise to a slow manifold [115]:
+d
+dtx1
+x2
+=x1
+(x2 x2
+1)
+(1)
+with= 0:1 and= 1. By a clever choice of observable functions y, the nonlinear system (1) may be
+represented as a linear system:
+d
+dty=Ky; (2)
+where Krepresents a nite-dimensional approximation of the Koopman operator. The system (1) is one of few
+analytical examples, for which a closed, nite-dimensional, linear Koopman approximation exists.
+The EDMD model t on the rst 9 monomials (up to third degree) is shown in Fig. 3(a). Some of the
+eigenvectors are spurious (see Fig. 3(c)), i.e. the evolution of the eigenfunction '(x(t)) obtained by evaluating the
+eigenfunction on a trajectory x(t) does not correspond to the linear prediction using the eigenvalue, et'(x(t0)).
+The reason is that the model is not closed in the particular choice of basis functions, because the derivatives of
+third degree monomials give rise to higher-degree monomials (see Fig. 3(b)) resulting in a nonlinear model:
+d
+dt2
+6666666666664y1
+y2
+y3
+y4
+y5
+y6
+y7
+y8
+y93
+7777777777775=2
+66666666666640 0 0 0 0 0 0 0
+0  0 0 0 0 0 0
+0 0 2 0 0 0 0 0 0
+0 0 0 + 0 0 0 0
+0 0 0 0 2 0 2 0 0
+0 0 0 0 0 3  0 0 0
+0 0 0 0 0 0 + 2 0 0
+0 0 0 0 0 0 0 2 +0
+0 0 0 0 0 0 0 0 3 3
+77777777777752
+6666666666664y1
+y2
+y3
+y4
+y5
+y6
+y7
+y8
+y93
+7777777777775+2
+66666666666640
+0
+0
+0
+0
+0
+ x4
+1
+ 2x3
+1x2
+ 3x2
+1x2
+23
+7777777777775; (3)
+where (y1;y2;y3;y4;y5;y6;y7;y8;y9) = (x1;x2;x2
+1;x1x2;x2
+2;x3
+1;x2
+1x2;x1x2
+2;x3
+3). These additional terms, that are
+not in the span of fy1;;y9g, will be aliased in the corresponding row equations corrupting the system matrix
+K. Thus, some of the eigenfunctions will be spurious, aecting the prediction accuracy of the model based
+onK. However, it may be possible to identify a subset of the eigenfunctions that are not corrupted, e.g.
+those eigenpairs that show good agreement in Fig. 3(c), and use these to construct a reduced-order model with
+improved prediction. Alternatively, EDMD may be regularized using sparsity-promoting techniques to regress a
+(approximate) closed model on a subset of basis functions. For instance, choosing the ve observable functions
+4
+Figure 4: Sparsied EDMD models increase robustness and prevent overtting on noisy data: (a) EDMD model,
+(b) validation of eigenpairs, and (c) phase plot with L2error for dierent models. For details see Fig. 3 and text.
+(y1;y2;y3;y4;y5) = (x1;x2;x2
+1;x1x2;x3
+1), which are a subset of the nine monomials used above, yields:
+d
+dt2
+66664y1
+y2
+y3
+y4
+y53
+77775=2
+666640 0 0 0
+0  0 0
+0 0 2 0 0
+0 0 0 + 
+0 0 0 0 3 3
+777752
+66664y1
+y2
+y3
+y4
+y53
+77775; (4)
+which is a 5-dim. linear system, that remains closed under the action of the Koopman operator.
+Measurements from real-world systems are generally corrupted by noise, which can be more challenging for
+model identication procedures. Figure 4(c) shows the poor prediction performance of the EDMD model trained
+on noisy data (displayed in Fig. 4(a)). More eigenfunctions are inaccurate as a result of an increasing number of
+non-vanishing coecients in the state matrix compared with the noise-free situation in Fig. 3. The least-squares
+solution overts resulting in a full matrix with small, but non-vanishing coecients. By sparsifying the EDMD
+state matrix or constructing a reduced-order model based on accurate eigenfunctions (validated from Fig. 4(b))
+higher prediction accuracy and robustness to noise can be achieved (compare models in Figure 4(c)). Ideally,
+it would be possible to learn good eigenfunctions directly, which are designed to behave linearly and evolve as
+predicted by their associated eigenvalue, which would potentially signicantly increase prediction accuracy and
+reduce the dimension of the model.
+3 Background
+In this section, we provide a brief background on Koopman spectral theory in Sec. 3.1 and a numerical algorithm,
+dynamic mode decomposition, to approximate the Koopman operator in Sec. 3.2. Key results in optimal control
+are then summarized in Sec. 3.3.
+3.1 Koopman spectral theory
+The classical geometric theory of dynamical systems considers a set of coupled ordinary dierential equations
+d
+dtx(t) = f(x) (5)
+in terms of the state of the system x2M , whereMis a dierentiable manifold, often given by M=Rn. In
+discrete time, the dynamics are given by
+xk+1=F(xk); (6)
+where Fmay be the ow map of the dynamics in (5):
+F(x(t0)) =x(t0) +Zt0+t
+t0f(x())d: (7)
+5
+Discrete-time systems are more general and form a superset, containing those induced by continuous-time dynam-
+ics. Moreover, discrete-time dynamics are often more consistent with experimental measurements, and may be
+preferred for numerical analysis. The geometric perspective then considers xed points and invariant structures
+of the dynamics.
+In 1931, B. O. Koopman introduced the operator theoretic perspective, showing that there exists an innite-
+dimensional linear operator, given by K, that acts to advance all measurement functions g:M! Rof the state
+with the ow of the dynamics:
+Kg=gF: (8)
+Thus, the Koopman operator advances measurements linearly:
+g(xk+1) =Kg(xk): (9)
+For smooth dynamics, there is a continuous system
+d
+dtg(x) =Kg(x) =rg(x)f(x); (10)
+whereKis the innitesimal generator of the one-parameter family of Koopman operators K.
+The Koopman operator is linear, which is appealing, but is innite dimensional, posing issues for representation
+and computation. Instead of capturing the evolution of all measurement functions in a Hilbert space, applied
+Koopman analysis approximates the evolution on a subspace spanned by a nite set of measurement functions.
+It is possible to obtain a nite-dimensional matrix representation of the Koopman operator by restricting it to
+an invariant subspace. A Koopman invariant subspace is spanned by any set of eigenfunctions of the Koopman
+operator. A Koopman eigenfunction '(x) corresponding to eigenvalue satises
+'(x) ='(F(x)): (11)
+In continuous-time, a Koopman eigenfunction '(x) :M! Csatises
+d
+dt'(x) ='(x): (12)
+Obtaining Koopman eigenfunctions from data or analytically is a central applied challenge in modern dynamical
+systems. Discovering these eigenfunctions enables globally linear representations of strongly nonlinear systems in
+terms of these intrinsic observables. The evolution equation (12) describes the unactuated behavior, which will
+be extended to incorporate the eect of control in our KRONIC framework (compare the third box in Fig. 2 and
+for further details we refer to Sec. 4 and 5).
+3.2 Dynamic mode decomposition
+Dynamic mode decomposition (DMD) is a simple numerical algorithm that approximates the Koopman opera-
+tor with a best-t linear model that advances measurements from one time step to the next [97, 101, 115, 69].
+DMD was originally introduced in the uid dynamics community [101, 102, 44, 8, 81, 21] to decompose large
+data sets into dominant spatial-temporal coherent structures, and a connection with Koopman theory was soon
+established [97]. In addition to uid dynamics, DMD has been widely applied to a range of problems in neu-
+roscience [18], robotics [14], epidemiology [95], and video processing [45, 71, 41]. The DMD algorithm has also
+been extended to include sparsity and compressed sensing [114, 56, 23, 47, 41], actuation and control [93], multi-
+resolution analysis [70], de-noising [34, 51], and streaming variants [52].
+In DMD, the innite-dimensional Koopman operator in (9) is approximated with a nite-dimensional matrix
+Athat advances the system state x:
+xk+1Axk: (13)
+Given data from a nonlinear system in (6), it is possible to stack snapshots into a matrix X= [x1x2:::xm 1]
+and a time-shifted matrix X0= [x2x3:::xm]. In terms of these data matrices, (13) becomes
+X0AX: (14)
+6
+Various DMD algorithms then compute the leading eigendecomposition of the best-t linear operator A, given
+by
+A= arg min
+~AjjX0 ~AXjjF; (15)
+wherekkFis the Frobenius norm. The best-t Ais given by A=X0Xy, whereyis the pseudo-inverse, which
+is computed via singular value decomposition.
+DMD has proven to be an extremely useful technique for the analysis of high-dimensional dynamical systems
+data. However, DMD is based on linear measurements of the system, which do not typically span a Koopman-
+invariant subspace of a general nonlinear system. For example, a linear DMD model may perfectly capture
+the periodic attractor dynamics of a system on a limit cycle, but will fail to capture the nonlinear transients
+if the system is perturbed o the attractor. DMD has since been augmented with nonlinear measurements
+to enrich the model in EDMD [118, 119, 60] and VAC [87, 88]. EDMD models have been used with success
+for estimation [108, 109] and model predictive control [65]. However, EDMD models are based on a large set of
+nonlinear measurements of the state, and there is no guarantee that these measurements form a Koopman invariant
+subspace. In fact, EDMD measurement subspaces will generally notbe closed [20, 69]. For example, there is no
+nite-dimensional Koopman invariant subspace that includes the state of the system xfor any dynamical system
+that has multiple attractors (e.g., xed points, periodic orbits, etc.), since the resulting nite-dimensional linear
+model cannot be topologically conjugate to the original dynamics. This is closely related to the representation of
+the Koopman operator in a polynomial basis, similar to Carleman linearization [10, 67, 112]. Thus, EDMD as well
+as other models are often plagued with spurious eigenfunctions that do not behave linearly as predicted by the
+associated eigenvalue. Fortunately, although these models may have corrupted eigenvalues and eigenfunctions,
+eigenfunctions corresponding to lightly damped eigenvalues may be faithfully extracted.
+3.3 Optimal control
+The overarching goal of Koopman control is to reformulate strongly nonlinear dynamics in a linear framework
+to enable the use of powerful optimal and robust control techniques available for linear systems [104, 37, 107].
+Here, we summarize key results in optimal control theory that will be used for control in Koopman eigenfunction
+coordinates. We consider the nonlinear system (5) aected by an external input
+d
+dtx(t) = f(x;u);x(0) = x0 (16)
+with multi-channel control input u2Rqand continuously dierentiable dynamics f(x;u) :RnRq!Rn.
+Without loss of generality, the origin is an equilibrium: f(0;0) =0.
+Innite-horizon optimal control minimizes the following quadratic cost functional
+J(x;u) =1
+21Z
+0xT(t)Qx(t) +uT(t)Ru(t)|{z}
+L(x;u)dt (17)
+with state and input weight matrices Q2RnnandR2Rqq. Both matrices are symmetric and fulll Q>0
+andR0. A full-state feedback control law
+u(x) = C(x)x=c(x);c(0) =0 (18)
+with gain C:Rn!Rqnis sought that minimizes the cost function (17) subject to the state dynamics (16) to
+drive the system to the origin, i.e. lim
+t!1x(t) =0;8x.
+4 Koopman operator control in eigenfunctions
+We now propose a general control architecture in Koopman eigenfunction coordinates, referred to as Koopman
+Reduced Order Nonlinear Identication and Control (KRONIC)(see Fig. 2). This eigenfunction perspective relies
+on a model constructed from validated Koopman eigenfunctions, which is closed and linear by design. First, we
+derive how the eect of actuation aects the dynamics of these eigenfunction coordinates. Second, the optimal
+7
+control problem is formulated in these coordinates and a corresponding feedback controller is then developed,
+yielding a possibly nonlinear control law in the original state variables. Control in eigenfunction coordinates
+is quite general, encompassing the stabilization of xed points and periodic orbits, e.g. via the Hamiltonian
+eigenfunction, or the manipulation of more general spatial-temporal coherent structures given by level sets of
+other eigenfunctions.
+4.1 Control{ane systems
+We rst examine how adding control to a dynamical system (5) aects a single Koopman eigenfunction. This
+formulation then readily generalizes to multiple eigenfunctions. Consider a control-ane system
+d
+dtx(t) = f(x) +qX
+i=1bi(x)ui; (19)
+with a multi-channel input u2Rq, continuously dierentiable dynamics f(x) :Rn!Rnassociated with the
+unforced dynamics, and each bi(x) is a vector eld acting on the state space.
+Starting with the Koopman operator associated with the uncontrolled, autonomous system (see Sec. 3.1), we
+examine how the control terms in (19) aect the dynamics of its eigenfunctions. By applying the chain rule, we
+obtain
+d
+dt'(x) =r'(x) 
+f(x) +qX
+i=1bi(x)ui!
+(20a)
+='(x) +r'(x)qX
+i=1bi(x)ui: (20b)
+This equation diers from Eq. (12) in the additional second term associated with the control terms. The '(x)
+is a Koopman eigenfunction associated with the autonomous Koopman operator for the unforced dynamics f(x).
+For instance, a Hilbert space of the Lebesque square-integrable functions may be considered as function space.
+The control enters the dynamics of 'via the additional term leading to a control-ane system, which is linear
+in'and possibly nonlinear in the control.
+Without loss of generality, we assume in the examples presented in later sections a linear control term:
+d
+dtx(t) = f(x) +Bu; (21)
+with control matrix B2Rnq, so that the dynamics of the eigenfunctions become
+d
+dt'(x) ='(x) +r'(x)Bu: (22a)
+4.2 Nonane control systems
+More generally, we may be interested in the control of a nonlinear, non-ane system:
+d
+dtx(t) = f(x;u); (23)
+with continuously dierentiable dynamics f(x;u) :RnRq!Rn. We may now consider an observable g(x;u)
+as a function of the extended state space MU , where x2M andu2U, and the non-autonomous Koopman
+operator acting on these observables. For discrete-time dynamics with discrete map F(x;u), the Koopman op-
+erator propagates scalar measurements according to Kg(xk;uk) =g(F(xk;uk);uk+1) by assuming the Koopman
+operator acts on the extended state space in the same manner as the Koopman operator associated with the
+autonomous, unforced system. This assumption has been previously [65] considered, where the extended space
+was dened as the product of the original state-space and the space of all control sequences. Since the rst ap-
+pearance of this article, they have been further studies [94, 4, 57] examining the approximation of the Koopman
+operator for the non-ane control system. In [94], it is in more detail discussed how the Koopman operator
+8
+formulation can be modied based on the dynamics of uitself, e.g. open-loop versus closed-loop control. As
+associated function space, in which observables are dened on the extended state space, a Hilbert space of the
+Lebesque square-integrable functions or polynomial functions dened on a compact set may be considered. If
+the dynamics on uare governed by a specic feedback law of the form u=C(x), that is only a function of the
+state x, then choices about the function space for the controlled system are equivalent to those applying to the
+autonomous system.
+For smooth dynamics (23), the continuous-time dynamics are given by
+d
+dtg(x;u) =Kg(x;u): (24)
+An associated Koopman eigenfunction '(x;u) satises
+d
+dt'(x;u) ='(x;u): (25)
+Applying the chain rule, we nd that the dynamics of the Koopman eigenfunction depends on _u, which is generally
+arbitrary:d
+dt'(x;u) =rx'(x;u)f(x;u) +ru'(x;u)_u. Instead, we may specify that '(x;u) reduces to the
+eigenfunction '(x;u) of_x=f(x;u) for all locked u2U, as in [94]. In this case, the eigenfunction is parametrized
+by the input u
+rx'(x;u)f(x;u) ='(x;u);8u2U: (26)
+These are eigenfunctions of the parametrized Koopman generator, which is autonomous for each locked uand
+can be dened on the commonly used function spaces as stated above. This perspective is also assumed within
+the gEDMD framework and its extension for control [61]. The Koopman generator Kis approximated as a nite-
+rank matrix Kparametrized by the discrete control input using EDMD. The control problem is then solved by
+optimizing switching times among the nite set of discrete control inputs and associated models.
+If we augment the eigenfunction vector with the input u, we obtain
+d
+dt'(x;u) ='(x;u) +ru'(x;u)_u; (27)
+where we view _uas the input to the Koopman linear system, and the ru'(x;u) matrix varies based on xandu.
+Thus, we may enact a gain-scheduled control law.
+Summarizing, if the original dynamics are nonlinear and control-ane, the dynamics in Koopman eigenfunction
+coordinates are control-ane and split into a linear part associated with the nonlinear unforced dynamics and
+a bilinear part associated with the control term. If the original dynamics are nonlinear and non-ane in the
+control, the eigenfunction dynamics can become linear if the Koopman operator is dened on the extended state.
+Considering practical implications, it is also possible to modify these dynamics so that these consist of a linear
+part and a bilinear control term as in Eq. (27). We also point out, that while the control is generally nonlinear
+in the state x, it may become linear in the eigenfunction coordinates for special cases, such as r'(x) = const:
+4.3 Formulation of the optimal control problem
+We now formulate the innite-horizon, optimal control problem [107] for a reduced set of Koopman eigenfunctions.
+The control objective is a quadratic cost functional:
+J(';u) =1
+21Z
+0'T(x(t))Q''(x(t)) +uT(t)Ru(t) dt; (28)
+where'= ['1'2::: 'r]Tcomprisesreigenfunctions with 'jassociated with eigenvalue j. For this cost
+function to be equivalent to the cost in the original state x, a modied weight matrix may be considered such
+that'TQ''xTQx. This can only be achieved exactly if the state itself is an eigenfunction of the Koopman
+operator; however, it can be sucient requiring this only for a subset of states that enter the cost function.
+Alternatively, it is possible to estimate xvia the inverse mapping ' 1. Eigenfunctions may generally not be
+invertible exactly. Nevertheless, the inverse mapping may be approximated using multidimensional scaling as
+in [58] or learned jointly with 'itself using autoencoders [74]. More generally, the matrix Q'allows one to
+weight particular eigenfunction directions, which are related to properties of the underlying system and coherent
+9
+structures. The selection of a specic set of eigenfunctions, in which a model is constructed and which are used to
+formulate the cost functional, is problem specic. However, given a target state xREFin the original state space,
+the associated target value of the eigenfunctions may be directly determined by evaluating the eigenfunctions on
+the target state, i.e. 'REF:='(xREF).
+For the general case, it is possible to augment the state with the control input and include the derivative of
+the control as new input ^u:=_u:
+d
+dt
+'
+u
+=
+ B'
+0 0
+'
+u
++
+0
+Iq
+^u (29)
+withqqidentity matrix Iq. This may be interpreted as integral control. The cost functional is then given by
+J=1
+21Z
+0
+'TuTQ'0
+0 R'
+u
++^uT^R^udt: (30)
+with some restrictions on ^R. Modifying the system structure, by moving the nonlinearity in the control term into
+the state dynamics, improves the tractability of the problem [11].
+In the following, we will focus on multiple-input, control-ane systems (21), for which the dynamics in intrinsic
+coordinates becomesd
+dt'(x) ='(x) +rx'(x)Bu (31)
+with= diag(1; :::; r). Depending on the structure of '(x) and B, the actuation matrix B'=rx'(x)B
+may be a function of x. A state-dependent control term may be interpreted as a gain-scheduled control. A
+feedback controller is now sought in the Koopman representation of the form
+u= c'['(x)] = C'(x)'(x): (32)
+We may also consider reference tracking, u= C'(x)
+'(x) 'REF
+, with a modied cost functional (28).
+The objective is then to determine the gain function C'by minimizing J(';u) and the resulting control umay
+be directly applied to the original system (21), for which the control problem may be suboptimal. Generally,
+Koopman eigenfunction control can be used in two ways depending on which means of control one has access
+to: (1) internally driven swimmers or particles, which state is given by xand which dynamics are subject to an
+external eld, such as a uid ow or magnetic eld; or (2) driving an external eld, represented in terms of these
+eigenfunctions, in which these swimmers or particles drift.
+4.4 Solving the optimal control problem
+The model (31) may be combined with any model-based control strategy. In the following, we discuss ways to
+solve the optimal control problem formulated above using standard techniques.
+In the simplest case, for which Eq. (31) becomes fully linear, the optimal gain matrix C'can be determined
+by solving the associated algebraic Riccati equation leading to a linear quadratic regulator (LQR) formulated in
+Koopman eigenfunctions. For the more general case, where the control term becomes nonlinear, other techniques
+are required. A common extension of LQR for nonlinear systems considers state-dependent state and control
+matrices as outlined in Sec. A.3 and solves the state-dependent Riccati equation (72). Here, the state dynamics
+would be constant and linear, i.e. A=, and only the control matrix B':=rx'Bdepends on the state x:
+Q+P+TP PB'(x)R 1BT
+'(x)P=0: (33)
+We note that parametrizations for the dynamics (71) in xare unique for scalar systems, but generally nonunique
+for multivariable systems [31]. In contrast, the state-dependent dynamics in eigenfunction coordinates (31) are
+unique with respect to xandis constant. These are not a result from the factorization. The (non)uniqueness
+of the factorization is generally related to global optimal control and global optimal stability. However, further
+studies are required to connect these properties for solutions in eigenfunction coordinates to the state dynamics
+inx.
+We examine the eect of an error " (x) in the representation of a Koopman eigenfunction, ^ '(x) :='(x) +
+" (x), on its closed-loop dynamics based on (33) and provide an upper bound for the error (for details see
+10
+Appendix B). We assume control-ane dynamics (21) of the underlying system, access to full-state measurements
+x, and control vector elds are known. Further, we reformulate B(x)u:=Pq
+i=1bi(x)uifor simplicity. The closed-
+loop dynamics of '(x) are then given by
+_'(x) = q
+2+QC(x)R 1CT(x)'(x) = p'(x); (34)
+where:=2+QC(x)R 1CT(x). The upper bound for the error in due to the misrepresentation of '(x) due
+to" (x)is
+j ^j "
+QCR 1DT+QDR 1CT+ 2r f
+'(x)
+ "2
+QDR 1DT+(r f)2
+'2(x): (35)
+where C(x) :=r'(x)B(x) and D(x) :=r (x)B(x) are the control terms associated with '(x) and (x),
+respectively. For small '(x) the contribution of " (x) becomes important/may be dominant.
+More generally, Koopman control in eigenfunction coordinates may be combined with any model-based control
+approach. Under certain conditions, it may also be possible to feedback linearize the dynamics [59]. The data-
+driven identication of Koopman eigenfunctions can be challenging and they may only be approximated accurately
+in a certain domain. Further, dynamics may also drift away from the situations captured in the training data
+due to external disturbances. Especially in these cases it is advantageous to couple the resulting model with a
+receding horizon estimator and controller to adapt quickly to changing conditions. In particular, model predictive
+control has gained increasing popularity over the last decade due to its success in a wide range of applications
+and its ability to incorporate customized cost functions and constraints [26, 3, 40].
+5 Identifying Koopman eigenfunctions from data
+The overarching goal of this work is to control nonlinear systems in intrinsic Koopman eigenfunction coordinates.
+A leading method for approximating the Koopman operator is EDMD relying on a set of basis or dictionary
+functions. Here, we aim to address the well-known closure issue, i.e. the model may not be closed in the set
+of basis functions and can therefore have spurious eigenfunctions, by assuming an eigenfunction perspective.
+Approximating these eigenfunctions from data is an ongoing challenge. Building on EDMD, we propose a strategy
+to directly identify dominant Koopman eigenfunctions associated with lightly damped eigenvalues, that can then
+be utilized to construct low-dimensional, closed models. Further, we show that it is possible to sparsify the
+state-transition matrix Kof EDMD to improve the representation of eigenfunctions within the selected basis.
+It has long been recognized that numerical regularization via the truncation of the SVD in the computation
+of the pseudoinverse, as it is done for DMD/EDMD, is crucial to reduce noise corruption. However, this does
+not produce a sparser approximation of K, which is crucial for systems that are inherently sparse in their
+representation. An additional L1 regularization is here advantageous as it is able to improve the predictive power
+of the model and eigenfunctions become more accurately represented in the chosen function library preventing
+overtting. Interestingly, the innitesimal generator of the Koopman operator may be sparse even when the
+Koopman operator itself is not [61]. However, even in these cases, the approach may benet from a sparsity
+constraint to counteract spurious non-zero entries arising from noise and numerical approximation. More
+generally, non-compactness or continuous spectra of the Koopman operator can pose issues for the numerical
+analysis requiring some form of regularization (see [43] for a detailed discussion for the Koopman operator and [42]
+regarding the Perron-Frobenius operator).
+In the following we formulate a framework using sparsity-promoting techniques to identify Koopman eigen-
+functions directly building on the partial dierential equation (PDE) governing the evolution of an eigenfunction.
+Applying the chain rule to (12) yields
+d
+dt'(x) =r'(x)_x=r'(x)f(x): (36)
+Combined with (12), this results in a linear PDE for the eigenfunction '(x):
+r'(x)f(x) ='(x): (37)
+This formulation assumes continuous and dierentiable dynamics and that the eigenfunctions are smooth [84].
+11
+System
+DataSparse 
+regressionUnknown dynamics 
+˙x=y
+˙y=x−x3˙x=f(x)
+Example:PDE for Koopman eigenfunction
+/parenleftBig
+λΘ(X)−Γ(X,˙X)/parenrightBig
+ξ=0
+λxy yx2y2x4y4x
+= − 0Time 
+Θ(X) Γ(X,˙X) ξ
+ϕ(x) =/bracketleftbigx2y2x4/bracketrightbig
+2/3
+−2/3
+−1/3
+
+Truth:Sparse coeﬃcients 
+Example:
+For         :λ= 0 
+H=−1
+2x2+1
+2y2+1
+4x4Eigenfunction
+˙x˙y2x˙xy˙x+x˙y
+2y˙y4x3˙x4y3˙y
+ξϕ(x)≈Θ(x)ξFigure 5: Identication of Koopman eigenfunctions from data using implicit-SINDy.
+Spectral properties of the Koopman operator have been shown to relate to intrinsic time scales, geometrical
+properties, and the long-term behavior of dynamical systems [80, 85, 77, 69]. It has been shown [83], that the
+evolution of observables can be described by a linear expansion in Koopman eigenfunctions for systems which
+consist only of the point spectrum, i.e. smooth dynamical systems exhibiting, e.g., hyperbolic xed points, limit
+cycles and tori. If systems with a mixed spectrum are considered, it may be possible to restrict the following
+analysis to the point spectrum as in [33].
+5.1 Data-driven discovery of continuous-time eigenfunctions
+Sparse identication of nonlinear dynamics (SINDy) [22] is used to identify Koopman eigenfunctions for a partic-
+ular value of . This formalism assumes that the system has a point or mixed spectrum, for which eigenfunctions
+with distinct eigenvalues exist. A schematic is displayed in Fig. 5.
+First, we build a library of candidate functions:
+(x) =1(x)2(x)p(x)
+: (38)
+We choose large enough so that the Koopman eigenfunction may be well approximated in this library:
+'(x)pX
+k=1k(x)k=(x): (39)
+Given data X= [x1x2xm], the time derivative _X= [_x1_x2_xm] can be approximated numerically from x(t)
+if not measured directly [22]. The total variation derivative [28] is recommended for noise-corrupted measurements.
+It is then possible to build a data matrix (X):
+(X) =
+1(XT)2(XT)p(XT)
+: (40)
+Moreover, we can dene a library of directional derivatives, representing the possible terms in r'(x)f(x)
+from (37):  (x;_x) = [r1(x)_xr2(x)_xrp(x)_x]. It is then possible to construct  from data:
+ (X;_X) =
+r1(XT)_Xr2(XT)_X rp(XT)_X
+: (41)
+For a specic eigenvalue , the Koopman PDE in (37) may be evaluated on data, yielding:
+
+(X)  (X;_X)
+=0: (42)
+The formulation in (42) is implicit, so that will be in the null-space of the matrix (X)  (X;_X). The
+right null-space of (42) for a given is spanned by the right singular vectors of (X)  (X;_X) =UV
+(i.e., columns of V) corresponding to zero-valued singular values. It is possible to identify the few active terms
+12
+Algorithm 1 Direct discovery of eigenfunctions based on the implicit formulation (42).
+1:Initialize: guess= eigs( (X)y (X;_X))g
+2:foreach eigenvalue iinguessdo
+3: Initialize:=guess
+i
+4:whilenot converged do
+5: M:= (X;_X) (X)
+6: N:= null( M)
+7: foreach rowlinN do
+8: q0:= (N(l;:)=norm( N(l;:)))T
+9: qmtx(:;l) := adm( N;q0;;MaxIter;tolerance );
+10: (:;l) =Nqmtx(:;l)
+11: end for
+12: foreach column lin do
+13: (:;l) := soft thresholding( (:;l);)
+14: (:;l) := normalize( (:;l))
+15:Error (l) := norm( (Xtest)(:;l) ettest(xtest
+0)(:;l))
+16: end for
+17:best:= min(Error )
+18::=(:;best )
+19: Update:= (T(X)y (X;_X))=(T)
+20: end while
+21: T(:;i) =
+22: (i;i) =
+23:end for
+24:return ;T
+in an eigenfunction by nding the sparsest vector in the null-space [96], which is used, e.g., in the implicit-SINDy
+algorithm [75]. This is a nonconvex approach based on alternating directions (adm) with linear scaling [96],
+which can be adapted to our problem. In this formulation, the eigenvalues are not known a priori , and must
+be learned online along with the approximate eigenfunction. In Alg. 1, we propose an implicit formulation, which
+starts with an initial guess of the eigenvalues given by the least-squares solution, and subsequently alternates
+between an searching for the sparsest vector in the null-space [96] and updating of the eigenvalue. As the
+approach in [96] depends on the initial condition, we evaluate all initial conditions given by each row in the
+nullspace N:= null(  (X;_X) (X)). An additional soft-thresholding with parameter and validation on
+a test dataset is applied to select the best eigenvector for each initial condition. While the approach has been
+observed to converge to accurate eigenvalues in clean data, the found eigenvector in the solution set may not
+be unique. This approach solves for each eigenpair separately; however, it may also be possible to extend it to
+solve for eigenpairs jointly which is part of ongoing research. From a practical standpoint, data in Xdoes not
+need to be sampled from full trajectories, but can be obtained using more sophisticated strategies such as latin
+hypercube sampling or sampling from a distribution over the phase space. It may also be possible to directly
+identify a recursion relationship to obtain a power series expansion as shown in Appendix C and in [78].
+Koopman eigenfuntions and eigenvalues can also be determined as the solution to the eigenvalue problem
+K=, where K=y is obtained via least-squares (LS) regression. While many eigenfunctions are
+spurious, i.e. these eigenfunctions do not behave linearly as predicted by the corresponding eigenvalue, those
+corresponding to lightly damped eigenvalues can be well approximated [20, 69], and a reduced-order Koopman
+model may developed on these coordinates (see also Sec. 2). The accuracy of eigenfunctions of Kcan be improved,
+by improving the recovery of Kitself, which can be achieved by sparsifying Kdirectly. The minimization problem,
+min
+kijjri(XT)_X (X)kT
+ijj2
+2+(ki);8ki;i= 1;:::;p; (43)
+whereis a regularization term that promotes the sparsity of ki, i.e. the number of non-zero coecients, is
+solved separately for each row in K= [kT
+1;:::;kT
+p]. For instance, an L1constraint on the coecients in kimay
+be chosen and kimay equivalently be determined as in SINDy [22]. In general, the problem (43) can be solved
+13
+using standard techniques, such as LASSO [99, 113], Least Angle Regression [39], or an iterated least-squares
+thresholding method [22].
+This formulation is closely related to the gEDMD framework [61], a generalization of the EDMD method to
+approximate the innitesimal generator of the Koopman operator. The gEDMD least-squares formulation is solved
+here row-wise with an additional sparsity constraint. There are also similarities to sparsity-promoting DMD [56]
+and variants [53, 55], which aims to reconstruct a signal through a sparse combination of modes/eigenfunctions,
+which have been computed from a least-squares solution. In contrast to these works, we argue that the sparse
+representation of eigenfunctions themselves should be promoted. Alternatively, it is also possible to use the
+dominant terms in accurately identied eigenfunctions, generally associated with lightly damped eigenvalues, as
+guidance to select observables to regress on. Since the rst appearance of this article, further promising methods
+have been proposed to identify Koopman eigenfunctions directly [66, 49, 89].
+5.2 Data-driven discovery of discrete-time eigenfunctions
+In discrete-time, an eigenfunction evaluated at a number of data points in Xwill satisfy:
+'(x1)::: ' (xm)T='(x2)::: ' (xm+1)T: (44)
+Again, searching for such an eigenfunction '(x) in a library (x) yields the matrix system:
+((X) (X0))=0; (45)
+where X0=
+x2x3xm+1
+is a time-shifted matrix. This formalism directly identies the functional
+representation of a Koopman eigenfunction with eigenvalue .
+If we seek the best least-squares t to (45), this reduces to the extended DMD [118] formulation:
+=y0: (46)
+Again, it is necessary to conrm that predicted eigenfunctions actually behave linearly on trajectories.
+5.3 Koopman model reduction and validation
+For any data-driven modeling framework cross-validation is critical to ensure predictive and generalization capa-
+bilities. Approximations of the Koopman operator allow a systematic evaluation based on its linearity property.
+We can learn a nite-rank approximation using any EDMD-like method or learn eigenfunctions directly. In either
+case, it is critical to validate that any candidate eigenfunction '(x(t)) actually behaves linearly on trajectories
+x(t) as the eigenvalue predicts. The error of an eigenfunction can be dened as
+E=jj'(x(t)) et'(x(0))jj2(47)
+evaluated on a test trajectory x(t) and identied eigenfunctions can be ranked according to the error E. All
+eigenfunctions with error below a threshold may then be used to construct a reduced-order model:
+'(x) ='+r'(x)Bu (48)
+analogous to Eq. (31). This model is closed and behaves linearly by design and we demonstrate in the following
+its increased predictive power.
+6 Example: System with a slow manifold
+6.1 Identication of eigenfunctions and models
+We consider a system with quadratic nonlinearity that gives rise to a slow manifold [115]:
+d
+dtx1
+x2
+=x1
+(x2 x2
+1)
+(49)
+14
+Figure 6: Model comparison for the slow manifold system with noise level = 0:1: (a) training and test data,
+(b) state prediction error on test data for each identied model, (c) state prediction error on test data for each
+identied reduced-order model (ROM), (d) transition matrix on set of measurement functions, (e) eigenpairs
+(;'(x)) validated on test trajectory (marked blue if below threshold (dashed line)), (f) prediction error for each
+eigenpair (;'(x)) (error between trajectory as predicted by eigenvalue and by evaluating eigenfunction on test
+trajectory), (g) state prediction using model Kand ROM constructed from validated (or good) eigenfunctions
+(marked in blue/yellow in (f)). For details see text.
+with= 0:1 and= 1. In the following, we apply the methods outlined in Sec. 5 to the dynamical
+system (49). For all models, a library of the rst 9 monomials (up to the third degree) is considered. Noise
+corruption in measurement data can be particularly problematic. Here, we examine the recovery of eigenfunctions
+and prediction performance for dierent noise magnitudes = 0:1 and= 0:9. Further, reduced-order models are
+constructed based on eigenpairs ( ;'(x)) that are deemed accurate, i.e. have a small L2error when compared with
+the prediction using the associated eigenvalue, here denoted by . The threshold for the selection of eigenfunctions
+is 1 and 3 for noise magnitudes = 0:1 and= 0:9, respectively. The L1regularized problem is solved using the
+iterative least-squares thresholding algorithm (ITLS) as in SINDy [22] and least angle regression (LARS) [39];
+however, detailed results are only shown for LARS as these have equivalent performance. LARS has the advantage
+that the number of iterations scales with the number of candidate functions; only 10 iterations are required here.
+The sparse solution is then selected when there is minimal improvement in the absolute value of correlation with
+15
+the evolving residual. The soft thresholding parameter in the implicit formulation is set to = 0:1 and= 0:2
+for= 0:1 and= 0:9, respectively.
+Figure 7: Model comparison for the slow manifold system as in Fig. 6 but with higher measurement noise level
+= 0:9. The ROM model error displayed in (c) is cut at 100. For details see Fig. 6.
+The results are displayed in Figs. 6 and 7 for the two noise cases. We observe that with increasing noise level,
+the EDMD state transition matrix becomes denser due to overtting (see (d)). In contrast, the implicit approach
+andL1 regularized EDMD (termed `LARS' or `ITLS' in the following) yield sparse matrices, which is more
+apparent for large noise magnitude. Note that the state matrix for the implicit formulation is reconstructed using
+the identied eigenfunctions on the set of candidate functions for visualization purposes, i.e. there are many zero
+entries and candidate functions that do not contribute to the actual dynamics. Lightly damped eigenfunctions
+can be recovered for all approaches. Eigenfunctions, or specically eigenpairs ( ;'(x)), are deemed as recovered,
+if the prediction error falls below a threshold (marked as dashed line in (f)). The prediction error is computed
+by evaluating the eigenfunction on a test trajectory and comparing it with the evolution as predicted by the
+associated eigenvalue; the evolution is displayed in (e). These good eigenpairs (colored as blue bars in (f)) are
+then used to construct reduced-order models (ROMs), that are by design linear and closed (subject to small
+errors). Note that solution from the implicit formulation may not be unique, i.e. there are several identical
+eigenpairs. However, only unique eigenpairs are used to construct the reduce-order model. This is the reason
+why, e.g. in Fig. (6)(f), the error for all eigenpairs falls below the threshold, but only unique ones (marked in
+16
+blue) are selected to construct the ROM.
+For small noise magnitude (Fig. 6), the identied models and ROMs perform all well, except the EDMD-based
+ROM, as one crucial eigenfunction associated with = 0:19 falls above the threshold and is not selected. The
+eigenvalue is correct, but not the associated eigenfunction. If the eigenfunction is included in the model (yellow
+bar in (f) and yellow dashed line in (g)), i.e. the model is constructed from blue and yellow marked eigenpairs,
+it yields a similar performance as the full-state EDMD model. It can also be observed that even in the low
+noise setting sparsication yields improvements. We note that the full-state model and ROM obtained from the
+implicit formulation are identical, as all discovered eigenpairs fall below the threshold (in (f)) and only unique
+pairs are selected to construct either model. We note that the 4D-ROM from the implicit formulation can achieve
+better accuracy with one dimension lower compared with EDMD and the sparse EDMD model identied using
+LARS. Moreover, while all eigenpairs from the implicit formulation are accurate, both EDMD and LARS yield
+also non-physical eigenfunctions. The overall L2prediction error on the test trajectory in the original state is
+summarized for the full-state models and ROMs in (b) and (c), respectively.
+For higher noise levels (Fig. 7), the performance dierences become more apparent. LARS still yields several
+more accurate eigenfunctions than EDMD, so that LARS and the LARS-ROM signicantly outperform EDMD
+and the EDMD-based ROM. The performance of EDMD does not improve here by truncating the SVD when
+computing the pseudo-inverse. The implicit formulation is more noise sensitive, as it is searching for eigenfunctions
+in the nullspace of a matrix 42, and is only able to discover one accurate eigenfunction. Interestingly, despite this
+caveat, the 2D model is able to outperform EDMD and the EDMD-based ROM. The implicit model is unable
+to predict the exact transient behavior; however, it accurately predicts the convergence to the steady state. The
+implicit ROM model, however, is insucient with just one eigenfunction '(x) =x1and is unable to predict
+the evolution of the second state x2. When selecting one or two additional eigenfunctions for the EDMD-based
+ROM (in yellow shown in (g) for two additional eigenfunctions, i.e. in total six eigenfunctions marked by blue
+and yellow in (f)), the prediction performance improves considerably, although it is still unable to predict the
+steady-state behavior.
+Summarizing, EDMD is suering from overtting and sparsity-promoting formulations can yield signicant
+performance enhancements. Model validation in terms of eigenfunctions is a crucial step and can be used to
+construct better performing and lower-dimensional reduced-order models. More generally, these results also
+demonstrate the importance of not just selecting good, but also the right eigenfunctions.
+6.2 Control design
+We now demonstrate control in intrinsic Koopman coordinates for the controlled system:
+d
+dtx1
+x2
+=x1
+(x2 x2
+1)
++Bu (50)
+where the control vector is B2R2. This system can be represented as a nite-dimensional, linear system in a spe-
+cial choice of observable functions, making it amenable to optimal control [20]. KRONIC in intrinsic coordinates
+provides a powerful alternative if the system does not allow for a fully controllable, linear representation.
+The system exhibits slow and fast dynamics for jjjjand has a single xed point at the origin. This
+nonlinear system can be embedded in a higher-dimensional space ( y1;y2;y3) = (x1;x2;x2
+1) where the unforced
+dynamics form a closed linear system in a Koopman-invariant subspace:
+d
+dt2
+4y1
+y2
+y33
+5=2
+40 0
+0 
+0 0 23
+5
+|{z}
+K2
+4y1
+y2
+y33
+5+2
+41 0
+0 1
+2y103
+5B
+|{z}
+=Byu: (51)
+However, Bymay be a function of y, and hence of state x, depending on the specic choice of B. Koopman
+eigenfunctions of the unforced system, i.e. B[0 0]T, are'=x1and'=x2 bx2
+1withb=
+ 2with
+eigenvalues and, respectively. These eigenfunctions remain invariant under the Koopman operator Kand can
+be interpreted as intrinsic coordinates. Note that 'p:='p
+are also Koopman eigenfunctions with eigenvalue p
+forp2N(andp2Zfor non-vanishing 'p).
+17
+Figure 8: LQR for B= [0 1]T,= 0:1 and= 1 using standard linearization, truncated Koopman in yand
+'(KRONIC) compared with the solution of the nonlinear control problem (TPBV) and feedback linearization:
+(a) phase plot and (b) cost evolution. KRONIC is outperforming all other approaches.
+The dynamics of the Koopman eigenfunctions are aected by the additional control term B6=[0 0]Taccording
+to (see also Eq. (31))
+d
+dt'=2
+40 0
+00
+0 0 23
+5'+2
+41 0
+ 2bx11
+2x103
+5Bu: (52)
+Here, the rst term represents the unforced, uncoupled, linear dynamics of the eigenfunctions and the second
+term a possibly state-dependent control term r'B, that incorporates the eect of control on each eigenfunction.
+The controller shall stabilize the unstable xed point at the origin if either orare unstable. The control
+objective is to minimize the quadratic cost function
+Jx=Z1
+0xTQx+Ru2dt (53)
+withQ= [1 0
+0 1] andR= 1, weighing state and control expenditures equally. Analogously, we can dene a cost
+function in observable functions,
+Jy=Z1
+0yTQyy+Ru2dt;Qy=hQ0
+0
+0 0 0i
+; (54)
+and in intrinsic coordinates,
+J'=Z1
+0'TQ''+Ru2dt;Q'=
+Q 0
+b
+0b b2
+: (55)
+Here, QyandQ'are chosen to yield the same cost in x. Linear optimal control is then directly applied to (52)
+to derive the control law, which is then incorporated in (50). The controller is linear in yand'and yields a
+nonlinear controller in the state x:
+uy= Cyy= Cy;1Cy;2
+x1
+x2
+ Cy;3x2
+1
+u'= C''= C';1C';2x1
+x2
+ (C';3 bC';1)x2
+1;
+where Cy2R13andC'2R13are the control gain vectors in observable or intrinsic coordinates, respectively.
+6.3 Stabilization with unstable fast dynamics
+First, we consider the system with = 0:1 and= 1 with an unstable x2direction. The control vector is
+B= [0 1]T, resulting in a constant vector in yor'coordinates, By=B'= [0 1 0]T. Note that the rst direction
+is uncontrollable, but also stable.
+18
+Figure 9: Control for B= [1 0]T,= 0:1 and= 1 comparing KRONIC (56) by solving the SDRE, Num.
+TPBV, and LQR on the linearized dynamics: (a) phase plot, and (b) cumulative control performance over T= 50
+time units. Note that the cost for KRONIC can not be directly compared with TPBV and linear. LQR, as the
+controller in the latter two is optimized with respect to Jx, while the former is optimized for J'.
+Standard LQR results are compared (see Fig. 8) for the linearized dynamics, truncated Koopman system in
+y, truncated Koopman system in '(KRONIC), as well as with feedback linearization [59] ( uFL=x2
+1 CFLx)
+and with numerically solving the nonlinear control problem as a two-point boundary value problem (TPBV),
+with performance evaluated in terms of the cumulative cost ^Jt
+x=Pt
+=0Jx(). Both controllers, in observable
+functions and intrinsic coordinates, achieve the same performance and outperform linearized LQR and feedback
+linearization. The results for the truncated Koopman system in observables correspond to those presented in [20].
+There is no dierence between those results and the control results of the system in intrinsic coordinates, as
+these systems are connected via an invertible linear transformation. One advantage of a formulation in intrinsic
+coordinates will become apparent in the next case, where the stable and unstable directions are reversed.
+6.4 Stabilization with unstable slow dynamics
+We now consider (50) where the stable and unstable directions are reversed, i.e. = 0:1 and= 1. The control
+input now aects the rst state x1withB= [1 0]T, otherwise this state is uncontrollable. As elaborated in [20],
+in this case the linear system in observables (51) will become nonlinear in the control term and, more importantly,
+will become unstabilizeable as the third state y3has a positive eigenvalue 2 . Analogously, the Koopman system
+in intrinsic coordinates has an uncontrollable, unstable direction in '2. However, the dynamics of the Koopman
+eigenfunctions are uncoupled, thus the third direction can be discarded and the controller is developed in the
+controllable subspace:
+d
+dt'
+'
+=0
+0'
+'
++1
+ 2bx1
+u: (56)
+Note that the third direction 2(x) is a harmonic of (x), i.e.,2=2
+. Thus, these two directions may not be
+independently controllable with a single input. Here, the controller for xis determined by solving the SDRE (see
+Sec. 4.3) at each time instant to account for the nonlinear control term. In a truncated Koopman eigenfunction
+system like in this example, the weights in J'can generally not be modied to directly replicate the cost Jx.
+Here, the weights for JxareQ=eye(2) andR= 1, and for J':=J(';u) are Q'=QandR'= 4R. The
+choice forR'ensures a fair comparison by enforcing the same applied energy input for all methods.
+Performance results are summarized in Fig. 9. It is also possible to combine KRONIC with MPC allowing
+for more general objective functions. Then, the control could be formulated in terms of Jxby computing the
+inverse' 1:Rr!Rnif it exists or estimating xfrom'using, e.g., multidimensional scaling as in [58]. Control
+in Koopman intrinsic coordinates allows one to discard uncontrollable, unstable directions, for which standard
+control toolboxes such as Matlab's lqrfail. Note that feedback linearization fails in this case too: The control
+law is of the form uFL=x 1
+1CFLx. As the system approaches the origin, the control input becomes unboundedly
+large.
+19
+Figure 10: KRONIC demonstrated for several Hamiltonian systems.
+7 Example: Hamiltonian energy control
+Conserved quantities, such as the Hamiltonian, are Koopman eigenfunctions associated with the eigenvalue = 0.
+Hamiltonian systems represent a special class of systems for which we can easily discover a Koopman eigenfunction
+directly from data.
+The dynamics of a Hamiltonian system are governed by
+d
+dtq=@H
+@p;d
+dtp= @H
+@q; (57)
+where qandpare the generalized state and momenta vectors, respectively. The Hamiltonian H=H(q;p)
+considered here is time-independent, representing the conserved energy in the system. Trajectories of the system
+evolve on constant energy hypersurfaces f(q;p) :H(q;p) =Eg, which may be interpreted as oscillatory modes.
+Thus, energy level stabilization is a form of oscillation control and corresponds to stabilizing invariant manifolds
+in phase space. Also nonlinear xed point stabilization may correspond to stabilizing a particular value of the
+Hamiltonian energy.
+Consider the nonlinear, control-ane Hamiltonian systemd
+dtx=f(x) +Buwhere f= [@H=@p @H=@q]T,
+with state vector x= [q p]T2Rn, multi-channel input vector u2Rq, and constant control matrix B2Rnq.
+We may develop the control directly for the eigenfunction equation
+d
+dt'= 0'+rx'Bu:=B'u; (58)
+where'=H. This equation also represents the energy conservation law of the system: A change in the
+energy, i.e. the Hamiltonian, corresponds to the external supplied work via u. The innite-time horizon cost
+function to be minimized is J= limt!11
+2Rt
+0Q(H(x(t)))2+uT(t)Ru(t)dtwith scalar Qpenalizing energy
+deviations and Rpenalizing the cost expenditure. Assuming a single input u, the control law is given by
+u= sign(BH)p
+Q=RH(x) feeding back the current energy level H(x). The ratio Q=R determines how aggressive
+the controller is. A more aggressive controller, with Q>R , leads to a faster but also more costly convergence to the
+desired state, and vice versa. For the specic case Q=R, the control law reduces further to u= sign(BH)H(x).
+Note that this feedback control law is linear in the Hamiltonian function, but nonlinear in the state x. In the
+following, we demonstrate the control approach for several Hamiltonian systems by solving the SDRE; an overview
+is provided in Fig. 10, where colored curves represent Koopman controlled trajectories. We assume Q=R= 1
+for all examples.
+20
+Figure 11: Comparison of the energy control control strategy [7] and SDRE for the pendulum with "= 0:1. The
+color coding in the phase plots depicts the respective state-dependent control
+7.1 Frictionless pendulum
+A frictionless pendulum given by a negative cosine potential V(x) = cos(x1) is steered towards dierent energy
+levelsHREF(x) =E8x,E 2 f  1;0;1;2g, with feedback law u= C(H(x) HREF) = C(H(x) E).
+Minimizing the Hamiltonian drives the system to the equilibrium point at the origin with E= 1 (green curve
+in Fig. 10). Koopman control has improved performance over an LQR controller based on linearized dynamics
+near the center.
+We further compare the controller resulting from solving the state-dependent Riccati equation with an energy-
+based control (EC) [7], which is developed from physical considerations:
+SDRE :B=0
+1
+;_H=x2u; u = sign(x2)(H(x) E) (59a)
+EC:B=0
+ cos(x1)
+;_H= x2cos(x1)u; u = sign( x2cos(x1))(H(x) E) (59b)
+If the functional representation of the Koopman eigenfunction, or specically here the Hamiltonian energy func-
+tion, is identied from data as in KRONIC, the feedback gain can be precomputed and does not need to be
+computed on-line. In Fig. 11, the state-dependent feedback law is shown for both controllers as color-coded phase
+plots, where negative values are depicted by blue and positive values by red. The extrema are identical. The
+control input from the EC controller is here slightly modied compared with (59b) by moving the term  cos(x1)
+intouitself. Then the eective control and performance are displayed in terms of ^ u= cos(x1)ufor a fair
+comparison; otherwise, the EC controller would appear less performing. The pendulum dynamics are locally
+controllable as long as udoes not vanish, which is achieved if x16==2 andx26=0 for the EC controller and if x26=0
+for the SDRE controller. Both controllers yield a bang-bang strategy and successfully steer the system to the
+desired energy level, though the SDRE controller is performing slightly better.
+7.2 Dung system
+Certain damped or forced oscillators are described by the Dung equation (Fig. 10). The system is steered
+towards the energy level E= 0, which corresponds to the separatrix cycle (yellow dashed lines) yielding a periodic
+solution. The origin is a saddle point leading to a homoclinic orbit dened by x
+2=x
+1p
+1 1(x
+1)2=2 for
+x
+1p
+2. It is possible to stabilize the center xed points by commanding a lower reference energy; however,
+because of symmetry in the system, both xed points are indistinguishable in eigenfunction coordinates. This
+illustrates a fundamental uncertainty associated with Koopman eigenfunction control.
+For the eigenvalue = 0, (42) becomes   (X;_X)=0, and hence a sparse is sought in the null-space of
+  (X;_X). Polynomials up to fourth order are employed to construct a library of candidate functions in (40)-
+(41). A single time series for t2[0;10] with time step  t= 0:001 starting at the initial state x0= [0; 2:8]T
+is collected. Thus, each row in (40) and (41) corresponds to a time instant of the trajectory. The prediction
+and associated error of the identied eigenfunction are displayed in Fig. 12. Here, the energy is predicted over
+the full state space using the identied eigenfunction, the Hamiltonian energy function, which is trained from a
+single trajectory. The magnitude of the error is very small of O(10 17). However, the eigenfunction evaluate on
+a trajectory would oscillate with a tiny amplitude around the true energy level.
+21
+Figure 12: Prediction over the state space and error using the discovered Hamiltonian for the Dung system
+trained on a single trajectory.
+Figure 13: Dependency in increasing number of measurements for the Dung system: (a) error in the Koopman
+eigenfunction, (b) error in (42) with estimated , (c) computational time to solve for in (42), and (d) cumulative
+control performance ^JoverT= 10 time units.
+The error of the regression problem, the computational time for identifying the eigenfunction, and the control
+performance (steering towards E= 0) for an increasing number of measurements in the estimation step are
+displayed in Fig. 13. The identied Koopman eigenfunction with = 0 from 1792 measurements (kink in
+Fig. 13(b)) is '(x) = [x2
+1x2
+2x4
+1] [ 2
+32
+31
+3]Twith errorO(10 8). This eigenfunction represents a perfect recovery of
+the Hamiltonian up to a scaling, as a Hamiltonian multiplied by a constant scalar is also a conserved quantity.
+Using a larger time step of  t= 0:05, 56 measurements are sucient to learn the eigenfunction with error
+O(10 6).
+8 Example: Basin hopping in a double well
+A Koopman eigenfunction represents a topography over the state; e.g., the Hamiltonian function depicts the energy
+landscape of the system. Trajectory control of a set of particles based on a single Koopman eigenfunction is driven
+by the dierence between the current and desired value in this topography. While the Koopman eigenfunction
+is a global, linear representation of the system, the control of the particle is local, e.g. by solving a suboptimal
+SDRE. This is illustrated for a particle in an asymmetric double potential V(x1) =1
+4x4
+1 1
+2x2
+1 a
+3x3
+1+ax1with
+a= 0:25 (Fig. 14(a)). The Hamiltonian is H=x2
+2=2 +V(x1) and the dynamics are
+d
+dtx1
+x2
+=x2
+ x3
+1+ax2
+1+x1 a
++1 0
+0 1
+u: (60)
+22
+Figure 14: Switching control strategy based on KRONIC and the homoclinic orbit to jump between wells: (a)
+potential function V(x1) showing initial conditions (blue and cyan) and extrema (red), (b) phase plot with
+unforced (yellow) and controlled trajectories (blue and cyan), (c) instantaneous cost function and (d) total energy.
+For an initial condition in the left well (blue dots in Fig. 14(a)) the controller will fail to steer the state to the
+xed point x= [1 0]Tin the center of the right well as the trajectory will become trapped in the bottom of
+the left well. Instead, the controller must rst increase the energy level to the saddle transition, and after the
+trajectory passes to the right basin, the energy can be decreased further.
+We propose a switching control strategy that exploits the Koopman eigenfunctions to transport particles
+between basins of dierent heights associated with dierent xed points. In particular, the following control
+strategy steers particles from the left to the right basin:
+u=8
+><
+>: C(x)(H(x) H([a;0])) ifH(x)<H([a;1]);
+0 if H(x) =H([a;1])andx1a;
+ C(x)(H(x) H([1;0])) ifx1>a:
+A particle on an energy level lower than H([a;1]), associated with the saddle point, is rst steered onto a trajectory
+with slightly higher energy than the homoclinic orbit connecting the two basins. On this orbit, control is turned
+o and the particle travels to the right well exploiting the intrinsic system dynamics. As soon as it passes the
+saddle point, control is turned on again directing it to the lowest energy level H([1;0]) at the desired xed point.
+The controller is demonstrated for two initial conditions, as shown in Fig. 14(b-d), driving both to the desired
+energy level.
+This controller can be fully derived from data: First, relevant Koopman eigenfunctions can be identied from
+data, as shown in Sec. 5. By analyzing roots and extrema of the eigenfunction corresponding to = 0, equilibrium
+and saddle points can be identied. The homoclinic and heteroclinic orbits associated with the saddles can be
+used as natural transit paths between basins. In each basin, eigenfunction control drives the system to the desired
+state. Future applications for this control strategy include space mission design and multi-stable systems such as
+proteins.
+9 Example: Double Gyre ow
+We now consider a high-dimensional, spatially evolving, non-autonomous dynamical system, with time-dependent
+Koopman eigenfunctions. The periodically driven double gyre ow models the transport between convection cells
+in the Rayleigh-B enard ow due to lateral oscillations, yielding a simple model for the gulf stream ocean front [105].
+We employ here the same parameters as in Shadden et al.'s seminal work on Lagrangian coherent structures [103].
+The time-dependent stream function is
+	(x;y;t ) =Asin(f(x;t)) sin(y) (61a)
+withf(x;t) ="sin(!t)x2+ (1 2"sin(!t))x (61b)
+withA= 0:25,!= 2, and"= 0:25 on a periodic domain [0 ;2][0;1]. The velocity eld v= [vxvy]Tis given
+byvx= @	
+@yandvy=@	
+@x.
+23
+Figure 15: Controlled double gyre ow: (a) autonomous with "= 0 steering an ensemble of drifters (initial
+condition depicted by red dots) to the level 	 = 0 :2, (b) a single drifter trajectory (unforced and controlled) in
+the non-autonomous double gyre ow with "= 0:25, and (c) corresponding stream function values.
+The control objective is to steer an ensemble of trajectories to a level set of the stream function. This can be
+interpreted as the control of an ensemble of active drifters or autonomous gliders in the ocean, which drift due to
+hydrodynamic forces associated with vxandvy. The dynamics of the ith drifter ared
+dt[xiyi] =h
+vx+isin(i)
+vy+icos(i)i
+=
+[vxvy] + [1 0
+0 1]u.
+For the autonomous and unforced ow with "= 0, the stream function is a Koopman eigenfunction associated
+with the eigenvalue = 0. The forced system becomes:
+d
+dt	(x;y) =h
+@	
+@x@	
+@yi
+ @	
+@y
+@	
+@x
+|{z}
+=0+h
+@	
+@x@	
+@yi
+B
+|{z}
+B	(x;y)u: (62)
+Without control, the stream function 	 is conserved, as it is the negative of the Hamiltonian. The particles follow
+streamlines, which are isolines of the stream function.
+In the non-integrable case, with ">0, the total derivative of the stream function is given by
+d
+dt	(x;y;t ) =A	(x;y;t )	 +B	(x;y;t )u (63)
+where the vanishing term in (62) is not displayed. The rst term in (63) arises from the time derivative
+@
+@t	(x;y;t ) and is reformulated into a linear-like structure in 	: @	=@t=Acos(f(x;t)) sin(y)(@f=@t ) =
+tan 1(f(x;t))(@f=@t )	 =A		. The second term is the time-dependent analogue of the corresponding term
+in (62).
+For both cases, "= 0 and">0, a controller is developed for the stream function. The control is then applied
+to an ensemble of drifters to steer them towards the level set 	 = 0 :2. As in the previous examples a quadratic
+cost function with Q= 1 and R= (1 0
+0 1) is considered. In both cases, B	andA	depend on the state, and
+for" >0 also on time. Thus, the state-dependent Riccati equation is solved at each point in space and time.
+The controller successfully drives an ensemble of drifters distributed over the domain to the desired level, as
+shown in Fig. 15(a). Trajectories are integrated using a 4th-order Runge-Kutta scheme from t2[0;10]. Example
+trajectories of the non-autonomous system, with and without control, are presented in Fig. 15(b-c).
+Note that in the non-autonomous case, the reference isocurve 	 REF = 0:2 (white dashed in Fig. 15(b))
+oscillates from left to right while being periodically compressed and expanded in x-direction. The particles follow
+the moving isocurve resulting in a small oscillation around the desired value (see Fig. 15(c)).
+Koopman eigenfunction control can be interpreted in two ways: (1) applying local control to internally driven
+swimmers or particles in an external eld such as a uid ow or magnetic eld; or (2) driving the external eld
+in which the swimmers or particles drift. In the latter case, control drives the amplitude of the stream function
+at each point to the desired value. For the double gyre ow with a constrained spatial domain, the spatially
+distributed gain may be precomputed.
+24
+Figure 16: Comparison of Koopman system identication methods for control demonstrated for the Dung
+system. Here, EDMDc-MPC requires knowledge of the Koopman eigenfunction. The employed weights are
+QH= 1 andR= 1 forJ', and Q=eye(2) andR= 1 forJx(instantaneous cumulative costs are shown here).
+The prediction and control horizon for MPC is in both cases N= 5.
+10 Discussion and conclusions
+In summary, we extend the Koopman operator formalism to include actuation, and demonstrate how a nonlinear
+control problem may be converted into a bilinear control problem in eigenfunction coordinates. Next, we have
+presented a data-driven framework to identify leading eigenfunctions of the Koopman operator and sparsity-
+promoting extensions to EDMD. We nd that lightly damped or undamped eigenfunctions may be accurately
+approximated from data via regression, as these eigenfunctions correspond to persistent phenomena, such as
+conserved quantities. Moreover, these are often the structures that we seek to control, since they aect long-
+time behavior. We have demonstrated the ecacy of this new data-driven control architecture on a number of
+nonlinear systems, including Hamiltonian systems and a challenging high-dimensional ocean mixing model. These
+results suggest that identifying and controlling Koopman eigenfunctions may enable signicant progress towards
+the ultimate goal of a universal data-driven nonlinear control strategy.
+Finite-dimensional approximations of the Koopman operator are typically obtained as its projection onto a
+specied basis, which may suer from a well-known closure issue. The matrix Kis usually large, as the state is
+lifted to a high-dimensional space, and the resulting model rarely closes and spurious eigenfunctions may appear.
+Building on EDMD, we construct a reduced-order model using validated Koopman eigenfunctions, so that the
+resulting model will be closed by design . Both KRONIC and EDMD with control [65] provide Koopman-based
+system identication that can be leveraged for model-based control, such as MPC or LQR, as shown in Fig. 16.
+However, there are a number of key dierences: (1) KRONIC directly identies Koopman eigenfunctions, while
+EDMDc approximates the Koopman operator restricted to a high-dimensional span of observables. (2) EDMD
+augments the state vector with nonlinear measurements, increasing the dimension of the system. In contrast,
+KRONIC yields a reduced-order model in terms of a few Koopman eigenfunctions. (3) Control is incorporated in
+EDMDc as an approximated ane linear term. KRONIC derives an expression for how eigenfunctions are aected
+by control through the generator equation. However, this may render the control term bilinear (nonlinear in the
+state). (4) The cost function for EDMDc is dened in the state or measurement space, while KRONIC denes
+the cost in eigenfunctions; note that these cost functions are not always transferable. (5) Finally, KRONIC
+readily admits more complicated solutions, such as limit cycle stabilization, as these correspond to level sets of
+the eigenfunctions.
+As with previous studies, this work further cements the importance of accurate identication and represen-
+tation of Koopman eigenfunctions. Future work will continue to develop algorithms to extract approximate
+eigenfunctions from data, and it is likely that these eorts will benet from advances in machine learning. In
+addition, there is a fundamental uncertainty principle in representing Koopman eigenfunctions, as these eigenfunc-
+tions may themselves be irrepresentable, as are the long-time ow maps for chaotic systems. Instead of seeking
+perfect Koopman eigenfunctions, which may not be attainable, it will be important to incorporate uncertainty
+quantication into the data-driven Koopman framework. Model uncertainties may then be managed with robust
+control.
+The present work also highlights an important choice of perspective when working with Koopman approxima-
+tions. Generally, Koopman eigenfunctions are global objects, such as the Hamiltonian energy function. Although
+a global, linear representation of the dynamics is appealing, there is also information that is stripped from these
+25
+representations. For example, in the case of the Hamiltonian eigenfunction, information about specic xed
+points and spatial locations are folded into a single scalar energy. If the Hamiltonian is viewed as a topography
+over the phase space, then this eigenfunction only carries information about the altitude , and not the location .
+In contrast, Lan and Mezi c [72] show that it is possible to extend the Hartman-Grobman theorem to the entire
+basin of attraction of certain xed points and periodic orbits, providing a local linear embedding of the dynamics.
+Connecting these perspectives will continue to yield interesting and important advances in Koopman theory. In
+addition, there are known connections between the eigenvalues of geometric structures in phase space and the
+spectrum of the Koopman operator [83]. This knowledge may guide the accurate identication of Koopman
+eigenfunctions.
+Formulating control in terms of Koopman eigenfunctions requires a change of perspective as the control
+objective may now be dened in eigenfunctions coordinates. Eigenfunctions characterize, e.g., geometric properties
+of the system, such as xed points and limit cycles, as particular level sets, and the control objective can be
+equivalently formulated to steer the system towards these objects. Further, particular eigenfunctions represent
+coherent structures, i.e. persistent features of the system, which have been targeted in control for a long time.
+However, the specic selection of eigenfunctions to control and their interpretation regarding specic control
+goals remains an open problem. Nevertheless, it may still be possible to formulate the control in the original
+state space, e.g. by incorporating the state as observables, modifying the state weight matrix appropriately,
+or by learning an approximation of the inverse mapping [58], which can be more easily incorporated in the
+context of model predictive control. This also motivates additional work to understand how controllability and
+observability in these coordinates relate to properties of the nonlinear system. The degree of observability and
+controllability will generally vary with dierent eigenfunctions, so that it may be possible to obtain balanced
+realizations. Moreover, classic results, such as the PBH test, indicate that multi-channel actuation may be
+necessary to simultaneously control dierent eigenfunctions corresponding to the same eigenvalue, such as the
+Hamiltonian energy and conserved angular momentum. The additional degrees of freedom arising from multi-
+channel inputs can also be used for eigenstructure assignment to shape Koopman eigenfunctions [50]. Thus,
+actuation may modify both the shape of coherent structures (i.e., Koopman modes associated with a particular
+eigenfunction) and their time dynamics. It may also be possible to use Koopman linear embeddings to optimize
+sensor and actuator placement for nonlinear systems.
+Finally, as undamped or lightly damped eigenfunctions correspond to conserved or nearly conserved quantities,
+there are many potential applications of the proposed control strategy. For example, symmetries give rise to
+other conserved quantities, which will likewise yield new Koopman eigenfunctions. In many physical systems,
+simultaneously controlling the system energy and angular momentum may be an important goal. Much of the
+present work was formulated with the problem of space mission design in mind. Energy ecient transport
+throughout the solar system has long driven advances in theoretical and computational dynamical systems, and
+may stand to benet from control based on Koopman eigenfunctions. More generally, there is a broad range
+of applications that stand to benet from improved nonlinear control, include self-driving cars, the control of
+turbulence, suppressing the spread of disease, stabilizing nancial markets, human machine interfaces, prosthetics
+and rehabilitation, and the treatment of neurological disorders, to name only a few.
+Acknowledgments
+EK acknowledges funding by the Moore/Sloan foundation, the Washington Research Foundation, and the eScience
+Institute. SLB and JNK acknowledge support from the Defense Advanced Research Projects Agency (DARPA
+contract HR011-16-C-0016) and the UW Engineering Data Science Institute, NSF HDR award #1934292. SLB
+acknowledges support from the Army Research Oce (W911NF-17-1-0306) and the Air Force Oce of Scien-
+tic Research (FA9550-16-1-0650). JNK acknowledges support from the Air Force Oce of Scientic Research
+(FA9550-15-1-0385). The authors gratefully acknowledge many valuable discussions with Josh Proctor about
+Koopman theory and extensions to control. We would also like to acknowledge Igor Mezi c, Maria Fonoberova,
+Bernd Noack, Clancy Rowley, Sam Taira, and Lionel Mathelin.
+26
+A Optimal control
+We begin by formulating optimal control for the full nonlinear system in (16). This procedure then simplies
+considerably for linearly factorizable or linear dynamics, motivating Koopman embeddings.
+A.1 Hamilton-Jacobi-Bellman equation
+A nonlinear optimal control formulation for the system in (16) can be established using dynamic programming [15].
+This relies on Bellman's principle of optimality [13], stating that an optimal trajectory remains optimal when the
+problem is initialized at intermediate steps, and leads to the Hamilton-Jacobi-Bellman (HJB) equation [12]:
+0 = inf
+ufL(x;u) +rxJf(x;u)g= inf
+uH(x;rxJ;u): (64)
+If the HJB equation (64) has a continuously dierentiable, positive denite solution J(x) [15], also referred to
+as an optimal value function, then the optimal control law is
+u= arg min
+uH
+x;@J
+@x;u
+: (65)
+The solution is a state-feedback control law, i.e. a closed-loop controller, which is optimal for any initial condition
+and solved for all states at once. Solving this nonlinear PDE is computationally challenging and only feasible for
+low-dimensional problems. If solved, however, the HJB equation provides a global solution to the optimal control
+problem.
+A.2 Euler-Lagrange equations
+An alternative approach searches for the optimal trajectory under certain constraints using a variational argument
+and Pontryagin's minimum (or maximum) principle [92]. Here, a small variation around an optimal trajectory
+is considered, for which the change in cost shall vanish. The sequence of control inputs that solves this problem,
+constrained by the state dynamics (16), constitutes the optimal control. However, the Euler-Lagrange equations
+provide only necessary, but not sucient, conditions, so that the solution may only converge to a local minimum
+and the control is generally not optimal in practice.
+Similar to (64), a Lagrange-type expression is formulated for the control Hamiltonian H(x;u;z) :=L(x;u) +
+zTf(x;u), where zis referred to as Lagrange multiplier, co-state or adjoint variable. A necessary condition is
+the minimization of the control Hamiltonian (i.e., Pontryagin's minimum principle), leading to the following set
+of coupled ordinary dierential equations:
+_x=@HT
+@z(x;u;z) = f(x;u) (66a)
+_z= @HT
+@x(x;u;z) (66b)
+with stationarity condition@HT
+@u(x;u;z) = 0 and transversality boundary conditions x(0) = x0and limT!1z(T) =
+0. Then, the optimal control is given by
+u= arg min
+uH(x;u;z): (67)
+IfL() and f(x();u()) are concave, then the necessary condition is also sucient and any path that satises
+these conditions also solves the optimal control problem.
+The Euler-Lagrange equations (66) lead to an optimal open-loop control: The control upoint-wise minimizes
+the control Hamiltonian H(x(t);u;z(t)). This two-point boundary value (TPBV) problem is solvable for higher-
+dimensional problems in contrast to the HJB equation. However, in practice, only a local minimum is found. For
+systems with a high number of degrees of freedom, such as uid ows, expensive direct and adjoint simulations
+render this approach infeasible, instead motivating the use of reduced-order models.
+27
+A.3 Linear or factorized systems
+The control problem above simplies considerably for linear systems of the form
+d
+dtx(t) =Ax+Bu;x(0) = x0: (68)
+Using ansatz z=Pxfor the co-state, the optimal control is given by
+u= R 1BTz= R 1BTPx; (69)
+with constant gain C=R 1BTPand where the positive semi-denite matrix P2Rnnis the solution to the
+algebraic Riccati equation (ARE) [107]:
+Q+PA+ATP PBR 1BTP=0: (70)
+For this special case, referred to as the linear quadratic regulator (LQR), the Euler-Lagrange equations and the
+HJB equation lead to the same solution, using a quadratic ansatz for co-state and value function. The ARE (70)
+can be solved upfront and yields a global state-feedback control law. This simplicity motivates eorts to nd linear
+representations for nonlinear systems and explains why nonlinear embeddings via Koopman operator theory are
+so appealing.
+For later reference, we point out an extension of LQR to control-ane, nonlinear systems by factoring the
+governing equations into a linear-like structure, as in (68), where the state transition matrix and actuation matrix
+become state-dependent:
+d
+dtx(t) =A(x)x+B(x)u;x(0) = x0: (71)
+For these systems, it is common to solve the ARE point-wise, i.e. at each point xin time, leading to the state-
+dependent Ricatti (SDRE) equation [90]
+Q+PA(x) +AT(x)P PB(x)R 1BT(x)P=0 (72)
+where the weight matrices QandRmay also be state dependent. In contrast to the ARE, which can be pre-
+computed o-line, the SDRE is solved on-line at each x. The required computational power and memory during
+the on-line phase may render it infeasible for high-dimensional systems. The SDRE generalizes LQR for nonlinear
+systems, retaining a simple implementation and often yielding near optimal controllers [30]. We refer to [29, 32]
+for a review on the SDRE and related discussions, e.g. on controllability and stability.
+B Eect of misrepresentation of eigenfunctions
+We examine the eect of an error in the representation of a Koopman eigenfunction on the closed-loop dynamics
+based on (33) and provide an upper error bound. We consider the following cost function
+J=Z
+Q'2(x) +Ru2dt (73)
+where a single eigenfunction '(x) is to be controlled and with positive weights QandR. Assuming a control-ane
+system _x=f(x) +B(x)u, the eigenfunction satises
+_'(x) ='(x) +C(x)u (74)
+withC(x) :=r'(x)B(x). Here,'is the Koopman eigenfunction associated with the autonomous dynamics
+satisfying _'=r'(x)f(x) ='(x). We assume full-state measurements xare available and knowledge of how
+the control aects these measurements B(x). Thus, we do not have to represent the control term C(x) in terms
+of eigenfunctions but can evaluate it exactly given the current measurement xand knowledge of '(x). Solving
+the scalar Riccati equation (33) analytically yields
+P=1
+C(x)R 1CT(x)
++q
+2+QC(x)R 1CT(x)
+: (75)
+28
+The feedback control is then given by
+u= R 1CTP'= R 1CT(x)
+C(x)R 1CT(x)
++q
+2+QC(x)R 1CT(x)
+'(x) (76)
+and the resulting closed-loop dynamics are
+_'(x) = q
+2+QC(x)R 1CT(x)'(x) = p'(x); (77)
+where:=2+QC(x)R 1CT(x). We examine the eect of a misrepresentation of the eigenfunction:
+^'(x) :='(x) +" (x) (78)
+where" (x) is the discrepancy to the true eigenfunction '(x) with small ". The dynamics of ^ '(x) are given in a
+factorized representation by
+_^'(x) = _'(x) +"_ (x) ='(x) +C(x)u+"r (f(x) +B(x)u)
+='(x) +"r (x)f(x)
+'(x) +" (x)^'(x) + (C(x) +"D(x))u (79)
+withD(x) :=r (x)B(x). The upper bound for the error in due to the misrepresentation of '(x) is
+j ^j=2+QC(x)R 1CT(x) '(x) +"r (x)f(x)
+'(x) +" (x)2
+ Q(C(x) +"D(x))R 1(C(x) +"D(x))T
+=2 "Q(CR 1DT+DR 1CT) "2QDR 1DT 2'2+"2'r f+"2(r f)2
+('+" )2
+2 "Q(CR 1DT+DR 1CT) "2QDR 1DT 2'2+"2'r f+"2(r f)2
+'2(x)
+= "Q(CR 1DT+DR 1CT) "2QDR 1DT "2'r f+"2(r f)2
+'2
+= "
+QCR 1DT+QDR 1CT+ 2r f
+'(x)
+ "2
+QDR 1DT+(r f)2
+'2(x): (80)
+C Series solutions for eigenfunctions
+It is possible to solve the PDE in (37) for eigenfunctions using standard techniques, such as Taylor or Laurent
+series.
+C.1 Linear dynamics
+Consider linear dynamics
+d
+dtx=x: (81)
+Assuming a Taylor series expansion for '(x):
+'(x) =c0+c1x+c2x2+c3x3+
+then the gradient and directional derivatives are given by:
+r'=c1+ 2c2x+ 3c3x2+ 4c4x3+
+r'f=c1x+ 2c2x2+ 3c3x3+ 4c4x4+
+Solving for terms in (37), c1= 0 must hold. For any positive integer , only one coecient may be nonzero.
+Specically, for =k2Z+, then'(x) =cxkis an eigenfunction for any constant c. For instance, if = 1, then
+'(x) =x.
+29
+C.2 Quadratic nonlinear dynamics
+Consider a nonlinear dynamical system
+d
+dt=x2: (82)
+There is no Taylor series that satises (37), except the trivial solution '= 0 for= 0. Instead, we use a Laurent
+series:
+'(x) =+c 3x 3+c 2x 2+c 1x 1+c0
++c1x+c2x2+c3x3+:
+The gradient and directional derivatives are given by:
+r'=  3c 3x 4 2c 2x 3 c 1x 2+c1+ 2c2x
++ 3c3x2+ 4c4x3+
+r'f=  3c 3x 2 2c 2x 1 c 1+c1x2+ 2c2x3
++ 3c3x4+ 4c4x5+:
+All coecients with positive index are zero, i.e. ck= 0 fork1. The nonpositive index coecients are given by
+the recursion ck+1=kck, fork 1. The Laurent series is
+'(x) =c0
+1 x 1+2
+2x 2 3
+3!x 3+
+=c0e =x:
+This holds for all 2C. There are also other Koopman eigenfunctions that can be identied from the series.
+C.3 Polynomial nonlinear dynamics
+For a more general nonlinear dynamical system
+d
+dt=axn; (83)
+'(x) =e
+(1 n)ax1 nis an eigenfunction for all 2C.
+References
+[1] I. Abraham, G. De La Torre, and T. D. Murphey. Model-based control using Koopman operators.
+arXiv:1709.01568 , 2017.
+[2] F. Allg ower, T. A. Badgwell, J. S. Qin, J. B. Rawlings, and S. J. Wright. Nonlinear predictive control and
+moving horizon estimation: an introductory overview. In Advances in control , pages 391{449. Springer,
+1999.
+[3] F. Allg ower, R. Findeisen, and Z. K. Nagy. Nonlinear model predictive control: From theory to application.
+J. Chin. Inst. Chem. Engrs , 35(3):299{315, 2004.
+[4] H. Arbabi, M. Korda, and I. Mezi c. A data-driven koopman model predictive control framework for nonlinear
+partial dierential equations. In Proceedings of the IEEE Conference on Decision and Control , pages 6409{
+6414. IEEE, 2019.
+[5] H. Arbabi and I. Mezi c. Ergodic theory, dynamic mode decomposition and computation of spectral prop-
+erties of the Koopman operator. arXiv preprint arXiv:1611.06664 , 2016.
+[6] K. B. Ariyur and M. Krsti c. Real-Time Optimization by Extremum-Seeking Control . Wiley, 2003.
+30
+[7] K. J. Astr om and K. Furuta. Swinging up a pendulum by energy control. Automatica , 36(2):287{295, 2000.
+[8] S. Bagheri. Koopman-mode decomposition of the cylinder wake. J. Fluid Mech. , 726:596{623, 2013.
+[9] B. Bamieh and L. Giarr e. Identication of linear parameter varying models. Int. J. Robust and Nonlinear
+Control , 12:841{853, 2002.
+[10] S. P. Banks. Innite-dimensional Carleman linearization, the Lie series and optimal control of non-linear
+partial dierential equations. International journal of systems science , 23(5):663{675, 1992.
+[11] S. C. Beeler and D. E. Cox. State-dependent Riccati equation regulation of systems with state and control
+nonlinearities. NASA/CR-2004-213245 , 2004.
+[12] R. Bellman and R. Kalaba. Selected papers on mathematical trends in control theory . Dover, 1964.
+[13] R. E. Bellman. Dynamic programming . Princeton University Press, Princeton, N.J., 1957.
+[14] E. Berger, M. Sastuba, D. Vogt, B. Jung, and H. B. Amor. Estimation of perturbations in robotic behavior
+using dynamic mode decomposition. J. Adv. Robotics , 29(5):331{343, 2015.
+[15] D. P. Bertsekas. Dynamic Programming and Optimal Control . Athena Scientic, 2005.
+[16] S. A. Billings. Nonlinear system identication: NARMAX methods in the time, frequency, and spatio-
+temporal domains . John Wiley & Sons, 2013.
+[17] R. W. Brockett. Volterra series and geometric control theory. Automatica , 12(2):167{176, 1976.
+[18] B. W. Brunton, L. A. Johnson, J. G. Ojemann, and J. N. Kutz. Extracting spatial{temporal coherent
+patterns in large-scale neural recordings using dynamic mode decomposition. J. Neuroscience Methods ,
+258:1{15, 2016.
+[19] S. L. Brunton, B. W. Brunton, J. L. Proctor, E. Kaiser, and J. N. Kutz. Chaos as an intermittently forced
+linear system. Nature Commun. , 8(19), 2017.
+[20] S. L. Brunton, B. W. Brunton, J. L. Proctor, and J. Kutz. Koopman invariant subspaces and nite linear
+representations of nonlinear dynamical systems for control. PLoS ONE , 11(2):e0150171, 2016.
+[21] S. L. Brunton and B. R. Noack. Closed-loop turbulence control: Progress and challenges. Appl. Mech. Rev. ,
+67:050801{1{050801{48, 2015.
+[22] S. L. Brunton, J. L. Proctor, and J. N. Kutz. Discovering governing equations from data by sparse identi-
+cation of nonlinear dynamical systems. Proc. Natl. Acad. Sci , 113(15):3932{3937, 2016.
+[23] S. L. Brunton, J. L. Proctor, J. H. Tu, and J. N. Kutz. Compressed sensing and dynamic mode decompo-
+sition. J. Comp. Dyn. , 2(2):165{191, 2015.
+[24] M. Budi si c and I. Mezi c. Geometry of the ergodic quotient reveals coherent structures in ows. Physica D ,
+241(15):1255{1269, 2012.
+[25] M. Budi si c, R. Mohr, and I. Mezi c. Applied Koopmanism. Chaos , 22(4):047510, 2012.
+[26] E. F. Camacho and C. B. Alba. Model predictive control . Springer Science & Business Media, 2013.
+[27] B. Charlet, J. L evine, and R. Marino. On dynamic feedback linearization. Systems & Control Letters ,
+13(2):143{151, 1989.
+[28] R. Chartrand. Numerical dierentiation of noisy, nonsmooth data. ISRN Appl. Math. , 2011, 2011.
+[29] T. Cimen. State-dependent Riccati equation (SDRE) control: A survey. IFAC Proc. Volumes , 41(2):3761{
+3775, 2008.
+31
+[30] J. R. Clautier, N. D'Souza, and C. P. Mracek. Nonlinear regulation and nonlinear H control via the state-
+dependent Riccati equation technique: Part 1, theory. In Proc. Int. Conf. Nonlinear problems in aviation
+and aerospace , pages 117{131, 1996.
+[31] J. Cloutier, C. D'Souza, and C. Mracek. Nonlinear regulation and nonlinear h1control via the state-
+dependent riccati equation technique: Part 1, theory; part 2, examples. In Proc. of the First International
+Conference on Nonlinear Problems in Aviation and Aerospace, Daytona Beach, FL , pages 117{141, 1996.
+[32] J. R. Cloutier. State-dependent Riccati equation techniques: an overview. In Proc. American Control
+Conference , volume 2, pages 932{936. IEEE, 1997.
+[33] S. Das and D. Giannakis. Delay-coordinate maps and the spectra of koopman operators. Journal of
+Statistical Physics , 175(6):1107{1145, 2019.
+[34] S. T. M. Dawson, M. S. Hemati, M. O. Williams, and C. W. Rowley. Characterizing and correcting for the
+eect of sensor noise in the dynamic mode decomposition. Exp. Fluids , 57(3):1{19, 2016.
+[35] M. Dellnitz, G. Froyland, and O. Junge. The algorithms behind GAIO|set oriented numerical methods
+for dynamical systems. In Ergodic theory, analysis, and ecient simulation of dynamical systems , pages
+145{174. Springer, 2001.
+[36] M. Dellnitz and O. Junge. Set oriented numerical methods for dynamical systems. Handbook of dynamical
+systems , 2:221{264, 2002.
+[37] G. E. Dullerud and F. Paganini. A course in robust control theory: A convex approach . Texts in Applied
+Mathematics. Springer, Berlin, Heidelberg, 2000.
+[38] C. Edwards and S. Spurgeon. Sliding mode control: theory and applications . Crc Press, 1998.
+[39] B. Efron, T. Hastie, I. Johnstone, and R. Tibshirani. Least angle regression. The Annals of Statistics ,
+32(2):407{499, 2004.
+[40] U. Eren, A. Prach, B. B. Ko cer, S. V. Rakovi c, E. Kayacan, and B. A ckme se. Model predictive control in
+aerospace systems: Current state and opportunities. Journal of Guidance, Control, and Dynamics , 2017.
+[41] N. B. Erichson, S. L. Brunton, and J. N. Kutz. Compressed dynamic mode decomposition for real-time
+object detection. J Real-Time Imag. Proc. , 2016.
+[42] G. Froyland. An analytic framework for identifying nite-time coherent sets in time-dependent dynamical
+systems. Physica D , 250:1{19, 2013.
+[43] D. Giannakis. Data-driven spectral decomposition and forecasting of ergodic dynamical systems. Appl.
+Comput. Harmon. Anal. , 47(2):338{396, 2019.
+[44] M. Grilli, P. J. Schmid, S. Hickel, and N. A. Adams. Analysis of unsteady behaviour in shockwave turbulent
+boundary layer interaction. J. Fluid Mech. , 700:16{28, 2012.
+[45] J. Grosek and J. N. Kutz. Dynamic mode decomposition for real-time background/foreground separation
+in video. arXiv:1404.7592 , 2014.
+[46] J. Guckenheimer and P. Holmes. Nonlinear oscillations, dynamical systems, and bifurcations of vector elds ,
+volume 42 of Applied Mathematical Sciences . Springer, 1983.
+[47] F. Gueniat, L. Mathelin, and L. Pastur. A dynamic mode decomposition approach for large and arbitrarily
+sampled systems. Phys. Fluids , 27(2):025113, 2015.
+[48] N. Hansen, A. S. P. Niederberger, L. Guzzella, and P. Koumoutsakos. A method for handling uncertainty
+in evolutionary optimization with an application to feedback control of combustion. IEEE Trans. Evol.
+Comput. , 13(1):180{197, 2009.
+32
+[49] M. Haseli and J. Cort es. Learning koopman eigenfunctions and invariant subspaces from data: Symmetric
+subspace decomposition. arXiv Preprint arXiv:1909:01419 , 2019.
+[50] M. Hemati and H. Yao. Dynamic mode shaping for uid ow control: New strategies for transient growth
+suppression. In 8th AIAA Theoretical Fluid Mechanics Conference , page 3160, 2017.
+[51] M. S. Hemati and C. W. Rowley. De-biasing the dynamic mode decomposition for applied Koopman spectral
+analysis. arXiv preprint arXiv:1502.03854 , 2015.
+[52] M. S. Hemati, M. O. Williams, and C. W. Rowley. Dynamic mode decomposition for large and streaming
+datasets. Phys. Fluids , 26(11):111701, 2014.
+[53] J.-C. Hua, F. Noorian, D. Moss, P. H. Leong, and G. H. Gunaratne. High-dimensional time series prediction
+using kernel-based koopman mode regression. Nonlinear Dynamics , 90:1785{1806, 2017.
+[54] A. Isidori. Nonlinear control systems . Springer, 2013.
+[55] F. D. L. J. Gra, X. Xu and T. Singh. Reduced-order modeling using dynamic mode decomposition and
+least angle regression. In AIAA Aviation Forum , page 3072, 2019.
+[56] M. Jovanovi c, P. Schmid, and J. Nichols. Sparsity-promoting dynamic mode decomposition. Physics of
+Fluids , 26:024103, 2014.
+[57] E. Kaiser, J. Kutz, and S. Brunton. Data-driven approximations of dynamical systems operators for control.
+Ininvited chapter for The Koopman Operator in Systems and control , pages 197{234. Springer, 2020.
+[58] Y. Kawahara. Dynamic mode decomposition with reproducing kernels for Koopman spectral analysis. In
+Advances in Neural Information Processing Systems , pages 911{919, 2016.
+[59] H. K. Khalil. Noninear Systems . Prentice-Hall, 1996.
+[60] S. Klus, P. Koltai, and C. Sch utte. On the numerical approximation of the Perron-Frobenius and Koopman
+operator. J. Comp. Dyn. , 3(1):51{79, 2016.
+[61] S. Klus, F. N uske, S. Peitz, J.-H. Niemann, C. Clementi, and C. Sch utte. Data-driven approxima-
+tion of the koopman generator: Model reduction, system identication, and control. arXiv Preprint
+arXiv:1909:10638v2 , 2019.
+[62] P. V. Kokotovic. The joy of feedback: nonlinear and adaptive. IEEE Control systems , 12(3):7{17, 1992.
+[63] P. V. Kokotovic, R. E. O'malley, and P. Sannuti. Singular perturbations and order reduction in control
+theory|an overview. Automatica , 12(2):123{132, 1976.
+[64] B. O. Koopman. Hamiltonian systems and transformation in Hilbert space. Proc. Natl. Acad. Sci , 17(5):315{
+318, 1931.
+[65] M. Korda and I. Mezi c. Linear predictors for nonlinear dynamical systems: Koopman operator meets model
+predictive control. arXiv:1611.03537 , 2016.
+[66] M. Korda and I. Mezi c. Optimal construction of koopman eigenfunctions for prediction and control. IEEE
+Transactions on Automatic Control , 1:1, 2020.
+[67] K. Kowalski, W.-H. Steeb, and K. Kowalksi. Nonlinear dynamical systems and Carleman linearization .
+World Scientic, 1991.
+[68] M. Krsti c, I. Kanellakopoulos, and P. V. Kokotovi c. Nonlinear and adaptive control design . Wiley, 1995.
+[69] J. N. Kutz, S. L. Brunton, B. W. Brunton, and J. L. Proctor. Dynamic Mode Decomposition: Data-Driven
+Modeling of Complex Systems . SIAM, 2016.
+[70] J. N. Kutz, X. Fu, and S. L. Brunton. Multi-resolution dynamic mode decomposition. SIAM Journal on
+Applied Dynamical Systems , 15(2):713{735, 2016. Preprint. Available: arXiv:1506.00564.
+33
+[71] J. N. Kutz, J. Grosek, and S. L. Brunton. Dynamic mode decomposition for robust PCA with applications
+to foreground/background subtraction in video streams and multi-resolution analysis. In T. Bouwmans,
+editor, CRC Handbook on Robust Low-Rank and Sparse Matrix Decomposition: Applications in Image and
+Video Processing , 2015.
+[72] Y. Lan and I. Mezi c. Linearization in the large of nonlinear systems and Koopman operator spectrum.
+Physica D , 242(1):42{53, 2013.
+[73] L. Ljung. System Identication: Theory for the User . Prentice Hall, 1999.
+[74] B. Lusch, J. N. Kutz, and S. L. Brunton. Deep learning for universal linear embeddings of nonlinear
+dynamics. Nature Communications , 9:4950, 2018.
+[75] N. M. Mangan, S. L. Brunton, J. L. Proctor, and J. N. Kutz. Inferring biological networks by sparse
+identication of nonlinear dynamics. IEEE Trans. Molecular, Biological, and Multi-Scale Commun. , 2(1):52{
+63, 2016.
+[76] A. Mauroy and J. Goncalves. Linear identication of nonlinear systems: A lifting technique based on the
+Koopman operator. IEEE Conf. Decision and Control (CDC) , pages 6500{6505, 2016.
+[77] A. Mauroy and I. Mezic. A spectral operator-theoretic framework for global stability. In Decision and
+Control (CDC), 2013 IEEE 52nd Annual Conference on , pages 5234{5239. IEEE, 2013.
+[78] A. Mauroy and I. Mezi c. Global stability analysis using the eigenfunctions of the Koopman operator. IEEE
+Trans Autom Control , 61:3356{3369, 2016.
+[79] D. Q. Mayne, J. B. Rawlings, C. V. Rao, and P. O. M. Scokaert. Constrained model predictive control:
+Stability and optimality. Automatica , 36(6):789{814, 2000.
+[80] I. Mezi c. Spectral properties of dynamical systems, model reduction and decompositions. Nonlinear Dy-
+namics , 41(1-3):309{325, 2005.
+[81] I. Mezi c. Analysis of uid ows via spectral properties of the Koopman operator. Ann. Rev. Fluid Mech. ,
+45:357{378, 2013.
+[82] I. Mezi c. On applications of the spectral theory of the Koopman operator in dynamical systems and control
+theory. In IEEE Conf. Decision and Control (CDC) , pages 7034{7041. IEEE, 2015.
+[83] I. Mezic. Koopman operator spectrum and data analysis. arXiv:1702.07597 , 2017.
+[84] I. Mezi c. Spectral operator methods in dynamical systems: Theory and applications . Springer, 2017.
+[85] I. Mezi c and A. Banaszuk. Comparison of systems with complex behavior. Physica D , 197(1):101{133,
+2004.
+[86] O. Nelles. Nonlinear system identication: from classical approaches to neural networks and fuzzy models .
+Springer, 2013.
+[87] F. No e and F. Nuske. A variational approach to modeling slow processes in stochastic dynamical systems.
+Multiscale Modeling & Simulation , 11(2):635{655, 2013.
+[88] F. N uske, R. Schneider, F. Vitalini, and F. No e. Variational tensor approach for approximating the rare-
+event kinetics of macromolecular systems. J. Chemical Physics , 144(5):054105, 2016.
+[89] S. Pan, N. Arnold-Medabalimi, and K. Duraisamy. Sparsity-promoting algorithms for the discovery of
+informative koopman invariant subspaces. arXiv Preprint arXiv:2002:10637 , 2020.
+[90] J. D. Pearson. Approximation methods in optimal control i. Sub-optimal control. I. J. Electronics ,
+13(5):453{469, 1962.
+[91] H. Peng, J. Wu, G. Inoussa, Q. Deng, and K. Nakano. Nonlinear system modeling and predictive control
+using the RBF nets-based quasi-linear ARX model. Control Eng Pract , 17(1):59{66, 2009.
+34
+[92] L. Pontryagin, V. Boltyanskii, R. Gamkrelidze, and E. Mishchenko. The mathematical theory of optimal
+processes . Interscience, 1962.
+[93] J. L. Proctor, S. L. Brunton, and J. N. Kutz. Dynamic mode decomposition with control. SIAM J. Appl.
+Dyn. Sys. , 15(1):142{161, 2016.
+[94] J. L. Proctor, S. L. Brunton, and J. N. Kutz. Generalizing Koopman theory to allow for inputs and control.
+SIAM J. Applied Dynamical Systems , 17(1):909{930, 2018.
+[95] J. L. Proctor and P. A. Eckho. Discovering dynamic patterns from infectious disease data using dynamic
+mode decomposition. International Health , 7(2):139{145, 2015.
+[96] Q. Qu, J. Sun, and J. Wright. Finding a sparse vector in a subspace: Linear sparsity using alternating
+directions. In Adv. Neural Inform. Process. Syst. 27 , pages 3401{3409, 2014.
+[97] C. W. Rowley, I. Mezi c, S. Bagheri, P. Schlatter, and D. Henningson. Spectral analysis of nonlinear ows.
+J. Fluid Mech. , 645:115{127, 2009.
+[98] W. J. Rugh and J. S. Shamma. Research on gain scheduling. Automatica , 36(10):1401{1425, 2000.
+[99] F. Santosa and W. W. Symes. Linear inversion of band-limited reection seismograms. SIAM Journal on
+Scientic and Statistical Computing , 7(4):1307{1330, 1986.
+[100] S. S. Sastry. Nonlinear systems: analysis, stability, and control , volume 10. Springer, 2013.
+[101] P. J. Schmid. Dynamic mode decomposition of numerical and experimental data. J. Fluid Mech. , 656:5{28,
+2010.
+[102] P. J. Schmid. Application of the dynamic mode decomposition to experimental data. Exp. Fluids , 50:1123{
+1130, 2011.
+[103] S. Shadden, F. Lekien, and J. Marsden. Denition and properties of Lagrangian coherent structures from
+nite-time Lyapunov exponents in two-dimensional aperiodic ows. Physica D , 212:271{304, 2005.
+[104] S. Skogestad and I. Postlethwaite. Multivariable feedback control: analysis and design . John Wiley & Sons,
+Inc., 2 edition, 2005.
+[105] T. H. Solomon and J. P. Gollub. Chaotic particle transport in time-dependent Rayleigh-B enard convection.
+Phys. Rev. A , 38:6280{6286, 1988.
+[106] A. Sootla, A. Mauroy, and D. Ernst. An optimal control formulation of pulse-based control using Koopman
+operator. arXiv:1707.08462 , 2017.
+[107] R. F. Stengel. Optimal control and estimation . Courier Corp., 2012.
+[108] A. Surana. Koopman operator based observer synthesis for control-ane nonlinear systems. In 55th IEEE
+Conf. Decision and Control (CDC , pages 6492{6499, 2016.
+[109] A. Surana and A. Banaszuk. Linear observer synthesis for nonlinear systems using Koopman operator
+framework. IFAC-PapersOnLine , 49(18):716{723, 2016.
+[110] Y. Susuki and I. Mezi c. A prony approximation of Koopman mode decomposition. IEEE Conf. Decision
+and Control (CDC) , pages 7022{7027, 2015.
+[111] R. S. Sutton and A. G. Barto. Reinforcement Learning: An Introduction . The MIT Press, 1998.
+[112] S. A. Svoronos, D. Papageorgiou, and C. Tsiligiannis. Discretization of nonlinear control systems via the
+Carleman linearization. Chem. Eng. Science , 49(19):3263{3267, 1994.
+[113] R. Tibshirani. Regression shrinkage and selection via the lasso. Journal of the Royal Statistical Society.
+Series B (methodological) , 58(1):267{288, 1996.
+35
+[114] J. H. Tu, C. W. Rowley, J. N. Kutz, and J. K. Shang. Spectral analysis of uid ows using sub-Nyquist-rate
+PIV data. Exp. Fluids , 55(9):1{13, 2014.
+[115] J. H. Tu, C. W. Rowley, D. M. Luchtenburg, S. L. Brunton, and J. N. Kutz. On dynamic mode decompo-
+sition: theory and applications. J. Comp. Dyn. , 1(2):391{421, 2014.
+[116] W. E. Vander Velde. Multiple-input describing functions and nonlinear system design . McGraw-Hill, New
+York, 1968.
+[117] M. O. Williams, M. S. Hemati, S. T. M. Dawson, I. G. Kevrekidis, and C. W. Rowley. Extending data-driven
+Koopman analysis to actuated systems. IFAC-PapersOnLine , 49(18):704{709, 2016.
+[118] M. O. Williams, I. G. Kevrekidis, and C. W. Rowley. A data-driven approximation of the Koopman operator:
+extending dynamic mode decomposition. J. Nonlin. Sci. , 2015.
+[119] M. O. Williams, C. W. Rowley, and I. G. Kevrekidis. A kernel approach to data-driven Koopman spectral
+analysis. J. Comp. Dyn. , 2(2):247{265, 2015.
+[120] D. Wilson and J. Moehlis. An energy-optimal methodology for synchronization of excitable media. SIAM
+J. Appl. Dyn. Sys. , 13(2):944{957, 2014.
+[121] T. Zhang, G. Kahn, S. Levine, and P. Abbeel. Learning deep control policies for autonomous aerial vehicles
+with MPC-guided policy search. In IEEE Int Conf Robotics Autom , pages 528{535, 2016.
+36

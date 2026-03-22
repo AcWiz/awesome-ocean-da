@@ -1,0 +1,1096 @@
+Spatio-temporal modeling and forecasting with Fourier
+neural operators
+Pratik Nag1, Andrew Zammit-Mangion1, Sumeetpal Singh1, and Noel
+Cressie1
+1School of Mathematics and Applied Statistics, University of Wollongong,
+Australia
+Abstract
+Spatio-temporal process models are often used for modeling dynamic physical and
+biological phenomena that evolve across space and time. These phenomena may ex-
+hibit environmental heterogeneity and complex interactions that are diﬃcult to capture
+using traditional statistical process models such as Gaussian processes. This work pro-
+poses the use of Fourier neural operators (FNOs) for constructing statistical dynamical
+spatio-temporal models for forecasting. An FNO is a ﬂexible mapping of functions that
+approximates the solution operator of possibly unknown linear or non-linear partial
+diﬀerential equations (PDEs) in a computationally eﬃcient manner. It does so using
+samples of inputs and their respective outputs, and hence explicit knowledge of the un-
+derlying PDE is not required. Through simulations from a nonlinear PDE with known
+solution, we compare FNO forecasts to those from state-of-the-art statistical spatio-
+temporal-forecasting methods. Further, using sea surface temperature data over the
+Atlantic Ocean and precipitation data across Europe, we demonstrate the ability of
+FNO-based dynamic spatio-temporal (DST) statistical modeling to capture complex
+real-world spatio-temporal dependencies. Using collections of testing instances, we
+show that the FNO-DST forecasts are accurate with valid uncertainty quantiﬁcation.
+Keywords: Burgers’ equation, Green’s function, integro-diﬀerence equations, nonstation-
+arity, partial diﬀerential equations.
+1 Introduction
+Spatio-temporal (ST) modeling and data analysis is often a component of physical, environ-
+mental, and biological studies. Such ST processes can exhibit complex dependencies across
+both space and time and hence can be diﬃcult to model. ST statistical models fall into two
+1arXiv:2601.01813v1  [stat.ME]  5 Jan 2026
+main categories ( Wikle et al. ,2019). The ﬁrst category consists of descriptive ST models,
+such as Gaussian processes (GPs; e.g., Cressie and Huang ,1999;Gneiting and Guttorp ,
+2007;Cressie and Wikle ,2011;Banerjee et al. ,2014), where the time dimension is simply
+considered to be an extra dimension and treated in the same way as the spatial dimensions.
+This approach often faces challenges in computational scalability and its handling of com-
+plex dynamics. Moreover, these descriptive ST models typically rely on predeﬁned classes
+of spatio-temporal covariance functions, which limit their ﬂexibility.
+The second category consists of dynamical ST (DST) models, which are constructed
+by specifying conditional-dependence relationships between and within spatial ﬁelds at suc-
+cessive time steps (e.g., Cressie and Wikle ,2011, Ch.7). These models provide an elegant
+framework for capturing the temporal evolution of a spatial process, making them par-
+ticularly eﬀective in applications where the underlying (physical, biological, etc.) system
+dynamics are complex. DST models oﬀer a distinct advantage over descriptive ST models
+since they are able to encode the scientiﬁc process being modeled, which makes them well
+suited for forecasting tasks.
+A class of DST models that has been extensively used for modeling spatio-temporal dy-
+namical systems is the class of integro-diﬀerence equation (IDE) models ( Wikle and Cressie ,
+1999;Wikle ,2002). These models are designed to characterize the conditional dependence
+between a spatial ﬁeld at a future time step and its current state, through an integral opera-
+tor. They have been successfully applied in various domains, such as ecology (e.g., Neubert
+et al. ,1995), meteorology (e.g., Xu et al. ,2005;Calder et al. ,2011), and epidemiology (e.g.,
+Kot and Schaﬀer ,1986).
+Typically, DST models assume a linear operator, which simpliﬁes their mathematical
+formulation. However, the linearity assumption may not be appropriate over long time
+horizons, where environmental heterogeneity and dynamic interactions can induce strong
+2
+nonlinear dependencies. One way to address this is through quadratic nonlinear IDE-based
+DST models ( Wikle and Hooten ,2010;Wikle and Holan ,2011). While these models are
+better at capturing complex nonstationary behaviors, they are less computationally eﬃcient
+for making statistical inferences.
+To mitigate the computational cost of ﬁtting ﬂexible DST models, de B´ ezenac et al. (2019)
+proposed the use of convolutional neural networks (CNNs) for learning dynamical parameters
+from data. Their approach was extended to stochastic IDE models by Zammit-Mangion and
+Wikle (2020). In both of these works, the CNN is trained oﬄine but, once trained, parameter
+estimation, followed by forecasting, can be done with very little computational cost. The
+framework relies on a predeﬁned governing linear partial diﬀerential equation (PDE), the
+solution to which is used to construct the IDE. However, many real-world applications involve
+heterogeneous or highly nonlinear dynamics that are not well represented through linear
+PDEs.
+Recent advances in deep learning have revolutionized researchers’ ability to model com-
+plex systems, particularly those governed by PDEs, linear or nonlinear. One such advance
+is the Fourier neural operator (FNO; Li et al. ,2020), which are building blocks for model-
+ing intricate physical dynamics of spatio-temporal processes. Unlike traditional solvers that
+explicitly solve PDEs, FNOs use training data to learn mappings between functional spaces
+based on samples of inputs and their respective outputs. This makes them particularly
+suited for spatio-temporal-forecasting applications where the underlying dynamics may not
+be known. Notably, they are more computationally eﬃcient than standard PDE solvers,
+which makes them an attractive alternative to stochastic physical models.
+In this study, we introduce a general class of stochastic DST models that uses an FNO
+framework to capture the temporal evolution of spatial processes; we refer to these as FNO-
+DST models . Their forecasting performance is evaluated here through simulation studies
+3
+involving Burgers’ equation, a nonlinear (non-stochastic) PDE whose forecasts can be ob-
+tained numerically through ﬁnite-diﬀerence approximations. Then we consider forecasting of
+geophysical variables. We use FNO-DSTs to forecast sea surface temperature (SST) over the
+North Atlantic Ocean, where it has been shown that the dynamics can be well represented
+through an advection-diﬀusion PDE ( de B´ ezenac et al. ,2019). In a second application, we
+use FNO-DSTs to forecast precipitation in a region over Europe, where the physical dy-
+namics are complex and unknown. In both applications, we ﬁnd that the FNO-DST model
+captures complex spatio-temporal interactions and that this leads to accurate forecasts.
+The remainder of the paper is structured as follows: Section 2gives the modeling and
+methodological details of an FNO, and it describes how we incorporate it into an FNO-
+DST model. Section 3details the setup of the simulation experiment that compares the
+performance of the FNO-DST forecasts to other spatio-temporal forecasts, where the spatio-
+temporal data are generated using Burgers’ equation that recall is nonlinear. Section 4
+applies the FNO-DST approach to two geophysical variables, and we again compare its
+forecasting performance to that of other approaches. Section 5discusses key ﬁndings and
+potential directions for future research. This article is accompanied by on-line Supplementary
+Material.
+2 The FNO-DST model
+In Section 2.1, we describe IDE models and a nonlinear generalization that employs neural
+operators. In Section 2.2, we introduce the FNO-DST model as a computationally tractable
+speciﬁcation of the neural-operator-based model discussed in Section 2.1. Parameter esti-
+mation, speciﬁcally maximum likelihood estimation of the FNO-DST model’s parameters, is
+presented in Section 2.3.
+4
+2.1 Classical IDE-based dynamical spatio-temporal models
+LetT“ r0, Ksdenote a continuous-time domain, and let DĂRdbe a spatial domain;
+in our examples, dis either 1 or 2. Although many models for environmental processes of
+interest assume continuous evolution on DˆT, for computational expediency their solutions
+are often discretized, resulting in a correlated time series of spatial processes. We adopt
+the same approach here: Let tt1, t2, . . . , t Tube a ﬁnite set of time points in Twith ﬁxed
+increments tk`1´tk“δą0, where δ!K, and where 0 ďt1ďtTďK. For spatio-temporal
+processes governed by PDEs, a discrete-time representation can sometimes be constructed
+from integral solutions at these successive time points. As an example, we choose a simple
+linear advection-diﬀusion PDE, here a real-valued continuous-time spatial process Cps, tqon
+Dˆ rtk, tk`hs, that evolves according to,
+BCps, tq
+Bt`γ1dÿ
+i“1BCps, tq
+Bsi´γ2dÿ
+i“1B2Cps, tq
+Bs2
+i“0;sPD, tP rtk, tk`hs, (1)
+where the vector of parameters γ” pγ1, γ2qJPRˆR`”Γ, and where his a ﬁxed positive
+integer such that the end-point tk`hPT. For ﬁxed and known γ,Dbounded, and with
+suitable regularity conditions ( Brezis and Br´ ezis ,2011;Evans ,2022) onCps, tkq, the solution
+to (1) at the end-point tk`hinvolves a Green’s function gp¨,¨q, and is ( Brauer ,1967;Pan,
+2009):
+Cps, tk`hq “GγrCp¨, tkqs ”ż
+Dgps´u, hδ;γqCpu, tkqdu;sPD, k“1,2, . . . , T ´h. (2)
+In (2), we have used Gγto denote the integral operator that maps the input function Cp¨, tkq P
+L2pD;Rqto a corresponding output function in the same space L2pD;Rq, where L2pD;Rq
+is the space of squared integrable functions that map from DtoR. In ( 2), the Green’s
+function gps´u, hδ;γq “ p4πγ2hδq´d{2exp“
+´ }s´u´γ1hδ1}2{p4γ2hδq‰
+, which is derived in
+the Supplementary Material, Section S.1. The integral solution ( 2) is a deterministic linear
+5
+autoregression of the spatial process with time step hδand starting spatial ﬁeld Cps, tkq.
+We now introduce two sources of uncertainty that change ( 2) into a stochastic process.
+First, we add a spatially correlated random term ηps, tk`hq,sPD, to ( 2), which captures
+variability of the underlying phenomenon being modeled and not accounted for by the in-
+tegral solution. In this work, the spatial processes ηp¨, tk`hqandηp¨, tk`h`k1qare assumed
+to be uncorrelated when conditioned on Ykp¨, tkq, for ką0 and k1ă0 (their precise proba-
+bilistic dependence across time is made clear subsequently in ( 25)). Further, the processes
+tηps, tkqukare also each assumed to be at least second-order diﬀerentiable with respect to
+the spatial index s, as is the solution to ( 1). Second, we model the parameters γin (2) as
+random and independent of the process ηp¨,¨qentirely, across both space and time. These
+modeling assumptions lead to the following integro-diﬀerence equation model,
+Yk`hpsq “ż
+Dgps´u, hδ;γqYkpuqdu`ηps, tk`hq;sPD, k“1,2, . . . , T ´h, (3)
+where gp¨,¨qis the Green’s function, Ykp¨q ” Cp¨, tkqfork“1, . . . , T ´h, and Ykp¨q ” Yp¨, tkq
+is the stochastic process at time point tk. Note that, conditional on γ, the h-step processes
+deﬁned in ( 3) are Markov in time. For example when h“1, conditional on γ, the process
+tYkp¨qu kis Markov in time. However, we shall see that, marginally, the past and the future
+of the process are not independent conditional on the present.
+Typically, a ﬁnite-dimensional representation of Yk`hp¨qis used. Here, we discretize D
+into basic areal units (BAUs) of common area ∆. Let DGĂDdenote the BAU centroids, and
+deﬁne the random column vectors Yk” pYkpsq:sPDGqJandηk`h” pηps, tk`hq:sPDGqJ.
+Approximating the integral in ( 3) with a sum, we see that ( 3) can be represented as the
+|DG|-dimensional vector autoregressive (VAR) process,
+Yk`h“GγYk`ηk`h;k“1,2, . . . , T ´h, (4)
+6
+where Gγ” pgps´u, hδ;γq∆ :s,uPDGqis a |DG| ˆ |DG|matrix, and recall that γand
+hence Gγare random. Now suppose that ηk`his a mean-zero |DG|-dimensional Gaussian
+vector such that var pηk`h|Ykq “Σk`hpYk;αqwith parameters α. Furthermore, assume
+that cov pηk,ηk`h|Ykq “0fork“ ph`1q, . . . , pT´hq. Then,
+Yk`h|Yk,γ„Gau pGγYk,Σk`hpYk;αqq;k“1,2, . . . , T ´h. (5)
+In this work, we are mainly interested in forecasting the process Yk`hattk`hfrom
+information up to and including tk. Now, the forecasting distribution given only information
+Ykattkis
+ppYk`h|Ykq “ż
+ΓppYk`h|Yk,γqppγ|Ykqdγ. (6)
+Forecasting based on the predictive distribution given by ( 6) is likely to be of little value
+since there is scarce information on the dynamical parameters γin just Ykat time point k.
+That is, ppγ|Ykq «ppγqin (6).
+Intuitively, the dynamical parameters could be learned by incorporating information from
+recent history up to the time lag τ:
+ppYk`h|Yk, . . . , Yk´τq “ż
+ΓppYk`h|Yk,γqppγ|Yk, . . . , Yk´τqdγ, (7)
+where the conditional distribution of γis now used to sharpen the forecasting distribu-
+tion. Now, as τincreases, the conditional distribution of γcan be expected to concen-
+trate its probability around the true parameter, which we denote as γo; that is, from ( 7),
+ppYk`h|Yk, . . . , Yk´τq «ppYk`h|Yk,γoqfor large τ. This brief discussion reveals that
+when developing spatio-temporal forecasting models in the absence of knowledge on the gov-
+erning dynamical parameters, using a value of τą0 that includes the past, is essential, even
+when the latent spatio-temporal model is conditionally Markov across time.
+There are several ways to incorporate this history dependence into a temporally dynamic
+7
+spatio-temporal model with hidden dynamical parameters. One approach is to replace the
+spatial convolution in ( 3) with a sum (over time) of pτ`1qspatial convolutions, resulting
+in,
+Yk`hpsq “τÿ
+j“0ż
+Dgjps´u, hδ;θ1qYk´jpuqdu`ηps, tk`hq;sPD, k “τ`1, . . . , T ´h,(8)
+where tgjp¨, hδ;θ1quτ
+j“0are kernels parameterized by θ1. Equation ( 8) reduces to ( 3) when
+τ“0 and g0p¨,¨q “gp¨,¨q. As we did to obtain ( 4), we can discretize DintoDGto obtain a
+VAR process,
+Yk`h“τÿ
+j“0Gj,θ1Yk´j`ηk`h;k“τ`1, . . . , T ´h, (9)
+where Gj,θ1” pgjps´u, hδ;θ1q∆ :s,uPDGqis a|DG| ˆ |DG|matrix.
+Another approach to incorporating history dependence, which relaxes the linearity struc-
+ture of ( 8), is to make the kernel in ( 3) state-dependent; this leads to a state-dependent
+VAR process ( Cressie and Wikle ,2011, Sec. 7.3.2, Zammit-Mangion and Wikle ,2020) of the
+form,
+Yk`h“Gθ2pYk, . . . , Yk´τqYk`ηk`h;k“τ`1, . . . , T ´h. (10)
+While both of these approaches lead to ﬂexible classes of spatio-temporal models, practical
+implementations involve structure and restrictions on the matrices in ( 9) and ( 10), and
+constant regular gridding. Fitting these models to data is also computationally expensive.
+Fourier neural operator (FNO)-based models, discussed next, relieve the modeler of several
+of these drawbacks. Speciﬁcally, they possess the universal approximation property for
+continuous operators ( Kovachki et al. ,2023); they can be easily adapted to diﬀerent regular
+griddings of D; and, they are extremely fast to ﬁt and forecast with, by virtue of the Fast
+Fourier Transform.
+8
+2.2 FNO-DST models for eﬃcient computation
+Motivated by the discussion in the previous section about hidden dynamics, spatio-temporal
+models for which the underlying dynamics are not prescribed should, in general, include
+classes that are Markov of order greater than 1. Here we consider a ﬂexible operator that
+maps sample paths of the spatio-temporal process Yp¨,¨qfrom L2pDˆrtk´τ, tks;RqtoL2pDˆ
+ttk`hu;Rqfor any kP tτ`1, . . . , T ´hu. Note that the functional space of the input allows
+us to incorporate history-dependence into the operator, here by mixing convolutions over
+time. Speciﬁcally, at the core of our FNO deﬁned below, is a space-time convolution of the
+form
+vps, tk`hq “żtk
+tk´τż
+Dgps´u, tk`h´r;γqvpu, rqdudr, (11)
+where vPL2pDˆT;Rqandgp¨,¨;γqis a Green’s function parameterized by γ. Note from
+(11) that the operator is a convolution and hence time-invariant. Therefore, the time interval
+of the integral in ( 11) can be chosen to be r0, τδs, by shifting the time coordinate of vp¨,¨q:
+vps, tk`hq “żτδ
+0ż
+Dgps´u,ph`τqδ´q;γqvpkq
+0pu, qqdudq, (12)
+where the time-shifted spatio-temporal process vpkq
+0pu, tqis deﬁned as
+vpkq
+0pu, tq ”vpu, t`tk´τq.
+Then vps, tk`hq ”G0rvpkq
+0s, where G0r ¨ sis the k-invariant operator deﬁned from ( 12). With-
+out loss of generality we can therefore express the time-varying operator in ( 11) as a time-
+invariant operator on the shifted version of our spatio-temporal process, which corresponds
+to an implicit assumption that the underlying physical laws are temporally-invariant.
+Now deﬁne G0r ¨ s ” Gθr ¨ s, whereθare parameters that parameterize the FNO. The FNO
+uses a general (nonlinear) operator model for Gθ, with universal approximation properties
+9
+as described in Kovachki et al. (2023):
+GθrYpkq
+0s “Q˝σapWL`KLq ˝ ¨ ¨ ¨ ˝ σapW1`K1q ˝PrYpkq
+0s;Ypkq
+0PL2pDˆ r0, τδs;Rq,(13)
+where Ypkq
+0p¨, tq ”Yp¨, t`tk´τqfortP r0, τδs. Equation ( 13) consists of three main compo-
+nents, which we now describe in detail.
+•Lifting operator P:The operator PrYpkq
+0sis a pointwise mapping of Ypkq
+0’s graph
+into the higher-dimensional space DvĎRdv, where dvąd`2. Speciﬁcally, for
+x” psJ, tqJPDˆ r0, τδs, let xpkq
+Y” pxJ, Ypkq
+0ps, tqqJ, which is a pd`2q-dimensional
+column vector. In our implementation,
+vpkq
+0pxq ”PrYpkq
+0spxq “HPxpkq
+Y`bP;xPDˆ r0, τδs, (14)
+where HPis advˆ pd`2qmatrix and bPis adv-dimensional vector. We collect the
+parameters in the operator Pr ¨ sinto the vector ϕP”`
+vecpHPqJ,bJ
+P˘J.
+•Kernel integral operator Kland local linear operator Wl:For layers l“
+1, . . . , L, the operators Klr ¨ sandWlr ¨ sare the core components of the neural op-
+erator. Speciﬁcally, Wlr ¨ sis the following linear transformation of the dv-dimensional
+function vpkq
+l´1p¨q,
+Wlrvpkq
+l´1spxq “AW,lvpkq
+l´1pxq `bW,l;xPDˆ r0, τδs, (15)
+where AW,lis advˆdvmatrix and bW,lis adv-dimensional vector. We collect the
+parameters of Wlr ¨ sinto the vector ϕW,l”`
+vecpAW,lqJ,bJ
+W,l˘J. The integral operator
+Klr ¨ sis a multivariate version of a special case of ( 12) given by
+Klrvpkq
+l´1spxq “ż
+Dˆr0,τδsGlpx´x1;ϕK,lqvpkq
+l´1px1qdx1;xPDˆ r0, τδs, (16)
+where Glp¨;ϕK,lqis advˆdvmatrix of kernels with parameters collected into the vector
+10
+ϕK,l. Finally, the output of layer l, denoted vpkq
+l, is the dv-dimensional function,
+vpkq
+lpxq ”σa´
+Wlrvpkq
+l´1spxq `Klrvpkq
+l´1spxq¯
+;l“1, . . . , L, xPDˆ r0, τδs,(17)
+where recall that vpkq
+0pxq ”PrYpkq
+0spxqfor some ﬁxed k, and the map σap¨qis a point-
+wise activation function that renders the operator nonlinear. In our case, we use a
+rectiﬁed linear unit (ReLU) for σap¨q, which returns its input vector with the negative
+components set to zero and with the positive components left unchanged.
+•Projection operator Q:This operator projects the dv-dimensional output of the
+ﬁnal layer back to the target output space. We implement this operator through
+Qrvpkq
+Lspxq “hJ
+Qvpkq
+Lpxq `bQ;xPDˆ r0, τδs, (18)
+where hQis adv-dimensional vector, and bQis a scalar. We collect the parameters in
+the operator Qr ¨ sinto the vector ϕQ” phJ
+Q, bQqJ.
+Recall that the neural operator given by ( 13) has universal approximation properties
+under suitable regulatory conditions. So too does the Fourier neural operator (FNO), where
+the operator Klr ¨ sis expressed as a Fourier-inverse-Fourier pair. The Fourier transform of
+a convolution is a product of Fourier transforms, and hence,
+Kl”
+vpkq
+l´1ı
+pxq “F´1“
+FrGlp¨;ϕK,lqsFrvpkq
+l´1s‰
+pxq, (19)
+where the Fourier operator and the inverse Fourier operator are
+Upωq ”Fruspωq “ż
+Dˆr0,τδsupxqexpp´ιωJxqdx;ωPRd`1, (20)
+F´1rUspxq “1
+p2πqd`1ż
+Rd`1UpωqexppιωJxqdω;xPDˆ r0, τδs, (21)
+withωdenoting spatio-temporal angular frequency and up¨qa function in L2pDˆ r0, τδs;Rq.
+11
+Deﬁnition: Equation ( 13), together with the expression of Klr ¨ sas a Fourier–inverse-
+Fourier transformation pair in ( 19), deﬁnes the Fourier neural operator (FNO) that maps
+functions in L2pDˆ r0, τδs;Rqto functions in L2pDˆ tph`τqδu;Rq.
+Fast computation is key in any neural operator, and in the FNO we obtain it by using
+the Cooley-Tukey Fast Fourier Transform (FFT) ( Cooley and Tukey ,1965). Speciﬁcally,
+instead of using ( 20) and ( 21) we start with the discrete Fourier transform (DFT):
+Upκq “ÿ
+xPDGˆTGτupxqexp˜
+´2πιd`1ÿ
+j“1κjxj
+mj¸
+;κPΩ, (22)
+upxq “1
+m1¨¨¨md`1ÿ
+κPΩUpκqexp˜
+2πιd`1ÿ
+j“1κjxj
+mj¸
+;xPDGˆTG
+τ, (23)
+where TG
+τ” t0, δ, . . . , τδ u;mjis the number of grid spacings in the the j-th spatio-temporal
+coordinate, so md`1“τ; and Ω ”Śd`1
+j“1p0, . . . , m j´1q. Then, for computational eﬃciency,
+we shrink Ω to ˜Ω”Śd`1
+j“1p0, . . . , ˜mj´1q, where ˜ mj!mj, j“1, . . . d `1. Hence, the product
+of Fourier transforms reduces to Opśd`1
+j“1˜mjqmatrix-vector multiplications of dimension dv
+that can be computed very quickly; see the Supplementary Material, Section S.1.3, where
+the FFT algorithm is brieﬂy described.
+In our implementation of the FNO, we do not declare a parametric form for Glp ¨;ϕK,lqin
+Equation ( 19) before ﬁnding its DFT. Instead, we deﬁne FrGlsin (19) as a spectral-weights
+tensor of complex numbers that is conjugately symmetric (since signals are taken to be real-
+valued), directly in the Fourier domain. We denote them by FK,lPCdvˆdvˆ˜m1ˆ¨¨¨ˆ ˜md`1, in the
+high-dimensional space of complex numbers, which are trainable parameters that we collect
+into the vector ϕK,l”vecpFK,lq. They give the FNO the ﬂexibility it needs to represent
+complex spatio-temporal dynamics.
+Letθ“`
+ϕJ
+P,ϕJ
+W,1,ϕJ
+K,1, . . . ,ϕJ
+W,L,ϕJ
+K,L,ϕJ
+Q˘Jbe the set of trainable parameters as-
+sociated with the neural operator in ( 13). Let Gp ¨;θqdenote the neural operator imple-
+mented with the DFT ( 22), which conveniently also admits a ﬁnite-dimensional parame-
+12
+terization. Now, for k“τ`1, . . . , T ´h,deﬁne the vector-valued stochastic time series
+Ypk´τq:k” tYk´τ, . . . , Ykuwhere the |DG|-dimensional vector YkisYkp¨qevaluated at DG.
+Then we can rewrite the output of the operator deﬁned in ( 13) on the discretized domain as
+GpYpk´τq:k;θq. More details on these discretized tensors are discussed in the Supplementary
+Material, Section S.1.2. The discretized evaluation, Gp ¨;θq, of the operator Gθr ¨ sin (13)
+is a |DG|-dimensional vector that captures the spatio-temporal dynamics of a potentially
+complex physical process as follows:
+Yk`h“GpYpk´τq:k;θq `ηk`h;k“τ`1, . . . , T ´h. (24)
+This should be compared to Equation ( 10), where the operator Gθ2pYk, . . . , Yk´τqYkis
+relatively constrained. Since the process model deﬁned in ( 24) is a dynamic spatio-temporal
+(DST) model, we refer to this as the FNO-DST model.
+We now turn to the additive terms tητ`1`h, . . . ,ηTu. We model the conditional covariance
+matrixΣk`hpYk;αqofηk`husing a squared exponential covariance function with spatially
+and temporally varying standard deviation, given by
+covpηps, tk`hq, ηps1, tk`hq |Ykq “σk`hps;Ykqσk`hps1;Ykqexpˆ
+´}s´s1}2
+2α2
+r˙
+, (25)
+fors,s1PDG.We cater for heteroscedasticity by modeling the standard deviation parameter
+at time tk`has a function of the process Yk. Speciﬁcally, we let
+`
+σk`hpsi;Ykq:siPDG˘J“fNNpYk;αNNq, (26)
+where fNNp¨qis a shallow feed-forward neural network that takes Ykas inputs and produces
+the vector of standard deviations across the spatial grid. This speciﬁes Σk`hpYk;αq, where
+α” pvecpαNNqJ, αrqJare further trainable parameters in the FNO-DST model.
+13
+2.3 Likelihood computation, training, and forecasting
+Consider Nindependent realisations from a spatio-temporal process model on Dˆ r0, Ks
+generated using, for example, random initial conditions or dynamical parameters. Assume
+that, for n“1, . . . , N , we observe each process at time points tt1, . . . , t Tuwith temporal
+step size δ, to yield the discretized time series tYpnq
+1, . . . , Ypnq
+Tu. Under the assumption of
+conditional independence given the history of τobservations, the likelihood function for the
+unknown parameters pθJ,αJqJcan be written as
+Lpθ,αq “Nź
+n“1T´hź
+k“τ`1p`
+Ypnq
+k`h|Ypnq
+pk´τq:k,θ,α˘
+“Nź
+n“1T´hź
+k“τ`1Lpnq
+kpθ,αq, (27)
+where Ypnq
+pk´τq:k” tYpnq
+k´τ, . . . , Ypnq
+ku. From the Gaussian VAR model given by ( 24),
+Ypnq
+k`h|Ypnq
+pk´τq:k,θ,α„Gau´
+GpYpnq
+pk´τq:k;θq,Σpnq
+k`hpYk;αq¯
+;n“1, . . . , N, k “τ`1, . . . , T ´h,(28)
+whereΣpnq
+k`hpYk;αqis the covariance matrix of ηpnq
+k`hparameterized by α. We maximize
+Lpθ,αqusing a standard optimisation algorithm with an Adam learning schedule ( Kingma ,
+2014). Let ppθ,pαqdenote the estimated parameters that maximize L. Substituting these
+estimates into Equation ( 28) yields the forecasting distribution for replicate i:
+Ypnq
+k`h|Ypnq
+pk´τq:k,pθ,pα„GaupGpYpnq
+pk´τq:k;pθq,Σpnq
+k`hpYk;pαqq;n“1, . . . , N, k “τ`1, . . . , T ´h,(29)
+where GpYpnq
+pk´τq:k;pθqis the estimated predictive mean and Σpnq
+k`hpYk;pαqis the corresponding
+estimated predictive covariance matrix.
+3 Simulation experiments
+In this section, we conduct a comparative analysis of the forecasting performance of our pro-
+posed FNO-DST approach against current state-of-the-art approaches using two-dimensional
+(1-D space ˆtime) simulations from Burgers’ equation, a nonlinear PDE whose solution can
+14
+be obtained numerically. The comparison uses performance metrics such as mean squared
+prediction error (MSPE), prediction interval coverage probability (PICP), and mean predic-
+tion interval width (MPIW); for more details on PICP and MPIW, see Lakshminarayanan
+et al. (2017) and the Supplementary Material, Section S.2.2. In our simulation experiments,
+we compare forecasts from the FNO-DST model to those of the following:
+•Convolutional Long Short-Term Memory (ConvLSTM) neural network model ( Shi
+et al. ,2015), which employs convolutional transitions within the inner LSTM module
+of the neural network. To train this model we replace Gp ¨;θqin (24) with ConvLSTM
+blocks.
+•Space-Time DeepKriging (STDK) model ( Nag et al. ,2023), which performs spatio-
+temporal prediction by learning the relationship between embedded spatio-temporal
+locations psJ, tqJ,forsPDGandtP tt1, . . . , t Tu, and the underlying process Yps, tq,
+using neural networks. Nag et al. (2023) have shown that this approach outperforms
+another approach based on Gaussian regression with Vecchia’s approximation ( Katzfuss
+and Guinness ,2021) for prediction of complex spatio-temporal processes.
+•Persistence model, which is a simple model where spatial observations from the last
+time point of the current sequence are used as forecasts for future time points at
+the corresponding locations. This approach can be thought of as providing a low-bar
+benchmark that other models’ forecasts should improve upon.
+Reproducible code is available from https://github.com/pratiknag/FNO-DSTM-Code .
+3.1 Two-dimensional implementation
+We consider the two-dimensional (1-D space ˆtime) non-steady-state Burgers’ equation
+(Hopf,1950), which is a nonlinear PDE that has been used in various applications such as
+15
+modeling the one-dimensional ﬂow of a viscous ﬂuid. A solution to Burgers’ equation can
+be obtained numerically, and can serve as a gold standard against which the forecasts from
+the four models given above can be compared. Burgers’ equation for the evolution of a
+spatio-temporal ﬁeld tups, tq:sP r0,1s, tP r0,1su(i.e., D“ r0,1sandT“ r0,1s), is written
+here as:
+Bups, tq
+Bt`1
+2Bu2ps, tq
+Bs“γB2ups, tq
+Bs2;ps, tq P p0,1q ˆ p0,1q, (30)
+with initial condition ups,0q “ a0psq,forsP r0,1s; and periodic boundary conditions
+up0, tq “up1, tq,fortP r0,1s. Here γP r0,1sis the viscosity parameter. In order to solve ( 30)
+for a given γanda0p ¨ q, we rely on the Euler numerical method ( Biswas et al. ,2013), where
+the PDE is discretized onto a ﬁne grid as follows: We replace temporal derivatives with a
+forward diﬀerence of step size ∆ t“1{10000, we replace spatial ﬁrst-order derivatives with a
+backward diﬀerence of step size ∆ s“1{211, and we replace spatial second-order derivatives
+with a symmetric second diﬀerence of the same step size. That is, the discretization of ( 30)
+results in,
+upsi,˜tj`1q´upsi,˜tjq
+∆t`upsi,˜tjqupsi,˜tjq´upsi´1,˜tjq
+∆s“γupsi`1,˜tjq´2upsi,˜tjq`upsi´1,˜tjq
+p∆sq2 ,
+(31)
+with s0“˜t0“0, periodic boundary conditions ups0,˜tjq “ups211,˜tjq, and a uniform grid
+psi,˜tjq “pi{211, , j{10000 qfori“1, . . . , 211andj“1, . . . , 10000. Hence Burgers’ equation,
+discretized, can be rewritten as a one-step-ahead forecast by rearranging terms in ( 31) as
+follows:
+upsi,˜tj`1q “upsi,˜tjq ´∆t
+∆supsi,˜tjq`
+upsi,˜tjq ´upsi´1,˜tjq˘
+`
+γ∆t
+p∆sq2`
+upsi`1,˜tjq ´2upsi,˜tjq `upsi´1,˜tjq˘
+,(32)
+where the forecast at ˜tj`1is made from local spatial knowledge at the current time ˜tj.
+(Note, we use ˜tjfor the simulator time point to distinguish it from the FNO-DST time point
+16
+tj.) Since we have periodic boundary conditions, we simulate a0p¨qon a unit circle once,
+from a wrapped Gaussian process with mean zero and covariance obtained from a chordal
+Mat´ ern covariance function ( Guinness and Fuentes ,2016) with variance 1 .0, length scale
+1.0, and smoothness 2 .0. We consider two simulation settings: one has random γ”γp1q„
+Uniform p0.05,0.7q, and the other has ﬁxed γ”γp2q“0.4.
+In this simulation study, we consider two diﬀerent neural operators of the form
+Gθ:L2pr0,1s2ˆ r0, τδs;Rq ÞÑL2pr0,1s2ˆ tpτ`hqδu;Rq.
+We deﬁne the ﬁrst neural operator, which we label FNO-DST-H (FNO-DST with ‘history’),
+to have τ“4. We deﬁne the second neural operator, which we label FNO-DST-NH (FNO-
+DST with ‘no history’), to have τ“0. For both operators we let δ“0.1, and h“5 (5-step
+ahead forecast). We consider these two neural operators to give evidence to our intuition in
+Section 2.1that one needs to condition on past trajectories to sharpen the forecasts when
+the dynamics are variable (in the case of γp1q), even though ( 31) suggests a Markov model.
+For each neural operator and simulation setting, we simulate 1000 independent instances
+on the spatial domain DG“ ti{211:i“0, . . . , 211uwith time step ∆ t“1{10000 using
+(32). The neural operators use a coarser time step of δ“0.1. Here, we let tt1, . . . , t Tu “
+t0.1,0.2, . . . , 1.0u, and, we evaluate the forecast performance at t10“1 from information
+up to t5“0.5. Note that DGdeﬁnes a uniform discretization of the unit interval with
+211equispaced points, chosen to facilitate eﬃcient FFT computations as discussed in the
+Supplementary Material, Section S.1.2. Our temporal and spatial discretizations are used to
+construct the vectors tYk:k“1, . . . , T u, which are needed for optimizing the log-likelihood
+deﬁned in ( 27). For each neural operator and simulation setting we use N“950 instances
+for training; the remaining N0“50 instances are used for testing.
+17
+FNO-DST-H FNO-DST-NH
+(a) Predicted ﬁelds (top row) and errors (bottom row) for random γ“γp1q.
+FNO-DST-H FNO-DST-NH
+(b) Predicted ﬁelds (top row) and errors (bottom row) for ﬁxed γ“γp2q.
+Figure 1: First testing instance out of N0“50 testing instances for, respectively, forecasts
+from FNO-DST-H and FNO-DST-NH models at T“10. (a): γ“γp1q, (b): γ“γp2q. In
+the top panels of (a) and (b), the current and past four steps (blue lines), the true spatial
+ﬁeld at T“10 (black dotted line), and the forecasts (red line) with 95% prediction intervals
+(gray shaded area), are shown.
+18
+Table 1: Performance metrics for comparing FNO-DST-H and FNO-DST-NH for random
+γp1qand ﬁxed γp2qin the simulation experiment of Section 3.1.
+Model MSPE PICP MPIW
+γ“γp1qFNO-DST-NH 0.381 0.122 0.202
+FNO-DST-H 0.001 0.97 0.088
+γ“γp2qFNO-DST-NH 0.001 0.97 0.122
+FNO-DST-H 0.0007 0.98 0.065
+3.2 Simulation results
+Figure 1presents a comparison between FNO-DST-H and FNO-DST-NH for the ﬁrst testing
+instance with random γ“γp1qand the ﬁrst testing instance with ﬁxed γ“γp2q. In the
+Supplementary Material, Section S.2.2, the same types of comparisons are provided for two
+additional testing instances, which show patterns consistent with this ﬁrst testing instance.
+Table 1provides a numerical comparison between FNO-DST-H and FNO-DST-NH using
+forecasting performance metrics MSPE, PICP, and MPIW. These metrics are obtained by
+averaging over replications, space, and forecast times (See the Supplementary Material,
+Section S.2.1) at t“1. From the comparative table and plots, it can be observed that
+with γgiven by random γp1q, the inputs from the current and past τ“4 steps during
+training enables FNO-DST-H to learn more eﬀectively the underlying governing dynamics
+and produce a superior 5-step-ahead forecast of the spatial ﬁeld up¨,1qwhen compared to
+FNO-DST-NH. For γgiven by ﬁxed γp2q, training on a single current value gives comparable
+results to training on the current and past four values. This supports our argument in
+Section 2.1, advocating for the inclusion of temporal history rather than relying on a single
+snapshot for forecasting a spatial ﬁeld when the underlying PDE parameters are variable.
+To conclude this section, we compare the FNO-DST-H model with the three competing
+19
+models given in the introduction to this section for simulation setting γ“γp1q. The com-
+parison is shown visually in Figure 2and using the forecasting performance metrics MSPE,
+PICP, and MPIW in Table 2. From the results, it can be seen that the FNO-DST-H pro-
+duces valid forecasts (as do ConvLSTM and STDK), but it is more accurate, and it yields
+an MPIW that is smaller by an order of magnitude.
+FNO-DST-H ConvLSTM STDK Persistence
+Figure 2: Forecast ﬁelds (top row by model) and corresponding prediction errors (bottom row
+by model) for the ﬁrst testing instance out of N0“50 testing instances. This visualization
+illustrates both the forecast quality at T“10 and error distribution across space for the
+simulation setting with random γ“γp1q. In the top panels, the current and past four steps
+(blue lines), the true spatial ﬁeld at T“10 (black dotted line), and the forecasts (red line)
+with 95% prediction intervals (gray shaded area), are shown.
+Table 2: Performance metrics for competing models for the simulation setting γ“γp1qand
+FNO-DST-H, described in Section 3.1.
+Model MSPE PICP MPIW
+FNO-DST-H 0.001 0.97 0.088
+ConvLSTM 0.054 0.98 0.574
+STDK 0.075 0.99 1.013
+Persistence 0.089 - -
+20
+4 FNO-DST forecasting in geophysical applications
+In this section, we conduct a comparative analysis of FNO-DST forecasting applied to two
+geophysical data sets. We also compare these forecasts with those obtained from another
+dynamical forecasting approach based on the physically motivated integro-diﬀerence equation
+discussed in Section 2.1. A neural-network version of the linear integro-diﬀerence equation
+(CNN-IDE; Zammit-Mangion and Wikle ,2020) is competitive when those dynamics are
+expected (as in SST forecasting), but it performs less well when little is known about the
+underlying dynamics.
+4.1 Application to SST data
+In this study, we use sea surface temperature (SST) data generated by the NEMO (Nu-
+cleus for European Modeling of the Ocean) simulation framework ( Madec and the NEMO
+System Team ,2024). NEMO is an advanced modeling system designed for oceanic simu-
+lations, employing physically motivated equations to model both regional and global ocean
+circulation. As in climate reanalysis, it also employs historical observations to produce an
+assimilated representation of oceanic states, which ensures that its data closely align with
+actual SST measurements.
+We utilize NEMO SST data obtained from the GLOBAL_ANALYSIS_FORECAST_PHY_001_
+024product, which is provided by the Copernicus Marine Environment Monitoring Service
+(CMEMS). From this source, we aggregated the data onto a 0 .5-degree longitude-latitude
+grid. Following Zammit-Mangion and Wikle (2020), we concentrated our analysis and fore-
+casting of SST on the North Atlantic Ocean. The region is divided into 19 distinct zones,
+each spanning a standardized 64 ˆ64 grid DG”␣`i´1
+63,j´1
+63˘
+:i, jP t1, . . . , 64u(
+.
+In this study, we focus on leveraging the FNO-DST framework for modeling the operator
+21
+mapping deﬁned in Section 2.2as
+Gθ:L2pr0,1s2ˆ r0, τδs;Rq ÞÑL2pr0,1s2ˆ tpτ`hqδu;Rq.
+To train our models, we use the initial 4000 days of data available in this data product,
+covering the period from 27 December 2006 to 16 December 2017, with the 19 zones treated
+as replicates. The ﬁnal 10 days of data are reserved for testing. Consequently there are
+4000 ˆ19“76000 images that are used for training purposes. Figure 3(motivated from
+ﬁgures in Zammit-Mangion and Wikle ,2020) presents the delineation of these 19 zones,
+Figure 3: North Atlantic Ocean sea surface temperature (SST) NEMO data on December
+27, 2006, with 19 zones numbered and delineated by the black boxes.
+illustrated with the SST data on December 27, 2006 (the ﬁrst day in the data product).
+This subdivision into the 19 zones is primarily for computational eﬃciency; however, it does
+not signiﬁcantly aﬀect the approach, as the dominant dynamics within each zone can still
+be used to forecast the future from the recent past. We take τ“2 (recent past), h“3
+(3-step-ahead forecast) and discretize the temporal dimension to the daily resolution. Hence
+we forecast 3 days ahead from the current day and two preceding days.
+Figure 4gives a visual comparison of the 3-day-ahead forecasts of the FNO-DST model
+and the CNN-IDE model. It is well established that SST data sets exhibit advection-diﬀusion
+22
+FNO-DST
+CNN-IDE
+Figure 4: Visual comparison of FNO-DST and CNN-IDE forecasts for zone 3 in the North
+Atlantic Ocean. Forecasts of SST on 17 Dec 2017 were made from data on 12 Dec, 13 Dec,
+14 Dec 2017. The top row shows 14 Dec 2017 data and its evolution to 17 Dec 2017, 3 days
+later. The middle row (FNO-DST) and bottom row (CNN-IDE) show the forecast results
+for 17 Dec 2017 (Pred. mean, Pred. error, and pixelwise 95% Pred. interval width).
+properties, which the CNN-IDE model eﬀectively incorporates through prior physical knowl-
+edge. Table 3uses the same metrics used in Tables 1and2(Section 3), showing an expanded
+comparison that includes the other three forecasts (ConvLSTM, STDK, and Persistence)
+that were compared in the simulations. While CNN-IDE forecasts of SST were best, the
+FNO-DST forecasts still performed well, even though no explicit geophysical knowledge was
+incorporated. This demonstrates its forecasting potential for applications where the dynam-
+ics are scarcely known, as is the case for the daily precipitation data in the next subsection.
+23
+Table 3: Forecasting performance metrics of SST forecasts for competing models described
+in Sections 2.1and3, averaged over 19 zones and over all 3-day-ahead forecasts from 17
+December 2017 to 26 December 2017. (The FNO-DST model includes ‘history’ from the
+current time back to the two previous times.)
+Model MSPE PICP MPIW
+FNO-DST 1.56 0.95 5.77
+CNN-IDE 1.34 0.95 5.65
+ConvLSTM 1.66 0.96 5.85
+STDK 2.27 0.93 3.98
+Persistence 2.45 - -
+4.2 Application to precipitation data
+The second application uses daily precipitation data collected from weather stations dis-
+tributed across Western and Central Europe ( Toreti ,2014). The data set includes a compre-
+hensive observational record of daily precipitation measurements spanning the period from
+01 January 2014, to 31 December 2024. Figure 5illustrates the spatial distribution of the
+weather stations, where the subregion highlighted in red was selected for our forecasting
+study. To preprocess the data, a 10-day moving average was applied to a weather station’s
+daily data to mitigate short-term ﬂuctuations and ﬁll in small gaps in the data. Each time
+series was then standardized to ensure consistent scaling across spatial locations and time
+points, with the sample mean and sample standard deviation saved in order to produce
+forecasts back on the original scale. Finally, spatio-temporal interpolation using the Deep-
+Kriging approach of Nag et al. (2023) was employed to generate precipitation ﬁelds on a
+64ˆ64 standardized grid DG”␣`i´1
+63,j´1
+63˘
+:i, jP t1, . . . , 64u(
+deﬁned over the highlighted
+subregion in Figure 5, namely r15˝E,25˝Es ˆ r45˝N,55˝Ns,for all days between 01 January
+2014 and 31 December 2024 inclusive. Further details on the dataset, its preprocessing, and
+24
+Figure 5: Distribution of weather-station locations across western and central Europe. The
+region highlighted in red has been speciﬁcally chosen for forecasting purposes.
+the interpolation framework are provided in Nag(2025). To train the models, we use the
+ﬁrst 3200 days of the gridded spatial dataset, spanning the period from 1 January 2014 to
+5 November 2023. The remaining 421 days, from 6 November 2023 to 31 December 2024,
+are reserved for testing. As in Section 4.1, we take τ“2 (recent past), h“3 (3-step-ahead
+forecast). Note that, unlike the SST application that had 19 replicates, here there is only
+one replicate, and so training is on 3200 images.
+Figure 6gives a visual comparison of the 3-day-ahead forecasts from the FNO-DST model
+and the CNN-IDE model. Table 4uses the same metrics and forecasting approaches as in
+Table 3. The results clearly demonstrate that the FNO-DST forecasting of precipitation
+outperforms the other models’ forecasts across all evaluation metrics. For the precipitation
+application, the dynamics are relatively poorly understood, and CNN-IDE comes third in
+performance. As shown in Figure 6, the FNO-DST model is able to forecast an East–West
+25
+FNO-DST
+CNN-IDE
+Figure 6: Visual comparison of FNO-DST and CNN-IDE forecasts for the precipitation data
+over the highlighted region shown in Figure 5. Forecasts on 18 Nov 2023 were made from
+data on 13 Nov, 14 Nov, 15 Nov 2023. The top row shows 15 Nov 2023 data and its evolution
+to 18 Nov 2023, 3 days later. The middle row (FNO-DST) and bottom row (CNN-IDE) show
+the forecast results (Pred. mean, Pred. error, and pixelwise 95% Pred. interval width).
+precipitation front that is similar to what actually occurs on 18 November 2023. The CNN-
+IDE model, on the other hand, does not reproduce this feature. The simulation results in
+Section 3and the applications in this section highlight the inferential and computational
+eﬃciency of FNO-DST forecasting in diverse settings.
+26
+Table 4: Performance metrics of diﬀerent competing models described in Sections 3and4,
+averaged over all 3-step-ahead forecasts at all spatial locations and all days from 06 Nov
+2023 to 31 Dec 2024.
+Model MSPE PICP MPIW
+FNO-DST 0.32 0.96 1.95
+CNN-IDE 0.46 0.96 2.43
+ConvLSTM 0.38 0.94 2.23
+STDK 0.82 0.92 1.97
+Persistence 0.84 - -
+5 Conclusions
+In this work, we develop a framework for dynamic spatio-temporal (DST) modeling where
+Fourier Neural Operators (FNOs) are used to forecast entire spatial ﬁelds in a computa-
+tionally eﬃcient manner. Discretized partial- and integro-diﬀerential-equation models often
+struggle to accommodate nonlinear interactions and complex dynamics inherent in many
+environmental and physical systems, and this aﬀects their forecasting performance. Our
+approach leverages the FNO’s ability to learn and then to approximate mappings between
+spatial ﬁelds across time using fast, parallelizable computations and without requiring ex-
+plicit knowledge of the underlying dynamical mechanisms.
+We evaluated the forecasting performance of the proposed FNO-DST model deﬁned in
+Section 2.2through a combination of simulation studies and real-world applications. In the
+simulation experiments based on Burgers’ equation, which is a nonlinear PDE, the FNO-DST
+model demonstrated strong forecasting skill in capturing the nonlinear dynamics governing
+the system. In the real-data applications, we applied the model to two distinct spatio-
+temporal geophysical settings: forecasting sea surface temperature (SST) over the North
+27
+Atlantic Ocean, and forecasting precipitation over a region in Europe. In the SST-forecasting
+application, where physical PDE-based models have been previously developed, the FNO-
+DST model performed almost as well as a PDE-based model. In the precipitation-forecasting
+application, where the underlying dynamics are considerably more complex and less-well
+characterized, the FNO-DST model was able to learn the dynamics and provide superior
+forecasts according to several performance metrics. Our results demonstrate the ability of
+the FNO-based framework to adapt to a wide range of spatio-temporal systems for which
+the dynamics are unknown or little known.
+Beyond its forecasting ability, a key strength of the FNO-based framework is its com-
+putational eﬃciency and scalability, both during training and post-training. This oﬀers
+a substantial computational advantage for real-time forecasting applications, especially in
+high-dimensional domains, where traditional statistical and mechanistic models can become
+computationally prohibitive, or perhaps the traditional models are over-simpliﬁed for com-
+putational eﬃciency. Just as importantly, by embedding the FNO within a statistical model,
+the framework naturally accommodates uncertainty quantiﬁcation, which is critical for de-
+cision making.
+There remain several promising avenues for future research. First, extensions to in-
+corporate physical constraints or conservation laws directly into the FNO framework will
+further improve forecasting skill while enhancing model interpretability. Second, developing
+a Bayesian hierarchical statistical formulation of the FNO-DST model will improve uncer-
+tainty quantiﬁcation as data and parameter uncertainties are included. Finally, while the
+current work focuses on spatial lattices, adapting the methodology for irregular spatial do-
+mains, non-Euclidean spaces, or multivariate spatio-temporal processes represent important
+directions for broadening the applicability of the FNO-DST approach to forecasting.
+28
+Acknowledgement
+This material is based upon work supported by the Air Force Oﬃce of Scientiﬁc Research
+under award number FA2386-23-1-4100. Nag and Zammit-Mangion also acknowledge travel
+support from the JRC, Italy to visit their research centre, which motivated the application
+case study presented in Section 4.2.
+Appendix: Notation
+D:Continuous spatial domain.
+T:Continuous temporal domain.
+s:The spatial coordinate, sPD.
+t:The temporal coordinate, tPT.
+Cp¨,¨q:The deterministic real-valued continuous-time PDE-based spatial process.
+γ:Parameters associated with the underlying PDE.
+gp¨,¨q, gjp¨,¨q:Green’s functions and kernels in diﬀerent scenarios.
+ηp¨,¨q:Spatially correlated random innovation term.
+Yp¨,¨q:The spatio-temporal stochastic process being modeled.
+Ykp¨q ” Yp¨, tkq:The stochastic (spatial) process evaluated at time point tk.
+tYkp¨qu k” tYps, tkq:sPDuT
+k“1:The time series of spatial processes deﬁned on the domain
+D.
+DG:BAU-discretization of D.
+29
+ηk`h:ηp¨, tk`hqevaluated on DG.
+Σk`hpYk;αq:The covariance matrix associated with ηk`h, which is a function of Ykand
+parameterized by α.
+Yk:Ykp¨qevaluated on DG.
+Gγ,Gj,θ1,Gθ2:Matrices representing BAU-discretized Green’s functions of the operators in
+(3), (8), and ( 10), with parameters γ,θ1, andθ2, respectively.
+τ:Past lag used to form the conditioning history.
+h:Forecast horizon for h-step-ahead forecast.
+x” psJ, tqJ:The spatio-temporal coordinate, xPDˆT.
+Gθ:The FNO operator parameterized by θ.
+P,K,W,Q:The lifting operator, kernel integral operator, local linear operator, and projec-
+tion operator, as deﬁned in ( 14), (16), (15), and ( 18), respectively.
+F,F´1:The Fourier and inverse Fourier operators, as deﬁned in ( 20) and ( 21), respectively.
+Gp¨;θq:Vector representing the BAU-discretized output of the operator Gθ.
+Ypk´τq:k:Vector-valued stochastic time series tYk´τ, . . . , Yku.
+tYpnq
+kuk:Vector representing the BAU-discretized time series for the i-th independent repli-
+cate.
+Σpnq
+k`hpYpnq
+k;αq:The covariance matrix associated with Ypnq
+k`h.
+TG
+τ” t0, δ, . . . , τδ u:The temporal discretization of the interval r0, τδsintoτ`1 equally
+spaced points with step size δ.
+30
+Lpθ,αq:The likelihood function of the parameters θandα, whereαis the vector of pa-
+rameters that describe the spatial dependence of the innovation spatial ﬁeld.
+References
+Banerjee, S., Carlin, B. P., and Gelfand, A. E. (2014). Hierarchical Modeling and Analysis
+for Spatial Data . Chapman and Hall, CRC Press, Boca Raton, FL.
+Biswas, B. N., Chatterjee, S., Mukherjee, S., and Pal, S. (2013). A discussion on eu-
+ler method: A review. Electronic Journal of Mathematical Analysis and Applications ,
+1(2):2090–2792.
+Brauer, F. (1967). Green’s functions for singular ordinary diﬀerential operators. Canadian
+Journal of Mathematics , 19:571–582.
+Brezis, H. and Br´ ezis, H. (2011). Functional Analysis, Sobolev Spaces and Partial Diﬀerential
+Equations . Vol. 2, Springer, New York, NY. See Chapter 8.
+Calder, C. A., Berrett, C., Shi, T., Xiao, N., and Munroe, D. K. (2011). Modeling space-
+time dynamics of aerosols using satellite data and atmospheric transport model output.
+Journal of Agricultural, Biological, and Environmental Statistics , 16:495–512.
+Cooley, J. and Tukey, J. (1965). An algorithm for the machine calculation of complex Fourier
+series. Mathematics of Computation , 19(90):297–301.
+Cressie, N. and Huang, H.-C. (1999). Classes of nonseparable, spatio-temporal stationary
+covariance functions. Journal of the American Statistical Association , 94(448):1330–1340.
+Cressie, N. and Wikle, C. K. (2011). Statistics for Spatio-Temporal Data . Wiley, Hoboken,
+NJ.
+31
+de B´ ezenac, E., Pajot, A., and Gallinari, P. (2019). Deep learning for physical processes:
+Incorporating prior scientiﬁc knowledge. Journal of Statistical Mechanics: Theory and
+Experiment , 2019(12):124009.
+Evans, L. C. (2022). Partial Diﬀerential Equations, Ch.5 . Vol. 19, American Mathematical
+Society, Providence, RI.
+Gneiting, T. and Guttorp, P. (2007). Continuous parameter space-time models. Environ-
+metrics , 18:412–429.
+Guinness, J. and Fuentes, M. (2016). Isotropic covariance functions on spheres: Some prop-
+erties and modeling considerations. Journal of Multivariate Analysis , 143:143–152.
+Hopf, E. (1950). The partial diﬀerential equation ut`uux“µuxx.Communications on Pure
+and Applied Mathematics , 3(3):201–230.
+Katzfuss, M. and Guinness, J. (2021). A general framework for Vecchia approximations of
+Gaussian processes. Statistical Science , 36(1):124–141.
+Kingma, D. P. (2014). Adam: A method for stochastic optimization. arXiv preprint
+arXiv:1412.6980 .
+Kot, M. and Schaﬀer, W. M. (1986). Discrete-time growth-dispersal models. Mathematical
+Biosciences , 80:109–136.
+Kovachki, N., Li, Z., Liu, B., Azizzadenesheli, K., Bhattacharya, K., Stuart, A., and Anand-
+kumar, A. (2023). Neural operator: Learning maps between function spaces with applica-
+tions to PDEs. Journal of Machine Learning Research , 24(89):1–97.
+Lakshminarayanan, B., Pritzel, A., and Blundell, C. (2017). Simple and scalable predictive
+32
+uncertainty estimation using deep ensembles. Advances in Neural Information Processing
+Systems , 30:1–12.
+Li, Z., Kovachki, N., Azizzadenesheli, K., Liu, B., Stuart, A., Bhattacharya, K., and Anand-
+kumar, A. (2020). Multipole graph neural operator for parametric partial diﬀerential
+equations. Advances in Neural Information Processing Systems , 33:6755–6766.
+Madec, G. and the NEMO System Team (2024). NEMO ocean engine reference manual.
+https://doi.org/10.5281/zenodo.1464816 .
+Nag, P. (2025). Spatio-temporal deepkriging in pytorch: A supplementary application
+to precipitation data for interpolation and probabilistic forecasting. arXiv preprint
+arXiv:2509.12708 .
+Nag, P., Sun, Y., and Reich, B. J. (2023). Spatio-temporal deepkriging for interpolation and
+probabilistic forecasting. Spatial Statistics , 57:100773.
+Neubert, M. G., Kot, M., and Lewis, M. A. (1995). Dispersal and pattern formation in a
+discrete-time predator-prey model. Theoretical Population Biology , 48(1):7–43.
+Pan, E. (2009). Green’s Functions . pp. 13-46, Springer, New York, NY.
+Shi, X., Chen, Z., Wang, H., Yeung, D.-Y., Wong, W.-K., and Woo, W.-C. (2015). Con-
+volutional LSTM network: A machine learning approach for precipitation nowcasting.
+Advances in Neural Information Processing Systems , 28:1–9.
+Toreti, A. (2014). Gridded Agro-meteorological data in Europe. http://data.europa.eu/
+89h/jrc-marsop4-7-weather_obs_grid_2019 . Downloaded on 24 January 2025.
+Wikle, C. K. (2002). A kernel-based spectral model for non-Gaussian spatio-temporal pro-
+cesses. Statistical Modelling , 2(4):299–314.
+33
+Wikle, C. K. and Cressie, N. (1999). A dimension-reduced approach to space-time Kalman
+ﬁltering. Biometrika , 86(4):815–829.
+Wikle, C. K. and Holan, S. H. (2011). Polynomial nonlinear spatio-temporal integro-
+diﬀerence equation models. Journal of Time Series Analysis , 32(4):339–350.
+Wikle, C. K. and Hooten, M. B. (2010). A general science-based framework for dynamical
+spatio-temporal models. Test, 19:417–451.
+Wikle, C. K., Zammit-Mangion, A., and Cressie, N. (2019). Spatio-Temporal Statistics with
+R. CRC Press, Boca Raton, FL.
+Xu, K., Wikle, C. K., and Fox, N. I. (2005). A kernel-based spatio-temporal dynamical
+model for nowcasting weather radar reﬂectivities. Journal of the American Statistical
+Association , 100(472):1133–1144.
+Zammit-Mangion, A. and Wikle, C. K. (2020). Deep integro-diﬀerence equation models for
+spatio-temporal forecasting. Spatial Statistics , 37:100408.
+34
+Supplementary Material: Spatio-temporal modeling and
+forecasting with Fourier neural operators
+Pratik Nag1, Andrew Zammit-Mangion1, Sumeetpal Singh1, and Noel
+Cressie1
+1School of Mathematics and Applied Statistics, University of Wollongong,
+Australia
+Here we provide additional details about the methodology (Green’s function), the dis-
+cretization, the computation (Fast Fourier Transform), and the simulation experiments (per-
+formance metrics, extra ﬁgures).
+S.1 Further technical details
+S.1.1 Derivation of the Green’s function in Equation (2) in the
+main text
+Let the Fourier transform of C(s, t) beF[C], where
+F[C](κ, t)≡/hatwideC(κ, t) =/integraldisplay
+Rde−ικ⊤sC(s, t) ds,
+with inverse
+F−1[/hatwideC](s, t)≡ C(s, t) =1
+(2π)d/integraldisplay
+Rdeικ⊤s/hatwideC(κ, t) dκ,
+where ιis the imaginary number in the complex plane, and κ= (κ1, . . . , κ d)⊤. Taking the
+Fourier transform of Equation (1) in the main text and, using linearity,
+∂
+∂tF[C](κ, t) +γ1d/summationdisplay
+i=1F/bracketleftbigg∂C
+∂si/bracketrightbigg
+−γ2d/summationdisplay
+i=1F/bracketleftbigg∂2C
+∂s2
+i/bracketrightbigg
+= 0,for (κ, t)∈Rd×[tk, tk+τ].(S.1.1)
+For each i= 1, . . . , d ,
+F/bracketleftbigg∂C
+∂si/bracketrightbigg
+(κ, t) =/integraldisplay
+Rde−ικ⊤s∂C
+∂si(s, t) ds.
+Integrating by parts with respect to siwe get,
+F/bracketleftbigg∂C
+∂si/bracketrightbigg
+(κ, t) =ικi/hatwideC(κ, t), F/bracketleftbigg∂2C
+∂s2
+i/bracketrightbigg
+(κ, t) =−κ2
+i/hatwideC(κ, t).
+1
+Note that the integration-by-parts step uses the fact that a boundary term vanishes as |si| →
+∞. This holds under the mild assumption that, for each ﬁxed t,C(·, t) and ( ∂C/∂s i)(·, t)
+belong to L1(Rd;R), which in particular implies C(s, t)→0 as∥s∥ → ∞ (Brezis and Br´ ezis ,
+2011;Evans ,2022).
+Substituting these expressions into Equation ( S.1.1), we obtain
+∂
+∂t/hatwideC(κ, t) +γ1d/summationdisplay
+i=1ικi/hatwideC(κ, t) +γ2d/summationdisplay
+i=1κ2
+i/hatwideC(κ, t) = 0 ,
+or equivalently,
+∂/hatwideC
+∂t(κ, t) =−/parenleftBig
+ιγ11⊤κ+γ2∥κ∥2/parenrightBig/hatwideC(κ, t),
+where 1is the d-dimensional vector of 1s. We denote the equation above simply as du/dt =
+−au, where u(t)≡/hatwideC(κ, t), and a≡ιγ11⊤κ+γ2∥κ∥2, for a ﬁxed κ. Then,
+u(t)∝e−at.
+At the starting value t=tkin the interval [ tk, tk+τ], we write/hatwideC(κ, tk)≡/hatwideC0(κ). Hence
+u(tk+τ) =e−aτ/hatwideC0(κ),
+or in terms of/hatwideC(κ,·),
+/hatwideC(κ, tk+τ) = exp/braceleftbigg
+−(ιγ11⊤κ+γ2∥κ∥2)τ/bracerightbigg
+/hatwideC0(κ).
+Its inverse Fourier transform is,
+C(s, tk+τ) =1
+(2π)d/integraldisplay
+Rdeικ⊤s/hatwideC0(κ) exp/braceleftbigg
+−(ιγ11⊤κ+γ2∥κ∥2)τ/bracerightbigg
+dκ.
+Using/hatwideC0(κ) =/integraltext
+Rde−ικ⊤uC(u, tk) du, and applying Fubini’s theorem, we have
+C(s, tk+τ) =/integraldisplay
+Rd
+1
+(2π)d/integraldisplay
+Rdexp/braceleftbigg
+ικ⊤(s−u)−ιγ1τ1⊤κ−γ2τ∥κ∥2/bracerightbigg
+dκ
+C(u, tk) du.
+Hence, for γ= (γ1, γ2)⊤, where γ2>0, the Green’s function is
+g(r, τ;γ) =1
+(2π)d/integraldisplay
+Rdexp/braceleftbigg
+ικ⊤r−ιγ1τ1⊤κ−γ2τ∥κ∥2/bracerightbigg
+dκ,
+which is real-valued and can be evaluated through a standard Gaussian integral to be:
+g(r, τ;γ) =1
+(4πγ2τ)d/2exp/parenleftbigg
+−∥r−τγ11∥2
+4γ2τ/parenrightbigg
+, τ > 0.
+Finally, substituting τ=hδyields the desired result in Equation (2) of the main text.
+2
+S.1.2 Further details on the discretization of the FNO input
+In the notation of Section 2.2 from the main text, the input ﬁeld Y(k)
+0(·), for k∈ {τ+
+1, . . . , T −h}, evaluated on DG× TG, where TG≡ {0, δ, . . . , τδ }, is a tensor of size m1×
+· · · × md+1. Similarly, the output of layer l,vl(·), evaluated on DG× TG, is a tensor of
+sizedv×m1× · · · × md+1, for l= 1, . . . , L . This tensor formulation lends itself to eﬃcient
+computation on graphics and tensor processing units. In particular, the local operations
+P[·],Q[·], and Wl[·], for l= 1, . . . , L , simply reduce to multiple batch multiplications and
+additions that can be done in an embarrassingly parallel fashion for each point in DG× TG.
+S.1.3 Computation of discrete Fourier transforms
+The tensor formulation of Section 2.2 from the main text allows us to take advantage of the
+discrete Fourier transform (DFT). Computation of Equations (21) and (22) have complexity
+O((/producttextd+1
+j=1˜mj)2), where ˜ mjare deﬁned below Equation (22) in the main text. To speed up
+computation, in practice we use the Cooley–Tukey Fast Fourier Transform (FFT) algorithm
+(Cooley and Tukey ,1965), where we let ˜ mj= 2qj, j= 1, . . . , d + 1, and we compute the
+Fourier transforms at even and odd indices recursively. The computational complexity of
+the FFT is O((/producttextd+1
+j=1˜mj) log(/producttextd+1
+j=1˜mj)), which is exponentially faster than the naive DFT.
+Similarly, the Cooley-Tukey FFT algorithm can be used to compute the inverse DFT (IDFT),
+as deﬁned in Equation (20), exponentially faster than the naive IDFT. We use the pytorch
+software package to implement the multi-dimensional FFT for our applications.
+S.2 Further simulation-experiment details
+S.2.1 Performance metrics
+We assess the forecasting performance of each model using metrics evaluated at N0test
+instances, namely the time series of spatial data excluded from training. We compute these
+metrics by comparing the forecasts from all the models with the true process values at
+the corresponding spatial locations. The diagnostics we consider are the mean squared
+prediction error (MSPE), the prediction interval coverage probability (PICP) of a nominal
+95% prediction interval, and the mean prediction interval width (MPIW). These are deﬁned
+as
+MSPE =1
+N01
+|DG|1
+T−h−τN0/summationdisplay
+j=1/summationdisplay
+s∈DGT−h/summationdisplay
+k=τ+1(Y(j)(s, tk+h)−/hatwideY(j)(s, tk+h))2,
+PICP =1
+N01
+|DG|1
+T−h−τN0/summationdisplay
+j=1/summationdisplay
+s∈DGT−h/summationdisplay
+k=τ+11{Y(j)(s, tk+h)∈[L(j)(s, tk+h), U(j)(s, tk+h)]},
+MPIW =1
+N01
+|DG|1
+T−h−τN0/summationdisplay
+j=1/summationdisplay
+s∈DGT−h/summationdisplay
+k=τ+1[U(j)(s, tk+h)−L(j)(s, tk+h)],
+where L(j)(s, tk+h) and U(j)(s, tk+h) are the lower and upper forecast bounds of the 95%
+prediction interval of Y(j)(s, t+h).
+3
+S.2.2 Additional testing instances for Section 3
+This section presents supplementary ﬁgures corresponding to Section 3 of the main text,
+illustrating the results for two additional testing instances.
+4
+FNO-DST-H FNO-DST-NH
+(a) Predicted ﬁelds (top row) and errors (bottom row) for random γ=γ(1).
+FNO-DST-H FNO-DST-NH
+(b) Predicted ﬁelds (top row) and errors (bottom row) for ﬁxed γ=γ(2).
+Figure S.1: Second testing instance out of N0= 50 testing instances for, respectively, fore-
+casts from FNO-DST-H and FNO-DST-NH models at T= 10. (a): γ=γ(1), (b): γ=γ(2).
+In the top panels of (a) and (b), the current and past four steps (blue lines), the true spatial
+ﬁeld at T= 10 (black dotted line), and the forecasts (red line) with 95% prediction intervals
+(gray shaded area), are shown.
+5
+FNO-DST-H ConvLSTM STDK Persistence
+Figure S.2: Forecast ﬁelds (top row by model) and corresponding prediction errors (bottom
+row by model) for the second testing instance out of N0= 50 testing instances. This
+visualization illustrates both the forecast quality at T= 10 and error distribution across
+space for the simulation setting with random γ=γ(1). In the top panels, the current and
+past four steps (blue lines), the true spatial ﬁeld at T= 10 (black dotted line), and the
+forecasts (red line) with 95% prediction intervals (gray shaded area), are shown.
+6
+FNO-DST-H FNO-DST-NH
+(a) Predicted ﬁelds (top row) and errors (bottom row) for random γ=γ(1).
+FNO-DST-H FNO-DST-NH
+(b) Predicted ﬁelds (top row) and errors (bottom row) for ﬁxed γ=γ(2).
+Figure S.3: Third testing instance out of N0= 50 testing instances for, respectively, forecasts
+from FNO-DST-H and FNO-DST-NH models at T= 10. (a): γ=γ(1), (b): γ=γ(2). In
+the top panels of (a) and (b), the current and past four steps (blue lines), the true spatial
+ﬁeld at T= 10 (black dotted line), and the forecasts (red line) with 95% prediction intervals
+(gray shaded area), are shown.
+7
+FNO-DST-H ConvLSTM STDK Persistence
+Figure S.4: Forecast ﬁelds (top row by model) and corresponding prediction errors (bottom
+row by model) for the third testing instance out of N0= 50 testing instances. This visual-
+ization illustrates both the forecast quality at T= 10 and error distribution across space for
+the simulation setting with random γ=γ(1). In the top panels, the current and past four
+steps (blue lines), the true spatial ﬁeld at T= 10 (black dotted line), and the forecasts (red
+line) with 95% prediction intervals (gray shaded area), are shown.
+References
+Brezis, H. and Br´ ezis, H. (2011). Functional Analysis, Sobolev Spaces and Partial Diﬀerential
+Equations . Vol. 2, Springer, New York, NY. See Chapter 8.
+Cooley, J. and Tukey, J. (1965). An algorithm for the machine calculation of complex Fourier
+series. Mathematics of Computation , 19(90):297–301.
+Evans, L. C. (2022). Partial Diﬀerential Equations, Ch.5 . Vol. 19, American Mathematical
+Society, Providence, RI.
+8

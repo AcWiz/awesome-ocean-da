@@ -1,0 +1,500 @@
+Neural ocean forecasting from sparse satellite-derived
+observations: a case-study for SSH dynamics and
+altimetry data
+Daria Botvynko1, Pierre Hasl ´ee1, Lucile Gaultier3, Bertrand Chapron2, Cl´ement de Boyer
+Mont ´egut2, Anass El Aouni4, Julien Le Sommer5, and Ronan Fablet1
+1Lab-STICC, UMR CNRS 6285, IMT Atlantique, Odyssey, INRIA, IMT Atlantique, Brest, France
+2LOPS, UMR CNRS 6523, Ifremer, Plouzan ´e, France
+3OceanDataLab, Locmaria-Plouzan ´e, France
+4Mercator Ocean International, Toulouse, France
+5CNRS, IRD, Univ. Grenoble Alpes, Grenoble, France
+ABSTRACT
+We present an end-to-end deep learning framework for short-term forecasting of global sea surface dynamics based on sparse satellite
+altimetry data. Building on two state-of-the-art architectures: U-Net and 4DVarNet, originally developed for image segmentation and
+spatiotemporal interpolation respectively, we adapt the models to forecast the sea level anomaly and sea surface currents over a
+7-day horizon using sequences of sparse nadir altimeters observations. The model is trained on data from the GLORYS12 operational
+ocean reanalysis, with synthetic nadir sampling patterns applied to simulate realistic observational coverage. The forecasting task is
+formulated as a sequence-to-sequence mapping, with the input comprising partial sea level anomaly (SLA) snapshots and the target
+being the corresponding future full-field SLA maps.
+Weevaluatemodelperformanceusing(i)normalizedrootmeansquarederror(nRMSE),(ii)averagedeffectiveresolution,(iii)percentage
+ofcorrectlypredictedvelocitiesmagnitudesandangles, andbenchmarkresultsagainsttheoperationalMercatorOceanforecastproduct.
+Results show that end-to-end neural forecasts outperform the baseline across all lead times, with particularly notable improvements
+in high variability regions. Our framework is developed within the OceanBench benchmarking initiative, promoting reproducibility
+and standardized evaluation in ocean machine learning. These results demonstrate the feasibility and potential of end-to-end neural
+forecasting models for operational oceanography, even in data-sparse conditions.
+Keywords: neural forecast, SLA, end-to-end neural scheme, satellite altimetry
+1 INTRODUCTION
+Theshort-termforecastingoftheoceanisofkeyinterestforavarietyofapplications,includingamongothersoffshoreoperations
+(Le Traon et al., 2019), maritime traffic routing (Davidson et al., 2009), ocean extremes (Hobday et al., 2016), sampling
+strategies of scientific surveys. State-of-the-art operational systems rely on data assimilation schemes (Lellouche et al., 2018) to
+combine a physical model of the ocean dynamics with different observation sources, usually both in situand satellite-derived
+observations. The resulting short-term ocean forecasts typically involve an estimation of the current observation given past
+available observations. The physical model then propagates the state over the targeted time horizon, typically over a week.
+Numerousstudiessupporttherelevanceoftheoperationaloceanforecastingschemes,butalsorevealsignificantuncertainty
+levels (Lellouche et al., 2013).
+Recently,neuralforecastingschemeshaveemergedasappealingsolutionsforoceandynamics,withstrikingexamplesfor
+short-termoceanforecasting(Wangetal.,2024;ElAounietal.,2025;Cuietal.,2025). Theseneuralschemesinvolveemulators
+of the physical model, trained from reanalysis datasets. These schemes now reach state-of-the-art forecasting performance
+for short-termocean forecasts and canevenoutperform data-assimilation-based systems forspecific case-studies and metrics
+(ElAounietal.,2025). Whilethoseneuralforecastingschemesemerge,thecharacteristicsofoceanobservingsystemsmay
+howeverquestionwhetheroneshouldalso addressuncertaintiesintheestimationofinitialstatebydataassimilationschemes.
+Satellite-derived observations, such as the sea surface height (SSH) and sea surface temperature (SST), involve large sampling
+gaps, which prevent data assimilation schemes to recover fine-scales dynamics, typically below one or two hundred kilometers
+for sea surface currents (Ballarotta et al., 2019). The sampling of the interior of the ocean by ARGO floats or moorings is
+obviously even scarcer. Optimal interpolation has long been the reference approach to deliver gap-free observation-based
+products, but end-to-end neural mapping schemes (Beauchamp et al., 2021; Febvre et al., 2024; Martin et al., 2023, 2024) havearXiv:2512.22152v1  [physics.ao-ph]  15 Dec 2025
+shown a great potential to better exploit sparse observation datasets and improve the reconstruction of ocean processes.
+Thisstudyexploreshowend-to-endneuralschemescouldcontributetoimprovedshort-termoceanforecaststhroughthe
+direct exploitation of sparse ocean observation datasets. Following the above-mentioned advances in neural interpolation
+schemes, we state the short-term forecasting of ocean states as an end-to-end neural mapping problem from gappy observations
+to the targeted ocean forecasts. As demonstration testbed, we focus on SSH forecasts, as SSH is a key signature of global ocean
+circulation and it is associated with sparse satellite altimetry observations (Ducet et al., 2000). Adapting a state-of-the-art
+neural mapping scheme (Fablet et al., 2021; Febvre et al., 2023), we do not only adapt the 4DVarNet scheme, but also introduce
+the state-of-the-art UNet architecture for the forecasting task. Our approach integrates both neural architectures to predict sea
+surface height from sparse satellite observations. Numerical experiments, conducted with a one-year of real satellite altimetry
+dataset, demonstrate the potential of these deep learning models to significantly enhance short-term ocean forecasts, compared
+to the state-of-the-art data-assimilation-based methods. We discuss further these findings towards the evolution of neural ocean
+forecasting approaches.
+This paper is organized as follows. Section 2 provides a brief introduction to short-term ocean forecasting. We present the
+proposeddeeplearningapproachinSection3. Section3.3describestheconsidereddatasetandbenchmarkanwereportour
+results in Section 4. Section 5 discusses our main findings with respect to the state-of-the-art.
+2 PROBLEM STATEMENT AND RELATED WORK
+Operationalforecastingsystemsfortheearthsystemsrelyondataassimilationschemes(LahozandSchneider,2014;Buizza
+et al., 2018). They state the short-term forecasting of a state of interest as a two-step process. The analysis step solves an initial
+condition problem and the forecasting comes to propagate the initial condition over the targeted forecasting window using
+thephysicaldynamicalmodel. Suchassimilation-basedsystemsleveragestate-of-the-artgeneralcirculationmodelsanddata
+assimilationschemes. GLO12oceanforecastingsystem(Lelloucheetal.,2018)fallsintothiscategory. ItcombinesNEMO
+oceanmodel(Madecetal.,2015)withaKalmanassimilationscheme(BrasseurandVerron,2006)todeliver10-dayglobal
+forecasts at 1/12◦resolution, providing both hourly and daily averages based on different observation datasets (mainly satellite
+altimetry, satellite-derived SST and ARGO float data). While representative of the state-of-the-art in terms for forecasting
+performance (Lellouche et al., 2013), assimilation-based forecasts may involve significant uncertainties especially for time
+scales below a week and horizontal scales below a few hundreds of kilometers. This may be critical for a variety of applications
+such as maritime traffic routing (Davidson et al., 2009; Lellouche et al., 2023), the forecasting of ocean BGC dynamics (Fennel
+et al., 2022).
+Froma methodologicalpointofview,assimilation-based systemaddressesthe forecastingof theentirephysical stateand
+does not focus on specific variables of interest. Let us introduce the underlying state-space formulation:
+ 
+𝜕x(𝑡)
+𝜕𝑡=M(x(𝑡))+𝜂(𝑡)
+y(𝑡)=H𝑡(x(𝑡))+𝜖𝑚(𝑡),∀𝑡,𝑚(1)
+where xis the space-time state of interest and yis observation process which relates to state xthrough observation operator H𝑡.
+Thisobservationoperatorcanbetime-dependenttoaccountforirregularly-sampledobservationdataduetothegeometryof
+theobservingsystem(e.g.,polar-orbitingearthobservationsatellites)aswellastotheimpactofatmosphereconditionsonto
+the passive satellite sensing of the ocean surface (e.g., infrared and multispectral satellite sensors). At a given time 𝑡∗, the
+forecasting of state xfrom time𝑡∗to time𝑡∗+𝑁·Δinvolves two sub-problems:
+•the estimation of the state bx(𝑡∗), often stated as a minimisation problem:
+bx0=arg min
+x(𝑡∗)J x(𝑡∗),y(𝑡∗
+<),𝜇(2)
+withJthecostfunction, y(𝑡∗
+<)theobservationtimeseriesuptotime 𝑡∗and𝜇. Variationaldataassimilationmethods
+(Cummings and Smedstad, 2013) are examples of such schemes.
+•the iterative application of a time-stepping operator ΦM,Δfor dynamical model Mand time step 𝛿from initial condition
+bx0such that:
+x(𝑡∗+𝑛Δ)=ΦM,Δ[x(𝑡∗+(𝑛−1)Δ)],∀𝑛∈[0,𝑁−1] (3)
+Thisformulationmakesexplicittwomainsourcesofuncertaintiesinassimilation-basedoceanforecasts: uncertaintiesonthe
+estimationoftheinitialstatefromavailablepartialobservations,anduncertaintiesassociatedwiththeapproximationofthe
+2/13
+truedynamicsofstate xbytime-steppingoperator ΦM,Δ. Thequantificationofthethesetwosourcesofuncertaintiesremain
+challenging (Lermusiaux et al., 2006; Hoteit et al., 2024).
+A very recent literature has emerged regarding neural short-term forecast for earth system dynamics (El Aouni et al., 2025;
+Wang etal., 2024; Cui et al.,2025), neural schemes for short-term weather forecasts being the mostimpactful examples (Lam
+et al., 2022; Bi et al., 2023). Interestingly, different neural architectures, including purely data-driven schemes (El Aouni et al.,
+2025) and hybrid models using neural correction terms (Liu et al., 2023), have rapidly reached state-of-the-art performance on
+a global scale compared with model-based forecasts. They typically exploit end-to-end learning strategies from reanalysis
+datasets and state the short-term forecasting as the prediction of a time series of states over a given time window from a
+gap-freeinitialcondition. Thebestneuralschemesgeneralizetoreal-timeforecastconfigurationstocompeteoroutperform
+operationalsystemssuchasECMWFIFSschemes(Bietal.,2023). Similarlearningstrategieshavealsobeenexploredfor
+short-termoceanforecasts(Wangetal.,2024;Xiongetal.,2023)andpointsoutthepotentialimprovementofassimilation-based
+oceanforecasts. Mostneuralforecastingschemesexploitauto-regressiveformulationsandcanberegardedasreplacingthe
+model-based time-stepping operator by a neural time-stepping operator:
+x(𝑡∗+𝑛Δ)=Φ𝑁𝑁[x(𝑡∗+(𝑛−1)Δ)],∀𝑛∈[0,𝑁−1] (4)
+Asaconsequence,suchneuralforecastingschemefocusesonimprovingforecastingskillsassociatedtouncertaintiesinthe
+model-based time-stepping operator ΦM,Δ.
+Regarding ocean dynamics, the scarcity of the available satellite-derived and in situ observation datasets for the ocean may
+however question whether the underlying assumption that one can neglect the uncertainties in the estimation of the initial state.
+Whereas optimal interpolation methods and assimilation-based schemes remain the state-of-the-art operational approaches
+for most operational oceanography products, numerous studies point out how neural mapping schemes, trained from real
+observation or simulation-only datasets, could better exploit real gappy datasets for a wide range of missing data rates and
+patterns, as illustrated among others for satellite altimetry (Beauchamp et al., 2021; Martin et al., 2023), ocean colour products
+(Dorffer et al., 2025) and sea surface temperatures (Barth et al., 2020). These findings invite to question how they translate to
+short-term ocean forecasts. Through a case-study for satellite altimetry datasets, we explore neural ocean forecasts stated as an
+end-to-end neural mapping from a series of partial observations to the targeted time series of states in the future, see Figure 1,
+that is to say trainable neural operators as:
+{x(𝑡∗),..., x(𝑡∗+𝑁Δ)}=Ψ
+y(𝑡∗
+<)
+(5)
+Inthisstudyweconsidertheneuraloperator Ψtobebasedon: (i)theneuraldataassimilationschemeintroducedin(Fabletetal.,
+2021), or (ii) the state-of-the-art UNet model. In the remainder, we describe those two architectures adapted to the forecast task,
+as well as the proposed benchmark for the short-term neural forecast of the SSH from satellite altimetry data at global scale.
+3 PROPOSED APPROACH
+3.1 End-to-end neural schemes for short-term forecasting
+The forecasting problem is formulated as a nonlinear mapping from observed sparse fields at time 𝑡to predicted gap-free fields
+over the subsequent seven days. Formally:
+𝐹:X𝑡→Y𝑡+1:𝑡+7
+whereX𝑡denotes the sparse input and Y𝑡+1:𝑡+7the target future sequence.
+Inspired by recent advances in the neural mapping of gappy observation fields (Febvre et al., 2023; Fablet et al., 2023;
+Martin et al., 2023), we address the short-term forecasting problem (5) as the end-to-end learning of a neural parameterization
+of operatorΨ. The underlying statement resorts to considering the short-term forecasting problem as an interpolation problem
+with observation data available only in the past, i.e.before time step 𝑡∗. Specifically, in this study we consider 14-days temporal
+window in the past.
+Considering that the observation data are provided as gridded fields with missing data, any state-of-the-art image-to-image
+architecturescouldpotentiallyapply. Amongothers,wemayciteUNet,TransformerandConvLTSMarchitectures(Ronneberger
+et al., 2015; Ashish, 2017; Shi et al., 2015). As ocean observation data usually involve large missing data rates, neural mapping
+schemes recently explored for the space-time interpolation of the sea level anomaly (SLA) from satellite altimetry data (Fablet
+et al., 2023; Martin et al., 2023) also appear as appealing solutions.
+As described above, in this study we leverage (i) the 4DVarNet architecture, originally designed for spatiotemporal
+interpolation, and (ii) UNet, the state-of-the-art neural architecture widely used in computational imaging, and adapt them
+3/13
+Figure 1. Proposed end-to-end neural scheme for short-term forecasting: input satellite observations are fed to the
+end-to-end neural architecture providing a full SSH forecasted field.
+toperformsequence-to-sequenceforecastingfromincompleteSLAobservations. Wereferthereaderto(Fabletetal.,2021;
+Beauchamp et al., 2021) and to the associated Github page for the details on the 4DVarNet framework. The UNet code used in
+this study is an implementation of (Ronneberger et al., 2015) and is available in this Github repository.
+3.2 OSSE-based training scheme
+Following(Febvreetal.,2023),weconsiderasupervisedtrainingschemefromsimulationdata,whileweassesstheperformance
+of trained model on real ocean observation data. We detail the considered training dataset in Section 3.3. Let us denote by
+{x𝑡𝑟𝑢𝑒
+𝑛,y𝑛}𝑛the training dataset formed by pairs of true state and associated gappy observation data, see Figure 2, the latter
+corresponding to real nadir altimeter sampling patterns. For the 4DVarNet neural scheme the training loss combines the
+following three elementary losses for each sample index 𝑛(while for the UNet it only combines first two):
+Lx,𝑛=+𝐾𝑓∑︁
+𝑘=−𝐾𝑂𝜔𝑘x𝑡𝑟𝑢𝑒
+𝑛(𝑡∗+𝑘Δ)−bx𝑛(𝑡∗+𝑘Δ)2(6)
+L∇x,𝑛=+𝐾𝑓∑︁
+𝑘=−𝐾𝑂𝜔𝑘∇x𝑡𝑟𝑢𝑒
+𝑛(𝑡∗+𝑘Δ)−∇bx𝑛(𝑡∗+𝑘Δ)2(7)
+LΦ,𝑛=x𝑡𝑟𝑢𝑒
+𝑛−Φ x𝑡𝑟𝑢𝑒
+𝑛2+bx𝑛−Φ bx𝑛2(8)
+The first two losses refer to MSE losses for state xand its spatial gradient x, whereas the third loss acts as a regularisation
+loss (Fablet et al., 2021). Overall, the training phase amounts to minimizing a weighted sum of these three losses:
+L=Í
+𝑛𝛼xLx,𝑛+𝛼∇xLx,𝑛+𝛼ΦLΦ,𝑛. Weights𝛼x,𝛼∇xand𝛼Φweretunedempiricallytorespectively50,1000and1forthe
+4DVarNet and 50 for the UNet.
+3.3 Data Preparation
+Training is conducted using the GLORYS12 operational ocean reanalysis product, which provides daily global SLA fields at a
+1/4◦spatial resolution. To simulate real-world altimetric coverage, we generate synthetic nadir-like sampling patterns from
+theGLORYS12SLAfields 1andcouplethemtothecorrespondinggap-freefields,seeFigure2. Thesesampledtracksserve
+asinputtothemodel,whilethecorrespondingfuturefull-fieldGLORYS12outputsareusedasgroundtruthduringtraining.
+During the inference phase, we use real satellite altimetry data from near-real-time dataset doi:10.48670/moi-00147.
+3.4 Model Training
+The models were trained over the 2010–2019 period using Adam optimizer and a learning rate e-3. Inputs consist of sequences
+ofspatialSLAfieldswithmissingvaluesduetothenadirsamplingmask,andoutputsarethecorrespondingcompleteSLA
+sequences over a 7-day forecast horizon. The training process was performed using one A100 GPU and it took a couple of days
+for the 4DVarNet to converge and around a day for the UNet. We let the reader to our PyTorch code for further details.
+1Importantly, this SLA is derived from the related SSH field by substracting the corresponding mean dynamic topography (MDT) doi:10.48670/moi-00021
+4/13
+Figure 2. Input and target of the proposed end-to-end neural scheme for short-term forecasting: (a) the input to the
+end-to-endneuralmodelisasetof14pastdaysofsatelliteobservationsandthecorrespondingtargetis(b)asetof7futuredays
+of complete SSH fields.
+3.5 Evaluation Metrics
+Theperformanceof theforecastingsystem isquantitativelyevaluatedthroughasetof diagnosticsassessingtheaccuracyand
+spatialfidelityofthepredictedSLAandSSCfields. Allmetricsarecomputedbycomparingmodelforecastsagainstindependent
+observationaldatasets: SLAfromalong-trackdelayed-timeSaral/AltiKadatasetdoi:10.48670/moi-00146,andvelocitiesof
+drifters trajectories at 15-m depth doi:10.17882/86236, which were filtered by daily averaging, similarly to (Garcia et al., 2025).
+We evaluate the forecasted SSH outputs of: (i) operational ocean forecast GLO12 provided in real time by Copernicus
+Marinedoi:10.48670/moi-00016, (ii)state-of-the-artneuraloceanemulators(ElAounietal.,2025)and(Wangetal.,2024)and
+(iii) the SLA of the studied end-to-end neural ocean forecasts 4DVarNet and UNet.
+Following the evaluation protocol of the Ocean Data Challenge for SSH mapping, we interpolate the forecasted fields
+onto the observation points. Specifically, for the SLA metrics we interpolate the forecasted data along nadir tracks, while
+for SSC we perform the interpolation at the drifters locations. In contrast to the SSH mapping evaluation introduced in the
+mentioned Data Challenge, in this study we adapt the framework to respect a strictly forecast-oriented evaluation workflow.
+Thus,weonlyconsideroneforecastedfieldperweekforeachleadtime(wherethefirstleadtimecorrespondstoWednesday). As
+consequence, in orderto ensure temporalconsistencyof the evaluation, fora given leadtime 𝜏, we consideronly observations
+acquired within a temporal window of ±0.5days around the nominal forecast leadtime 𝑡0+𝜏in the computation of the metrics
+describedbellow. Itisimportanttomentionthataparticularattentionduringtheevaluationprocessisputintothechoiceof
+MDT(LeTraon etal.,2017)toderiveSLAfromprovidedSSHoutputsandvice-versa. Weconsider theMDTdistributedby
+Copernicus Marine in order to depict the SSH-derived variables provided by model-based forecasts (GLO12 (Lellouche et al.,
+2018),GloNet(ElAounietal.,2025)andXiHe(Wangetal.,2024));andtheMDTprovidedinthecorrespondingaltimetry
+product doi:10.48670/moi-00146.
+Weusethenormalizedrootmeansquarederror(nRMSE)andtheaverageeffectiveresolutiontoassesstheSLAforecast
+accuracy. The nRMSE quantifies the relative amplitude of model–observation discrepancies, normalized by the observed
+variability:
+nRMSE score =1−1
+𝑁Í𝑁
+𝑖=1(ˆ𝑦𝑖−𝑦𝑖)2
+1
+𝑁Í𝑁
+𝑖=1𝑦2
+𝑖, (9)
+, where ˆ𝑦𝑖and𝑦𝑖represent the predicted and observed data, respectively, and 𝑁the total number of observation samples.
+The average effective resolution, or 𝜆𝑥, is defined as the first wavelength 𝜆where the noise to signal ratio (NSR) falls below
+the chosen threshold 𝛼= 0.5 (Ballarotta et al., 2019), see eq. 10. Here, the NSR is computed as the ratio of the difference
+between power spectral densities of the forecasted and observed signals to the power spectral density of the observed signal.
+𝜆𝑥=min
+𝜆NSR≤𝛼	
+. (10)
+5/13
+In order to obtain the forecasted geostrophic SSC, we differentiate the corresponding SLA forecasts (except the ±2◦equator
+area) and apply drifters-based corrections 𝑀𝐷𝑇𝑢and𝑀𝐷𝑇𝑣from the MDT product doi:10.48670/moi-00150:
+𝑢=−𝑔
+𝑓𝜕SLA
+𝜕𝑦+𝑀𝐷𝑇𝑢 (11)
+𝑣=𝑔
+𝑓𝜕SLA
+𝜕𝑥+𝑀𝐷𝑇𝑣 (12)
+where𝑢and𝑣are zonal and meridional components of geostrophic current; parameters 𝑔and𝑓represent the gravitational
+acceleration and the Coriolis parameter.
+Following the SSC evaluation described in (Garcia et al., 2025), we use here two metrics: percentage of correctly predicted
+velocitydirections( 𝑃𝜃)andpercentageofcorrectlypredictedvelocitymagnitudes( 𝑃|𝑢|),bothcomparedtothedriftersvelocities
+at15-mdepth. 𝑃𝜃quantifiestheproportionoflocationswheretheangulardeviationbetweenforecastedandobservedvelocities
+is within a tolerance angle Δ𝜃maxfixed at 45◦, see eq. 13 and 𝑃|𝑢|measures the proportion of points where the relative error in
+speed remains below a threshold Δ|𝑢|,maxfixed at 25%, see eq. 14.
+𝑃𝜃=1
+𝑁𝑁∑︁
+𝑖=1I |ˆ𝜃𝑖−𝜃𝑖|<Δ𝜃max×100, (13)
+𝑃|𝑢|=1
+𝑁𝑁∑︁
+𝑖=1I||ˆ𝑢𝑖|−|𝑢𝑖||
+|𝑢𝑖|<Δ|𝑢|,max
+×100. (14)
+where𝑁is the total number of collocated observation samples, and I(·)denotes the indicator function.
+4 RESULTS
+In this section, we present the resultsof the evaluation of the benchmarked forecast models, see Section 4.1. We focus on the
+performance of the presented forecasts in comparison to the Mercator Ocean operational forecast. The evaluation is performed
+globally, followed by an analysis of regime-dependent performances across different dynamical regimes.
+4.1 Benchmarked models
+Inthisstudy,webenchmarkstate-of-the-artneuraloceanemulators(ElAounietal.,2025;Wangetal.,2024)andend-to-end
+neuraloceanforecastmodelsagainsttheoperationalbaselineGLO12(Lelloucheetal.,2018,2023). Themodelsconsideredare
+summarized in Table 1. They are categorized into two groups: neural ocean emulators, which aim to propagate in time the
+initial state provided by assimilation-based products, and end-to-end neural forecasts, which directly predict the SLA from
+sparse inputs without relying on any physical model. We evaluate all models at leadtimes ranging from 0 to 7 days, with
+theirpredictionscomparedagainstindependentaltimeteranddrifterobservations. Thebenchmarkfocusesontheirabilityto
+reproduce SLA and SSC on the set of the evaluation metrics presented in Section 3.5.
+Table 1. Benchmarked models and their specifications.
+Model Type Resolution Nb of parameters
+GLO12 Operational baseline 1/12◦daily -
+GloNet Neural emulator 1/12◦daily 200M
+XiHe Neural emulator 1/12◦daily 80M
+4DVarNet End-to-end neural forecast 1/4◦daily 652K
+UNet End-to-end neural forecast 1/4◦daily 17M
+6/13
+4.2 Global-scale performance
+Figure 3 shows the SLA predicted by end-to-end neural ocean forecasts at leadtime 1 on January 18 2023. Figure 4 shows
+theevaluationmetricsacrossleadtimes0,3and5forthebenhmarkedneuralemulatorsmodels,allcomparedtothebaseline
+GLO12, with the colorbar corresponding to the respective relative gains in %. The 4DVarNet consistently outperforms baseline
+GLO12 and other state-of-the-art neural forecasts across the nRMSE SSH score. Performance remains robust over time,
+highlightingthestabilityofthemodelacrossdiverseoceanregimes. Furthermore,4DVarNetalsoimprovesthederivedSSC,
+particularly improving the forecast of SSC angles compared to drifters velocity vectors, suggesting a more accurate capture of
+flow directions.
+Figure 3. SLA predicted by proposed end-to-end neural forecasts 4DVarNet (left column) and UNet (right column) at leadtime
+0 on 2023-01-18.
+Figure 4. Benchmark of SSH forecasts (and derived SSC), provided by GLO12, GloNet, XiHe and proposed end-to-end
+neural forecasts 4DVarNet and UNet. The benchmark presents the following metrics: nRMSE score and average effective
+resolutionoftheSSHwithrespecttoSARAL/AltiKa,%correctlypredictedSSCanglesandmagnitudeswithrespecttodrifters.
+Colors indicate relative gain in % compared to the baseline GLO12, with blue indicating better performances.
+4.3 Regime-dependent performance
+Tables 2–4 assess the performance of the benchmarked models across leadtimes 0, 3 and 5 and three oceanic regimes: coastal,
+offshore high variability, and offshore low variability regions. Here we inter-compare the benchmarked models against the
+observation -based delayed-time product DUACS (Taburet et al., 2019). DUACS uses an Optimal Interpolation (OI) algorithm
+appliedtosparsealtimetrydata(Ballarottaetal.,2019;LeTraonetal.,2025). Weemphasizethat,foragivenleadtime,DUACS
+productexploitspastandfuturealtimetryobservations. Thisisthereasonwhywedonotincludeitinthebenchmarkamongthe
+tested approaches. It provides us with a means to compute relative performance metrics in our regime-dependent analysis.
+DUACScanbetterreflectthespatialstructuresofSLAcomparedtoassimilation-basedmodelanalyses,especiallyinhighly
+dynamic regions (Ballarotta et al., 2019).
+To quantify forecasts’ accuracies relative to the DUACS baseline, we compute percentage gains of each metric relative
+tothecorrespondingDUACSscore(bothevaluatedwithrespecttoSaral/AltiKaobservations),seeTables2-4. Atleadtime
+0, 4DVarNet achieves the best performance compared to GLO12 baseline across all regions. It remains the closest to the
+DUACSreconstruction,andisevenabletooutperformitinoffshorehigh-variabilityregions. UNetperformsslightlyworse
+7/13
+Figure 5. SLA reconstructed by OI-based DUACS product vs baseline forecast GLO12 and proposed end-to-end neural
+forecasts 4DVarNet and UNet at leadtimes 0 and 5 in the Gulf Stream on 2023-01-18 and 2023-01-23.
+than 4DVarNet, however outperforms GLO12, especially in coastal regions. GloNet underperforms 4DVarNet and UNet, while
+XiHeisatthesamelevelofperformanceasGLO12,asitsfirstleadtimeisdefinedastheoneprovidedbythereanalysis. At
+leadtime3,4DVarNetmaintainsstrongperformanceacrossallregimes,consistentlyachievingthelowestRMSEandhighest
+nRMSE, reaching positive gains relative to DUACS. UNet shows competitive performance in low-variability areas, but is worse
+than GloNet in coastal regions, which gains in performance compared to the first leadtime. By leadtime 5, 4DVarNet still
+consistentlyoutperformsGLO12acrossallregimesandisconsiderablyoutperformingDUACSreconstructionespeciallyin
+coastal and offshore low-variance regions. UNet remains competitive especially in low-variance areas. Overall, all models lose
+performancerelativetotheirfirstleadtimeasforecastsadvance,yet4DVarNetkeepingthelowestlevelofrelativeerrorswrt
+DUACS, highlighting the ability of this end-to-end neural architecture to remain close to an observations-based short-term
+forecast even at longer leadtimes. Figures 6 and 5 further illustrates this comparison by displaying the SLA fields from GLO12,
+proposedend-to-endforecasts4DVarNetandUNetatleadtimes0and5,butalsoDUACSL4productforthecorresponding
+dates, in two high variability regions: Gulf Stream and Agulhas. As expected, GLO12 struggles to correctly position some
+dynamicalstructuresincomparisontoobservation-basedproductDUACS.Inthecontrast,theend-to-endneuralforecastsbetter
+recoverspatialpatternsandaremoreconsistentwithDUACS.Atleadtime5,however,theUNetforecastshowsanoticeableloss
+8/13
+Figure 6. SLA reconstructed by OI-based DUACS product vs baseline forecast GLO12 and proposed end-to-end neural
+forecasts 4DVarNet and UNet at leadtimes 0 and 5 in the Agulhas region on 2023-01-18 and 2023-01-23.
+of energy, reflected in a reduced SLA variance, a phenomenon which is not observed in the 4DVarNet forecasts.
+Figure7presentstherelativegainsofthebenchmarkedmodelswithrespecttotheoperationalbaselineforecastGLO12
+for leadtime 0 for the explained variance metric calculated per 1◦×1◦bins. We refer the reader to the SSH mapping data
+challengedocumentationforfurtherdetailsontheimplementationofthemetric. Thegainsarecomputedasthepercentage
+difference relative to GLO12 for all scales as well as for spatial scales ranging between 65 and 500 km. Visually, the 4DVarNet
+model shows large improvements over the baseline across all scales. We observe the most significant added value in small
+scales(65–500km),specificallyintheoffshoreregions(bothhighandlowvariability),whichwehavealreadyshowninthe
+quantitative analysis in the Table 2. We suggest that the 4DVarNet forecast model is able to capture smaller dynamics due
+to its gradient regularization. Similarly, UNet also shows more improvements in the filtered maps, with a particular gain in
+ofsshore low variability regions, with a localized degradations along the equatorial band. In the contrast to the end-to-end
+neuralforecasts,GloNetshowsheterogeneousimprovementswrtbaselineGLO12acrossthechosenmetric,withaparticular
+9/13
+Table 2.Relativeerror(%)ofRMSEandnRMSEmetricsoftheforecastedSLAatleadtime0withrespecttoDUACSmapping
+product. The metrics are calculated for three dynamical regions: coastal, offshore high variability and low variability regions.
+Positive values indicate degradation relative to DUACS, negative values indicate improvement. Compared to the benchmarked
+forecasts, DUACS SLA relies on past and future altimetry observations for a given leadtime.
+Coastal Offshore High Var. Offshore Low Var.
+Model RMSE (%) nRMSE (%) RMSE (%) nRMSE (%) RMSE (%) nRMSE (%)
+GLO12 44.81 3.13 41.52 5.91 47.22 2.50
+GloNet 52.26 3.64 52.54 7.48 57.33 3.04
+XiHe 44.81 3.13 41.52 5.91 47.22 2.50
+4DVarNet 8.85 0.62 -1.35 -0.19 5.07 0.27
+UNet 9.97 0.70 8.95 1.27 15.91 0.84
+Table 3. Relative error (%) of RMSE and nRMSE metrics of the forecasted SLA at leadtime 3 with respect to DUACS at the
+same leadtime. The metrics are calculated for three dynamical regions: coastal, offshore high variability and low variability
+regions. Positive values indicate degradation relative to DUACS, negative values indicate improvement.
+Coastal Offshore High Var. Offshore Low Var.
+Model RMSE (%) nRMSE (%) RMSE (%) nRMSE (%) RMSE (%) nRMSE (%)
+GLO12 49.23 3.52 54.25 7.72 55.51 2.97
+GloNet 39.14 2.80 34.12 4.88 46.49 2.48
+XiHe 130.18 9.32 183.34 26.14 157.44 8.41
+4DVarNet 11.20 0.80 5.37 -0.77 9.14 0.49
+UNet 20.47 1.46 19.49 2.78 22.79 1.21
+Table 4. Relative error (%) of RMSE and nRMSE metrics of the forecasted SLA at leadtime 5 with respect to DUACS at the
+same leadtime. The metrics are calculated for three dynamical regions: coastal, offshore high variability and low variability
+regions. Positive values indicate degradation relative to DUACS, negative values indicate improvement.
+Coastal Offshore High Var. Offshore Low Var.
+Model RMSE (%) nRMSE (%) RMSE (%) nRMSE (%) RMSE (%) nRMSE (%)
+GLO12 55.21 3.85 64.23 9.39 63.32 3.35
+GloNet 48.19 3.37 35.46 5.21 50.37 2.67
+XiHe 131.97 9.20 182.31 26.71 160.08 8.64
+4DVarNet 15.48 1.08 16.52 2.42 17.72 0.94
+UNet 26.33 1.83 29.02 4.27 29.49 1.56
+degradation of performances in coastal regions, and some improvements in higher latitudes. These spatial distributions of
+explained variance errors highlight that 4DVarNet provides the most consistent improvements globally, whereas UNet and
+GloNetshow moreheterogeneous performances. Furthermore, the moresignificantimprovementsatsmaller scalesunderscores
+that the end-to-end neural forecasts can better exploit sparse observations to forecast dynamics at scales where traditional
+model-based forecast is less reliable.
+5 CONCLUSION AND DISCUSSION
+This study introduces a deep learning-based framework for short-term ocean forecasting, leveraging end-to-end neural
+architecture, especially 4DVarNet schemes, in a novel forecasting setup. Trained on simulated nadir altimetry data, the model
+demonstrates state-of-the-artperformance inpredicting global SSHovera 7-day horizon. Integratedwithin theOceanBench
+benchmarking initiative (Johnson et al., 2023; Aouni et al., 2025), our approach provides a standardized and reproducible
+framework for neural ocean forecasting. These results open promising avenues for future improvements in operational
+oceanographyusingmachinelearning. Ourfindingsdemonstratetherelevanceofend-to-endneuralnetworksforshort-term
+ocean forecasting. The ability of 4DVarNet to handle sparse observations and to produce accurate forecasts is of particular
+10/13
+(a)
+(b)
+(c)
+Figure 7. Gain of the explained variance of the forecasted SLA wrt SARAL/AltiKa observations relative to the one
+GLO12 baseline at leadtime 0: at all scales (left column) and filtered at 65-500km scales (right column). The
+benchmarked forecasts: (a) 4DVarNet, (b) UNet, (c) GloNet.
+interest for operational contexts, where real-time data are often incomplete or noisy.
+Whileweonlyrelyontrainingstrategiesbasedonreanalysisdatasetsandsimulatedobservationdata,futureworkcould
+explorethepotentialoftrainingschemesusingrealobservationdatasets(Martinetal.,2024;Dorfferetal.,2025). Inthiscontext,
+the benefit of wide-swath altimetry data could be highly valuable (Ballarotta et al., 2025; Fouchet et al., 2025). Accounting for
+uncertaintyquantificationintheproposedend-to-endneuralforecastsisalsoakeychallenge. Weaimtoexplorethecombination
+of4DVarNetschemesandgenerativeapproaches(Lietal.,2024)asrecentlyexploredforSLAmapping(Beauchampetal.,
+2025).
+11/13
+ACKNOWLEDGMENTS
+This work has been carried out as part of the Copernicus Marine Service OceanBench-STOF project. Copernicus Marine
+Service isimplemented by Mercator Oceanin the framework ofa delegation agreement withthe European Union. This work
+waspartiallysupportedbytheFrenchANROceaniX(ANR-19-CHIA-0016). ItalsobenefitedfromHPCandGPUresources
+provided by GENCI-IDRIS (Grant 2021-101030) and the CPER AIDA GPU cluster, supported by the Regional Council of
+Brittany, Brest Métropole, and Fonds Européen de DEveloppement Régional (FEDER).
+REFERENCES
+Aouni, A. E.,Gaudel, Q., Johnson, J.E., Charly, R., Sommer, J.L., van Gennip, Fablet,R., Drevillon, M., DRILLET, Y., and
+Traon, P. Y. L. (2025). Oceanbench: A benchmark for data-driven global ocean forecasting systems. In The Thirty-ninth
+Annual Conference on Neural Information Processing Systems Datasets and Benchmarks Track .
+Ashish, V. (2017). Attention is all you need. Advances in neural information processing systems , 30:I.
+Ballarotta, M., Ubelmann, C., Bellemin-Laponnaz, V., Le Guillou, F., Meda, G., Anadon, C., Laloue, A., Delepoulle, A.,
+Faugère,Y.,Pujol,M.-I.,etal.(2025). Integratingwide-swathaltimetrydataintolevel-4multi-missionmaps. OceanScience ,
+21(1):63–80.
+Ballarotta,M.,Ubelmann,C.,Pujol,M.-I.,Taburet,G.,Fournier,F.,Legeais,J.-F.,Faugère,Y.,Delepoulle,A.,Chelton,D.,
+Dibarboure, G., et al. (2019). On the resolutions of ocean altimetry maps. Ocean science , 15(4):1091–1109.
+Barth,A.,Alvera-Azcárate,A.,Licer,M.,andBeckers,J.-M.(2020). Dincae1.0: Aconvolutionalneuralnetworkwitherror
+estimates to reconstruct sea surface temperature satellite observations. Geoscientific Model Development , 13(3):1609–1622.
+Beauchamp, M.,Amar, M.M., Febvre, Q.,andFablet, R.(2021). End-to-endlearningofvariationalinterpolationschemes
+for satellite-derived ssh data. In 2021 IEEE International Geoscience and Remote Sensing Symposium IGARSS , pages
+7418–7421. IEEE.
+Beauchamp, M., Fablet, R., Benaichouche, S., Tandeo, P., Desassis, N., and Chapron, B. (2025). Neural variational data
+assimilation with uncertainty quantification using spde priors. Artificial Intelligence for the Earth Systems , 4(3):240060.
+Bi, K., Xie, L., Zhang, H., Chen, X., Gu, X., and Tian, Q. (2023). Accurate medium-range global weather forecasting with 3d
+neural networks. Nature, 619(7970):533–538.
+Brasseur, P. and Verron, J. (2006). The seek filter method for data assimilation in oceanography: a synthesis. Ocean Dynamics ,
+56(5):650–661.
+Buizza,R.,Balmaseda,M.A.,Brown,A.,English,S.,Forbes,R.,Geer,A.,Haiden,T.,Leutbecher,M.,Magnusson,L.,Rodwell,
+M.,etal.(2018). ThedevelopmentandevaluationprocessfollowedatECMWFtoupgradetheIntegratedForecastingSystem
+(IFS). European Centre for Medium Range Weather Forecasts.
+Cui,Y.,Wu,R.,Zhang,X.,Zhu,Z.,Liu,B.,Shi,J.,Chen,J.,Liu,H.,Zhou,S.,Su,L.,etal.(2025). Forecastingtheeddying
+ocean with a deep neural network. Nature Communications , 16(1):2268.
+Cummings, J. A. and Smedstad, O. M. (2013). Variational data assimilation for the global ocean. In Data assimilation for
+atmospheric, oceanic and hydrologic applications (Vol. II) , pages 303–343. Springer.
+Davidson, F. J., Allen, A., Brassington, G. B., Øyvind Breivik, Daniel, P., Kamachi, M., Sato, S., King, B., Lefevre, F.,
+Sutton, M., and Kaneko, H. (2009). Applications of godae ocean current forecasts to search and rescue and ship routing.
+Oceanography , 22(3):176–181.
+Dorffer, C., Jourdin, F., Nguyen, T. T. N., Devillers, R., Mouillot, D., and Fablet, R. (2025). Observation-only deep learning for
+gappy satellite-derived ocean colour data using 4dvarnet. IEEE Transactions on Geoscience and Remote Sensing .
+Ducet, N., Le Traon, P.-Y., and Reverdin, G. (2000). Global high-resolution mapping of ocean circulation from topex/poseidon
+and ers-1 and-2. Journal of Geophysical Research: Oceans , 105(C8):19477–19498.
+ElAouni,A.,Gaudel,Q.,Regnier,C.,VanGennip,S.,LeGalloudec,O.,Drevillon,M.,Drillet,Y.,andLellouche,J.-M.(2025).
+Glonet: Mercator’s end-to-end neural global ocean forecasting system. Journal of Geophysical Research: Machine Learning
+and Computation , 2(3).
+Fablet, R., Chapron, B., Drumetz, L., Mémin, E., Pannekoucke, O., and Rousseau, F. (2021). Learning variational data
+assimilation models and solvers. Journal of Advances in Modeling Earth Systems , 13(10).
+Fablet, R., Febvre, Q., and Chapron, B. (2023). Multimodal 4dvarnets for the reconstruction of sea surface dynamics from
+sst-ssh synergies. IEEE Transactions on Geoscience and Remote Sensing , 61:1–14.
+Febvre, Q., Le Sommer, J., Ubelmann, C., and Fablet, R. (2024). Training neural mapping schemes for satellite altimetry with
+simulation data. Journal of Advances in Modeling Earth Systems , 16(7).
+Febvre, Q., Sommer, J. L., Ubelmann, C., and Fablet, R. (2023). Training neural mapping schemes for satellite altimetry with
+simulation data. arXiv preprint arXiv:2309.14350 .
+12/13
+Fennel,K.,Mattern,J.P.,Doney,S.C.,Bopp,L.,Moore,A.M.,Wang,B.,andYu,L.(2022). Oceanbiogeochemicalmodelling.
+Nature Reviews Methods Primers , 2(1):76.
+Fouchet,E.,Benkiran,M.,LeTraon,P.-Y.,andRemy,E.(2025). Comparisonofaglobalhigh-resolutionoceandataassimilation
+system with swot observations. Frontiers in Marine Science , 12:1563934.
+Garcia, P., Larroche, I., Pesnec, A., Bull, H., Archambault, T., Moschos, E., Stegner, A., Charantonis, A., and Béréziat, D.
+(2025). Orcast: Operational high-resolution current forecasts. Artificial Intelligence for the Earth Systems .
+Hobday,A.J.,Alexander,L.V.,Perkins,S.E.,Smale,D.A.,Straub,S.C.,Oliver,E.C.,Benthuysen,J.A.,Burrows,M.T.,
+Donat,M.G.,Feng,M.,etal.(2016). Ahierarchicalapproachtodefiningmarineheatwaves. Progressinoceanography ,
+141:227–238.
+Hoteit, I., Chassignet, E., and Bell, M. (2024). Improving accuracy and providing uncertainty estimations: ensemble
+methodologies for ocean forecasting. State of the Planet Discussions , 2024:1–11.
+Johnson,J.E.,Febvre,Q.,Gorbunova,A.,Metref,S.,Ballarotta,M.,LeSommer,J.,etal.(2023). Oceanbench: Theseasurface
+height edition. Advances in Neural Information Processing Systems , 36:78275–78295.
+Lahoz, W. A. and Schneider, P. (2014). Data assimilation: making sense of earth observation. Frontiers in Environmental
+Science, 2:16.
+Lam, R., Sanchez-Gonzalez, A., Willson, M., Wirnsberger, P., Fortunato, M., Alet, F., Ravuri, S., Ewalds, T., Eaton-Rosen, Z.,
+Hu,W.,etal.(2022). Graphcast: Learningskillfulmedium-rangeglobalweatherforecasting. arXivpreprintarXiv:2212.12794 .
+Le Traon, P.-Y., Dibarboure, G., Jacobs, G., Martin, M., Rémy, E., and Schiller, A. (2017). Use of satellite altimetry for
+operational oceanography. Satellite altimetry over oceans and land surfaces , pages 581–608.
+Le Traon, P.-Y., Dibarboure, G., Lellouche, J.-M., Pujol, M.-I., Benkiran, M., Drevillon, M., Drillet, Y., Faugère, Y., and Remy,
+E. (2025). Satellite altimetry and operational oceanography: from jason-1 to swot. Ocean Science , 21(4):1329–1347.
+Le Traon, P. Y., Reppucci, A., Alvarez Fanjul, E., Aouf, L., Behrens, A., Belmonte, M., Bentamy, A., Bertino, L., Brando,
+V. E., Kreiner, M. B., et al. (2019). From observation to information and users: The copernicus marine service perspective.
+Frontiers in marine science , 6:234.
+Lellouche,J.-M.,Greiner,E.,LeGalloudec,O.,Regnier,C.,Benkiran,M.,Testut,C.-E.,Bourdalle-Badie,R.,Drevillon,M.,
+Garric, G., and Drillet, Y. (2018). Mercator ocean global high-resolution monitoring and forecasting system. New Frontiers
+in Operational Oceanography , pages 563–592.
+Lellouche, J.-M., Greiner, E., Ruggiero, G., Bourdallé-Badie, R., Testut, C.-E., Le Galloudec, O., Benkiran, M., and Garric, G.
+(2023). Evolution of the copernicus marine service global ocean analysis and forecasting high-resolution system: potential
+benefit for a wide range of users. Proceeding Eurogoos , pages 242–251.
+Lellouche, J.-M., Le Galloudec, O., Drévillon, M., Régnier, C., Greiner, E., Garric, G., Ferry, N., Desportes, C., Testut, C.-E.,
+Bricaud, C., et al. (2013). Evaluation of global monitoring and forecasting systems at mercator océan. Ocean Science ,
+9(1):57–81.
+Lermusiaux, P. F., Chiu, C.-S., Gawarkiewicz, G. G., Abbot, P., Robinson, A. R., Miller, R. N., Haley, P. J., Leslie, W. G.,
+Majumdar, S. J., Pang, A., et al. (2006). Quantifying uncertainties in ocean predictions.
+Li, L., Carver, R., Lopez-Gomez, I., Sha, F., and Anderson, J. (2024). Generative emulation of weather forecast ensembles with
+diffusion models. Science Advances , 10(13):eadk4489.
+Liu, G., Bracco, A., and Brajard, J. (2023). Systematic bias correction in ocean mesoscale forecasting using machine learning.
+Journal of Advances in Modeling Earth Systems , 15(11).
+Madec, G. et al. (2015). Nemo ocean engine.
+Martin,S.A.,Manucharyan,G.E.,andKlein,P.(2023). Synthesizingseasurfacetemperatureandsatellitealtimetryobservations
+using deep learning improves the accuracy and resolutionof gridded sea surfaceheight anomalies. Journal of Advancesin
+Modeling Earth Systems , 15(5).
+Martin,S.A.,Manucharyan,G.E.,andKlein,P.(2024). Deeplearningimprovesglobalsatelliteobservationsofoceaneddy
+dynamics. Geophysical Research Letters , 51(17).
+Ronneberger, O., Fischer, P., and Brox, T. (2015). U-net: Convolutional networks for biomedical image segmentation. In
+International Conference on Medical image computing and computer-assisted intervention , pages 234–241. Springer.
+Shi, X., Chen, Z., Wang, H., Yeung, D.-Y., Wong, W.-K., and Woo, W.-c. (2015). Convolutional lstm network: A machine
+learning approach for precipitation nowcasting. Advances in neural information processing systems , 28.
+Taburet, G., Sanchez-Roman, A., Ballarotta, M., Pujol, M.-I., Legeais, J.-F., Fournier, F., Faugere, Y., and Dibarboure, G.
+(2019). Duacs dt2018: 25 years of reprocessed sea level altimetry products. Ocean Science , 15(5):1207–1224.
+Wang, X., Wang, R., Hu, N., Wang, P., Huo, P., Wang, G., Wang, H., Wang, S., Zhu, J., and Xu, J. (2024). Xihe: A data-driven
+model for global ocean eddy-resolving forecasting. arXiv preprint arXiv:2402.02995 .
+Xiong, W., Xiang, Y., Wu, H., Zhou, S., Sun, Y., Ma, M., and Huang, X. (2023). Ai-goms: Large ai-driven global ocean
+modeling system. arXiv preprint arXiv:2308.03152 .
+13/13

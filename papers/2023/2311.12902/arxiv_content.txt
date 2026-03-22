@@ -1,0 +1,1215 @@
+Enhancing Solutions for Complex PDEs: Introducing Complementary
+Convolution and Equivariant Attention in Fourier Neural Operators
+Xuanle Zhao1,2*, Yue Sun1*, Tielin Zhang1,2, Bo Xu1,2
+1Institute of Automation, Chinese Academy of Sciences
+2School of Artificial Intelligence, University of Chinese Academy of Sciences
+Abstract
+Neural operators improve conventional neural networks by
+expanding their capabilities of functional mappings between
+different function spaces to solve partial differential equations
+(PDEs). One of the most notable methods is the Fourier Neu-
+ral Operator (FNO), which draws inspiration from Green’s
+function method and directly approximates operator kernels
+in the frequency domain. However, after empirical observa-
+tion followed by theoretical validation, we demonstrate that
+the FNO approximates kernels primarily in a relatively low-
+frequency domain. This suggests a limited capability in solv-
+ing complex PDEs, particularly those characterized by rapid
+coefficient changes and oscillations in the solution space.
+Such cases are crucial in specific scenarios, like atmospheric
+convection and ocean circulation. To address this challenge,
+inspired by the translation equivariant of the convolution ker-
+nel, we propose a novel hierarchical Fourier neural operator
+along with convolution-residual layers and attention mecha-
+nisms to make them complementary in the frequency domain
+to solve complex PDEs. We perform experiments on forward
+and reverse problems of multiscale elliptic equations, Navier-
+Stokes equations, and other physical scenarios, and find that
+the proposed method achieves superior performance in these
+PDE benchmarks, especially for equations characterized by
+rapid coefficient variations.
+Introduction
+Conventional research in the deep learning field is pre-
+dominantly driven by neural networks designed to learn
+relationships between input and output pairs that lie in
+finite-dimensional spaces. These designs have led to notable
+breakthroughs in numerous domains, including computer vi-
+sion (He et al. 2016; Chen et al. 2018), natural language pro-
+cessing (Zhou et al. 2016; Devlin et al. 2018), reinforcement
+learning (Hafner et al. 2019), and signal processing (Dong,
+Xu, and Xu 2018; Gulati et al. 2020).
+Partial differential equations (PDEs) are utilized in scien-
+tific research to describe a wide variety of physical, chem-
+ical, and biological phenomena (Sommerfeld 1949; Zhang
+et al. 2023). From turbulent flows to atmospheric circulation
+and material stress analysis, numerous real-world phenom-
+ena are fundamentally governed by the underlying PDEs.
+Therefore, solving PDEs is a crucial aspect of addressing
+problems in natural science.
+*These authors contributed equally.Traditional numerical methods for solving PDEs, such as
+the finite element method (FEM) and the finite difference
+method (FDM), present challenges in terms of incorporat-
+ing noisy data, generating complex meshes, solving high-
+dimensional problems, and handling inverse problems. For-
+tunately, by harnessing the expressiveness of neural net-
+works, many innovative methods (Hao et al. 2023; Brand-
+stetter et al. 2022; Liu et al. 2023; Li, Meidani, and Fari-
+mani 2022; Zhao et al. 2024b) have been proposed to ef-
+fectively overcome the limitations of numerical methods in
+solving PDEs. Examples of such methods include physics-
+informed neural networks (PINN) (Karniadakis et al. 2021)
+and Galerkin transformers (GT) (Cao 2021), which are
+specifically designed neural networks for PDE simulation by
+estimating the mapping between inputs and output pairs. In
+addition, methods such as the deep operator network (Deep-
+ONet) (Lu, Jin, and Karniadakis 2019) and the Fourier Neu-
+ral Operator (FNO) (Li et al. 2020, 2022) attempt to learn an
+operator between input and output function spaces. Besides
+solving PDEs, these methods have also proven to be effec-
+tive in dealing with issues related to complex dynamics such
+as climate change and natural disasters (Gopakumar et al.
+2023; Pathak et al. 2022; Zhao et al. 2024a).
+We preferentially consider more complex PDEs, such as
+multiscale PDEs, which have been widely used in physics,
+engineering, and related disciplines for analyzing com-
+plex practical problems such as reservoir modeling, ocean
+circulation, and high-frequency scattering (Quarteroni and
+Veneziani 2003). Given that complex PDEs are character-
+ized by rapidly changing coefficients and oscillations in the
+solution space, it is crucial to capture information across var-
+ious scales and frequency ranges. Nevertheless, when ap-
+plied to solving PDEs, evidence shows that FNO and related
+methods tend to prioritize learning low-frequency compo-
+nents (Li et al. 2020; Liu, Xu, and Zhang 2022; Anony-
+mous 2023), which raises the key question about how to cap-
+ture high-frequency features and combine them with low-
+frequency features of the FNO for solving complex PDEs.
+In this paper, we presented a novel attentive hierarchi-
+cal FNO method that attempts to capture and integrate low-
+frequency and high-frequency features at different scales.
+Since the convolution kernel is locally computed, high-
+frequency local details can be captured efficiently. There-
+fore, inspired by DCNO (Anonymous 2023), we adopt thearXiv:2311.12902v2  [cs.LG]  26 Jul 2024
+Fourier kernel with the convolutional-residual layer, which
+aims to improve the ability to capture high-frequency in-
+formation. Furthermore, we theoretically prove that the at-
+tention mechanism composed of channel and spatial atten-
+tion could integrate before the Fourier layer in a translation
+equivariant way. Furthermore, to effectively capture infor-
+mation across different scales, we propose a hierarchical ar-
+chitecture that learns convolutional-residual Fourier layers
+and equivariant attentions at multiple scales. Our main con-
+tributions can be summarized as follows:
+• We propose an enhanced method to address the issue
+where FNO-related approaches struggle to capture high-
+frequency features effectively. Specifically, our method
+integrates high-frequency and low-frequency compo-
+nents simultaneously with convolutional-residual Fourier
+layers and equivariant attentions in a hierarchical struc-
+ture.
+• The proposed method surpasses previous state-of-the-
+art approaches in existing PDE benchmarks, including
+Navier-Stokes equations, Darcy equations, and particu-
+larly multiscale elliptic equations with rapidly changing
+coefficients and significant solution variations.
+• Furthermore, our method demonstrates effectiveness and
+robustness in solving inverse PDE problems, particularly
+when dealing with noisy input data.
+Related works
+We briefly cover the background and related works in this
+section. More related works are listed in the Appendix.
+Neural PDE solver
+Many excellent algorithms have been proposed previously
+for solving PDEs using neural networks (Long et al. 2018;
+Hao et al. 2022). Physics-informed neural network (PINN)
+(Karniadakis et al. 2021) incorporates PDEs into the net-
+work by giving additional constraints with the form of PDEs
+into loss function, which then guide the synaptic modifica-
+tions towards tuned parameters that satisfy data distribution,
+physical PDE laws, and other necessary boundary condi-
+tions. GT (Cao 2021) utilizes the self-attention mechanism
+to build operator learners to solve PDEs and designs Fourier-
+type and Galerkin-type attention with linear complexity to
+reduce the computation cost. Neural operators leverage the
+concept that the operator denotes the mapping between in-
+finite input and output function spaces. DeepONet (Lu, Jin,
+and Karniadakis 2019) leverages the universal approxima-
+tion theorem to derive a branch-trunk structure to form the
+operator in a polynomial regression way. Some other meth-
+ods incorporate trained neural networks into conventional
+numerical solvers, to minimize numerical errors when deal-
+ing with coarse grids (Cuomo et al. 2022; Meng et al. 2020).
+Our approach is also built on the concept of FNO (Li et al.
+2020, 2022), which utilizes Green’s function and directly ap-
+proximates the kernel in the Frequency domain. We incorpo-
+rate different Fourier features at different frequency scales,
+which as a result, reaches promising performance in solving
+complex PDEs (e.g., multiscale PDEs).Multiscale PDEs
+Multiscale PDEs have many applications, including fore-
+casting atmospheric convection and ocean circulation, mod-
+eling the subsurface of flow pressures (Furman 2008;
+Huyakorn 2012), the deformation of elastic materials (Rivlin
+1948; Merodio and Ogden 2003), and the electric potential
+of conductive materials (Sundnes, Lines, and Tveito 2005).
+Multiscale elliptic PDEs are classic examples of multiscale
+PDEs. Solving elliptic PDEs with smooth coefficients is a
+conventional problem that can be effectively addressed using
+FNO. However, when the coefficients become non-smooth
+and exhibit rapidly changing features, the values in the so-
+lution spaces can exhibit oscillations and high contrast ra-
+tios (Anonymous 2023). Another example is turbulent flow,
+which is modeled by the Navier-Stokes equation. This equa-
+tion describes fluid dynamics and exhibits turbulent behav-
+ior at high Reynolds numbers. In turbulent flow, unsteady
+vortices interact, leading to complex dynamics. To solve
+these multiscale PDEs effectively, models must account for
+both global and local dynamics. Equations and more details
+about multiscale PDEs are presented in the Appendix.
+Fourier Neural Operator
+Fourier neural operator (FNO) (Li et al. 2020, 2022) draws
+inspiration from the conventional Green’s function method
+and directly optimizes the kernel within the Fourier fre-
+quency domain by utilizing the Fast Fourier Transform
+(FFT). This approach has been demonstrated to be an effi-
+cient means of reducing computational cost and performing
+global convolution. A notable advancement is that the op-
+erator kernel is directly trained in the frequency domain,
+whereby the network is theoretically independent of the
+training data resolution. Thus, FNO (Li et al. 2020, 2022)
+can deal with super-resolution problems and be trained on
+multiple PDEs.
+FNO has laid the foundation for operator learning, inspir-
+ing several subsequent works in the field. Geo-FNO (Li et al.
+2022) deforms the irregular grid into a latent space with a
+uniform grid to solve the limitation of FFT which could only
+be applied to rectangular domains. F-FNO (Tran et al. 2021)
+learns the kernel weights in a factorized way with separa-
+ble spectral layers. G-FNO (Helwig et al. 2023) utilizes the
+symmetry groups in the Fourier kernel to learn equivalent
+representations and improve accuracy even under imperfect
+symmetries.
+However, FNO ignores high-frequency components by
+default to learn a smooth representation of the input space,
+which results in poor performance when solving PDEs with
+rapidly changing coefficients (Liu, Xu, and Zhang 2022). To
+address this limitation, we integrate convolutional-residual
+Fourier layers and equivariant attention mechanisms to cap-
+ture local and global frequency features simultaneously.
+Methods
+In this section, we introduce our proposed method in detail.
+First, we formulate the definition of operator learning and il-
+lustrate FNO only learning the low-frequency domain. Then,
+Figure 1: Examples of various tasks, including Darcy-Rough, Trigonometric, Darcy-Smooth, Navier-Stokes, Pipe, and Elasticity
+datasets. These datasets solve equations according to coefficients, previous solutions, and structures by approximating mappings
+between input and output in coordinate spaces. All these tasks are covered in experimental verification.
+we theoretically prove the theorem to combine the atten-
+tion mechanism and Fourier transformation in a translation-
+equivariant way. Finally, we introduce the architecture of our
+proposed model.
+Problem Formulation
+For a PDE problem, the observed samples are (ai, ui)N
+i=1.
+Assuming the coordinates in a bounded open set D ⊂Rd,
+both the input and output can be expressed as functions with
+respect to these coordinates. These functions belong to the
+Banach spaces X=X(D;Rda)andY=Y(D;Rdu)re-
+spectively. Here, RdaandRdudenotes the range of input
+and output functions. Dconsists of a finite set of grid points
+within a rectangular area in R2. The function values are rep-
+resented by position x⊂ D, which could be denoted as a(x)
+andu(x). The overall solving process could be viewed as us-
+ing a neural network fθto approximate the mapping X → Y
+to predict the output ˆu(x), where ˆu(x) =fθ(a)(x).
+The Fourier neural operator (Li et al. 2020) is a powerful
+and efficient architecture for modeling PDEs that learn op-
+erators for mapping input and output function spaces. This
+algorithm is inspired by Green’s function method by learn-
+ing the kernel integral operator defined below.
+Define the kernel integral operator mapping by
+[K(ϕ)a](x) =Z
+kϕ(x, y)a(y)dy,∀x∈ D, (1)
+where Green’s function kϕis parameterized by neural net-
+works with parameter ϕ. In this context, the function kϕ
+serves as a kernel function that is learned from data. FNO
+assumes that Green’s function is periodic and only depen-
+dent on the relative distance, which means that kϕ(x, y) =
+kϕ(x−y). Then the operation in Eq. 1 could be regarded
+as convolution and efficiently implemented as element-wise
+multiplication in the frequency domain by using the convo-
+lution theorem:
+[K(ϕ)a](x) =Z
+kϕ(x−y)a(y)dy
+=F−1(F(kϕ)· F(a)) (x)
+=F−1(Rϕ· F(a)) (x),(2)where FandF−1are the Fourier transform and the inverse
+Fourier transform, respectively. Instead of learning the ker-
+nelkϕ, FNO directly learns the kernel Rϕin the Fourier do-
+main.
+It is important to note that although the integral operator
+itself is linear, the neural operator can learn non-linear op-
+erators by using non-linear activation functions. Thus, the
+Fourier layer can be formally expressed as:
+ˆu(x) :=σ 
+Wa(x) +F−1(Rϕ· F(a))(x)
+,∀x∈ D,
+(3)
+where σdenotes the non-linear activation function, Wand
+Rϕare the fully connected layer and trainable operator ker-
+nel, respectively.
+FNO Drawbacks
+Nevertheless, we take a one-dimensional case as an exam-
+ple to show that high-frequency features are not well repre-
+sented in FNO and related methods, posing a challenge in
+dealing with multiscale PDEs. During the Fourier transfor-
+mation process of the FNO, only the low-frequency com-
+ponents ( ω≤Tω) are reserved for multiplication, and high-
+frequency components ( ω > T ω) are ignored by default. The
+size of the kernel is the same as the size of the reserved low-
+frequency components. Thus the elementwise multiplication
+process could be expressed as:
+(Rϕ· F(a))(ω) =(Rϕ· F(a))(ω), ω≤Tω,
+0, ω > T ω.
+Therefore, after inverse Fourier transformation,
+F−1(Rϕ· F(a))(x) =X
+ω≤Tω(Rϕ· F(a))(ω)eiωx,
+only the low-frequency components are represented. For
+the sake of notational convenience, we only use the one-
+dimensional case for illustration, which still stands for 2D
+and 3D cases. Additionally, previous works (Liu, Xu, and
+Zhang 2022) also inform that FNO and GT have shown their
+tendency to prioritize learning low-frequency components
+before high-frequency components when applied to multi-
+scale PDEs. Therefore, obtaining information about differ-
+ent input function frequencies is crucial to solving complex
+PDEs. Motivated by the need to handle PDEs at multiple
+scales, this paper introduces a novel hierarchical attentive
+Fourier neural operator.
+Attentive Equivariant Convolution
+In the FNO (Li et al. 2020), the kernel of Green’s func-
+tion is imposed as the convolution kernel, which is a natu-
+ral choice from the perspective of fundamental solutions. A
+fundamental property of the convolution is that it commutes
+with translations,
+Ly[f ⋆ ψ ] (x) = [Ly[f]⋆ ψ] (x) (4)
+where Lyis the translation operator.1In other words, con-
+volving a y-translated signal Ly[f]with a filter is equivalent
+to first convolving the original signal fwith the filter ψand
+y-translating the obtained response next. This property is re-
+ferred to as translation equivariance.
+Previous works have defined attentive group convolution
+(Romero et al. 2020; Cohen and Welling 2016) and proved
+its equivariant property. We simplify them into attentive con-
+volution defined on Rd,
+[f ⋆αψ] (x) =Z
+Rdα(x,˜x)f(˜x)Lx[ψ] (˜x)d˜x (5)
+where α(x,˜x)is the attention map between the input and
+output positions.
+Theorem 1. The attentive convolution is an equivariant
+operator if and only if the attention operator Asatisfies:
+∀¯x,x,˜x∈Rd:A[L¯xf] (x,˜x) =A[f] 
+¯x−1x,¯x−1˜x
+(6)
+If, moreover, the maps generated by Aare invariant to one
+of its arguments, and, hence, exclusively attend to either the
+input or the output domain, then Asatisfies Equation (6)if
+it is equivariant and thus, based on convolutions.
+Since convolutions and pooling operations are translation
+equivariant, mostly visual attention mechanisms are transla-
+tion equivariant as well (Romero et al. 2020). One special
+case is channel attention based on fully connected layers (a
+non-translation equivariant map) in SE-Nets (Hu, Shen, and
+Sun 2018). However, the input of the fully connected lay-
+ers is obtained via global average pooling, which has shown
+that it is equivalent to a pointwise convolution (Romero et al.
+2020). Therefore, attention here is translation equivariant
+(Cohen et al. 2018).
+Furthermore, previous works broadly assumed that the
+maps in visual attention do not depend on the filters ψand
+could be equivariantly factorized into spatial αXand chan-
+nelαCcomponents. Hence, the attention coefficient αis the
+sole function of the input signal and becomes only depen-
+dent on x(Equation (5)).
+[f ⋆αψ] = [fα⋆ ψ] = [( αf)⋆ ψ] = 
+αXαCf
+⋆ ψ
+(7)
+In this way, the attention maps αcan be shifted to the in-
+put feature map f. Resultantly, the attentive convolution
+1It follows that Lg[f](x) = f 
+g−1x
+=f(x−y), where
+g−1=−yis the inverse of gin the translation group 
+Rd,+
+for
+g=y.is reduced to a sequence of conventional convolutions and
+point-wise non-linearities (Thm. 1), which further reduces
+the computational cost of attention.
+Inspired by GFNO (Helwig et al. 2023), we further uti-
+lize the following group Fourier transformation theorem to
+illustrate our Attentive Equivariant Fourier Neural Operator.
+Theorem 2. Given the orthogonal group O(d) acting on
+functions defined on Rdby the map (g, f)7→Lgfwhere
+(Lgf) (x) := f 
+g−1x
+, the group action commutes with
+the Fourier-transform, i.e. F ◦Lq=Lq◦ F.
+This theorem describes the equivariance of the Fourier
+transformation, which means applying a transformation
+from O(d)to a function in physical space equally applies
+the transformation to the Fourier transform of the function.
+Hence, based on Equation (3), our model could be generally
+built as
+ˆu:= MLP( σ 
+Wa+F−1(Rϕ· F(αXαCa))
+),(8)
+to avoid confusion, we make the input aand output uin bold
+and omit ∀x∈ D. We further introduce the details and mod-
+ify our model architecture to better learn the high-frequency
+feature in the next subsection.
+Model Architecture
+We propose a hierarchical attentive Fourier neural operator
+combined with convolutional-residual layers and attention
+mechanisms to learn the function mapping at various reso-
+lutions.
+Convolutional-Residual Fourier layers: Inspired by
+DCNO (Anonymous 2023), we propose the convolution-
+residual Fourier layers which are composed of two main
+components. In the first component, the input feature is
+transformed into the frequency domain by the Fast Fourier
+Transform (FFT) and directly learning an element-wise
+weight in the frequency domain. We follow the setting of
+FNO, only reserving lower-frequency components and train-
+ing the kernel weights on them. This setting aims to learn a
+smooth mapping to avoid jagged curves in solution spaces.
+However, this setting may ignore some details about the so-
+lution space, especially in solving multiscale PDEs. Since
+convolution utilizes a much smaller kernel size than the
+Fourier transform allowing the kernel to capture locally de-
+tailed information, we replaced the fully connected resid-
+ual layers with a convolution layer. This approach pertains
+to the high-frequency components that are neglected by the
+Fourier layer. To prevent confusion, we simplify the coordi-
+nates xand denote the input and output of the convolutional-
+residual Fourier layer at the k-th scale as vkand˜vkrespec-
+tively. Thus, the Fourier layers could be modulated as:
+˜vk=σ 
+Conv(vk) +F−1(Rϕ· F(vk)
+, (9)
+where σdenotes the GELU activation, Rϕrepresents the
+kernel weights in the Fourier domain that should be trained.
+Although the convolutional residual layers help to capture
+some high-frequency features, relying solely on this compo-
+nent is not enough to capture all detailed information. We
+also leverage attention mechanisms to enhance the extrac-
+tion and integration of information.
+DownDownUpUp……DownUp!𝑎!𝑣!!𝑢!𝓕𝒗𝒌𝑹𝓕"𝟏𝑪Convolutional-ResidualLayerFourier Layer
+Element-wise MultiplicationAddition%𝒂𝒌Channel	AttentionSpatialAttention
+EquivariantAttentionFourierLayerMLP………!𝑣!𝜎Figure 2: The overall network architecture. The input is downsampled and processed at each scale using equivariant attention
+and convolutional-residual Fourier layers. The final output is obtained by upsampling the outputs of hierarchical layers.
+Attention mechanism: The attention mechanism can be
+regarded as a dynamic selection process, where it chooses
+important features while automatically disregarding irrele-
+vant parts of the input features. The attention mechanism is
+suitable for learning dependence among pixels in the com-
+puter vision field (Yuan, Chen, and Wang 2020; Geng et al.
+2021). Generally, the grid data in this work is similar to pixel
+images. Previous works have conducted thorough experi-
+ments to determine the optimal configuration for integrat-
+ing channel and spatial attention maps in the Rdscenario.
+We follow the settings in (Woo et al. 2018) that serially start
+with the channel attention.
+˜ak
+c=AC(˜ak)⊗˜ak
+˜ak
+xc=AX(˜ak
+c)⊗˜ak
+c
+vk= ˜ak
+xc+ ˜ak(10)
+where ˜akserves as the input of the attention layers, which
+also denotes the downsampled feature of model input a.vk
+represents the output of the attention layers. ⊗denotes the
+element-wise product. The ACandAXdenote the channel
+and spatial attention respectively and have been proved to
+the equivariant operator before.
+Hierarchical architecture: We attempt to design our
+model hierarchically, with various scales as inputs. As in
+multiscale PDEs, multiple scales and regions represent dif-
+ferent physical laws (Karniadakis et al. 2021). The final pre-
+diction output is obtained by successively upsampling the
+outputs in various scales from coarse to fine. Specifically,
+for the k-scale, ˜ukis concatenated with the interpolation-
+upsampled ˜uk+1and further projected with a linear layer.
+More details are presented in the Appendix.
+As the weight matrix is directly parameterized in the
+Fourier domain, we follow the FNO (Li et al. 2020) to limitthe Fourier series by terminating it at a predefined number of
+modes. In simple terms, we employ different truncation val-
+ues at different hierarchical layers to ensure that our model
+can learn diverse information at different scales. However,
+large truncation modes would cause computing resources to
+increase hugely. To balance the computation cost and perfor-
+mance, we set the truncation mode to decrease with the fea-
+ture scale, as we reckon that large-scale features need more
+Fourier modes to represent, detailed values are listed in the
+Appendix.
+Evaluation metrics
+Previous works (Liu, Xu, and Zhang 2022; Anonymous
+2023) proposed H1 loss to solve multiscale PDEs which cal-
+culates the loss in the Fourier domain. However, we only
+use the normalized mean squared error (N-MSE) as the loss
+function and evaluation metrics, which is defined as
+N-MSE =1
+BBX
+i=1∥ˆui−ui∥2
+∥ˆui∥2, (11)
+where ∥ · ∥ 2is the 2-norm, Bis the batch size, uandˆuare
+the network output prediction and ground truth respectively.
+Experiments
+Benchmarks. We evaluate our method on various PDE
+benchmarks, including multiscale elliptic equations with
+various resolutions, Navier-Stokes equations with different
+viscosity coefficients, and other physics scenarios governed
+by PDEs. Also, we conduct experiments on the inverse prob-
+lem of multiscale elliptic equations with noise added to input
+data.
+Baselines. We compare our method with recent and ad-
+vanced methods. FNO (Li et al. 2020), U-NO (Rahman,
+Table 1: Experiment results on various elliptic equations with various resolutions. →denotes the resolution mapping between
+input and output. For example, 256→256denotes the input coefficient spaces are 256×256and the output solution spaces
+are256×256. Performance is measured with mean squared error (MSE with ×10−2). The number of parameters and time per
+epoch are measured for a batch size of 10. For clarity, the best result is in bold and the second best is underlined .
+METHODS PARAMETERS TIME PER EPOCH TRIGONOMETRIC DARCY ROUGH DARCY -SMOOTH
+(×106) (S) 256→256 512 →512 128 →128 256 →256 64 →64
+FNO 2.42 7.42 1.936 1.932 2.160 2.098 1.08
+WMT 10.32 20.03 1.043 1.087 1.573 1.621 0.82
+U-NO 16.39 15.42 1.256 1.245 1.368 1.332 1.13
+GT 3.27 36.32 1.143 1.264 2.231 2.423 1.70
+F-FNO 4.87 10.42 1.429 1.424 1.435 1.513 0.77
+HANO 15.84 29.13 0.893 0.948 1.172 1.241 0.79
+LSM 5.81 14.26 0.832 0.782 1.036 1.014 0.65
+DCNO 2.27 11.73 1.056 1.209 1.276 0.948 0.72
+OURS 5.36 10.81 0.722 0.695 1.161 0.904 0.59
+Ross, and Azizzadenesheli 2022), and F-FNO (Tran et al.
+2021) are FNO-relevant methods that use Fourier transfor-
+mation to learn the operators directly in the frequency do-
+main. WMT (Gupta, Xiao, and Bogdan 2021) learns the
+kernel projection onto fixed multiwavelet polynomial bases.
+GT (Cao 2021) modify the self-attention to Fourier-type and
+Galerkin-type attentions with linear complexities to solve
+the PDEs. HANO (Liu, Xu, and Zhang 2022) utilizes hier-
+archical attention to solve multiscale PDEs. LSM (Wu et al.
+2023) solves the PDEs in the latent spectrum domain by de-
+composing latent features into basic operators.
+Complex Elliptic Equations
+The elliptic equation datasets describe the flow of fluid
+through a porous medium, which are formulated by a
+second-order linear elliptic equation,−∇ · (a(x)∇u(x)) =f(x), x∈D,
+u(x) = 0 , x ∈∂D,(12)
+with rough coefficients and Dirichlet boundary. Our model
+aims to approximate an operator, which maps the input coef-
+ficient function to the corresponding output solution space.
+In contrast to previous works, the coefficient functions show
+a significant degree of smoothness, leading to correspond-
+ingly smooth solutions. We follow the setting in HANO
+(Liu, Xu, and Zhang 2022) and DCNO (Anonymous 2023)
+to change the conventional elliptic equations into multiscale
+cases by modifying coefficients to two-phrase rough ones
+(Darcy-Rough ) or high-contrast trigonometric coefficients
+(Trigonometric ). More details are denoted in the Appendix.
+The original experiments of multiscale PDEs using coef-
+ficients with resolution 1023×1023 to approximate the so-
+lution with resolution 256×256or512×512in the trigono-
+metric setting, which reduce the difficulties as larger inputs
+might contain more specific information. To enhance the dif-
+ficulty, we modify the resolution of coefficients to the same
+as that of the output solution. We also follow the setting in
+(Li et al. 2020) and perform the original elliptic equation
+dataset ( Darcy-Smooth ) for comparison.
+The experiment results are presented in Table 1, our
+model achieves the lowest error compared to other oper-Table 2: Experiments on various Navier-Stokes equations
+and other physical scenarios including Elasticity, Darcy-
+Smooth, and Pipe. Performances are measured with MSE
+(×10−2). Also, the best result is in bold and the second best
+is underlined .
+MethodsNavier-Stokes
+Elasticity Pipeν= 10−3ν= 10−4ν= 10−5
+T0= 10s T 0= 10s T 0= 10s
+T= 50s T = 30s T = 20s
+FNO 1.28 8.34 19.82 5.08 0.67
+WMT 1.01 11.35 15.41 5.20 0.77
+U-NO 0.89 5.72 17.53 4.69 1.00
+GT 1.12 - 26.84 16.81 0.98
+F-FNO 0.92 6.02 17.98 4.72 0.59
+HANO 0.98 6.18 18.47 4.75 0.70
+LSM 0.82 6.12 15.35 4.08 0.50
+Ours 0.72 5.92 15.09 3.89 0.51
+ator baselines in most situations, especially in the elliptic
+equations with trigonometric coefficients. Our results in-
+dicate that cascade architecture models, such as FNO and
+DCNO, perform suboptimally in this setting, while hierar-
+chical structures, such as U-NO, HANO, and LSM, per-
+form relatively better. However, the amount of parameters
+and computations required by HANO and UNO are con-
+siderable, our model reduces the parameter quantity by us-
+ing equivariant attention and convolutions and reaches better
+prediction performances. To better show the improvement
+of our model in solving multiscale PDEs, we visualize the
+prediction solution and error in Figure 5. Compared with
+FNO, our model achieves lower prediction error, especially
+in high-frequency components, which shows the improve-
+ments of our model to capture high-frequency features.
+Navier-Stokes Equation
+We consider the 2D Navier-Stokes equation, a standard
+benchmark proposed in FNO (Li et al. 2020), in which the
+vorticity forms on the two-dimensional torus T2.
+Figure 3: Showcase of Darcy-Rough Elliptic Equations,
+where the high-frequency components are moved to the cen-
+ter.G.T. andF.D. denote the ground truth and frequency do-
+main. The absolute error is computed as |u−ˆu|.
+Specifically, the operator predicts the vorticity after T0by
+the input vorticity before T0, the values of T0andTvary ac-
+cording to the dataset. Our experiments consider viscosities
+withν∈ {10−3,10−4,10−5}, with smaller viscosities de-
+noting more chaotic flow, are much harder to predict. The
+‘rollout’ strategy is employed to predict vorticity at each
+time step in a recursive manner to ensure fair comparisons.
+The final operator could be regarded as approximated by var-
+ious neural operators.
+Other physical scenarios
+We further evaluate our method on Pipe and Elasticity
+datasets.
+Pipe : The Pipe dataset focuses on predicting the incom-
+pressible flow through a pipe. The input is the pipe structure,
+while the output is the horizontal fluid velocity within the
+pipe. In this dataset, geometrically structured meshes with
+resolution 129×129are generated. The input and output
+are the mesh structure and fluid velocity within the pipe.
+Elasticity : The Elasticity dataset is designed to predict the
+internal stress within an incompressible material containing
+an arbitrary void at its center and an external tensile force
+Figure 4: Showcase of prediction results and absolute er-
+ror of our model in the Navier-Stokes equation dataset.
+First row: {2, 4, 6, 8, 10 }time steps input sequence; Sec-
+ond row: {12, 14, 16, 18, 20 }time steps ground truth se-
+quence; Third row: corresponding prediction sequence; Last
+row: corresponding absolute prediction error |ˆx−y|.
+is exerted on the material. Originally, the Elasticity data are
+presented by the point clouds, we follow (Wu et al. 2023) to
+modify the data into regular grids. The input consists of the
+material’s structural characteristics, while the output repre-
+sents the internal stress. These benchmarks estimate the in-
+ner stress of incompressible materials with an arbitrary void
+in the center of the material. In addition, external tension is
+applied to the material. This benchmark’s input and output
+are the material’s structure and inner stress.
+We evaluate our model on these datasets to demonstrate
+the effectiveness of our model in solving general PDE prob-
+lems. Table 2 summarizes experimental results on Navier-
+Stokes equations with various coefficients and other physical
+scenarios. Our model performs better in almost all settings,
+especially in the Navier-Stokes dataset with small viscosi-
+ties and Elasticity dataset. Learning high-frequency features
+may help capture detailed flow changes as flows with smaller
+viscosities are more chaotic.
+Our experimental results demonstrate that our model
+reaches superior performance compared with LSM (Wu
+et al. 2023), the previous state-of-the-art approach, which
+utilizes a combination of self-attention and latent spectral
+decomposition to solve PDEs within the latent domain. De-
+spite this, it is important to note that LSM is not an oper-
+ator since it relies on patched multiscale architectures and
+self-attention mechanisms. We further visualize the results
+of Navier-Stokes in Figure 5.
+Inverse Problems Solving
+In various scientific disciplines such as geological sciences
+and mathematical derivation, inverse problems are of sig-
+nificant importance. Nonetheless, these problems frequently
+demonstrate reduced stability compared to their associated
+Table 3: Experiments on inverse coefficient identification
+tasks. In this experiment, the input solution space and output
+coefficient space are both 256×256. Performances are mea-
+sured with MSE ( ×10−2). Also, the best result is in bold
+and the second best is underlined .
+methods Trigonometric Darcy rough
+ϵ= 0 ϵ= 0.01ϵ= 0.1ϵ= 0 ϵ= 0.01ϵ= 0.1
+FNO 44.74 46.34 48.43 28.41 28.98 30.65
+WMT 11.14 12.43 20.43 12.32 17.54 28.43
+U-NO 12.97 18.54 25.87 15.64 20.54 25.34
+GT 27.87 30.98 43.54 23.12 28.87 35.43
+F-FNO 21.46 26.98 36.34 18.73 25.23 37.54
+HANO 9.87 13.67 20.98 8.45 10.43 20.43
+DCNO 8.87 17.64 34.76 6.32 11.83 23.54
+Ours 8.32 10.14 18.24 7.48 9.42 17.32
+forward problems, even when advanced regularization tech-
+niques are employed.
+Following (Anonymous 2023), we evaluate our method
+for inverse identification problems on multiscale elliptic
+PDEs. In this experiment, we aim to learn an inverse op-
+erator, which maps the solution function space to the cor-
+responding coefficient space ˆu=u+ϵN(u)7→a. Here,
+ϵindicates the extent of Gaussian noise introduced into the
+training and evaluation data. The noise term N(u)accounts
+for the sampling distribution and data-related noise.
+The experiments about inverse coefficients inference
+problems on the multiscale elliptic PDEs dataset are pre-
+sented in Table 3. In our experiments, we modify the input
+and output resolutions to both 256×256in the Darcy Rough
+and Trigonometric elliptic equations. Since the coefficient
+function space changes faster than the solution space, this
+task is more challenging than the forward-solving problem.
+The result shows that our model performs well in the
+inverse coefficient identification problem, which illustrates
+our model’s ability to successfully address the challenges
+posed by this ill-posed inverse problem with data. Methods
+such as FNO and F-FNO that learn kernel functions directly
+in the low-frequency domain have trouble recovering targets
+with high-frequency components.
+Ablation study
+To verify the effectiveness of each component in our model,
+we perform ablation studies in various settings, including re-
+moving components ( w/o), replacing them with other com-
+ponents ( rep), and adding some other components ( add).
+• In the w/opart, we consider removing the attention com-
+ponent ( w/oAttention) or even the Fourier layer ( w/o
+FNO).
+• In the reppart, we consider replacing the convolutional-
+residual layer and attention mechanism with other com-
+ponents and keeping the number of parameters almost
+unchanged. For convolutional-residual layers, we replace
+them with simple residual layers ( repConv→Res) or
+fully connected layers ( repConv→Fc). For the atten-
+tion mechanism, we replace them with dilation convo-Table 4: Ablation studies on our proposed model, includ-
+ingremoving components (w/o) ,replacing them with other
+components (rep) , and adding some other components (add) .
+Performances are measured with MSE ( ×10−2) and the best
+result is in bold .
+DesignsMSE
+Trigono Darcy-Rough Navier-Stokes
+w/oAttention 1.054 1.162 17.25
+FNO 1.228 1.306 22.31
+repConv→Res 1.131 1.162 16.46
+Conv→Fc 1.176 1.245 15.72
+Att→d-Conv 0.894 0.954 16.12
+Att→MLP 0.985 1.034 15.63
+add Hier 0.794 0.901 15.36
+Ours 0.722 0.904 15.29
+lution ( repAtt→d-Conv) or multi-layer perceptrons ( rep
+Att→MLP).
+• In the addpart, we add one hierarchical layer with corre-
+sponding attention and Fourier layer ( addHier).
+It is discovered that all components of our model are
+essential for solving multiscale PDEs after removing ex-
+periments. Without the attention and Fourier layer, model
+performance on all benchmarks will drop seriously. Sim-
+ilar results could be found in replacing experiments, the
+convolutional-residual Fourier layer and attention can fit the
+multiscale PDEs benchmarks well. Besides, in the Navier-
+Stokes dataset, MLP achieved performance comparable to
+attention, suggesting that previous methods can work well
+in PDEs where the coefficients do not change rapidly. Addi-
+tionally, adding a hierarchical layer may improve the perfor-
+mance of the model sometimes, but this will add a significant
+amount of computation. To balance the efficiency and effec-
+tiveness we keep the number of layers of our model. Last but
+not least, our model performs better than methods with cas-
+cade architecture, such as FNO and F-FNO, indicating the
+importance of solving multiscale PDEs hierarchically.
+Conclusion
+We propose a novel hierarchical attentive Fourier neural op-
+erator that combines convolutional-residual Fourier layers
+and equivariant attentions for solving multiscale PDEs. Our
+model utilizes Fourier layers to learn low-frequency fea-
+tures, with convolutional-residual layer and attention mech-
+anisms to capture high-frequency features. Benefits from the
+above components, our model could capture both local and
+global information and achieve superior performances in
+many PDE benchmarks, especially in solving forward and
+inverse problems of multiscale elliptic PDEs.
+Many works should be done in the future. Researching
+how to solve more complicated PDEs or even complex dy-
+namics in the real scene and how to use the property of PDEs
+to design neural network architectures is meaningful.
+References
+Anonymous. 2023. Dilated convolution neural operator for mul-
+tiscale partial differential equations. In Submitted to The Twelfth
+International Conference on Learning Representations . Under re-
+view.
+Brandstetter, J.; Berg, R. v. d.; Welling, M.; and Gupta, J. K.
+2022. Clifford neural layers for PDE modeling. arXiv preprint
+arXiv:2209.04934 .
+Cao, S. 2021. Choose a transformer: Fourier or galerkin. Advances
+in neural information processing systems , 34: 24924–24940.
+Chen, R. T.; Rubanova, Y .; Bettencourt, J.; and Duvenaud, D. K.
+2018. Neural ordinary differential equations. Advances in neural
+information processing systems , 31.
+Cohen, T.; and Welling, M. 2016. Group equivariant convolutional
+networks. In International conference on machine learning , 2990–
+2999. PMLR.
+Cohen, T. S.; Geiger, M.; K ¨ohler, J.; and Welling, M. 2018. Spher-
+ical cnns. arXiv preprint arXiv:1801.10130 .
+Cuomo, S.; Di Cola, V . S.; Giampaolo, F.; Rozza, G.; Raissi, M.;
+and Piccialli, F. 2022. Scientific machine learning through physics–
+informed neural networks: Where we are and what’s next. Journal
+of Scientific Computing , 92(3): 88.
+Dai, J.; Qi, H.; Xiong, Y .; Li, Y .; Zhang, G.; Hu, H.; and Wei, Y .
+2017. Deformable convolutional networks. In Proceedings of the
+IEEE international conference on computer vision , 764–773.
+Devlin, J.; Chang, M.-W.; Lee, K.; and Toutanova, K. 2018. Bert:
+Pre-training of deep bidirectional transformers for language under-
+standing. arXiv preprint arXiv:1810.04805 .
+Dong, L.; Xu, S.; and Xu, B. 2018. Speech-transformer: a no-
+recurrence sequence-to-sequence model for speech recognition. In
+2018 IEEE international conference on acoustics, speech and sig-
+nal processing (ICASSP) , 5884–5888. IEEE.
+Engquist, B.; and Souganidis, P. E. 2008. Asymptotic and numeri-
+cal homogenization. Acta Numerica , 17: 147–190.
+Furman, A. 2008. Modeling coupled surface–subsurface flow pro-
+cesses: a review. Vadose Zone Journal , 7(2): 741–756.
+Geng, Z.; Guo, M.-H.; Chen, H.; Li, X.; Wei, K.; and Lin, Z.
+2021. Is attention better than matrix decomposition? arXiv preprint
+arXiv:2109.04553 .
+Gopakumar, V .; Pamela, S.; Zanisi, L.; Li, Z.; Anandkumar, A.; and
+Team, M. 2023. Fourier Neural Operator for Plasma Modelling.
+arXiv preprint arXiv:2302.06542 .
+Guibas, J.; Mardani, M.; Li, Z.; Tao, A.; Anandkumar, A.; and
+Catanzaro, B. 2021. Adaptive fourier neural operators: Efficient
+token mixers for transformers. arXiv preprint arXiv:2111.13587 .
+Gulati, A.; Qin, J.; Chiu, C.-C.; Parmar, N.; Zhang, Y .; Yu, J.;
+Han, W.; Wang, S.; Zhang, Z.; Wu, Y .; et al. 2020. Conformer:
+Convolution-augmented transformer for speech recognition. arXiv
+preprint arXiv:2005.08100 .
+Guo, M.-H.; Xu, T.-X.; Liu, J.-J.; Liu, Z.-N.; Jiang, P.-T.; Mu, T.-J.;
+Zhang, S.-H.; Martin, R. R.; Cheng, M.-M.; and Hu, S.-M. 2022.
+Attention mechanisms in computer vision: A survey. Computa-
+tional visual media , 8(3): 331–368.
+Gupta, G.; Xiao, X.; and Bogdan, P. 2021. Multiwavelet-based
+operator learning for differential equations. Advances in neural
+information processing systems , 34: 24048–24062.
+Hackbusch, W. 2013. Multi-grid methods and applications , vol-
+ume 4. Springer Science & Business Media.
+Hafner, D.; Lillicrap, T.; Ba, J.; and Norouzi, M. 2019. Dream to
+control: Learning behaviors by latent imagination. arXiv preprint
+arXiv:1912.01603 .Hao, Z.; Liu, S.; Zhang, Y .; Ying, C.; Feng, Y .; Su, H.; and Zhu, J.
+2022. Physics-informed machine learning: A survey on problems,
+methods and applications. arXiv preprint arXiv:2211.08064 .
+Hao, Z.; Wang, Z.; Su, H.; Ying, C.; Dong, Y .; Liu, S.; Cheng,
+Z.; Song, J.; and Zhu, J. 2023. Gnot: A general neural operator
+transformer for operator learning. In International Conference on
+Machine Learning , 12556–12569. PMLR.
+He, K.; Zhang, X.; Ren, S.; and Sun, J. 2016. Deep residual learn-
+ing for image recognition. In Proceedings of the IEEE conference
+on computer vision and pattern recognition , 770–778.
+Helwig, J.; Zhang, X.; Fu, C.; Kurtin, J.; Wojtowytsch, S.; and Ji,
+S. 2023. Group Equivariant Fourier Neural Operators for Partial
+Differential Equations. arXiv preprint arXiv:2306.05697 .
+Hu, H.; Gu, J.; Zhang, Z.; Dai, J.; and Wei, Y . 2018. Relation net-
+works for object detection. In Proceedings of the IEEE conference
+on computer vision and pattern recognition , 3588–3597.
+Hu, J.; Shen, L.; and Sun, G. 2018. Squeeze-and-excitation net-
+works. In Proceedings of the IEEE conference on computer vision
+and pattern recognition , 7132–7141.
+Huyakorn, P. S. 2012. Computational methods in subsurface flow .
+academic press.
+Karniadakis, G. E.; Kevrekidis, I. G.; Lu, L.; Perdikaris, P.; Wang,
+S.; and Yang, L. 2021. Physics-informed machine learning. Nature
+Reviews Physics , 3(6): 422–440.
+Li, Z.; Huang, D. Z.; Liu, B.; and Anandkumar, A. 2022. Fourier
+neural operator with learned deformations for pdes on general ge-
+ometries. arXiv preprint arXiv:2207.05209 .
+Li, Z.; Kovachki, N.; Azizzadenesheli, K.; Liu, B.; Bhattacharya,
+K.; Stuart, A.; and Anandkumar, A. 2020. Fourier neural oper-
+ator for parametric partial differential equations. arXiv preprint
+arXiv:2010.08895 .
+Li, Z.; Meidani, K.; and Farimani, A. B. 2022. Transformer for
+partial differential equations’ operator learning. arXiv preprint
+arXiv:2205.13671 .
+Liu, S.; Hao, Z.; Ying, C.; Su, H.; Cheng, Z.; and Zhu, J. 2023.
+NUNO: A General Framework for Learning Parametric PDEs with
+Non-Uniform Data. arXiv preprint arXiv:2305.18694 .
+Liu, X.; Xu, B.; and Zhang, L. 2022. Ht-net: Hierarchical trans-
+former based operator learning model for multiscale pdes. arXiv
+preprint arXiv:2210.10890 .
+Long, Z.; Lu, Y .; Ma, X.; and Dong, B. 2018. Pde-net: Learning
+pdes from data. In International conference on machine learning ,
+3208–3216. PMLR.
+Lu, L.; Jin, P.; and Karniadakis, G. E. 2019. Deeponet: Learning
+nonlinear operators for identifying differential equations based on
+the universal approximation theorem of operators. arXiv preprint
+arXiv:1910.03193 .
+Meng, X.; Li, Z.; Zhang, D.; and Karniadakis, G. E. 2020. PPINN:
+Parareal physics-informed neural network for time-dependent
+PDEs. Computer Methods in Applied Mechanics and Engineering ,
+370: 113250.
+Merodio, J.; and Ogden, R. 2003. Instabilities and loss of ellipticity
+in fiber-reinforced compressible non-linearly elastic solids under
+plane deformation. International Journal of Solids and Structures ,
+40(18): 4707–4727.
+Ovadia, O.; Kahana, A.; Stinis, P.; Turkel, E.; and Karniadakis,
+G. E. 2023a. ViTO: Vision Transformer-Operator. arXiv preprint
+arXiv:2303.08891 .
+Ovadia, O.; Turkel, E.; Kahana, A.; and Karniadakis, G. E. 2023b.
+DiTTO: Diffusion-inspired Temporal Transformer Operator. arXiv
+preprint arXiv:2307.09072 .
+Owhadi, H. 2017. Multigrid with rough coefficients and mul-
+tiresolution operator decomposition from hierarchical information
+games. Siam Review , 59(1): 99–149.
+Park, J.; Woo, S.; Lee, J.-Y .; and Kweon, I. S. 2018. Bam: Bottle-
+neck attention module. arXiv preprint arXiv:1807.06514 .
+Pathak, J.; Subramanian, S.; Harrington, P.; Raja, S.; Chattopad-
+hyay, A.; Mardani, M.; Kurth, T.; Hall, D.; Li, Z.; Azizzadenesheli,
+K.; et al. 2022. Fourcastnet: A global data-driven high-resolution
+weather model using adaptive fourier neural operators. arXiv
+preprint arXiv:2202.11214 .
+Quarteroni, A.; and Veneziani, A. 2003. Analysis of a geometrical
+multiscale model based on the coupling of ODE and PDE for blood
+flow simulations. Multiscale Modeling & Simulation , 1(2): 173–
+195.
+Rahman, M. A.; Ross, Z. E.; and Azizzadenesheli, K. 2022. U-no:
+U-shaped neural operators. arXiv preprint arXiv:2204.11127 .
+Rao, Y .; Zhao, W.; Zhu, Z.; Lu, J.; and Zhou, J. 2021. Global filter
+networks for image classification. Advances in neural information
+processing systems , 34: 980–993.
+Rivlin, R. 1948. Large elastic deformations of isotropic materials.
+I. Fundamental concepts. Philosophical Transactions of the Royal
+Society of London. Series A, Mathematical and Physical Sciences ,
+240(822): 459–490.
+Romero, D.; Bekkers, E.; Tomczak, J.; and Hoogendoorn, M. 2020.
+Attentive group equivariant convolutional networks. In Interna-
+tional Conference on Machine Learning , 8188–8199. PMLR.
+Sommerfeld, A. 1949. Partial differential equations in physics .
+Academic press.
+Sundnes, J.; Lines, G. T.; and Tveito, A. 2005. An operator splitting
+method for solving the bidomain equations coupled to a volume
+conductor model for the torso. Mathematical biosciences , 194(2):
+233–248.
+Tran, A.; Mathews, A.; Xie, L.; and Ong, C. S. 2021. Factorized
+fourier neural operators. arXiv preprint arXiv:2111.13802 .
+Woo, S.; Park, J.; Lee, J.-Y .; and Kweon, I. S. 2018. Cbam: Con-
+volutional block attention module. In Proceedings of the European
+conference on computer vision (ECCV) , 3–19.
+Wu, H.; Hu, T.; Luo, H.; Wang, J.; and Long, M. 2023. Solv-
+ing High-Dimensional PDEs with Latent Spectral Models. arXiv
+preprint arXiv:2301.12664 .
+Xu, J.; and Zikatanov, L. 2017. Algebraic multigrid methods. Acta
+Numerica , 26: 591–721.
+Yuan, Y .; Chen, X.; and Wang, J. 2020. Object-contextual repre-
+sentations for semantic segmentation. In Computer Vision–ECCV
+2020: 16th European Conference, Glasgow, UK, August 23–28,
+2020, Proceedings, Part VI 16 , 173–190. Springer.
+Zhang, T.; Cheng, X.; Jia, S.; Li, C. T.; Poo, M.-m.; and Xu, B.
+2023. A brain-inspired algorithm that mitigates catastrophic for-
+getting of artificial and spiking neural networks with low computa-
+tional cost. Science Advances , 9(34): eadi2947.
+Zhao, X.; Sun, Y .; Zhang, T.; and Xu, B. 2024a. En-
+hanced Spatiotemporal Prediction Using Physical-guided And
+Frequency-enhanced Recurrent Neural Networks. arXiv preprint
+arXiv:2405.14504 .
+Zhao, X.; Zhang, D.; Liyuan, H.; Zhang, T.; and Xu, B. 2024b.
+ODE-based Recurrent Model-free Reinforcement Learning for
+POMDPs. Advances in Neural Information Processing Systems ,
+36.
+Zhou, P.; Shi, W.; Tian, J.; Qi, Z.; Li, B.; Hao, H.; and Xu, B.
+2016. Attention-based bidirectional long short-term memory net-
+works for relation classification. In Proceedings of the 54th annualmeeting of the association for computational linguistics (volume 2:
+Short papers) , 207–212.
+Zhou, T.; Ma, Z.; Wen, Q.; Wang, X.; Sun, L.; and Jin, R. 2022.
+Fedformer: Frequency enhanced decomposed transformer for long-
+term series forecasting. In International Conference on Machine
+Learning , 27268–27286. PMLR.
+Benchmark Details
+We introduce the underlying PDEs of each benchmark and
+the number of corresponding training and testing samples.
+Multiscale Elliptic PDEs
+Multiscale elliptic equations are given by second-order lin-
+ear elliptic equations,
+−∇ · (a(x)∇u(x)) =f(x)x∈D
+u(x) = 0 x∈∂D(13)
+where the coefficient a(x)∈[amin, amax],∀x∈Dand
+amin>0. The coefficient a(x), enables rapid oscillation
+(for example, with a(x) =a(x/ε)where ε≪1), a signif-
+icant contrast ratio characterized by amax/amin≫1, and
+even a continuum of non-separable scales.
+Multiscale Trigonometric Coefficient We follow the set-
+ting in HANO (Liu, Xu, and Zhang 2022), which considers
+eq. (13) with multiscale trigonometric coefficients. The do-
+main Dis[−1,1]2, and the coefficient a(x)is defined as
+a(x) =6Q
+k=1(1 +1
+2cos(akπ(x1+x2)))(1 +1
+2sin(akπ(x2−
+3x1))), where akis uniformly distributed between 2k−1and
+1.5×2k−1, and the forcing term is fixed as f(x)≡1. The
+resolution of the dataset is 1023×1023 and lower resolu-
+tions are created by downsampling with linear interpolation.
+Two-Phase Coefficient The two-phase coefficients and
+solutions are generated according to FNO (Li et al. 2020).
+The coefficients a(x)are generated according to a∼µ:=
+ψ#N 
+0,(−∆ +cI)−2
+with zero Neumann boundary con-
+ditions on the Laplacian. The mapping ψ:R→Rassigns
+the value amaxto the positive segment of the real line and
+aminto the negative segment. The push-forward is explic-
+itly defined on a pointwise basis. The forcing term is fixed
+asf(x)≡1. The solutions uare derived through the ap-
+plication of a second-order finite difference approach on a
+well-suited grid. The parameters amax andaminhave the
+ability to manage the contrast of the coefficient. Addition-
+ally, the parameter cregulates the roughness or oscillation
+of the coefficient; an increased value of cleads to a coeffi-
+cient featuring rougher two-phase interfaces.
+Navier-Stokes
+We follow the Navier-Stokes equation in FNO (Li et al.
+2020). This dataset simulates incompressible and viscous
+flow on the unit torus, where fluid density is unchangeable.
+In this situation, energy conservation is independent of mass
+and momentum conservation.
+∇ ·u= 0
+∂w
+∂t+u· ∇w=ν∇2w+f
+w|t=0=w0,(14)
+where uandware abbreviated versions of u(x, t)and
+w(x, t), respectively. u∈R2is a velocity vector in 2D
+field, w=∇ × uis the vorticity, w0∈Ris the ini-
+tial vorticity at t= 0. In this dataset, viscosity is set asTable 5: More details about PDEs benchmarks, including
+the number of training and testing samples with their res-
+olutions. NS is short for Navier-Stokes.
+Benchmarks Ntraining Ntesting Resolution
+Trigonometric 1000 100 512×512,256×256
+Darcy-Rough 1000 100 256×256,128×128
+Darcy-Smooth 1000 200 64×64
+NS(ν= 10−3) 1000 200 64×64
+NS(ν= 10−4)10000 2000 64×64
+NS(ν= 10−5) 1000 200 64×64
+Elasticity 1000 200 41×41
+Pipe 1000 200 129×129
+ν∈ {10−3,10−4,10−5,10−6}and the resolution of the
+2D field is 64×64. The number of training and prediction
+frames is varied in different settings.
+Elasticity
+The governing equation of Elasticity materials is:
+ρs∂2u
+∂t2+∇ ·σ= 0, (15)
+where ρs∈Rdenotes the solid density, ∇andσdenote the
+nabla operator and the stress tensor respectively. Function u
+represents the displacement vector of material over time t.
+These benchmarks estimate the inner stress of incompress-
+ible materials with an arbitrary void in the center of the ma-
+terial. In addition, external tension is applied to the material.
+This benchmark’s input and output are the material’s struc-
+ture and inner stress.
+Pipe
+This dataset focuses on the incompressible flow through a
+pipe. The governing equations are similar to Navier-Stokes
+equations:
+∇ ·U= 0
+∂U
+∂t+U· ∇U=f−1
+ρ∇p+ν∇2U.(16)
+In this dataset, geometrically structured meshes with resolu-
+tion129×129are generated. The input and output are the
+mesh structure and fluid velocity within the pipe.
+We provide details of our benchmarks including the num-
+ber of training and testing samples and their input solutions
+in table 5.
+Backgrounds and Proofs
+Proofs of Equivariant of Attentive Convolution
+We follow the definition of (Cohen and Welling 2016) to
+define the attentive convolution and reduce the visual self-
+attention into
+fout
+c(g) =N˜cX
+˜cZ
+Gαc,˜c(g,˜g)ψc,˜c 
+g−1˜g
+fin
+˜c(˜g)d˜g.(17)
+In this work, we only consider group act on O(d), thus the
+definition could be further reduced into
+fout
+c(x) =N˜cX
+˜cZ
+Rdαc,˜c(x,˜x)ψc,˜c 
+x−1˜x
+fin
+˜c(˜x)d˜x.(18)
+Without loss of generality, let A:L2(Rd)→L2(Rd)
+denote the attentive group convolution defined by Equa-
+tion (18), with N˜c=N˜c= 1, and some ψwhich in the
+following we omit to simplify our derivation. Equivariance
+ofAimplies that ∀f∈L2(Rd),∀¯x,x∈Rd:
+A[L¯x[f]] (x) =L¯x[d[f]](x)
+⇔
+A[L¯x[f]] (x) =A[f] 
+¯x−1x
+⇔Z
+RdA[L¯x[f]] (x,˜x)L¯x[f](˜x)d˜x=
+Z
+RdA[f] 
+¯x−1x,˜x
+f(˜x)d˜x
+⇔Z
+RdA[L¯x[f]] (x,˜x)f 
+¯x−1˜x
+d˜x=
+Z
+RdA[f] 
+¯x−1x,¯x−1˜x
+f 
+¯x−1˜x
+d˜x,
+(19)
+where we once again perform the variable substitution
+˜x→¯x−1˜xat the right hand side of the last step. This must
+hold for all f∈L2(Rd)and hence:
+∀¯x∈Rd:A[L¯xf] (x,˜x) =A[f] 
+¯x−1x,¯x−1˜x
+(20)
+Proof of Symmetry of Fourier transform to O(d)
+LetA∈Rd×dbe an invertible matrix, f:Rd→R
+Lebesgue-integrable and b∈Rd. Consider the function
+fA,b:Rd→Rgiven by fA,b(x) =f(Ax+b). Then
+F(f(A,b))(ξ) =e−2πi⟨A−Tξ,b⟩
+|detA|F(f)(A−Tξ)
+In particular, if Ais an orthogonal matrix, then |detA|=
+1andA−T=A, so for all O∈O(n):
+F(f(O,b))(ξ) =e−2πi⟨Oξ,b⟩F(f)(Oξ)
+We will use the multi-dimensional change of variables
+formula with the substitution z=Ax+b, as well as theTable 6: Model configurations.
+MODEL DESIGNS HYPERPARAMETERS VALUES
+FOURIER LOW-FREQUENCY{24,12,6,3}LAYERS MODES {d1
+low,···,dK
+low}
+CHANNELS OF EACH{32,64,128,128}HIERARCHICAL SCALE {d1
+C,···, dK
+C}
+LAYERS NUMBER OF SCALES K 4
+DOWNSMAPLE RATIO r 2
+TRAINING LEARNING RATE 0.0005
+SETTING BATCHSIZE 10
+identity ⟨ξ, Az⟩=⟨ATξ, z⟩.
+F(f(A,b))(ξ)
+=1
+(2π)n/2Z
+Rde−2πi⟨ξ,x⟩f(A,b)(x)dx
+=1
+(2π)n/2|detA|Z
+Rde−2πi⟨ξ,A−1(Ax+b)⟩+2πi⟨ξ,A−1b⟩
+f(Ax+b)|detA|dx
+=e2πi⟨ξ,A−1b⟩ 1
+(2π)n/2|detA|Z
+Rde−2πi⟨ξ,A−1z⟩f(z)dz
+=e2πi⟨ξ,A−1b⟩
+|detA|1
+(2π)n/2Z
+Rde−2πi⟨A−Tξ,z⟩f(z)dz
+=e2πi⟨A−Tξ,b⟩
+|detA|F(f)(A−Tξ).
+(21)
+Model Details
+Implementation Details.
+Our model is implemented in PyTorch and conducted on a
+single NVIDIA A100 40GB GPU. Here are the implemen-
+tation details of our model.
+Model Configurations.
+Here we present the detailed model configurations of our
+model in table 6. In the beginning, the input data will be
+padded with zeros properly to resolve the division problem
+in model configurations.
+Downsample and Upsample Architecture
+In this section, we illustrate the downsampling and up-
+sampling operations in our hierarchical architectures. Our
+method is similar to that of LSM (Wu et al. 2023).
+Downsampling. Given deep features {˜ak(x)}x∈Dkat the
+k-th scale, The downsampling operation is to aggregate deep
+features in a local region through maximum pooling and
+convolution operations, which can be formalized as:
+{˜ak+1(x)}x∈Dk+1= Conv
+MaxPool 
+{˜ak(x)}x∈Dk
+,
+kfrom 1to(K−1).
+(22)
+Upsampling. Given the features ˜uk+1(x)x∈Dk+1and
+˜uk(x)x∈Dkcorresponding to the (k+ 1) -th and k-th scales,
+respectively, the upsampling procedure involves fusing the
+interpolated features from the (k+ 1) -th scale and the fea-
+tures from the k-th scale using local convolution. This pro-
+cess can be expressed as follows:
+{ˆuk(x)}x∈Dk= Conv 
+Concath
+Interp
+ 
+{˜uk+1(x)}x∈Dk+1
+,{˜uk(x)}x∈Dki!
+,
+kfrom (K−1)to1,
+(23)
+where we adopt the bilinear Interpolation Inter(·)for 2D
+data.
+More Related Work
+Operator Learning
+Suppose AandUdenote the infinite input and output func-
+tion spaces. The objective of the operator is to learn a map-
+ping from AtoUusing a finite collection of input and output
+pairs in the supervised learning way. For any vector function
+a∈ A,a:DA→RdAwithDA⊂Rdand for any vector
+function u∈ U,u:DU→RdU, with DU⊂Rd. Given
+=the training data {(ai, ui)}N
+i=1, our objective is to train an
+operator Gθ:A → U which is parameterized by θ, to learn
+the mapping between input and output function spaces by
+extracting relationships from aandu.
+Numerical Solvers for Multiscale PDEs
+In addressing multiscale PDEs, a variety of numerical ap-
+proaches are available. Numerical homogenization meth-
+ods (Engquist and Souganidis 2008) aim to create a finite-
+dimensional approximation space for solution exploration.
+Fast solvers like multilevel and multigrid methods (Hack-
+busch 2013; Xu and Zikatanov 2017) can be consid-
+ered as an extension of numerical homogenization. Re-
+cently, operator-adapted wavelet methods, such as Gamblets
+(Owhadi 2017), have been developed to solve linear PDEs
+with rough coefficients, representing a progression beyond
+numerical homogenization. Nevertheless, handling multi-
+scale PDEs poses inherent challenges for numerical meth-
+ods, given that the computational cost tends to scale in-
+versely proportional to the finest scale ϵof the problem. In
+recent years, there has been increasing exploration of neural
+network methods for solving multiscale PDEs (Anonymous
+2023; Liu, Xu, and Zhang 2022).
+More FNO Related Work
+Networks inspired by FNO have been verified in various do-
+mains, including computer vision and time series forecasting
+(Ovadia et al. 2023a,b). AFNO (Guibas et al. 2021) lever-
+ages kernel in the Fourier domain as a token mixer within
+the transformer, aiming at reducing computational complex-
+ity and enhancing performance in segmentation tasks. FED-
+former (Zhou et al. 2022) harnesses sparse basic elementsin the Fourier frequency domain to create a frequency-
+enhanced transformer. Meanwhile, GFNet (Rao et al. 2021)
+employs the element-wise multiplication of learnable global
+filters with features in the frequency domain to improve the
+performance in classification and transfer learning tasks.
+Visual Attention Methods
+The attention mechanism can be regarded as a process of
+adaptive selection based on input features. It has yielded ad-
+vantages in numerous visual tasks, including image classifi-
+cation (Woo et al. 2018), object detection (Dai et al. 2017;
+Hu et al. 2018), and semantic segmentation (Yuan, Chen,
+and Wang 2020; Geng et al. 2021). In computer vision, the
+attention mechanism is usually be divided into three main
+categories: channel attention, spatial attention, and tempo-
+ral attention. For instance, SENet (Hu, Shen, and Sun 2018)
+utilizes global average pooling on the channel dimension
+to modulate the corresponding channel attention. Comple-
+mentary channel attention akin to that of CBAM (Woo et al.
+2018) and BAM (Park et al. 2018) utilize similar strategies
+for spatial attention and combine spatial and channel atten-
+tion in series and parallel respectively. Recent research in
+visual attention aims to integrate the strengths of various at-
+tention mechanisms to create more holistic attention (Hu,
+Shen, and Sun 2018; Guo et al. 2022).
+More Visualization Results
+We visualize more results on the Trigonometric dataset com-
+pared to FNO.
+Figure 5: Showcase of multiscale PDEs, where the high-frequency components are moved to the center. G.T. andF.D. denote
+the ground truth and frequency domain. The absolute error is computed as |u−ˆu|.

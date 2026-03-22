@@ -1,0 +1,1011 @@
+manuscript submitted to JGR
+Deep learning in the abyss: a stratified Physics
+Informed Neural Network for data assimilation
+Vadim Limousin1, Nelly Pustelnik1, Bruno Deremble2and Antoine Venaille1.
+1CNRS, ENS de Lyon, LPENSL, UMR5672, 69342, Lyon cedex 07, France
+2Universit´ e Grenoble Alpes, CNRS, INRAE, IRD, Grenoble-INP, Institut des G´ eosciences de
+l’Environnement, Grenoble, France
+Key Points:
+•We propose a multi-layer Physics Informed Neural Networks suited for deep flow
+reconstruction.
+•We demonstrate the potential of this method for data assimilation using SWOT-
+like and ARGO-like pseudo-observations in a three-layer quasi-geostrophic model.
+Corresponding author: Antoine Venaille, antoine.venaille@ens-lyon.fr
+Corresponding author: Nelly Pustelnik, nelly.pustelnik@ens-lyon.fr
+–1–arXiv:2503.19160v1  [physics.ao-ph]  24 Mar 2025
+manuscript submitted to JGR
+Abstract
+The reconstruction of deep ocean currents is a major challenge in data assimilation due to
+the scarcity of interior data. In this work, we present a proof of concept for deep ocean
+flow reconstruction using a Physics-Informed Neural Network (PINN), a machine learning
+approach that offers an alternative to traditional data assimilation methods. We introduce
+an efficient algorithm called StrAss-PINN (for Stratified Assimilation PINNs), which assigns
+a separate network to each layer of the ocean model while allowing them to interact during
+training. The neural network takes spatiotemporal coordinates as input and predicts the
+velocity field at those points. Using a SIREN architecture (a multilayer perceptron with
+sine activation functions), which has proven effective in various contexts, the network is
+trained using both available observational data and dynamical priors enforced at several
+collocation points. We apply this method to pseudo-observed ocean data generated from
+a 3-layer quasi-geostrophic model, where the pseudo-observations include surface-level data
+akin to SWOT observations of sea surface height, interior data similar to ARGO floats,
+and a limited number of deep ARGO-like measurements in the lower layers. Our approach
+successfully reconstructs ocean flows in both the interior and surface layers, demonstrating
+a strong ability to resolve key ocean mesoscale features, including vortex rings, eastward jets
+associated with potential vorticity fronts, and smoother Rossby waves. This work serves as
+a prelude to applying StrAss-PINN to real-world observational data.
+Plain Language Summary
+Although bottom ocean currents are crucial for understanding overall ocean circulation,
+observations in the depths are limited, relying mainly on a few temperature, salinity, and
+pressure measurements. In contrast, the ocean’s surface is monitored in high detail by satel-
+lites. This article proposes using both the dynamical equations that describe vertical flow
+structure and advanced machine learning methods to reconstruct the full ocean dynamics.
+Since surface and bottom ocean dynamics are correlated, combining physical constraints
+with statistical analysis can help infer the entire system’s dynamics. This approach, called
+Physics-Informed Neural Networks (PINNs), integrates physics and statistical tools into a
+unified learning architecture.
+1 Introduction
+While satellites provide a vast amount of data on surface ocean currents (Fu et al.,
+1994; Fu et al, 2024), the interior remains sparsely observed, due to extreme conditions.
+Instruments such as localized moorings, ARGO floats (Wong et al., 2020), and acoustic
+measurements (Munk et al., 1995) offer valuable insights into deep layers, but reconstructing
+deep ocean dynamics from such limited data remains a major challenge. Reconstructing deep
+ocean currents is of tremendous importance, as deep flows play a central role in heat storage,
+carbon sequestration, and the oceanic energy budget (Fox-Kemper et al., 2021).
+From a methodological point of view, the uneven distribution of data makes this inverse
+problem particularly difficult. Traditionally, this issue has been addressed using either
+statistical methods, e.g. (Guinehut et al., 2012), which are agnostic to the underlying flow
+model, or data assimilation techniques, which combine available data with a flow model to
+provide reanalysis (Blayo et al., 2014; Carrassi et al., 2018). Over the past decade, there
+has been a growing shift toward machine learning techniques (Sonnewald et al., 2021). In
+this paper, we focus on one of these methods — Physics-Informed Neural Networks (PINNs)
+(Karniadakis et al., 2021) — which can be considered as a machine learning counterpart to
+data assimilation. A key advantage of this approach is that the field to recover is encoded
+directly in the neural network, eliminating the need for a grid-based discretization of the
+field. However, a major challenge remains to train the network to reconstruct multiscale,
+chaotic flows — characteristics that are prevalent in ocean dynamics. Here, we develop a
+multilayer PINNs learning strategy called StrAss-PINN , for Stratified Assimilation PINNs.
+–2–
+manuscript submitted to JGR
+We demonstrate its feasibility and utility for deep flow reconstruction. This is achieved in
+the presence of surface-intensified data and sparse subsurface data.
+State-of-the-art on surface fields recovery – A large body of studies have been focused
+on reconstructing surface and subsurface fields from these data. For instance, regarding sea
+surface height (SSH) fields obtained from satellite altimeters, existing gridded datasets are
+produced using optimal interpolation (Ballarotta et al., 2019). Spatial resolution of the
+reconstructions can be improved using simple assimilation methods, such as nudging with
+simple and fast dynamical models (Le Guillou et al., 2021), or deep learning strategies with
+convolutional networks (Manucharyan et al., 2021). More recently, powerful data-driven
+techniques such as 4DVarNet have replaced the dynamical constraints in the assimilation
+variational problems with a penalty term involving a neural network in order to learn the
+dynamic from data themselves (Beauchamp et al., 2023). Other data-driven methods, de-
+compositions into empirical orthogonal functions or autoencoders (Barth et al., 2020), have
+been used to reconstruct sea surface temperature (SST) fields in the presence of clouds that
+leads to spatio temporal gaps in the data set. Learning efficient interpolation from both SST
+and SSH has also been addressed within various machine learning frameworks, e.g. (Martin
+et al., 2023; Fablet et al., 2024; Archambault et al., 2024).
+Towards the recovery of deep ocean – The common feature of all the techniques men-
+tioned above is the reconstruction of a 2d+t field. Data-driven methods have also been
+developed for 3d+t fields, provided there is sufficient data for at least some period of time.
+For example, Guinehut et al. (2012) used optimal interpolation and multilinear regression
+on climatological data to infer the vertical structure of mesoscale turbulence from observa-
+tions alone. Similarly, Oulhen et al. (2024) combined data reduction techniques based on
+Empirical Orthogonal Functions (EOF) and analogs to reconstruct 3d+t temperature fields
+in the ocean’s upper layers, leveraging the ARGO dataset to learn statistical properties and
+reconstruct past fields from before the ARGO era. While promising, these methods are not
+ideal for reconstructing fields in regions that have never been intensively sampled, as statis-
+tical inference may not be reliable in such areas. For instance, trapped flow over seamounts
+may not always exhibit a clear signature at the surface (Venaille, 2012; G. C. Johnson &
+King, 2023). While moorings or deep ARGO floats provide useful local information on deep
+flows, global maps of deep ocean circulation can only be inferred using data assimilation
+techniques that combine data with flow models (Blayo et al., 2014). This approach has
+provided unvaluable reanalysis datasets, even if some unexpected behavior is also reported
+in some regions, see e.g. Lellouche et al. (2021). While successful for operational purposes,
+assimilation methods such as 4DVAR or the Ensemble Kalman Filter are often difficult
+to implement and computationally expensive. On the other hand, SSH interpolation via
+Deep Learning have been proven skillfull to reconstructing subsurface mesoscale structures
+(Manucharyan et al., 2021). In all those cases, combining data from observations with
+dynamical constraints or deep learning approaches typically requires the introduction of a
+spatial grid, which incurs a significant computational cost as the spatio-temporal resolution
+increases. This highlights the need for more flexible methods that can incorporate dynamical
+constraints within a mesh-free framework. This is precisely where PINNs offer potentially
+an advantage.
+PINNs, a grid-free assimilation technique – In a PINN, the physical state of the sys-
+tem (such as current velocity and density) is represented as the output of a neural network,
+while the input consists solely of spatio-temporal variables. The specificity of PINNs train-
+ing is to ensure that the solution generated by the trained neural network not only satisfies
+the observed data but also adheres to the differential equations that describe the system’s
+dynamics. This is achieved by designing a training loss function composed of a data fidelity
+term, which ensures consistency with the observed data, and a penalty term, which quanti-
+fies the discrepancy between the network output and the assumed physical dynamics. The
+use of PINNs provides a threefold benefit: it bypasses the need to specify artificial boundary
+conditions when constructing the field in a given region, it is mesh free, avoiding thus the
+–3–
+manuscript submitted to JGR
+need for discretization choices for the estimated field, and it provides useful flexibility in the
+choice of flow models, which can be adapted from case to case.
+Following the original proposal (Raissi et al., 2019), PINNs have been applied to a wide
+range of fluid mechanics problems, from Rayleigh-B´ enard convection (Lucor et al., 2022;
+Clark Di Leoni et al., 2023) to denoising measurements in stratified turbulence (Zhu et al.,
+2024), among a vast number of other examples (Karniadakis et al., 2021). Yet, applications
+of PINNs in atmospheric or oceanic field reconstruction are still in the early stages, see e.g.
+(Millet et al., 2023; Yoon et al., 2024). Notably, (Bang et al., 2024) addressed recently the
+ability of PINNs to reconstruct surface velocity field from surface drifter data. Implementing
+the PINN method in a realistic context such as mesoscale ocean turbulence (from 30 to
+300km) presents several challenges, especially when multiple temporal and spatial scale
+are involved. Indeed, training these networks involves a delicate balance between ensuring
+data fidelity and adhering to physical laws, which can complicate the optimization process
+and lead to convergence issues, requiring the use of specialized techniques and strategies
+(Karniadakis et al., 2021).
+Contributions – In the present work, we investigate the potential of PINNs to recon-
+struct deep ocean flows by leveraging minimal surface observations and sparse data from
+intermediate depths. Compared to state-of-the-art PINNs learning techniques, the proposed
+approach introduces a novel learning strategy by incorporating a multilayer training specif-
+ically tailored to multilayered ocean models. We demonstrate that the proposed PINNs
+can propagate information between vertical layers, reconstructing three-dimensional flow
+dynamics even with limited direct measurements from the deep ocean layer.
+To evaluate the performance of the proposed StrAss-PINN , we consider a simplified
+wind-driven three-layer ocean model, a minimal yet representative framework for ocean
+dynamics. The upper layer is observed through surface data (similar to SWOT-like altimetry
+observations), while the interior and deep layers are observed by sparse point measurements
+(similar to ARGO floats), as sketched in Fig. 1. By integrating these observations with the
+known system dynamics, we show that PINNs can successfully reconstruct deep ocean flow,
+even with minimal data. This work serves as a proof of concept for the use of PINNs in ocean
+flow reconstruction, particularly in regions where data are sparse or indirect. Although this
+study does not directly compare our method with traditional assimilation techniques, it
+lays the groundwork for future research to refine and optimize this approach for real-world
+oceanographic applications.
+2 State of the art and context
+2.1 Data Assimilation
+Data assimilation is a particular case of inverse problems. One has access to measure-
+ments of a signal altered by exterior known or unknown factors, such as noise, motion blur
+or, most notably in our case, the inability to observe the entire domain. For example, in
+the problem addressed in this work, observations are obtained from satellites and buoys,
+leading to partial sea surface data due to satellite coverage patterns and limited subsurface
+information resulting from the sparse data provided by buoys.
+The typical approach to assimilation is a grid-based approach that can be framed as a
+minimization problem, where the cost function consists of two terms: a data fidelity term
+and a penalty that enforces predefined dynamics. The solution to the assimilation problem
+corresponds to the minimiser of this cost function. Formally, the goal is to recover the
+temporal sequence of 3d states u( t, x, y, z ), with each component of u representing different
+variables (e.g., pressure, velocity, temperature), and ( t, x, y, z ) indicating spatio-temporal
+locations on a grid of size N=Nt×Nx×Ny×Nz. Assuming partial observations of the
+system at Mdistinct spatio-temporal points (represented by the vector d of size M), the
+–4–
+manuscript submitted to JGR
++ physics
+Reconstructed ﬁeld
+Pseudo-observations
+Figure 1: Schematic view of our method. Available (pseudo-)observations are provided
+by satellites for the surface and buoys in the ocean interior. They constitute the training
+set the networks aims to fit. This way, our method assimilates them additionally using
+explicit dynamics information through a physics-informed formalism to produce reasonable
+reconstructed fields. Finally, the networks are evaluated on a grid covering the domain,
+producing the reconstructed fields.
+cost function to be minimized is defined as:
+LDA(u) = ∥H(u)−d∥+∥D(u)∥ (1)
+where Hrepresents the observation operator, which establishes the relationship between
+the complete quantity to be recovered of size Nand the grid locations where observations
+are available. Additionally, Drepresents the physical model. The first term is referred to
+as the data term and ensures the reconstructed field matches the observed data d as well
+as possible. The second term is the dynamic information and ensures the reconstructed
+time series follows physical laws. Typically, Dis a discretisation of the explicit dynamics,
+formulated as a partial differential equation on the Nt×Nx×Ny×Nzgrid, and the norm
+∥ · ∥ can be either a squared L2,L1,TV, or Mahalanobis distance.
+In this procedure, the physical model can be highly complex (in order to have satisfying
+resolution) and the major hurdle is then to express the adjoint operator of this model in
+order to compute the desired minimiser. This minimization problem is the one behind the
+4DVar methods (Bocquet & Farchi, 2014). While the 3DVar strategy assimilates observa-
+tions at a single time point without considering their temporal evolution, the 4DVar extends
+this approach by incorporating observations over a time window to better capture system
+dynamics, at the cost of increased computational complexity. Kalman filtering or extended
+version for non-linear systems such as Extended Kalman Filter (EKF) or Ensemble Kalman
+Filter (EnKF), on the other hand, adopt a probabilistic and sequential approach, updat-
+ing the state estimate at each time step while dynamically propagating uncertainties, but
+remains computationally expensive, especially for nonlinear or large-scale systems.
+Several attempts to include machine learning in these approach have already been ex-
+plored (e.g., 4DVarNet) (Arcucci et al., 2021; Fablet et al., 2021; Beauchamp et al., 2023).
+Those methods combined standard assimilation techniques (cf. minimization of (1)) with
+neural network architecture either to build end-to-end approaches or a network improving
+the modeling of the map D. More precisely, the network predicts u t+∆tgiven utand the
+regularisation term involves D(u) = u t+∆t−fθ(ut), encouraging the reconstructed field u to
+adhere to the learned dynamics modeled by the neural network denoted fθ, with θthe net-
+work parameters. They show very promising results already comparable to the best classical
+approaches. For instance (Beauchamp et al., 2023) has reported a “ relative improvement
+with respect to the operational optimal interpolation between 30% and 60% in terms of recon-
+struction error ”. However, they are often implemented on surface reconstruction problems
+–5–
+manuscript submitted to JGR
+and do not deal with the interior of the ocean due to a lack of data. Moreover, these meth-
+ods are tied to a fixed grid, and as resolution increases, the cost of training the network can
+grow significantly.
+2.2 PINNs
+A second class of approaches that combine deep learning and physics models rely on
+the Physics-Informed Neural Network (PINN) framework and will be at the core of this
+contribution. The standard formulation of PINNs can be expressed as (1), with a key
+distinction: the field u is modeled by a neural network (i.e., u = fθ(t,x)) that uses spatio-
+temporal coordinates as inputs to predict the field values. In this work, following previous
+application to fluid mechanics problems (Raissi et al., 2019), we propose revisiting ocean
+data assimilation procedure using PINNs, which offer the key advantage of bypassing grid-
+based formulations that become computationally intensive when recovering 3d+t field such
+as subsurface fields.
+We denote u θas a shallow neural network parameterized by θ, a function of ( t,x), whose
+output is the desired field for a specific spatio-temporal location. The PINN formulation
+reduces to finding the optimal network u θwith parameters θthat minimize the following
+loss:
+LPINN(θ) =1
+nX
+(t,x)∈I(uθ(t,x)−d(t,x))2+λ∥D(uθ, ∂tuθ,∇uθ, . . .)∥2. (2)
+where Idenotes either a set of npoints where measurements d are available (for data
+assimilation problems), a set of npoints that sample initial and boundary conditions (to
+solve a well-posed Cauchy problem), or a combination of both. Initially, the formalism of
+PINNs has been developed to approach solutions to a well posed Cauchy problem with a
+chosen initial condition, boundary conditions and a chosen dynamics.
+The loss function thus consists of a data term and a regularization term measuring
+deviation from the dynamical prior. It serves as an objective function that encourages the
+minimiser to both closely solve the prior PDE D(u, ∂tu,∇u, . . .) = 0 and ensure fidelity to
+the observations d. The norm ∥D∥represents an L2norm over the spatio-temporal domain
+of interest, which must be approximated (e.g., using a Monte Carlo method). This involves
+evaluating the residual at a discrete set of collocation points that do not necessarily coincide
+with the data points.
+The computation of the loss function assumes that the network u θcan be differentiated
+with respect to its input coordinates to compute ∂tuθ,∂xuθ,∂yuθ, and any higher-order
+derivatives required by the prior PDE. In practice, this step is straightforward due to au-
+tomatic differentiation, which allows handling a wide range of differentiable functions u θ.
+This is a major advantage of PINNs formulation. This approach is considered mesh-free
+because the field u is not discretized on a grid, unlike standard assimilation techniques.
+In its original formulation, PINNs were implemented using a multilayer perceptron with
+a tanh activation function for u θ, alongside a Latin Hypercube Sampling strategy to select
+collocation points where the PDE residual is computed (Raissi et al., 2019). Since then,
+significant efforts have focused on optimizing the choice of collocation points (Khoa Nguyen
+et al., 2022), exploring alternative network architectures (Wang et al., 2024), and testing
+different activation functions (Sitzmann et al., 2020), among other strategies (Karniadakis
+et al., 2021). The algorithmic strategy itself is rarely studied, as it generally relies on a
+single neural network fully trained using standard optimization tools. In this study, the
+specific layered structure of the underlying ocean dynamics will lead us to focus on both the
+choice of the architecture and the algorithmic strategy.
+–6–
+manuscript submitted to JGR
+2.3 Focus on the implicit neural representation SIREN
+In this study, we focus on the SIREN model, a fully connected network that uniquely
+employs sine activations after each layer, along with a specifically tailored network initializa-
+tion (Sitzmann et al., 2020). More precisely, it has satisfying ability to learn simultaneously
+a function through its outputs and its gradients, thus our choice to use it in our study. This
+network architecture has proven useful in reconstructing various natural signals, including
+flow reconstruction with PINNs in the context of Rayleigh-Benard convection (Mommert et
+al., 2024). SIREN networks have also been used in ocean context, albeit without physical
+constraints, to represent surface current as a neural field (J. E. Johnson et al., 2022).
+In this study, we will consider a SIREN network to describe 2 d+tscalar fields :
+Ψθ(t, x, y ) =WM·sin(. . . W 2·sin(W1·sin(Kxx+Kyy−Ωtt+φ) +b1) +b2). . .+bM(3)
+where sine functions are taken coordinate by coordinate. Network parameters are
+θ={Kx, Ky,Ωt, φ, W 1, . . . , W M, b1, . . . , b M},
+where Kx, Ky,Ωt∈Rw×1,φ, bm∈Rw,Wm∈Rw×w,WM∈R1×wandbM∈R.
+This implicit neural representation takes field coordinates as inputs and outputs a
+scalar estimate of the field. The notion of resolution then shifts from a spatial resolution
+on a discretised domain to an implicit resolution related to the size of θ. Empirically,
+this implicit resolution corresponds to the spectral resolution. The smallest spatial and
+temporal scales that the SIREN can generate are limited by the highest values of Kx, Ky
+and Ω t. Therefore, these values must be carefully initialized to ensure the network can
+capture the small physical scales in the signal.
+SIREN is a particularly well-suited network for our task, as all activations are sine
+functions. Indeed, as a result, ∂tuθcan also be expressed as a SIREN model with shifted
+weights, since the derivative of a sine function is another sine function with a shifted phase.
+This property extends to spatial derivatives and higher-order derivatives, such as the Lapla-
+cian operator ∆. The stability of SIREN models under differentiation heuristically explains,
+according to Sitzmann et al. (2020), why such a network model can impressively learn a
+function and its derivatives simultaneously. This characteristic makes it an ideal candidate
+for our purpose, which is to incorporate physical knowledge in the form of partial differential
+equations into the learning strategy. This network architecture was initially introduced to
+address image-related problems, but the authors also experimented it as a PINN to solve
+a simple linear wave-propagation equation. In the present contribution, we aim to fully
+exploit its potential for a more complex task.
+3StrAss-PINN : New Physics-Assisted Neural network for Data Assimi-
+lation in Stratified fluid
+The proposed StrAss-PINN method builds on PINNs by adding a multilayer structure
+to both the training loss and the training process. In this section, we present the method
+through a concrete reconstruction problem for wind-driven, multilayer quasi-geostrophic
+dynamics, using ground truth from a simulation of a classic double-gyre setup. This setup
+models key features of midlatitude oceans, such as the Gulf Stream and the Kuroshio.
+Pseudo-observations will be extracted from this quasi-geostrophic ground truth, and the
+reconstruction will be compared to the full field of the simulation. For clarity, the method is
+presented here for a three-layer quasi-geostrophic model, though it can be extended to more
+layers. Details of the general multilayer formulation are provided in the Appendix Appendix
+A. Note to the reader: There are two notions of “layers”—oceanic layers and neural layers.
+We will clarify the context to avoid confusion whenever necessary.
+–7–
+manuscript submitted to JGR
+3.1 Dynamical model: three-layer quasi-geostrophic dynamic
+Layered structure of ocean models. Due to stable vertical density stratification and
+the small vertical-to-horizontal aspect ratio, ocean models are often represented as layers
+stacked on top of one another. In these models, stratification is defined by the density and
+horizontally averaged thickness of each layer. Many advanced ocean models use multilayer
+shallow water equations to capture large-scale stratification variations at the basin scale.
+By taking advantage of the large rotation limit relevant to midlatitude flows, one can then
+derive a simpler set of equations—the quasi-geostrophic model (Vallis, 2017). We focus here
+on a three layer quasi-geostrophic model driven by wind. The motivation is twofold: first,
+the quasi-geostrophic model filters out fast motions while capturing similar flow structures
+to the shallow water model, and second, three layers are sufficient to describe many im-
+portant features of mid latitude mesoscale ocean current. The principal features being the
+intensification of western and surface currents, the propagation of Rossby waves, the forma-
+tion of sharp eastward jets, and mesoscale vortex rings — hallmarks of oceanic turbulence.
+This model provides therefore a minimal framework for understanding midlatitude ocean
+currents like the Gulf Stream or Kuroshio (Vallis, 2017).
+Flow model and parameters. We consider three layers of homogeneous density ( ρ1, ρ2, ρ3)
+stacked vertically, as shown in Fig. 2(a). In each layer, the flow is 2D, non-divergent, and
+can be described by stream functions ( ψ1, ψ2, ψ3), which fully characterize the dynamics as
+scalar functions of ( t, x, y ). The flow takes place in a close basin with free slip boundary
+conditions. The system is forced by zonal wind stress curl −∂yτx(y), which drives the upper
+layer, and dissipates through the Ekman layer in the deeper layer, or via horizontal viscous
+dissipation in each layer. To capture key features of midlatitude ocean dynamics, we need
+to incorporate latitudinal variations in the Coriolis parameter using the β-plane approxi-
+mation, which assumes linear variations of planetary vorticity with latitude. The resulting
+system of equations is expressed as the following set of partial differential equations:
+d
+dt
+1
+∆ψ1−f2
+0ψ1−ψ2
+H1g′
+1+βy
+| {z }
+=q1=−1
+H1∂yτx+ν∆q1
+d
+dt
+2
+∆ψ2−f2
+0ψ2−ψ1
+H2g′
+1−f2
+0ψ2−ψ3
+H2g′
+2+βy
+| {z }
+=q2=ν∆q2
+d
+dt
+3
+∆ψ3−f2
+0ψ3−ψ2
+H3g′
+2+βy
+| {z }
+=q3=−rE∆ψ3+ν∆q3(4)
+withd
+dt
+ℓ≡∂t+(∂xψℓ)∂y−(∂yψℓ)∂xrepresenting the Lagrangian derivative, g′
+ℓ=g·(ρℓ+1−
+ρℓ)/ρℓis the reduced gravity between the ℓ-th and ( ℓ+ 1)-th layers, and Hℓdenotes the
+height of the ℓ-th layer. The parameter rE=f0hE/2H3is the bottom friction coefficient,
+with f0the Coriolis parameter and hEthe Ekman layer depth. The double-gyre framework
+amounts to choosing τx=τ0cos(2 πy/L ), with Las the domain size and τ0the maximum
+wind stress amplitude. Additionally, we made the classical rigid assumption, which simplifies
+to assuming that gHℓ/f2
+0→+∞. Typical flow fields obtained with this model are shown
+in Fig. 2(b) for parameters presented in Tab. 1.
+3.2 Posing the reconstruction problem with pseudo-observations
+Our idealized quasi-geostrophic framework aims to address a typical ocean assimila-
+tion problem, where abundant surface data—usually from satellites like SWOT—are avail-
+able, alongside sparser subsurface data—from ARGO floats. In real observations, ARGO
+floats typically provide measurements at a depth of 1 km for 9 days, then descend much
+deeper—usually to 2,000 meters, but up to 6,000 meters for deep-ARGO floats—before re-
+turning to the surface to transmit data and then resuming their descent. In our stratified
+–8–
+manuscript submitted to JGR
+H1H2H3ψ2ψ3ψ1<latexit sha1_base64="Kx6XtcGyWX2uMgAnr3Ffrf6ktgo=">AAAC2XicjVHLSsNAFD2Nr/qOj52bYBFclUSkuiy6cVnR2kIVmYxTDU2TMJmItXThTtz6A271h8Q/0L/wzpiCD0QnJDlz7j1n5t7rJ2GQKtd9KVgjo2PjE8XJqemZ2bl5e2HxKI0zyUWdx2Esmz5LRRhEoq4CFYpmIgXr+qFo+J1dHW9cCpkGcXSoeok46bLzKGgHnCmiTu3lYyWuVP8gk23GhROynpCDU7vkll2znJ/Ay0EJ+arF9jOOcYYYHBm6EIigCIdgSOlpwYOLhLgT9ImThAITFxhgirQZZQnKYMR26HtOu1bORrTXnqlRczolpFeS0sEaaWLKk4T1aY6JZ8ZZs795942nvluP/n7u1SVW4YLYv3TDzP/qdC0KbWybGgKqKTGMro7nLpnpir6586kqRQ4JcRqfUVwS5kY57LNjNKmpXfeWmfirydSs3vM8N8ObviUN2Ps+zp/gaKPsVcqV/c1SdScfdRErWMU6zXMLVeyhhjp5X+MBj3iyWtaNdWvdfaRahVyzhC/Lun8HS7mYHg==</latexit>Surface layer
+<latexit sha1_base64="iKKmfBci5EbZ27dehh8sMEs2TKc=">AAAC3nicjVHLSsNAFD2Nr1pfVVfiJlgEVyUVUZeiG91VsA9oRSfpVAfzYjIRSynu3Ilbf8Ctfo74B/oX3hkjqEV0QpIz595zZu69buyLRDnOS84aGR0bn8hPFqamZ2bnivML9SRKpcdrXuRHsumyhPsi5DUllM+bseQscH3ecC/2dLxxyWUiovBI9WJ+HLCzUHSFxxRRJ8WltuJXqn8QKi4D3hFMcdtnPS4HJ8WSU3bMsodBJQMlZKsaFZ/RRgcRPKQIwBFCEfbBkNDTQgUOYuKO0SdOEhImzjFAgbQpZXHKYMRe0PeMdq2MDWmvPROj9ugUn15JShurpIkoTxLWp9kmnhpnzf7m3Tee+m49+ruZV0Cswjmxf+k+M/+r07UodLFtahBUU2wYXZ2XuaSmK/rm9peqFDnExGncobgk7BnlZ59to0lM7bq3zMRfTaZm9d7LclO86VvSgCs/xzkM6uvlymZ583CjtLObjTqPZaxgjea5hR3so4oaeV/jAY94sk6tG+vWuvtItXKZZhHflnX/DiKBmmI=</latexit>Intermediate layer
+<latexit sha1_base64="LS2a/0PX+f0xdqmcXSvgkkYpVIg=">AAAC2HicjVHLSsNAFD3GV62vapdugkVwVVIRdSm6cVnBPrCWMomjhiaZMJmIpQjuxK0/4Fa/SPwD/QvvjCOoRXRCkjPn3nNm7r1+GoWZ8ryXMWd8YnJqujBTnJ2bX1gsLS03M5HLgDcCEQnZ9lnGozDhDRWqiLdTyVnsR7zl9/d1vHXJZRaK5EgNUt6N2XkSnoUBU0T1SuUTxa/UcE8oJWI3YgMur3ulilf1zHJHQc2CCuyqi9IzTnAKgQA5YnAkUIQjMGT0dFCDh5S4LobESUKhiXNco0janLI4ZTBi+/Q9p13HsgnttWdm1AGdEtErSelijTSC8iRhfZpr4rlx1uxv3kPjqe82oL9vvWJiFS6I/Uv3mflfna5F4Qw7poaQakoNo6sLrEtuuqJv7n6pSpFDSpzGpxSXhAOj/OyzazSZqV33lpn4q8nUrN4HNjfHm74lDbj2c5yjoLlRrW1Vtw43K7t7dtQFrGAV6zTPbeziAHU0yHuABzziyTl2bpxb5+4j1RmzmjK+Lef+HVael8A=</latexit>Bottom layer
+(a) Sketch of the model (b) Typical output of the model
+Figure 2: (a) Illustration of the three-layer framework with 2d flows in each layer encoded
+in stream functions ψi. (b) Kinetic energy fields in a three layers quasi-geostrophic model
+of the ocean. Three important features appear in the generated stream functions. First, as
+expected with the choice of wind forcing, two gyres are formed at the surface and induce
+a jet stream in the center of the domain. Second, we notice Rossby waves propagating in
+each layer. Third, small eddies go up the jet stream.
+Coefficient Value Coefficient Value
+H1 350 m β 1.7e−11 m−1·s−1
+H2 750 m f0 9.4e−5 s−1
+H3 2900 m τ0 1.3e−5 m2·s−2
+g′
+1 0.025 m ·s−2ν 40 m2·s−1
+g′
+2 0.0125 m ·s−2hE 2 m
+L 4000 km
+Table 1: Coefficients used in the implementation we study here.
+framework, this process is represented by satellite data such as SWOT for the first layer,
+sparse random measurements for the second layer and even sparser observations for the
+third layer.
+Concretely, following the notation in (2), we define a set of observation Iℓfor each layer
+ℓ={1,2,3}, incorporating SWOT-like measurements of ψ1, daily Argo-like measurements
+ofψ2, and Argo-like measurements of ψ3every 10 days, as shown in Fig. 3. The complete set
+of observations is denoted as I=I1∪ I2∪ I3. More details about this set will be provided
+in subsection 4.1.
+3.3 StrAss-PINN training network and loss
+To train the network using partially observed data and evaluate it outside the observed
+domain, we design a multilayer algorithm, using the fact that the ocean model is represented
+by vertically stacked layers, each with homogeneous density but differing from one layer to
+the next in a stably stratified structure.
+In the context of the three-layer quasi-geostrophic model, we consider three differential
+operators D1,D2,D3allowing us to rewrite quasi-geostrophic dynamics (4) as:
+
+
+D1(ψ1,∇ψ2) = 0
+D2(ψ2,∇ψ1,∇ψ3) = 0
+D3(ψ3,∇ψ2) = 0(5)
+–9–
+manuscript submitted to JGR
+(I1) SWOT-like.
+ (I2) Argo-like.
+ (I3) Argo-like (deep).
+Figure 3: In our set-up, observations are only provided by pseudo-measurement devices at
+locations stored in I1,I2, andI3. These three sets are illustrated here. Every simulation
+day, we have access to SWOT-like measurements of ψ1and Argo-like measurements of ψ2
+and every 10 simulation day we have Argo-like measurements of ψ3.
+with∇= (∂x, ∂y). We note that each layer interacts only with the layers directly in contact
+with it, as illustrated in Fig. 2(a). For example, the second layer interacts nonlinearly with
+both the first and third layers. More generally, the operator Dℓin layer ℓinvolves only the
+streamfunction ψℓof the current layer and the spatial derivatives of ψℓ−1andψℓ+1, i.e., the
+velocity fields in the neighboring layers.
+StrAss-PINN training network . This peculiar vertical structure of the flow model orga-
+nized in layers encourages us to use separated networks to predict the stream functions and
+let them interact during their learning, instead of relying on a single network to generate di-
+rect estimates of ( ψ1, ψ2, ψ3). In what follows, we will reconstruct the three fields of stream
+functions with three separate networks. We will use the following property: ψℓknows about
+∇ψℓ+1and∇ψℓ−1but not directly ψℓ+1orψℓ−1. Consequently, for each stratification layer
+ℓ, we design a network Ψ θℓtaking ( t, x, y ) as input allowing to estimate ψℓ, with network
+parameters θℓ. Each network will take the form of a SIREN as described in (3).
+StrAss-PINN training loss . The proposed minimization problem aiming to estimate the
+parameters ( θ1, θ2, θ3) is formulated as the minimisation of the loss function LStrAss-PINN :
+LStrAss-PINN (θ1, θ2, θ3) =3X
+ℓ=11
+|Iℓ|X
+i∈Iℓ|Ψθℓ(ti, xi, yi, zi)−di|2+∥D1(Ψθ1,∇Ψθ2)∥
++∥D2(Ψθ2,∇Ψθ1,∇Ψθ3))∥+∥D3(Ψθ3,∇Ψθ2)∥.(6)
+The quantity of interest are the estimated fields bψℓ:= Ψ bθℓwith
+(bθ1,bθ2,bθ3) = argmin
+(θ1,θ2,θ3)LStrAss-PINN (θ1, θ2, θ3).
+StrAss-PINN algorithmic strategy . In order to look for such a minimiser, we introduce
+a strategy guided by the stratified structure of the quasi-geostrophic model and the natural
+hierarchy between stratification layers. We propose to learn each oceanic layer successively
+starting from the surface down to the deep layer as sketched in Fig. 4 and explained as
+follows. Such a strategy is a block-minimization procedure that consists in solving, for each
+–10–
+manuscript submitted to JGR
+iteration k,
+θ[k+1]
+1 = argmin
+θ1X
+i∈I1|Ψθ1(ti, xi, yi)−di|2+D1
+Ψθ1,∇Ψθ[k]
+2
+| {z }
+L(1)
+StrAss-PINN 
+θ1,θ[k]
+2
+θ[k+1]
+2 = argmin
+θ2X
+i∈I2|Ψθ2(ti, xi, yi)−di|2+D2
+Ψθ2,∇Ψθ[k+1]
+1,∇Ψθ[k]
+3
+| {z }
+L(2)
+StrAss-PINN 
+θ[k+1]
+1,θ2,θ[k]
+3
+θ[k+1]
+3 = argmin
+θ3X
+i∈I3|Ψθ3(ti, xi, yi)−di|2+D3
+Ψθ3,∇Ψθ[k+1]
+2
+| {z }
+L(3)
+StrAss-PINN 
+θ[k+1]
+2,θ3
+Once the training of Ψ θ1has converged, we can compute an estimation of ∇Ψθ1that we
+freeze (meaning we stop learning θ1) in order to define the approximate differential operator
+D2(·,∇Ψθ1,·) and start learning the parameters of Ψ θ2using the loss L(2)
+StrAss-PINN . Finally,
+we construct D3similarly using a frozen estimate of ∇Ψ2to learn the parameters of Ψ θ3
+using the loss L(3)
+StrAss-PINN . The circulation of information is sketched in the diagram Fig. 4,
+and the algorithm is summed up in Alg. 1.
+StrAss-PINN initialization . The algorithm procedure is initialized with Ψθ[0]
+2= Ψθ[0]
+3= 0.
+The motivation behind the choice Ψθ[0]
+2= 0 is that the flow is much stronger at the surface
+than in the interior of the domain, i.e. ∇ψ1≫ ∇ ψ2. Therefore, a fair approximation for
+D1is to consider ∇ψ2= 0 everywhere. Similarly, the flow in the intermediate layer is much
+stronger than in the abyss, hence the choice Ψθ[0]
+3= 0. This strategy uses prior knowledge
+of ocean dynamics, which are typically surface-intensified. In some specific cases, such as
+above seamounts, the dynamics may instead be bottom-intensified. In that context, the
+algorithm’s convergence may not be optimal. We will explore more efficient strategies to
+account for these situations in future work.
+Algorithm 1 StrAss-PINN
+Require: Observations points: ( I1,I2,I3) and {(ti, xi, yi, di)}i∈Iℓforℓ= 1,2,3.
+Collocation points: {(Tj, Xj, Yj)}j∈J.
+whileLStrAss-PINN ≥εdo
+fork=1 to K do
+Get batchs from Iand define collocation points
+θ[k+1]
+1 = arg min
+θ1L(1)
+StrAss-PINN 
+θ1, θ[k]
+2
+θ[k+1]
+2 = arg min
+θ2L(2)
+StrAss-PINN 
+θ[k+1]
+1, θ2, θ[k]
+3
+θ[k+1]
+3 = arg min
+θ3L(3)
+StrAss-PINN 
+θ[k+1]
+2, θ3
+end for
+end while
+–11–
+manuscript submitted to JGR
+<latexit sha1_base64="CMFvvVImH2fuhFPOXT0xSbja0Kk=">AAACxnicjVHLSsNAFD2Nr1pfVZdugkVwVRIp6kYouumyon1ALZKk0zo0TcJkopQi+ANu9dPEP9C/8M44BbWITkhy5tx7zsy9109CnkrHec1Zc/MLi0v55cLK6tr6RnFzq5nGmQhYI4jDWLR9L2Uhj1hDchmydiKYN/JD1vKHZyreumUi5XF0KccJ6468QcT7PPAkURfDE/e6WHLKjl72LHANKMGselx8wRV6iBEgwwgMESThEB5Sejpw4SAhrosJcYIQ13GGexRIm1EWowyP2CF9B7TrGDaivfJMtTqgU0J6BSlt7JEmpjxBWJ1m63imnRX7m/dEe6q7jenvG68RsRI3xP6lm2b+V6dqkejjWNfAqaZEM6q6wLhkuivq5vaXqiQ5JMQp3KO4IBxo5bTPttakunbVW0/H33SmYtU+MLkZ3tUtacDuz3HOguZB2T0sV84rpeqpGXUeO9jFPs3zCFXUUEeDvAd4xBOerZoVWZl195lq5YxmG9+W9fABoQ6P+w==</latexit>k=1<latexit sha1_base64="KmUV6nxJgyxhVhmDn3yh780Uji8=">AAACx3icjVHLSsNAFD2Nr1pfVZdugkVwVRIRdSMU3eiugn1ALZKk0zY0zYTJpFiKC3/Arf6Z+Af6F94Zp6AW0QlJzpx7z5m59/pJFKbScV5z1tz8wuJSfrmwsrq2vlHc3KqnPBMBqwU84qLpeymLwpjVZCgj1kwE84Z+xBr+4FzFGyMm0pDH13KcsPbQ68VhNww8qajB6UHhtlhyyo5e9ixwDSjBrCovvuAGHXAEyDAEQwxJOIKHlJ4WXDhIiGtjQpwgFOo4wz0KpM0oi1GGR+yAvj3atQwb0155plod0CkRvYKUNvZIwylPEFan2TqeaWfF/uY90Z7qbmP6+8ZrSKxEn9i/dNPM/+pULRJdnOgaQqop0YyqLjAume6Kurn9pSpJDglxCncoLggHWjnts601qa5d9dbT8TedqVi1D0xuhnd1Sxqw+3Ocs6B+UHaPyu7VYalyZkadxw52sU/zPEYFF6iiRt59POIJz9alxa2RdfeZauWMZhvflvXwAeDWkA0=</latexit>k=2<latexit sha1_base64="O+oEosXBvP8vZYU2zuz8WA82/1g=">AAACx3icjVHLSsNAFD2Nr1pfVZdugkVwVRIVdSMU3eiugm2FWiRJp+3QNBMmk2IpLvwBt/pn4h/oX3hnTEEtohOSnDn3njNz7/XjkCfKcV5z1szs3PxCfrGwtLyyulZc36gnIpUBqwUiFPLa9xIW8ojVFFchu44l8wZ+yBp+/0zHG0MmEy6iKzWKWWvgdSPe4YGnNNU/2S/cFktO2THLngZuBkrIVlUUX3CDNgQCpBiAIYIiHMJDQk8TLhzExLUwJk4S4ibOcI8CaVPKYpThEdunb5d2zYyNaK89E6MO6JSQXklKGzukEZQnCevTbBNPjbNmf/MeG099txH9/cxrQKxCj9i/dJPM/+p0LQodHJsaONUUG0ZXF2QuqemKvrn9pSpFDjFxGrcpLgkHRjnps200iald99Yz8TeTqVm9D7LcFO/6ljRg9+c4p0F9r+welt3Lg1LlNBt1HlvYxi7N8wgVnKOKGnn38IgnPFsXlrCG1t1nqpXLNJv4tqyHD+M3kA4=</latexit>k=3
+<latexit sha1_base64="hb8ASWBOv7POec7b45CrKK9qVYs=">AAAC23icjVHLSsNAFD2Nr1pfUcGNm2ARXJVERF0W3bisYB/Q1pCk0zo0TUIyEUrtyp249Qfc6v+If6B/4Z0xBbWITkhy5tx7zsy91418ngjTfM1pM7Nz8wv5xcLS8srqmr6+UUvCNPZY1Qv9MG64TsJ8HrCq4MJnjShmzsD1Wd3tn8p4/ZrFCQ+DCzGMWHvg9ALe5Z4jiLL1rVYl4faoJa6YcGzrctTst8fjgq0XzZKpljENrAwUka1KqL+ghQ5CeEgxAEMAQdiHg4SeJiyYiIhrY0RcTIirOMMYBdKmlMUowyG2T98e7ZoZG9BeeiZK7dEpPr0xKQ3skiakvJiwPM1Q8VQ5S/Y375HylHcb0t/NvAbEClwR+5dukvlfnaxFoItjVQOnmiLFyOq8zCVVXZE3N75UJcghIk7iDsVjwp5STvpsKE2iape9dVT8TWVKVu69LDfFu7wlDdj6Oc5pUNsvWYcl6/ygWD7JRp3HNnawR/M8QhlnqKBK3jd4xBOetbZ2q91p95+pWi7TbOLb0h4+AEcTmHI=</latexit> ✓[k]1
+<latexit sha1_base64="JY7BQS7m3F1X4Eco4xoW/Zbq2H0=">AAAC23icjVHLSsNAFD2Nr1pfUcGNm2ARXJWkiLosunFZwT6grSVJp+3QNAnJRCi1K3fi1h9wq/8j/oH+hXfGFNQiOiHJmXPvOTP3Xif0eCxM8zWjzc0vLC5ll3Mrq2vrG/rmVjUOkshlFTfwgqju2DHzuM8qgguP1cOI2UPHYzVncCbjtWsWxTzwL8UoZK2h3fN5l7u2IKqt7zTLMW+Pm6LPhN0uXo0bg9ZkkmvrebNgqmXMAisFeaSrHOgvaKKDAC4SDMHgQxD2YCOmpwELJkLiWhgTFxHiKs4wQY60CWUxyrCJHdC3R7tGyvq0l56xUrt0ikdvREoD+6QJKC8iLE8zVDxRzpL9zXusPOXdRvR3Uq8hsQJ9Yv/STTP/q5O1CHRxomrgVFOoGFmdm7okqivy5saXqgQ5hMRJ3KF4RNhVymmfDaWJVe2yt7aKv6lMycq9m+YmeJe3pAFbP8c5C6rFgnVUsC4O86XTdNRZ7GIPBzTPY5RwjjIq5H2DRzzhWWtpt9qddv+ZqmVSzTa+Le3hA0l7mHM=</latexit> ✓[k]2
+<latexit sha1_base64="EG7euPMaY30zU99pWuBOKPwSK1o=">AAAC23icjVHLSsNAFD2Nr1pfVcGNm2ARXJVERV0W3bisYB/Q1pKk03ZoXiQTodSu3Ilbf8Ct/o/4B/oX3hlTUIvohCRnzr3nzNx77dDlsTCM14w2Mzs3v5BdzC0tr6yu5dc3qnGQRA6rOIEbRHXbipnLfVYRXLisHkbM8myX1ezBmYzXrlkU88C/FMOQtTyr5/MudyxBVDu/1SzHvD1qij4TVvvgatQYtMbjXDtfMIqGWvo0MFNQQLrKQf4FTXQQwEECDww+BGEXFmJ6GjBhICSuhRFxESGu4gxj5EibUBajDIvYAX17tGukrE976RkrtUOnuPRGpNSxS5qA8iLC8jRdxRPlLNnfvEfKU95tSH879fKIFegT+5dukvlfnaxFoIsTVQOnmkLFyOqc1CVRXZE3179UJcghJE7iDsUjwo5STvqsK02sape9tVT8TWVKVu6dNDfBu7wlDdj8Oc5pUN0vmkdF8+KwUDpNR53FNnawR/M8RgnnKKNC3jd4xBOetZZ2q91p95+pWibVbOLb0h4+AEvjmHQ=</latexit> ✓[k]3
+Figure 4: Circulation of the information in the proposed multilayer optimisation process.
+This illustration is provided for the three first iterations for the 3-layer quasi-geostrophic
+dynamics but can easily be generated to Nlayers introducing Nnetworks alternatively
+learning.
+4 Numerical experiments
+4.1 Data
+Ground truth simulation – The ground truth ( ψ1, ψ2, ψ3) are obtained from the three
+layers quasi-geostrophic model of the ocean introduced section 3.1. The values implemented
+in the studied simulation are summarized in Tab. 1. The lengthscales of the system are:
+the size of the domain L= 4000 km and the two Rossby deformation radii are L1∼39 km,
+L2∼22 km. The corresponding timescales are of order T= 1/(βLi)∼22 days.
+Typical flow fields obtained with this model are shown in Fig. 2. In the upper layer, a
+western-intensified front is visible at the interface between two large-scale gyres, correspond-
+ing to a coherent eastward jet similar to the Gulf Stream or Kuroshio. Coherent eddies can
+also be seen propagating westward, corresponding to mesoscale oceanic rings. Additionally,
+Rossby waves propagate across the entire domain, with their phase moving westward. In
+the interior layers (Fig. 2(b)), the front, eddies, and waves are still present, supporting our
+hypothesis that surface data can be used to help assimilate ocean interior information. To
+summarize, this ground truth simulation features simple yet interesting flow structures, both
+horizontally and vertically, making it an ideal framework for validating our reconstruction
+method.
+Pseudo-observations I– From these simulated data, we constructed pseudo-observations,
+motivated by the framework presented in section 3.2, to combine SWOT-like data and
+ARGO-like data. Recall that the pseudo-observation locations are organized into three
+sets,Iℓ, each associated with a layer ℓ, and we make the simplifying assumption that a
+measurement in layer ℓcorresponds to an observation of ψℓ.
+The set I1in the surface layer is obtained by constructing a mask that replicates
+the trace of a virtual SWOT-like satellite observation of sea surface height ( ψ1), following
+Le Guillou et al. (2021). To do this, we virtually placed our 4000 km ×4000 km ocean basin
+over the North Atlantic Ocean, at latitudes consistent with the Coriolis parameter f0+β0y.
+We then used the coordinates of the actual satellite’s SWOT trajectory and its two swaths,
+as if it passed over that domain. I1is the set of ( t, x, y ) coordinates for which the point
+(x, y) belongs to one of the swaths of SWOT at time t. Over a period of 100 days, this
+results in a total of 392,470 observation points, i.e., approximately 1 .5% of the domain being
+observed each day.
+The set I2in the intermediate layer corresponds to the locations of 800 independent
+ARGO-like buoys measuring ψ2. Each day, the buoys are randomly distributed across the
+–12–
+manuscript submitted to JGR
+513×513 domain grid. This is a realistic, though somewhat exaggerated, amount of ARGO
+data for the size of our domain (Argo, 2024).
+The set I3in the deeper layer is also obtained by randomly selecting 800 buoys in the
+513×513 grid points, but the daily averages of the streamfunction are measured only every
+ten days, consistent with the behavior of ARGO floats that dive every 10 days.
+To facilitate this preliminary analysis, we assume that measurements always provide
+direct information about the streamfunction in the observed layer. While this assumption
+is reasonable for the low-frequency component of sea surface height measurements from
+altimetry, it is an oversimplification for ARGO measurements, which provide information
+on thermodynamic variables rather than direct streamfunction data. However, under the
+assumption of geostrophic and hydrostatic balance, these measurements can be related to
+vertical variations in the streamfunction, rather than the streamfunction itself. Future work
+will focus on developing a more realistic representation of these measurements.
+4.2 Algorithm
+Neural network architecture . We deploy three SIREN neural networks, one for each
+layer. In our experiments we explore the impact of Ω t, Kx, Ky, controlling the weights
+of SIREN’s first layer as they are the only parameters of the network that can directly be
+physically interpreted. In their paper, Sitzmann et al. (2020) set a maximal value ω0for this
+first layer and initialise the weight uniformly between −ω0andω0. Conducting numerical
+experiments, we noticed in our case that these values do not change significantly during the
+learning. We thus decided to remove that randomness and set the values of the first layer
+in the following way. First, we chose a maximal value for the pulsation ωmaxand one for
+the wave numbers kmax. Then we fill Ω twith Nuniformly spread numbers between −ωmax
+andωmax,Kxwith Nuniformly spread numbers between −kmaxandkmaxand finally Ky
+with Nuniformly spread numbers between 0 and kmax. This way, the first layer covers a
+wide variety of potential waves propagating in our domain of the form sin( kxx+kyy−ωtt)
+with kx∈Kx,ky∈Kyandωt∈Ωt. This choice leads to N3waves. Choosing N= 5 is
+what set the width of our network to equal 125. Note that adding negative values for kx
+does not express more waves as the sine function is odd.
+Collocation points J. Other important parameters to adjust that can affect the training
+of the network are the number and the location of the collocation points. The higher it
+is, the better the estimation of ∥D(·)∥L2(Ω). However, the number of collocation point to
+consider is limited by the memory capacity of the machine used. We opted for Ncol=
+13×batch size col= 266240. Compared to literature, this is relatively few as we only
+have Ncol≈10×Nobs. It is usually recommended to have two or more orders of magnitude
+difference between NobsandNcolbut we had satisfying results with this set-up. Adding
+more collocation points would significantly increase the memory requirements of the method
+and probably call for multi-GPU training, which we did not explore.
+Minimization strategy for L(ℓ)
+StrAss-PINN . We look for the minimiser of the loss function
+using the gradient-based optimizer ADAM with learning rate of 1e-4 and batches of size
+1/13 of the total available data. In accordance with other PINNs formulation, the input
+and output are normalized. This is detailed in appendix Appendix C. All experiments were
+executed on a machine with an Intel Xeon Platinum 9242 CPU and an AD104GL [L4] GPU
+with 16 GB of RAM.
+Regularization parameter . The main parameter to tune is the regularisation parameter
+λ, the ratio of the data fidelity loss term to the physic-informed loss term Ldyn. It balances
+these two parts of the objective function and controls how much the network trusts the
+observations during its learning and how much the reconstruction is a physical field. A high
+value for λwill thus lead to a very smooth reconstruction. We chose λ= 0.0001 following
+the results shown in section 4.3.
+–13–
+manuscript submitted to JGR
+The values of the hyper-parameters used in the following numerical experiments are sum-
+marized in Tab. 2.
+Parameter Value Parameter Value
+Nobssurf 392470 Nobsint 80000
+Nobsbot 8000 Ncol 266240
+bsobs 30190 bscol 20480
+kmax 10 ωmax 1.5
+λ 1e-4 learning rate 1e-4
+Table 2: Summary of the choices of hyper-parameters values in the network.
+4.3 Results
+Recovery illustration. The results presented in Fig. 5 are obtained after one step of
+the alternate scheme 1 on pseudo-observations for a period of 100 days. We were able
+to reconstruct not only the surface field but also the ones in the interior of the ocean,
+leveraging physics knowledge to help the information propagate downward. Physically, it is
+very interesting to see that the reconstructed stream functions include the physical features
+resolved by the explicit model. Namely, the jet and the vortices detaching from it are
+well resolved even though they are poorly observed. It also resolved the large scale waves
+visible mainly in the right part of the domain for the first layer and everywhere for the
+other two. It is notable to remark that we were able to represent a field with original
+resolution N = 1,638,400 in a simulation at a resolution of 100 ×128×128 with only
+3×w+w+ 2×(w×w+w) +w+ 1 = 32126 parameters in StrAss-PINN .
+Impact of the regularisation parameter λ.This is an important parameter to tune
+as it can guide the learning towards a more significant reconstruction even with fewer ob-
+servations. However, it can yield a degraded reconstruction if wrongly set. The difference
+in the quality of reconstruction when no regularisation, i.e.λ= 0, the right amount of
+regularisation, λ= 10−4or to much regularisation is applied is shown in Fig. 6 at a spe-
+cific time. Visually, displaying the reconstruction into a small movie shows that structure
+in the reconstruction without regularisation are less smooth than those with regularisation
+(i.e., jumps in wave phase). Additionally, in the left column, with increased regularization
+(i.e., λ= 1), the field becomes smoother, especially for the first layer. The right panel of
+Fig. 6 shows the difference between the reconstructed fields on the left and the ground truth
+simulation, available everywhere in the domain, i.e.the reconstruction error. Qualitatively,
+one can see less structure in the error field with λ= 10−4than with λ= 0 or λ= 1.
+This shows the reconstruction captured more faithfully the physical features of the flow.
+Quantitatively, the mean square value of this difference is lower when some regularisation
+is used. The reconstruction scores evaluated on a 128 ×128 space grid and averaged over
+the 100 days of assimilation are shown in Tab. 3.
+Impact of SIREN initialisation. As mentioned above, the initialisation of the layers of
+SIREN can impact the quality of the reconstructed fields. Exploring the space of hyper-
+parameters by hand, we found the set of values showed in Tab. 2 to work very well and the
+value of the reconstruction error to be stable around these values.
+Impact of SIREN architecture. The number of layers and of neurons per layer were kept
+low in order to keep a model as transparent as possible for us to choose the just mentioned
+hyper-parameters by hand.
+–14–
+manuscript submitted to JGR
+ψ1t = 0 days t = 20 days t = 40 days t = 60 days t = 80 days
+d1(t= 0)
+Ψˆθ1
+ψ2t = 0 days t = 20 days t = 40 days t = 60 days t = 80 days
+d2(t= 0)
+Ψˆθ2
+ψ3t = 0 days t = 20 days t = 40 days t = 60 days t = 80 days
+∼d3(t= 0)
+Ψˆθ3
+Figure 5: Reconstructed stream functions in each oceanic layer of the quasi-geostrophic
+model compared to the full simulated fields. A snapshot of the observation points is shown
+next to the reconstruction to have an idea of the available data. Note that for the bottom
+layer, these observations are only available every ten days. Physically, it is very interesting
+to see that the reconstructed stream functions include the physical features resolved by the
+explicit model. Namely, the jet and the vortices detaching from it are well resolved even
+though they are poorly observed. It also resolved the large scale waves visible mainly in the
+right part of the domain for the first layer and everywhere for the other two.
+–15–
+manuscript submitted to JGR
+Ψˆθ1λ= 0 λ= 10−4λ= 1
+Ψˆθ2
+Ψˆθ3−0.2−0.10.00.10.2
+(a) Reconstructed fields.
+Ψˆθ1−ψ1λ= 0λ= 10−4λ= 1
+Ψˆθ2−ψ2
+Ψˆθ3−ψ3 (b) Difference to the ground truth.
+Figure 6: (a) reconstructed fields at a single time step and (b) the difference to the ground
+truth simulation for three reconstruction results: no regularisation (i.e. λ= 0), the right
+amount of regularisation (i.e. λ= 10−4), or too much regularisation (i.e., λ= 1). Qualita-
+tively, one can see from reconstruction error less structure with λ= 10−4than with λ= 0,
+showing that the reconstruction captured more faithfully the physical features of the flow.
+λ Surface MSE Intermediate MSE Abyss MSE
+0 53.72 0.79 4.02
+10−436.98 0.94 2.17
+1 279.99 264.03 1548.08
+Table 3: Mean square error of the reconstruction to the ground truth simulation multiplied
+by a factor 104for clarity. Error in the reconstruction of the deep field was nearly halved
+using the physics-informed loss as regularisation with the right balance to the data term.
+Reconstruction using noisy data. In order to evaluate the stability of the method to
+noisy data, we add white Gaussian noise with standard deviation of 0.05 and re-run our
+experiments. We can clearly observe that StrAss-PINN successfully reconstructs the field
+and, as expected, the required regularization parameter needs to be set higher for larger
+standard deviations in the noise distribution. The illustration for the standard deviation
+set to 0.05 is provided in Appendix Appendix B.
+5 Discussion and conclusions
+We have shown that StrAss-PINN is a promising tool for ocean data assimilation by
+using an idealized three-layer quasi-geostrophic ocean model as the ”ground truth” and
+realistic pseudo-observations resembling surface SWOT-like data and interior ARGO-like
+data. This minimal setup is relevant for assessing the feasibility of reconstructing deep
+ocean flows.
+The first advantage of StrAss-PINN and PINNs in general is that they do not rely
+on a predefined grid mesh. While there is still an implicit resolution (determined by the
+–16–
+manuscript submitted to JGR
+number of network parameters), StrAss-PINN can enhance the resolution of the initial field.
+For example, if there is a missing day of observations, the resolution can be increased
+in the model. A second advantage is that, for data assimilation problems like the one
+considered here, there is no need for knowledge of boundary or initial conditions in the loss
+function. The third advantage of encoding the ocean field in a network is the highly effective
+representation of the 3d field. This ability to compress information while maintaining well-
+behaved derivatives opens up potential for future work in ocean data assimilation.
+Several challenges remain to be addressed in future research in order to reconstruct
+real ocean flows effectively with StrAss-PINN . First, we will need to determine the min-
+imal amount of data needed for accurate flow reconstruction, exploring this question for
+each ocean layer independently. It will also be important to assess PINNs’ performance in
+comparison to more traditional assimilation techniques, such as 4DVar. Second, there is
+significant potential to improve the efficiency of the PINN strategy used in this study. For
+example, the selection of collocation points used to estimate the physical constraints in the
+cost function can be optimized, as has been proposed in previous work (Nabian et al., 2021;
+Khoa Nguyen et al., 2022). Finally, the approach will need to be extended to multilayer
+shallow water models and eventually to more comprehensive ocean models, up to real-world
+data.
+In summary, this paper demonstrates the potential of Physics-Informed Neural Net-
+works for reconstructing three-dimensional ocean currents from abundant surface data and
+sparse interior measurements. The novelty of our method lies in its ability to reconstruct
+not only surface but also deep ocean currents in this context. By combining available data
+with the underlying dynamics of ocean circulation, PINNs offer a promising approach for
+inferring deep ocean dynamics. Our study serves as a proof of concept for applying PINNs
+to deep ocean flow reconstruction.
+–17–
+manuscript submitted to JGR
+Appendix A Multilayer StrAss-PINN in the general setting
+In the proposed model, we consider Ldifferential operators ( Dℓ)1,...,L allowing us to
+rewrite quasi-geostrophic dynamics (4) as:
+
+
+D1(ψ1,∇ψ2) = 0
+Dℓ(ψℓ,∇ψℓ−1,∇ψℓ+1) = 0 ∀ℓ= 2, . . . , L −1
+DL(ψL,∇ψL−1) = 0(A1)
+The optimisation problem we now have to face is then to find a set ( θ1, . . . , θ L−1) of param-
+eters that minimise the training loss function LStrAss-PINN :
+LStrAss-PINN (Ψθ1, . . . , ΨθL) =1
+nnX
+i=1|uθ(ti, xi, yi, zi)−di|2+∥D1(Ψθ1,∇Ψθ2)∥
++L−1X
+ℓ=1∥Dℓ(Ψθℓ,∇Ψθℓ−1,∇Ψθℓ+1))∥+∥DL(ΨθL,∇ΨθL−1)∥(A2)
+In order to look for such a minimiser, we introduce a strategy guided by the stratified
+structure of the quasi-geostrophic model and the natural hierarchy between stratification
+layers. We propose to learn each oceanic layer successively starting from the surface down
+as sketched in Fig. 4 and explained as follows. Such a strategy is a block-minimization
+procedure that consists in solving
+min
+θ1X
+i∈I1|uθ(ti, xi, yi, zi)−di|2+∥D1(Ψθ1,∇Ψθ2)∥
+min
+θ2X
+i∈I2|uθ(ti, xi, yi, zi)−di|2+∥D2(Ψθ2,∇Ψθ1,∇Ψθ3))∥
+...
+min
+θL−1X
+i∈IL−1|uθ(ti, xi, yi, zi)−di|2+∥DL−1(ΨθL−1,∇ΨθL−2,∇ΨθL))∥
+min
+θLX
+i∈IL|uθ(ti, xi, yi, zi)−di|2+∥DL(ΨθL,∇ΨθL−1)∥
+Appendix B Noisy data
+In order to test the stability of our method to noisy data, we artificially added to each
+pseudo-observation a Gaussian noise of standard deviation 0.05. The result is shown in
+Fig. B1. StrAss-PINN successfully reconstructs the fields significantly more accurately than
+the option without regularisation which overfits the noisy observations. As expected, the
+required regularization parameter needs to be set higher for larger standard deviations of
+the noise than with untouched data.
+Appendix C Data normalisation
+It is a widely spread information that neural networks tend to prefer normalised inputs
+and outputs. In order to fit with this idea, we transform the domain from Ω = [0 , T]×[0, L]2
+to˜Ω = [−1,1]3and the outputs are normalised as well:
+–18–
+manuscript submitted to JGR
+Ψˆθ1λ= 0 λ= 5·10−4
+Ψˆθ2
+Ψˆθ3
+ψ1Ground truth
+ψ2
+ψ3
+Figure B1: Reconstruction with noisy pseudo-observations.
+ψ1←−(ψ1−µ)/σ
+ψ2←−(ψ2−µ)/σ
+ψ3←−(ψ3−µ)/σ(C1)
+with µandσthe mean and standard deviation of the observed data for the first layer.
+Now we need to rewrite the transformed differential operators. The advection operators
+now read:
+d
+dt
+i=rt∂˜t+r2
+x[−∂˜y(σΨi)·∂˜x+∂˜x(σΨi)·∂˜y] (C2)
+Let us write things explicitly for D1. For given networks Ψ 1and Ψ 2encoding the stream
+functions in the two first layers, the corresponding encoded potential vorticity ˜Q1is:
+˜Q1=r2
+x∆ (σΨ1) +σΨ2−σΨ1
+L2
+1+β˜y
+rx(C3)
+with rt= 2/Tandrx= 2/L. And the operator now reads:
+–19–
+manuscript submitted to JGR
+D1(Ψ1,∇˜Ψ2,∆˜Ψ2) =d
+dt
+1
+r2
+x∆ (σΨ1)−σΨ1
+L2
+1
++σ
+L2
+1d
+dt
+1Ψ2
++rxβ∂˜x(σΨ1)
+−rxτ0
+H1πsin(π˜y) +νr2
+x∆˜Q1(C4)
+The same treatment was done to D2andD3.
+–20–
+manuscript submitted to JGR
+Open Research Section
+The codes implementing StrAss-PINN are published in the Zenodo repository
+https://zenodo.org/records/15075427
+and the idealized ocean simulation data sets (including pseudo-observations) are pub-
+lished in the Zenodo repository
+https://doi.org/10.5281/zenodo.15074965 .
+Acknowledgments
+BD warmly thanks Emmanuel Cosme for useful discussions on deep flow reconstruction in
+data assimilation. The authors also thank the CBPSMN platform at ENS-Lyon for providing
+efficient computing resources for all the necessary numerical experiments. The platform uses
+SIDUS (Quemener & Corvellec, 2013), which was developed by Emmanuel Quemener.
+References
+Archambault, T., Filoche, A., Charantonis, A., B´ er´ eziat, D., & Thiria, S. (2024). Learning
+sea surface height interpolation from multi-variate simulated satellite observations.
+Journal of Advances in Modeling Earth Systems ,16(6), e2023MS004047.
+Arcucci, R., Zhu, J., Hu, S., & Guo, Y.-K. (2021). Deep data assimilation: Integrating deep
+learning with data assimilation. Applied Sciences ,11(3). doi: 10.3390/app11031114
+Argo. (2024). Argo (oceanography) — Wikipedia, the free encyclopedia. Retrieved from
+https://en.wikipedia.org/wiki/Argo (oceanography) ([Online; accessed 12-
+December-2024])
+Ballarotta, M., Ubelmann, C., Pujol, M.-I., Taburet, G., Fournier, F., Legeais, J.-F., . . .
+others (2019). On the resolutions of ocean altimetry maps. Ocean science ,15(4),
+1091–1109.
+Bang, C., Altaher, A. S., Zhuang, H., Altaher, A., Srinivasan, A., & Cherubin, L. (2024).
+Physics-informed neural networks to reconstruct surface velocity field from drifter
+data. Authorea Preprints .
+Barth, A., Alvera-Azc´ arate, A., Licer, M., & Beckers, J.-M. (2020). Dincae 1.0: A convo-
+lutional neural network with error estimates to reconstruct sea surface temperature
+satellite observations. Geoscientific Model Development ,13(3), 1609–1622.
+Beauchamp, M., Febvre, Q., Georgenthum, H., & Fablet, R. (2023). 4DVarNet-SSH: End-
+to-end learning of variational interpolation schemes for nadir and wide-swath satellite
+altimetry. Geoscientific Model Development ,16(8), 2119–2147.
+Blayo, ´E., Bocquet, M., Cosme, E., & Cugliandolo, L. F. (2014). Advanced data assimilation
+for geosciences: Lecture notes of the les houches school of physics: Special issue, june
+2012. OUP Oxford.
+Bocquet, M., & Farchi, A. (2014). Introduction to the principles and methods of data
+assimilation in the geosciences. Retrieved from https://cerea.enpc.fr/HomePages/
+bocquet/teaching/assim-mb-en.pdf
+Carrassi, A., Bocquet, M., Bertino, L., & Evensen, G. (2018). Data assimilation in the
+geosciences: An overview of methods, issues, and perspectives. Wiley Interdisciplinary
+Reviews: Climate Change ,9(5), e535.
+Clark Di Leoni, P., Agasthya, L., Buzzicotti, M., & Biferale, L. (2023). Reconstructing
+rayleigh–b´ enard flows out of temperature-only measurements using physics-informed
+neural networks. The European Physical Journal E ,46(3), 16.
+Fablet, R., Chapron, B., Drumetz, L., M´ emin, E., Pannekoucke, O., & Rousseau, F. (2021,
+October). Learning variational data assimilation models and solvers. Journal of Ad-
+vances in Modeling Earth Systems ,13(10).
+Fablet, R., Chapron, B., Le Sommer, J., & S´ evellec, F. (2024). Inversion of sea surface
+currents from satellite-derived sst-ssh synergies with 4dvarnets. Journal of Advances
+–21–
+manuscript submitted to JGR
+in Modeling Earth Systems ,16(6), e2023MS003609.
+Fox-Kemper, B., Hewitt, H. T., Xiao, C., Aalgeirsd´ ottir, G., Drijfhout, S. S., Edwards, T. L.,
+. . . others (2021). Ocean, cryosphere, and sea level change. In Climate change 2021:
+The physical science basis. contribution of working group i to the sixth assessment
+report of the intergovernmental panel on climate change (pp. 1211–1361). Cambridge
+University Press.
+Fu, L.-L., Christensen, E. J., Yamarone Jr, C. A., Lefebvre, M., Menard, Y., Dorrer, M.,
+& Escudier, P. (1994). Topex/poseidon mission overview (Vol. 99) (No. C12). Wiley
+Online Library.
+Fu et al, L.-L. (2024). The surface water and ocean topography mission: A breakthrough in
+radar remote sensing of the ocean and land surface water. Geophys. Res. Lett. ,51(4),
+e2023GL107652.
+Guinehut, S., Dhomps, A.-L., Larnicol, G., & Le Traon, P.-Y. (2012). High resolution 3-d
+temperature and salinity fields derived from in situ and satellite observations. Ocean
+Science ,8(5), 845–857.
+Johnson, G. C., & King, B. A. (2023). Zapiola gyre, velocities and mixing, new argo insights.
+Journal of Geophysical Research: Oceans ,128(6), e2023JC019893.
+Johnson, J. E., Lguensat, R., Fablet, R., Cosme, E., & Le Sommer, J. (2022). Neural
+fields for fast and scalable interpolation of geophysical ocean variables. arXiv preprint
+arXiv:2211.10444 .
+Karniadakis, G. E., Kevrekidis, I. G., Lu, L., Perdikaris, P., Wang, S., & Yang, L. (2021).
+Physics-informed machine learning. Nature Reviews Physics ,3(6), 422–440.
+Khoa Nguyen, T. N., Dairay, T., Meunier, R., Millet, C., & Mougeot, M. (2022). Fixed-
+budget online adaptive learning for physics-informed neural networks. towards param-
+eterized problem inference. arXiv e-prints , arXiv–2212.
+Le Guillou, F., Metref, S., Cosme, E., Ubelmann, C., Ballarotta, M., Le Sommer, J., &
+Verron, J. (2021). Mapping altimetry in the forthcoming SWOT era by back-and-
+forth nudging a one-layer quasigeostrophic model. J. Atmos. Oceanic Technol. ,38(4),
+697–710.
+Lellouche, J.-M., Greiner, E., Bourdall´ e-Badie, R., Garric, G., Melet, A., Dr´ evillon, M., . . .
+others (2021). The copernicus global 1/12 oceanic and sea ice glorys12 reanalysis.
+Frontiers in Earth Science ,9, 698876.
+Lucor, D., Agrawal, A., & Sergent, A. (2022). Simple computational strategies for more
+effective physics-informed neural networks modeling of turbulent natural convection.
+Journal of Computational Physics ,456, 111022.
+Manucharyan, G. E., Siegelman, L., & Klein, P. (2021). A deep learning approach to
+spatiotemporal ssh interpolation and estimation of deep currents in geostrophic ocean
+turbulence. Journal Of Advances In Modeling Earth Systems ,13(1).
+Martin, S. A., Manucharyan, G. E., & Klein, P. (2023). Synthesizing sea surface temperature
+and satellite altimetry observations using deep learning improves the accuracy and
+resolution of gridded sea surface height anomalies. Journal of Advances in Modeling
+Earth Systems ,15(5), e2022MS003589.
+Millet, C., Khoa Nguyen, T. N., & Mougeot, M. (2023). Physics-informed learning for
+modeling infrasound propagation in extreme weather conditions. The Journal of the
+Acoustical Society of America ,154(4supplement), A269–A269.
+Mommert, M., Barta, R., Bauer, C., Volk, M.-C., & Wagner, C. (2024). Periodically
+activated physics-informed neural networks for assimilation tasks for three-dimensional
+rayleigh-benard convection. arXiv preprint arXiv:2403.02970 .
+Munk, W., Worcester, P., & Wunsch, C. (1995). Ocean acoustic tomography . Cambridge
+University Press.
+Nabian, M. A., Gladstone, R. J., & Meidani, H. (2021, April). Efficient training of physics-
+informed neural networks via importance sampling. Computer-Aided Civil and Infras-
+tructure Engineering ,36(8), 962–977. doi: 10.1111/mice.12685
+Oulhen, E., Kolodziejczyk, N., Tandeo, P., Blanke, B., & S´ evellec, F. (2024). Reconstructing
+the ocean state using argo data and a data-driven method. Journal of Atmospheric
+–22–
+manuscript submitted to JGR
+and Oceanic Technology .
+Quemener, E., & Corvellec, M. (2013). SIDUS—the Solution for Extreme Deduplication of
+an Operating System. Linux J. ,2013 (235).
+Raissi, M., Perdikaris, P., & Karniadakis, G. (2019). Physics-informed neural networks: A
+deep learning framework for solving forward and inverse problems involving nonlinear
+partial differential equations. Journal of Computational Physics ,378, 686-707.
+Sitzmann, V., Martel, J., Bergman, A., Lindell, D., & Wetzstein, G. (2020). Implicit neural
+representations with periodic activation functions. Advances in Neural Information
+Processing Systems ,33, 7462–7473.
+Sonnewald, M., Lguensat, R., Jones, D. C., Dueben, P. D., Brajard, J., & Balaji, V. (2021).
+Bridging observations, theory and numerical simulation of the ocean using machine
+learning. Environmental Research Letters ,16(7), 073008.
+Vallis, G. K. (2017). Atmospheric and oceanic fluid dynamics . Cambridge University Press.
+Venaille, A. (2012). Bottom-trapped currents as statistical equilibrium states above topo-
+graphic anomalies. Journal of Fluid Mechanics ,699, 500–510.
+Wang, Y., Sun, J., Bai, J., Anitescu, C., Eshaghi, M. S., Zhuang, X., . . . Liu, Y.
+(2024). Kolmogorov arnold informed neural network: A physics-informed deep learn-
+ing framework for solving pdes based on kolmogorov arnold networks. arXiv preprint
+arXiv:2406.11045 .
+Wong, A. P., Wijffels, S. E., Riser, S. C., Pouliquen, S., Hosoda, S., Roemmich, D., . . .
+others (2020). Argo data 1999–2019: Two million temperature-salinity profiles and
+subsurface velocity observations from a global array of profiling floats. Frontiers in
+Marine Science ,7, 700.
+Yoon, S., Park, Y., Gerstoft, P., & Seong, W. (2024). Predicting ocean pressure field with
+a physics-informed neural network. The Journal of the Acoustical Society of America ,
+155(3), 2037–2049.
+Zhu, L., Jiang, X., Lefauve, A., Kerswell, R. R., & Linden, P. (2024). New insights
+into experimental stratified flows obtained through physics-informed neural networks.
+Journal of Fluid Mechanics ,981, R1.
+–23–

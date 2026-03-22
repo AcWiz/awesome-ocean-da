@@ -1,0 +1,1455 @@
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Spatio-Temporal Super-Resolution Data Assimilation
+(SRDA) Utilizing Deep Neural Networks with Domain
+Generalization
+Yuki Yasuda1and Ryo Onishi1
+1Global Scientific Information and Computing Center, Tokyo Institute of Technology, 2-12-1 Ookayama,
+Meguro-ku, Tokyo 1528550, Japan
+Key Points:
+•We propose a neural network-based scheme for data assimilation and spatio-temporal
+super-resolution using physics-based simulations
+•A data-augmentation technique was developed to improve the robustness of in-
+ference in the fusion of data-driven and physics-based models
+•A test with idealized ocean jets showed that the proposed approach efficiently in-
+fers high-resolution results with ensuring the robustness
+Corresponding author: Yuki Yasuda, yasuda.y.aa@m.titech.ac.jp
+–1–arXiv:2212.03656v2  [physics.ao-ph]  20 Sep 2023
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Abstract
+Deep learning has recently gained attention in the atmospheric and oceanic sciences for
+its potential to improve the accuracy of numerical simulations or to reduce computational
+costs. Super-resolution is one such technique for high-resolution inference from low-resolution
+data. This paper proposes a new scheme, called four-dimensional super-resolution data
+assimilation (4D-SRDA). This framework calculates the time evolution of a system from
+low-resolution simulations using a physics-based model, while a trained neural network
+simultaneously performs data assimilation and spatio-temporal super-resolution. The use
+of low-resolution simulations without ensemble members reduces the computational cost
+of obtaining inferences at high spatio-temporal resolution. In 4D-SRDA, physics-based
+simulations and neural-network inferences are performed alternately, possibly causing
+a domain shift, i.e., a statistical difference between the training and test data, especially
+in offline training. Domain shifts can reduce the accuracy of inference. To mitigate this
+risk, we developed super-resolution mixup (SR-mixup)–a data augmentation method for
+domain generalization. SR-mixup creates a linear combination of randomly sampled in-
+puts, resulting in synthetic data with a different distribution from the original data. The
+proposed methods were validated using an idealized barotropic ocean jet with supervised
+learning. The results suggest that the combination of 4D-SRDA and SR-mixup is effec-
+tive for robust inference cycles. This study highlights the potential of super-resolution
+and domain-generalization techniques, in the field of data assimilation, especially for the
+integration of physics-based and data-driven models.
+Plain Language Summary
+One challenge in the Earth sciences is the simulation of atmospheric and oceanic
+processes with high accuracy or at high spatio-temporal resolution. The neural network,
+a model developed in the field of artificial intelligence, has recently gained attention for
+its potential to learn the relationship between any variables from a sufficient amount of
+data. For example, a neural network can be trained to make high-resolution images from
+low-resolution images. This process is called super-resolution. We propose the incorpo-
+ration of a neural network for super-resolution into an atmospheric or ocean model that
+performs numerical simulations at low resolution. Since the atmospheric or ocean model
+is of low resolution, the proposed framework is computationally efficient while still al-
+lowing for high-resolution results with the aid of the neural network. Furthermore, to
+make the inference accurate, observation data are fused with atmospheric or ocean pre-
+dictions in the neural network. In real-world applications, it is important to make pre-
+dictions robust to noise from various factors. Accordingly, we developed a new technique
+where certain noise is added during the training of the neural network. The approach
+proposed here can efficiently compute high-resolution predictions of the atmosphere and
+ocean without compromising robustness.
+–2–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+1 Introduction
+Numerical simulation is an essential tool in the atmospheric and oceanic sciences.
+Despite the ever-increasing computer resources, it may still be difficult to conduct nu-
+merical simulations at high resolution or with high accuracy. One solution is to employ
+data-driven models such as neural networks (NNs) (Brunton et al., 2020; Duraisamy, 2021;
+Kashinath et al., 2021). For instance, NNs have been used for surrogate modeling of the
+Navier-Stokes equations, subgrid-scale modeling of Reynolds stress tensors, and super-
+resolution of fluid flows. These NNs can make numerical simulations more efficient or
+more accurate.
+Super-resolution (SR) refers to techniques that infer high-resolution (HR) images
+from low-resolution (LR) images. Methods based on deep learning have been studied in
+computer vision (e.g., Dong et al., 2014; Ha et al., 2019; Anwar et al., 2020). The suc-
+cess of such NNs has promoted the applications of SR to atmospheric and oceanic data
+(e.g., Ducournau & Fablet, 2016; Vandal et al., 2017; Onishi et al., 2019; Stengel et al.,
+2020; J. Wang et al., 2021; Wu et al., 2021; Yasuda et al., 2023). One example is SR sim-
+ulation (Onishi et al., 2019; J. Wang et al., 2021; Wu et al., 2021). With this scheme,
+time evolution is calculated from LR simulations using a physics-based model, and HR
+inferences are obtained by inputting the LR results into a trained NN. Super-resolution
+simulation is computationally efficient because it requires only LR simulations using a
+physics-based model, and the elapsed time of inference by a NN is usually negligible. How-
+ever, there is a concern that LR simulations may deviate from the true state because of
+unresolved processes. Data assimilation may be useful for reducing such deviation.
+Data assimilation (DA) is a framework that estimates the state of a system based
+on observations and background states provided by a model (Asch et al., 2016). Meth-
+ods of DA are typically variational or statistical, with NNs being applied to both types.
+Recent progress in the application of NNs to DA has been summarized in a review (Cheng
+et al., 2023). Variational methods, such as 4D-Var, are analogous to deep learning, in
+that both employ adjoint backpropagation (Abarbanel et al., 2018; Chen et al., 2018).
+The minimization of variational cost can be conducted with NNs, achieving more pre-
+cise 4D-Var estimations (Fablet et al., 2021; Beauchamp et al., 2022). Neural networks
+have also been incorporated into statistical methods, such as ensemble Kalman filters
+(EnKFs). To reduce the computational cost of calculating ensemble evolution, the sys-
+tem model can be replaced with a NN (Ouala et al., 2018; Chattopadhyay et al., 2022).
+In addition, the analysis step can be conducted in low-dimensional latent spaces to fur-
+ther increase computational efficiency (Amendola et al., 2021; Peyron et al., 2021; C. Liu
+et al., 2022). Instead of replacing system models, ensemble members can be obtained us-
+ing generative models, such as variational autoencoders (VAEs), which also reduce com-
+putation time (Grooms, 2021; Yang & Grooms, 2021).
+Super-resolution has recently been included in DA processes (Barth´ el´ emy et al.,
+2022), as super-resolution data assimilation (SRDA), which applies a statistical DA method,
+such as EnKF, to flow fields super-resolved by a NN. SRDA can be interpreted as a fu-
+sion of SR simulation and DA. Specifically, the time evolution of an ensemble is obtained
+–3–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+from LR simulations via a physics-based model, as in SR simulation. The NN indepen-
+dently super-resolves each LR result in the ensemble. Observations are then assimilated
+into these super-resolved HR data. The obtained HR analysis is mapped to the LR space
+using algebraic methods, such as linear interpolation, and this mapped state provides
+the initial condition for the next assimilation cycle. SRDA performs super-resolution and
+data assimilation separately, making it easy to incorporate into an existing DA frame-
+work. Some studies have shown that NNs can perform the entire or a part of the anal-
+ysis step. For instance, NNs can directly infer the analysis states (Krishnan et al., 2015;
+Fraccaro et al., 2017) or can estimate background error covariance matrices (Ouala et
+al., 2018; Grooms, 2021). These studies imply the potential for simultaneous SR and DA.
+However, to the authors’ knowledge, SR has yet to be fully studied in the context of DA
+and such a proof of concept has not been demonstrated.
+In SRDA (Barth´ el´ emy et al., 2022), physics-based simulations and NN inferences
+are alternated, potentially causing a domain shift (e.g., Moreno-Torres et al., 2012), in
+which the statistical distribution differs between the training and test data. Domain shifts
+can occur whenever physics-based simulations and NN inferences are interdependent. For
+instance, if training data are generated in advance via physics-based simulations (i.e.,
+offline training), a domain shift will occur because the training data are independent of
+the NN inference. Although this issue is briefly mentioned by Barth´ el´ emy et al. (2022),
+it has not been investigated. Online training provides a potential solution to this domain
+shift (Rasp, 2020). In this approach, training data are updated during the optimization
+of NNs through physics-based simulations (e.g., Krasnopolsky & Belochitski, 2020). How-
+ever, online training may be computationally intensive and is not always feasible.
+Domain generalization aims to improve generalizability across datasets with dif-
+ferent distributions and to overcome domain shift problems (e.g., J. Wang et al., 2022;
+Zhou et al., 2022). Domain generalization is similar to transfer learning, but differs in
+access to the test-data distribution. In transfer learning, a pre-trained NN is fine-tuned
+using small samples with the same distribution as the test data. In contrast, in scenar-
+ios of domain generalization, fine-tuning is impossible because such samples are not avail-
+able. In other words, the test-data distribution remains unknown up to the test phase.
+Domain-generalization methods may be useful for fusing data-driven and physics-based
+models; however, the applicability of domain generalization in applying NNs to fluid sys-
+tems remains unclear, particularly for atmospheric or oceanic data assimilation.
+In this study, we propose a novel data-assimilation scheme, four-dimensional SRDA
+(4D-SRDA), incorporating SR-mixup—a novel domain-generalization technique. In 4D-
+SRDA, DA and spatio-temporal SR are performed simultaneously by a NN, while the
+system’s time evolution is obtained from physics-based LR simulations. This scheme does
+not require ensemble members and is computationally efficient. To mitigate the risk of
+domain shifts and the associated deterioration in inference accuracy, we employed SR-
+mixup—a data-augmentation technique based on the mixup method (Zhang et al., 2018;
+Yao et al., 2022). The validity of this scheme was demonstrated using an idealized barotropic
+ocean jet (David et al., 2017). The 4D-SRDA and SR-mixup are applicable to physics-
+based models that use gridded input and output data. This study implies the potential
+–4–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+of SR and domain generalization, in the field of DA, for integrating physics-based and
+data-driven models.
+The remainder of the paper is organized as follows: 4D-SRDA is first proposed in
+Section 2. SR-mixup is then independently presented in Section 3. Numerical experi-
+ments are described in Section 4, where the NN in the 4D-SRDA system is trained us-
+ing SR-mixup. Section 5 evaluates the performance of the 4D-SRDA system and discusses
+the robustness of inference enhanced by SR-mixup. Section 6 presents the conclusions.
+2 Four-Dimensional Super-Resolution Data Assimilation (4D-SRDA)
+2.1 General Concept
+4D-SRDA comprises a NN and a physics-based model. The latter is typically an
+atmosphere or ocean model and is simply referred to as a “fluid model.” The system’s
+time evolution is calculated from LR simulations using the fluid model. The DA and spatio-
+temporal SR are performed simultaneously using the NN. Unlike EnKF and 4D-Var, the
+proposed method does not require ensemble members or iterative calculations and is com-
+putationally efficient.
+The calculation process in each assimilation cycle is shown in Figure 1. Consider
+the time series of observations and fluid-model states. The former are time-stamped and
+geolocated point-cloud data, while the latter are LR grid-point data. The LR fluid-model
+states generally include past, present, and future times, whereas observations are avail-
+able only for the past and present. Using these two input types, the NN infers a flow-
+field time series at high spatio-temporal resolution. In the NN, the observations are con-
+verted from point-cloud to grid-point data. The converted observations and the LR model
+states are fused through a low-dimensional latent space by utilizing an encoder–decoder
+architecture. Because of the encoder, the observations do not necessarily have to be phys-
+ical quantities—they can also be arbitrary quantities correlated with the true state of
+the system. In principle, the nonlinear mapper in Figure 1 represents any mapping in
+the latent space, including temporal SR (Section 4.2), while its specific form is determined
+by training. A snapshot of the inferred HR states is downsampled to the LR grid space
+using an algebraic operation, such as linear interpolation. The obtained LR snapshot is
+regarded as the analysis (the initial condition), from which an LR fluid simulation is con-
+ducted. The obtained output—a time series of LR model states—is used as input to the
+NN in the next assimilation cycle. This process (Figure 1) is repeated once new obser-
+vations are obtained.
+There are two key differences between 4D-SRDA and SRDA (Barth´ el´ emy et al.,
+2022). First, in 4D-SRDA, the input to the NN contains a time series of fluid-model states,
+whereas in SRDA, the input is a snapshot of these states. Second, in 4D-SRDA, the NN
+simultaneously performs DA and spatio-temporal SR, whereas in SRDA, the NN con-
+ducts spatial SR followed by a statistical DA (e.g., EnKF). Both 4D-SRDA and SRDA
+obtain the time evolution of the system via LR fluid simulation. SRDA is easily appli-
+cable to existing DA frameworks because it performs SR and DA separately; however,
+–5–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Observation
+(point cloud)
+Model state
+(LR time series)Projection
+to grid points
+Inference
+(HR time series)
+Inference
+(LR snapshot)Physics-based model (LR)Encoder
+DecoderNonlinear
+mapper
+(in latent space)Neural network
+Figure 1. Calculation process of four-dimensional super-resolution data-assimilation (4D-
+SRDA). The physics-based model, typically an atmosphere or ocean model, uses grid-point data
+as its input and output.
+this separation may not fully optimize SR inference for DA. In contrast, 4D-SRDA may
+achieve more accurate inference because it adopts end-to-end learning that simultane-
+ously optimizes the SR and DA processes; however, the feasibility of such learning is un-
+clear. This study presents an offline supervised learning method employing a new tech-
+nique, SR-mixup, which mitigates the influence of domain shift (Section 3). Unsuper-
+vised or online learning is another important topic for future research.
+2.2 Algorithm of 4D-SRDA Inference
+The details of the 4D-SRDA inference are given for one assimilation cycle shown
+in Figure 2a, where the assimilation window has the same length as the forecast period.
+This configuration is used for the numerical experiments in Sections 4 and 5. More gen-
+eral cases are briefly discussed later in this section.
+We first describe the input to the NN. A time series of LR states is obtained by
+numerically integrating the LR fluid model:
+{XLR(t0+i∆tLR)}i=−1,0,1={XLR(t0−∆tLR),XLR(t0),XLR(t0+ ∆tLR)},(1)
+where the current time is denoted by t0and ∆ tLRis the LR time step for the output.
+The initial condition XLR(t0−∆tLR) is given by the previous analysis state; XLR(t0)
+andXLR(t0+∆tLR) are the current and future states estimated by the LR fluid model,
+respectively. Each snapshot XLRis defined on the LR spatial grid points and is gener-
+ally composed of various three-dimensional field quantities, such as velocity and temper-
+ature. Observations are assumed to be given as:
+{OHR(t0+j∆tLR)}j=−1,0={OHR(t0−∆tLR),OHR(t0)}, (2)
+which does not include the future time t0+∆tLR. The observation OHRalso consists
+of several three-dimensional quantities and is defined on the HR spatial grid points, in-
+–6–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(b) Supervised training phase
+4D-SRDA inference LR fluid simulation 
+HR fluid
+simulation
+LR fluid
+simulation
+Observation
+4D-SRDA
+inferenceTime Resizing
+ResizingInference
+LR fluid
+simulation
+(a) Inference phase
+4D-SRDA inference LR fluid simulation
+LR fluid
+simulation
+Observation
+4D-SRDA
+inference
+LR fluid
+simulationInference4D-SRDA
+inference
+Resizing
+ResizingCurrent time
+Time
+Figure 2. Schematics for (a) inference and (b) supervised training. The low- and high-
+resolution (LR and HR) time steps are denoted by ∆ tLRand ∆ tHR, respectively, where
+∆tLR = 4∆ tHR. The assimilation interval is assumed to be ∆ tLR. In (a), the 4D-SRDA infer-
+ence and LR fluid simulation are alternated, whereas in (b), the 4D-SRDA inference is not used
+to conduct LR fluid simulations. Thus, (b) does not consider feedback from the neural network
+to the LR fluid model. The configuration illustrated here was employed in the numerical experi-
+ments in Sections 4 and 5.
+cluding missing data. The HR spatial resolution is assumed to be four times finer than
+the LR resolution.
+A trained NN, denoted by f, super-resolves the time series of the LR fluid-model
+states while incorporating the observations:
+{ˆYHR(t0+k∆tHR)}k=−4,...,4=f 
+{XLR(t0+i∆tLR)}i=−1,0,1,{OHR(t0+j∆tLR)}j=−1,0
+.
+(3)
+The time series of ˆYHRis composed of the same three-dimensional quantities as XLR,
+whereas ˆYHRis obtained on the HR spatio-temporal grid points. For instance, in Fig-
+ure 2a, the HR temporal resolution is four times finer, i.e., ∆ tHR= ∆tLR/4. A hat in-
+dicates that ˆYHRis a NN inference. The input of the future LR state XLR(t0+∆tLR)
+is expected to serve as auxiliary information for time evolution, helping the NN infer the
+HR states at future times. The output ˆYHR(t0) for the current time t0is mapped onto
+the LR spatial grid points using an algebraic method, such as linear interpolation. This
+mapped state is utilized as the initial condition for the LR fluid model in the next as-
+similation cycle, in which the current time t0is moved to t0+ ∆tLR(the assimilation
+interval is ∆ tLR). The outputs at the other time steps, such as ˆYHR(t0−∆tHR) and
+ˆYHR(t0+ ∆tHR), are not used in the next assimilation cycle.
+Various modifications of the above algorithm are possible. For instance, more LR
+time steps can be included in the inference, whereas three time steps are used in Equa-
+tion 3; the length of the assimilation window or forecast period can be varied, whereas
+both have the same length in Figure 2a; the scale factor of the spatial or temporal SR
+can be changed, whereas both factors are set to four above; and the past data can be
+eliminated from the input to the NN, leaving only the present and future input data, in
+contrast to Equation 3.
+–7–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+In this research, two assumptions are made for observation data: (i) mappability
+to any space-time point and (ii) statistical stationarity. Equation 2 is based on the first
+assumption; that is, the observations can be mapped to the HR spatial grid points and
+LR time points by spatio-temporal interpolation. In real-world applications, such inter-
+polation cannot be directly applied to integrated quantities. For instance, mapping cu-
+mulative precipitation to the time axis is not straightforward. Investigating the treat-
+ment of integrated quantities is beyond the scope of this study. Thus, we make the first
+assumption. NNs can be effective in solving such an inverse problem. In particular, the
+reconstruction techniques of three-dimensional point cloud data from two-dimensional
+images (e.g., Mandikal et al., 2018; Li et al., 2020) would be useful to assimilate inte-
+grated observations.
+The second assumption covers stationarity in terms of both temporal and spatial
+statistics, which indicates that observation errors, including measurement and represen-
+tativeness errors, are stationary. This assumption facilitates the representation learn-
+ing of observations with missing data (Section 5.2), but is not necessarily satisfied in real-
+world applications. It is worth noting here that the statistical stationarity does not im-
+ply temporal steadiness. Indeed, in Sections 4 and 5, the spatial density of observations
+is constant, while the observed grid points vary in time. This change in observed loca-
+tions is accounted for by the translation equivariance of the convolution operation (e.g.,
+Cohen et al., 2019); i.e., features can be extracted by convolution independently of ob-
+served locations. This implies that the local equivariance improves the generalizability
+for changes in observation data. For instance, there may be cases where the stationar-
+ity is broken globally but preserved locally, such as in the expansion of observation net-
+works. Various equivariant NNs have recently been studied (e.g., Cohen et al., 2019; Sos-
+novik et al., 2021), including graph NNs (Fuchs et al., 2020). Such an advanced archi-
+tecture will need to be incorporated into 4D-SRDA for practical applications where ob-
+servations are not stationary.
+2.3 A Case of Supervised Learning
+In this study, the NN involved in 4D-SRDA is trained using an offline supervised
+learning method. Offline means that training data are generated in advance from LR fluid
+simulations in which the NN inference is not considered; in other words, the feedback
+from the NN to the LR fluid model is not considered in the offline training. Supervised
+learning requires HR target data that can be interpreted as the true state of the atmo-
+sphere or ocean. In practice, such data can be obtained from HR reanalysis datasets. Thus,
+in the case of supervised learning, 4D-SRDA is a computationally efficient alternative
+for generating the HR reanalysis.
+Figure 2b describes the supervised learning that corresponds to the inference in Fig-
+ure 2a. Consider the target variables, namely the HR time series YHR(k∆tHR) (k= 0, . . . , N ),
+where each snapshot YHRis defined on the HR spatial grid points. Training datasets
+are created at a constant interval of ∆ tLR, which is equal to the assimilation interval in
+the inference phase (Figure 2a). Here, we explain the generation of a sample of the dataset
+for reference time t0. The initial condition for the LR fluid model is given by resizing
+–8–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+the HR snapshot YHR(t0−∆tLR) by an algebraic method, such as linear interpolation.
+This initial condition is interpreted as the analysis state from the previous assimilation
+cycle. The LR fluid model is then numerically integrated from t0−∆tLRtot0+∆tLR
+to obtain a time series of the LR states XLR, as in Equation 1. For observations, since
+the target variables are obtained from the HR reanalysis dataset, the same observations
+used to produce this reanalysis can be utilized in the training. By using spatio-temporal
+interpolation, the observations OHRare generated at t0−∆tLRandt0, as in Equation
+2. Consequently, the pair of the input and output is given by
+h
+{XLR(t0+i∆tLR)}i=−1,0,1,{OHR(t0+j∆tLR)}j=−1,0
+,{YHR(t0+k∆tHR)}k=−4,...,4i
+.
+(4)
+Training data generation is repeated by varying t0at a constant interval of ∆ tLR. When
+optimizing the NN, the inference is computed as in Equation 3, and the NN weights are
+updated based on the gradients of a given loss function.
+The generation of the initial condition for the LR fluid model is different between
+the inference and training phases (Figure 2). Specifically, in the inference phase, the ini-
+tial condition is obtained from the previous NN inference, while in the training phase,
+it is obtained from the HR target data. This difference results in a domain shift (e.g.,
+Moreno-Torres et al., 2012), namely a statistical difference in the input time series of LR
+statesXLR, which can be detrimental to 4D-SRDA performance. Indeed, a domain shift
+is inevitable in offline training because the training data are generated in advance inde-
+pendently of the NN inference. As a potential solution, we present a novel technique, SR-
+mixup.
+3 Super-Resolution Mixup (SR-mixup)
+SR-mixup is a data augmentation method for domain generalization. The algorithm
+can be applied to ordinary SR problems; thus, the following discussion is independent
+of 4D-SRDA. Before explaining SR-mixup, we will review the mixup method (Zhang et
+al., 2018; Yao et al., 2022).
+Mixup is a data augmentation method for supervised classification problems (Zhang
+et al., 2018). Consider a training dataset {(X(k), Y(k))}D
+k=1(D∈N), where X(k)is a
+numerical array, such as an image, and Y(k)is the corresponding class label based on
+one-hot encoding. A linear combination is considered for two randomly sampled pairs,
+(X(i), Y(i)) and ( X(j), Y(j)):
+˜X=λX(i)+ (1−λ)X(j), (5)
+˜Y=λY(i)+ (1−λ)Y(j), (6)
+where the interpolation ratio λ∈[0,1] is drawn from a beta distribution B(a, b) (a, b∈
+R+). Supervised learning is performed for the mixed sample ( ˜X,˜Y). Mixup is applied
+only during training, and not during the test phase. The random linear combination gen-
+erates synthetic samples with a different distribution from the original training data. This
+mixing is expected to enhance robustness to domain shifts.
+–9–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Several variants of mixup have been proposed (e.g., Verma et al., 2019; Mancini
+et al., 2020; Yao et al., 2022), most of which are intended for classification. Yao et al.
+(2022) proposed a mixup for regression, C-Mixup, to address the issue that the linear-
+ity imposed via mixup reduces the accuracy of regression models when data are highly
+nonlinear. In C-Mixup, the linear combination in Equations 5 and 6 is created for sim-
+ilar randomly sampled pairs, where the similarity is measured using a distance metric
+between the labels Y(i)andY(j).
+SR-mixup is based on C-Mixup. Super-resolution problems are treated as regres-
+sion when SR models are trained via supervised learning (e.g., Dong et al., 2014). In such
+cases, the input Xis an LR image and the output Yis the corresponding HR image. The
+linear combination of similar HR images results in blurred images. Because the purpose
+of SR is to improve the resolution and clarity of LR images, C-Mixup may not be suit-
+able for training SR models. We propose applying C-Mixup only to the input LR im-
+age. This method is called SR-mixup to emphasize the mixup for SR. Similarity is de-
+termined from the input Xinstead of Y. SR-mixup is applicable to both supervised and
+unsupervised learning because the pairing between XandYis not required.
+The SR-mixup algorithm consists of four steps and is employed only during train-
+ing. Here, we explain the algorithm in a supervised setting, which is similar for unsu-
+pervised applications. First, a pair ( X(i), Y(i)) is drawn from the training dataset. Sec-
+ond, nother pairs are randomly sampled, and pair ( X(j), Y(j)) is further extracted such
+that the Euclidean distance between X(i)andX(j)is the minimum. We adopted Eu-
+clidean distance as the dissimilarity measure, although other metrics can be used. Third,
+an interpolation ratio λis drawn from the beta distribution B(a, b). Fourth, a linear com-
+bination of inputs is created, ˜X(i)=λX(i)+ (1−λ)X(j), resulting in the augmented
+pair ( ˜X(i), Y(i)). The above four steps are repeated to generate a batch of data for op-
+timizing the NN. The pairing of XandYis not essential, because the augmented input
+˜X(i)is produced independently from the labels Y(i)andY(j). The parameters were set
+ton= 20 for the random sampling in the second step and a=b= 2 for the beta dis-
+tribution B(a, b) in the third step. Note that these parameters are context specific. In
+the present setting, X(i)andX(j)are regarded as statistically symmetric based on the
+symmetry of the beta distribution B(a, b)|a=b=2. This symmetry is discussed in Section
+4.3.
+4 Methods
+Numerical experiments were performed to confirm the effectiveness of 4D-SRDA
+and SR-mixup. Specifically, we simulated idealized barotropic ocean jets and then con-
+ducted supervised learning. Hereafter, 4D-SRDA is referred to as ST-SRDA (spatio-temporal
+SRDA) because the barotropic jet was modeled as a two-dimensional flow and the sum
+of the spatial and temporal dimensions is not four.
+–10–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+4.1 Fluid Simulation
+An idealized barotropic ocean jet was simulated in a two-dimensional periodic chan-
+nel (David et al., 2017). The equatorial beta plane ( x, y) was utilized, where x∈[0,2π]
+andy∈[0, π] are the zonal and meridional coordinates, respectively. The governing equa-
+tions are as follows:
+∂ω
+∂t+u∂ω
+∂x+v∂ω
+∂y+βv=−rω−ν∆2ω−dτ(y)
+dy, (7)
+∆ψ=ω, (8)
+(u, v) =
+−∂ψ
+∂y,∂ψ
+∂x
+. (9)
+Equation 7 describes the evolution of vorticity ωwith respect to time t, where the left-
+hand side represents the advection of ωand the beta effect, and the right-hand side con-
+sists of linear drag, hyperviscosity, and forcing due to zonal wind stress τ(y). Equations
+8 and 9 give the stream function ψand velocity ( u, v), respectively. Wind stress τ(y) is
+given by
+τ(y) =τ0
+sech2y−y0
+δ
+−c
+, (10)
+where cis determined such that the integral of τ(y) is zero. The parameters in the gov-
+erning equations were set as follows: β= 0.1,r= 1×10−2,ν= 1×10−5,τ0= 0.3,
+y0=π/2, and δ= 0.4. According to David et al. (2017), this configuration is within
+the parameter regime of mixing barriers with strong eddies, where coherent vortices re-
+main in a statistically steady state (Section 5.1). The presence of these vortices simpli-
+fies the evaluation because the phase of vorticity, namely the large-scale flow structure,
+is related to errors in inference.
+The initial condition was a superposition of a zonal jet and random perturbations.
+The zonal jet U(y) is given by
+U(y) =U0
+sech2y−y0
+δ
+−c
+, (11)
+where U0= 3.0. This initial jet satisfies the Rayleigh-Kuo inflection-point criterion, i.e.,
+β−d2U(y)
+dy2being 0 somewhere in the domain, which is a necessary condition for barotropic
+instability. The perturbations were added to the vorticity field for each wavenumber, where
+the phase and amplitude were sampled from Gaussian distributions with means of 0 and
+standard deviations of πfor the phase and 2 .5×10−3for the amplitude. The simula-
+tion data for deep learning were generated by varying the random perturbations.
+Numerical integration was performed using the modified Euler and pseudo-spectral
+methods. Three different resolutions were adopted: LR, HR, and ultra-HR (UHR). All
+configurations are summarized in Table 1. The integration time was from t= 0 to 24
+for all experiments.
+–11–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Table 1. Fluid simulation configurations for three different resolutions.
+Name Grid size
+(x×y)Cutoff wavenumberIntegration
+time stepOutput
+time step
+LR (low resolution) 32 ×16 10 5 ×10−41.00 (= ∆ tLR)
+HR (high resolution) 128 ×64 421
+4×5×10−40.25 (= ∆ tHR)
+UHR (ultra-high resolution) 1024 ×512 3411
+32×5×10−40.25 (= ∆ tHR)
+4.2 Neural Network in the ST-SRDA System
+The calculation process in the NN is simplified for potential application to three-
+dimensional flows. In particular, the temporal SR is separated from the spatial SR; that
+is, the temporal SR is performed in the nonlinear mapper, while the spatial SR is con-
+ducted in the decoder. In addition, the encoder and decoder act independently on the
+state at each time.
+Figure 3 outlines the network architecture, which is based on U-Net (Ronneberger
+et al., 2015). U-Net architectures have been employed in the SR for fluid systems (e.g.,
+Jiang et al., 2020; L. Wang et al., 2021; Hammoud et al., 2022). The input and output
+of the NN are vorticity fields. Compared with Figure 1, this NN does not include a trans-
+formation from point-cloud to grid-point data because the observations are defined on
+the HR spatial grid points (Equations 2 and 3). Hyperparameters, such as the number
+of hidden layers, were tuned via a grid search. These parameters are presented in Ap-
+pendix A. Details on the implementation of the NN are available at the Zenodo repos-
+itory (see Open Research).
+The encoder consists of four downsampling blocks. Each block begins with a con-
+volution operation with a 2 ×2 stride and halves the spatial size of the input array in
+thexandydimensions. The LR model states are spatially resized using nearest neigh-
+bor interpolation to match the HR (“Resize (x,y)” in Figure 3) and then encoded while
+being combined with the observations. Additionally, the observations are independently
+encoded.
+The nonlinear mapper contains five transformer-encoding blocks (Vaswani et al.,
+2017). The time interval of the input features is refined via linear interpolation to match
+the HR time steps (“Resize (t)” in Figure 3). This interpolation, followed by the non-
+linear mapping, performs the temporal SR. The output from each transformer block is
+passed to the next, and the encoded observations are input to all blocks. Each block first
+computes weights for the input features across every time step pair and then outputs the
+weighted sums of the features. This processing, known as the scaled dot-product atten-
+tion, incorporates temporal correlations into the nonlinear mapping (Vaswani et al., 2017;
+Niu et al., 2021). Finally, the encoded LR model states are added to the output via a
+skip connection.
+The decoder comprises four upsampling blocks. Each block utilizes pixel shuffle (Shi
+et al., 2016) to double the spatial size of the input array in the xandydimensions. Us-
+–12–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Conv2D-2
+Conv2D-3ReLU
+ReLU
+Downsampling
+BlockUpsampling
+BlockConv2D-4
+LeakyReLU
+Shuffle
+Conv2D-5
+LeakyReLUInference ω
+(HR)Upsample-2Upsample-1
+Upsample-4Upsample-3Transformer
+TransformerTransformerTransformer
+TransformerObservation ω
+(HR, missing)
+Conv2D-1
+Resize (t)Downsample-1
+Downsample-2
+Downsample-3
+Downsample-4Model state ω
+(LR)
+Resize (x,y) 
+Conv2D-1
+Resize (t)Downsample-1
+Downsample-2
+Downsample-3
+Downsample-4
+Conv2D-6
+LeakyReLU
+Conv2D-7ConcatResize (x, y , t)Encoder Non-linear mapper Decoder
+Block 1Block 2Block 3
+Figure 3. Neural network architecture of the spatio-temporal SRDA (ST-SRDA) system. The
+symbol ωdenotes vorticity fields. The blocks “Downsample” and “Upsample” are described in
+the bottom right corner. In the upsampling block, the label “Shuffle” refers to the pixel shuffle
+layer (Shi et al., 2016). If two or three arrows point to a block, all inputs are concatenated and
+then fed to the first layer in the block. Details about the implementation are available at the
+Zenodo repository (see Open Research). Outputs from Block 1 through 3 are shown in Figure 8.
+ing these four blocks, the spatial size of the output is restored to the HR grid size. The
+obtained output is concatenated with the features extracted by the first convolution in
+the NN, which are resized using linear interpolation along the space and time axes (“Re-
+size (x,y,t)” in Figure 3). The final inference is given through the last three convolution
+and nonlinear layers.
+In preprocessing, the vorticity at each grid point is transformed by the following
+formula:
+clip[0,1]ω−m
+s
+. (12)
+The clipping function, defined as clip[0,1](z) = min {1,max{0, z}}(z∈R), limits the
+value range to [0 ,1]. This function acts independently on each element of the input ar-
+ray. Parameters mandswere determined such that 99.999% of the vorticity values were
+within the range of [0 ,1]. As a result of this preprocessing, 0 was considered a missing
+value and was substituted onto the HR grid points without observations.
+4.3 Training and Testing Methods for the Neural Network
+The training and testing methods for the NN are based on Sections 2.3 and 2.2,
+respectively. The relationship for the data along the time axis is the same as in Figure
+2, where ∆ tLR= 1.00 and ∆ tHR= 0.25. The assimilation interval is ∆ tLR, which is
+approximately half of the advection time scale 2 π/U 0.
+–13–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+The training was performed using the HR simulation data, whereas in the test phase,
+ST-SRDA performance was evaluated with the UHR simulation results. The ST-SRDA
+is a surrogate scheme for generating HR reanalysis in the case of supervised learning (Sec-
+tion 2.3). In the training phase, the HR simulation data are considered to be derived from
+a reanalysis, while in the test phase, the UHR data are interpreted as the true state of
+the barotropic ocean jet system. The spatio-temporal resolution of the ST-SRDA out-
+put is always HR (Table 1); in the test, performance was measured by mapping the HR
+inference to UHR via bicubic interpolation. For comparison, EnKFs were applied to the
+LR and HR fluid models. The latter, EnKF at the HR, is interpreted as a model that
+generates the HR training data and is expected to provide a lower error bound for the
+ST-SRDA (The EnKFs are described in Section 4.4).
+The scale factor for the SR is 4 in both the spatial and temporal dimensions (i.e.,
+x,y, and t). The target variable is a part of the HR vorticity time series, comprising nine
+data points with a time step of ∆ tHR(= 0.25) (Figure 2b). The first four points are in-
+terpreted as the past, the middle point the present, and the last four points the future.
+The corresponding inputs to the NN are the time series of the observations and LR fluid-
+model states. The observations consist of two points in time, whereas the LR states con-
+sist of three points (Figure 2b). The time interval of both input time series is ∆ tLR(=
+1.0). This configuration means that the NN performs the temporal SR with a factor of
+4. Since the LR spatial grids (32 ×16) are four times coarser than the HR grids (128 ×
+64), the spatial SR also has a factor of 4. The scale factor of 4 is sufficiently high for real
+applications (Onishi et al., 2019; J. Wang et al., 2021).
+Synthetic observations were generated from the HR and UHR simulations in the
+training and test phases, respectively. For HR, observed grid points were randomly sub-
+sampled with a constant spatial spacing. Specifically, the spatial density of observations
+was constant, while observed grid points varied in time. For instance, when the vortic-
+ity is observed at every 8 ×8 grids, the spatial density is approximately 1.56%. This ra-
+tio is referred to as the observation point ratio, which is defined as
+the total number of observed grid points
+the total number of HR grid points (= 128 ×64). (13)
+The sensitivity to this ratio was assessed across experiments by varying it from 0.5% to
+6.5%. At the unobserved grid points, Not a Numbers (NaNs) were substituted and re-
+placed in subsequent preprocessing with missing values, i.e., zeros (Section 4.2). Spatially
+independent Gaussian noise was added to the subsampled vorticity, with a mean of 0 and
+a standard deviation of 0 .1, which is approximately 5% of the spatio-temporal average
+of the absolute values of vorticity. For UHR, the average pooling of an 8 ×8 kernel was
+applied to the vorticity field to match the spatial size to that of the HR, and the above
+processing was applied.
+The training and validation data were generated from the HR fluid simulations (Fig-
+ure 2b). All simulations were terminated at t= 24, when the barotropic jet becomes
+a statistically steady state consisting of westward-propagating large-scale eddies (David
+et al., 2017). To increase dataset size, the initial random perturbations were varied ran-
+–14–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+domly (Section 4.1), and 3,500 and 1,000 simulations were run for the training and val-
+idation dataset, respectively. Each HR simulation contained 23 LR-simulation cycles be-
+cause of ∆ tLR= 1 (i.e., t0= 1, . . . , 23). In each cycle, the initial condition for the LR
+fluid model was given by applying a low-pass filter to the HR vorticity in the wavenum-
+ber domain. The total size of the training and validation dataset was 80,500 (= 3 ,500×
+23) and 23,000 (= 1 ,000×23), respectively.
+The NN was trained by employing SR-mixup and Adam optimization (Kingma &
+Ba, 2015). For the loss function, we used the mean absolute error (MAE) of vorticity.
+The weights of the NN that resulted in the smallest validation MAE were stored after
+1,000 epochs with a mini-batch size of 32. SR-mixup was applied only to the LR model
+states. SR-mixup is not necessary for the observation data, because they are indepen-
+dent of the NN inference and not subject to domain shifts. If SR-mixup were applied to
+data with missing values, such as observations, the linear interpolation would need to
+be replaced with a nearest neighbor interpolation using a threshold against λ.
+In each iteration, SR-mixup generates a synthetic time series as in Equation 5:
+˜ωLR,(i)(t) = λωLR,(i)(t) + (1 −λ)ωLR,(j)(t),
+=ωLR,(i)(t) + (1 −λ)(ωLR,(j)(t)−ωLR,(i)(t)), (14)
+(t∈ {t0−∆tLR, t0, t0+ ∆tLR}),
+where iandjdenote the data indices, and λis independent of tand sampled from the
+beta distribution B(a, b)|a=b=2. Equation 14 is interpreted as the original time series ωLR,(i)(t)
+being perturbed by a time series ωLR,(j)(t) that is similar to ωLR,(i)(t) in terms of Eu-
+clidean distance (Section 3). In training, ˜ ωLR,(i)(t) was used as input instead of ωLR,(i)(t).
+The beta distribution B(a, b) was set to be symmetric (i.e., a=b= 2) to increase the
+perturbation amplitude. The grid-wise relative error between two similar LR time se-
+ries was found to be quite small ( ≲10%) due to the sufficiently large dataset size. As
+the dataset size decreases, the difference between ωLR,(i)andωLR,(j)tends to increase,
+suggesting that λneeds to be biased toward 1, i.e., an asymmetric beta distribution is
+required to suppress the perturbation amplitude. Note that SR-mixup partially breaks
+the dynamical consistency in the LR time series; for instance, nonlinear conserved quan-
+tities, such as energy, are not constant in time. On the other hand, the linearity of SR-
+mixup indicates that linear constraints, such as Equations 8 and 9, are preserved because
+all physical quantities are linearly superposed by using the same weight of λ. Mixup, in-
+cluding SR-mixup, is a simple method for domain generalization (Zhang et al., 2018; Yao
+et al., 2022). Advanced methods, such as generative adversarial networks (GANs) (e.g.,
+J. Wang et al., 2022; Zhou et al., 2022) may improve dynamical consistency.
+The test method is the same as the inference method in Figure 2a, which repeats
+the feedback cycle between the NN and fluid model. In the first cycle, the initial con-
+dition for the LR fluid model was given by a superposition of random perturbations and
+the zonal jet (Equation 11) because of no NN inference, while in later cycles, the initial
+condition was obtained by applying the low-pass filter to the NN inference. Since the
+initial perturbations in the first cycle were random, the vorticity evolution would be largely
+–15–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+different even using the HR fluid model. Here, 50 UHR simulations were performed to
+generate the ground-truth data. The following results were not sensitive to the number
+of UHR simulations (similar results were found even for 5 UHR simulations).
+ST-SRDA performance was evaluated using two metrics, namely pixel-wise accu-
+racy and pattern consistency, for the time series that consists of the analysis and fore-
+cast values. The ST-SRDA output includes the past, present, and future (Figure 2a).
+All vorticity time series evaluated in Section 5 were created as follows: in each assim-
+ilation cycle, the inferences between t0andt0+3∆tHR(i.e., four time points) were ex-
+tracted; after all cycles, all extracted values were combined into one time series.
+The MAE ratio measures pixel-wise errors as follows:
+MAE ratio at t=1
+NNX
+i=1P
+UHR space |ω(i)(t)−ˆω(i)(t)|P
+UHR space|ω(i)(t)|, (15)
+where Nis the number of test simulations ( N= 50), ω(i)(t) is the ground-truth UHR
+vorticity in the i-th simulation, and ˆ ω(i)(t) is the corresponding HR inference of ST-SRDA.
+The spatial size was matched by resizing the HR inference to the UHR grid space via
+bicubic interpolation.
+The consistency of the spatial patterns was estimated using the mean structural
+similarity index measure (MSSIM) (Z. Wang et al., 2004):
+MSSIM loss at t= 1−MSSIM( t)
+= 1−1
+NX
+iX
+UHR space 
+2µ(i)(t)ˆµ(i)(t) + C 12 
+2γ(i)(t) + C 22
+ 
+µ(i)(t)2+ ˆµ(i)(t)2+ C 12 
+σ(i)(t)2+ ˆσ(i)(t)2+ C 22,(16)
+where C 1= 0.01, C 2= 0.03,µ(i)(t) and σ(i)(t)2are the mean and variance of the ground
+truth, respectively; ˆ µ(i)(t) and ˆ σ(i)(t)2are the corresponding quantities of the ST-SRDA
+inference; and γ(i)(t) is the covariance between the ground truth and inference. The vari-
+ables in the summation are calculated locally by applying a Gaussian filter; for instance,
+when computing the second moment, the Gaussian filter is applied to each vorticity field
+after squaring the vorticity value at each grid point. We confirmed that MSSIM losses
+are not sensitive to the window function. Indeed, similar results were found when a rect-
+angular window was employed instead of the Gaussian. The MSSIM loss takes a value
+greater than or equal to 0, and smaller values indicate that the spatial patterns of in-
+ference are more similar to those of the ground truth. A detailed discussion of MSSIM
+can be found in Z. Wang et al. (2004).
+The MAE ratio and MSSIM loss were calculated for each time t, as shown in Equa-
+tions 15 and 16. The time-averaged values are referenced using the same names.
+The evaluation in the test phase was conducted using an NVIDIA RTX A6000 GPU
+on a local workstation. The NN training was performed using four NVIDIA Tesla P100
+GPUs on the TSUBAME3.0 supercomputer at the Tokyo Institute of Technology.
+–16–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+4.4 Ensemble Kalman Filter (EnKF)
+An EnKF (Evensen, 1994) with the perturbed observation method (Burgers et al.,
+1998) was applied to the HR or LR fluid model. The former, referred to as EnKF-HR,
+is considered to provide a lower bound on the errors for the ST-SRDA because the un-
+derlying HR fluid model is the same as that used to generate the training data. The EnKF
+applied to the LR fluid model is referred to as EnKF-SR, which is a baseline model for
+the ST-SRDA. In EnKF-SR, the assimilation is performed in the HR space after the LR
+fluid-model state is super-resolved to the HR by bicubic interpolation. Barth´ el´ emy et
+al. (2022) reported that performing the EnKF in the HR space may provide more ac-
+curate inferences than those in the LR space when observations are defined on the HR
+grid points. When the EnKF is applied in the LR space, several observations may need
+to be combined into a single point because of the coarser spatial resolution. The EnKF
+in the HR space does not require such aggregation, suggesting that the observation data
+are fully utilized. For both EnKF-HR and EnKF-SR, the initial condition for the fluid
+model was given by a superposition of random perturbations and the zonal jet (Equa-
+tion 11) as in testing with the ST-SRDA, and the assimilation was performed at the con-
+stant interval ∆ tLR, i.e., the same interval of the ST-SRDA inference (Figure 2a). For
+simplicity, the observation errors, including representativeness errors, are assumed to obey
+the same statistics as described in Section 4.3 for all models (i.e., ST-SRDA, EnKF-SR,
+and EnKF-HR) because the assimilation is performed through the HR space in all mod-
+els.
+The background error covariance matrices were spatially localized using a function
+of Gaspari and Cohn (1999). These error covariances were inflated by adding Gaussian
+noise to the analysis state prior to the numerical integration of the fluid model (Whitaker
+et al., 2008). This Gaussian noise had a mean of 0 and incorporated spatial correlation
+by estimating its covariance based on the training data at each time step. The initial per-
+turbations to create ensemble members were also sampled from this Gaussian distribu-
+tion at t= 0. The results were not sensitive to the Gaussian-noise covariance; similar
+results were obtained when the Gaussian noise had a constant correlation length. We
+also confirmed that this additive inflation provided more accurate inferences than the
+multiplicative covariance inflation (Anderson & Anderson, 1999)
+Hyperparameters for the EnKF-HR and EnKF-SR were determined for each ob-
+servation point ratio such that the MAE was minimized using the training data. Specif-
+ically, the number of ensemble members was fixed at 100, and the following hyperparam-
+eters were tuned: the amplitude for the initial perturbation to create the ensemble; ad-
+ditive inflation amplitude; localization radius; and amplitude for perturbing observations.
+5 Results and Discussion
+5.1 Accuracy of ST-SRDA Inferences
+By comparing the EnKF-SR, EnKF-HR, and ST-SRDA, we will demonstrate that
+the ST-SRDA successfully achieves simultaneous DA and spatio-temporal SR. The test
+–17–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Figure 4. An example of vorticity evolution from the ground-truth data at ultra-high resolu-
+tion (UHR).
+method repeats the feedback cycle between the fluid simulation and NN inference (Fig-
+ure 2a) and is equivalent to the 4D-SRDA calculation process (Figure 1).
+Before making this comparison, we discuss a typical vorticity evolution from the
+ground-truth UHR data (Figure 4). In the initial stage (0 ≤t≲10), the unstable jet
+meanders and collapses into multiple vortices, while developing fine filaments. The vor-
+tices then merge into a flow with wavenumber 1 (10 ≲t≲16), where the small-scale
+structure is again enhanced ( t∼13). Finally, the wavenumber-1 vorticity continues to
+propagate westward, i.e., in the negative xdirection (16 ≲t). This final state of the
+coherent vortices is characteristic of the regime of mixing barriers with strong eddies and
+can be understood through Rossby-wave dynamics (David et al., 2017). All fluid sim-
+ulations were terminated at t= 24 (Section 4.3) because no fine-scale pattern devel-
+oped in this statistically steady state.
+The ST-SRDA successfully inferred both the small- and large-scale structures in
+the vorticity fields. Figure 5 compares the ground truth with the EnKF-SR, EnKF-HR,
+and ST-SRDA inferences. At t= 7, the wavenumber-2 structure developed and was
+associated with the collapse of the jet stream (Figure 4). The ST-SRDA and EnKF-HR
+emulated this collapse with high accuracy; in particular, both reproduced the small-scale
+structures within the positive and negative vortices. Although the EnKF-SR inferred the
+vortex locations, it failed to reproduce the fine-scale patterns inside the vortices. At t=
+13, the results were similar to those at t= 7: the vortex merging was successfully em-
+ulated by the ST-SRDA and EnKF-HR, but not by the EnKF-SR. At t= 23, the large-
+scale coherent vortices propagated westward, and all models successfully inferred the phase
+of vorticity, i.e., the large-scale pattern. Overall, the ST-SRDA inferred vorticity fields
+that were similar to those of the EnKF-HR.
+The quantitative analysis indicated that the ST-SRDA inference tended to be more
+accurate than the EnKF-SR inference at all time points. Figure 6 shows the time series
+of the MAE ratio and MSSIM loss averaged over all of the test simulations. All scores
+were calculated in the UHR space, with LR and HR vorticity fields mapped to the UHR
+space via bicubic interpolation. The results were not sensitive to this mapping because
+a similar time series set was obtained when all of the scores were calculated in the LR
+–18–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+/gid00008/gid00045/gid00042/gid00048/gid00041/gid00031/gid00001/gid00047/gid00045/gid00048/gid00047/gid00035 /gid00006/gid00041/gid00012/gid00007/gid00496/gid00020/gid00019 /gid00006/gid00041/gid00012/gid00007/gid00496/gid00009/gid00019 /gid00020/gid00021/gid00496/gid00020/gid00019/gid00005/gid00002/gid00047/gid00001/gid00715/gid00001/gid00428 /gid00047/gid00001/gid00715/gid00001/gid00422/gid00424 /gid00047/gid00001/gid00715/gid00001/gid00423/gid00424
+Figure 5. Vorticity snapshots from the ground-truth data and EnKF-SR, EnKF-HR, and ST-
+SRDA inferences. The black dots in the ground truth represent the observed grid points. Their
+ratio (1 .56%) was calculated according to Equation 13. The mean absolute error (MAE) ratio is
+defined by Equation 15.
+or HR space. All time series in Figure 6 are based on the analysis and forecast values
+of the vorticity. Since the assimilation intervals (∆ tLR= 1.00) were the same for all
+models, the MAE ratio and MSSIM loss were reduced at the same time points. The time
+series of the ST-SRDA (orange solid lines) are missing for 0 ≤t <1 because no fore-
+cast was inferred during this initial period (Section 4.3). On average, the MAE ratio and
+MSSIM loss of the ST-SRDA were smaller than those of the EnKF-SR (green dashed
+lines), but larger than those of the EnKF-HR (blue dotted lines). This verifies that the
+EnKF-HR provides a lower bound on the errors for the ST-SRDA. The time series of the
+EnKF-SR have two peaks around t= 7 and 13 (vertical lines). These peaks reflect the
+development of fine-scale patterns due to jet stream collapse ( t∼7) and vortex merg-
+ing (t∼13) (Figures 4 and 5). These two peaks are observed for the MSSIM loss of
+the ST-SRDA and EnKF-HR (Figure 6b), but are not clear for their MAE ratios (Fig-
+ure 6a). This result is likely due to the fact that the MAE ratio is a pixel-wise error and
+not sensitive to differences in flow patterns (e.g., Z. Wang et al., 2004). After the vor-
+tex merging (13 ≲t), the MAE ratio and MSSIM loss decreased, while the flow field
+approached the statistically steady large-scale state. This result is plausible as it is rel-
+atively easy to infer large-scale flow patterns.
+The accuracy of the ST-SRDA was comparable to that of the EnKF-HR with sparse
+observations. Figure 7 shows the dependence of the MAE ratio and MSSIM loss on the
+observation point ratio. The error bars represent the standard deviations based on all
+50 test simulations. Both errors of the ST-SRDA (orange solid lines) are smaller than
+those of the EnKF-SR (green dashed lines), but larger than those of the EnKF-HR (blue
+dotted lines), as in Figure 6. For all the models, the means and standard deviations of
+the test scores tended to increase as observations became sparser. In particular, the er-
+ror bars of the EnKF-HR were so large that they overlapped with those of the ST-SRDA
+–19–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Figure 6. Time series of the test scores: (a) mean absolute error (MAE) ratio and (b) mean
+structural similarity index measure (MSSIM) loss. The MAE ratio and MSSIM loss are defined
+by Equation 15 and 16, respectively. The observation point ratio was set to 1 .56%, as in Figure
+5. The vertical lines represent t= 7, 13, and 23. The inferences at these times are shown in
+Figure 5. The assimilation interval is ∆ tLR= 1.00 for all the models.
+Figure 7. Dependence of the test scores on the observation point ratio: (a) mean absolute
+error (MAE) ratio and (b) mean structural similarity index measure (MSSIM) loss. The MAE
+ratio and MSSIM loss are defined by Equation 15 and 16, respectively. The test scores were aver-
+aged over 4 ≤t≤20. The observation point ratio was calculated according to Equation 13. The
+error bars show the standard deviations from all 50 test simulations. The vertical lines denotes
+an observation ratio of 1.56%, which is the same as in Figures 5 and 6.
+at an observation point ratio of 0.69%. This implies that the accuracy of the ST-SRDA
+is relatively robust and becomes comparable to that of the EnKF-HR when observations
+are sparse.
+The computation time of ST-SRDA was much shorter than that of EnKF-SR and
+EnKF-HR. Table 2 compares the average wall times of all the models. For reference, the
+table also lists the wall times of the underlying HR and LR fluid models. The wall time
+of the ST-SRDA was approximately 22% and 1.3% of that of the EnKF-SR and the EnKF-
+HR, respectively, which highlights the computational efficiency of ST-SRDA.
+5.2 Features for Observations Including Missing Values
+In general, NNs can learn data representations suitable for specific problems (e.g.,
+Bengio et al., 2013; Zeiler & Fergus, 2014). Here, it is interesting to examine the rep-
+resentations for the observation data because of missing values. We show that the spa-
+tial range with the influence of observed grid points can increase in deeper layers.
+–20–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Table 2. Average wall times of all the models for the vorticity evolution over 0 ≤t≤24. The
+EnKF-SR and ST-SRDA employ the low-resolution (LR) fluid model to calculate the time evolu-
+tion, while the EnKF-HR employs the high-resolution (HR) fluid model. The number of ensemble
+members for the EnKF-SR and EnKF-HR was set to 100. All the calculations, including the NN
+inference, were performed using a single process of an Intel Xeon Gold 6242R CPU.
+Model name Wall time [s]
+HR fluid model 696.3
+LR fluid model 28.9
+EnKF-HR 4415.6
+EnKF-SR 262.5
+ST-SRDA 57.2
+/gid00422/gid00423/gid00429/gid00427/gid00425
+ /gid00422/gid00427
+/gid00424/gid00423/gid00424/gid00423
+/gid00427/gid00425/gid00427/gid00425
+/gid00422/gid00423/gid00429
+Figure 8. Features extracted from the observation data. The far-left panel shows a ground-
+truth snapshot, where the black dots represent the observed grid points. Since the average pool-
+ing is applied to the UHR data to generate the synthetic observations, the panel shows the
+ground-truth snapshot blurred by average pooling. In the observation data, the unobserved
+points were filled with the missing values, i.e., zeros (Section 4.3). The other panels show the
+features extracted from the observations. These features are outputs from Block 1 through 3 in
+Figure 3. The feature magnitudes are normalized to 1. Each number along the vertical or lateral
+axis denotes the data size.
+Figure 8 shows features extracted from the observation data that appear to be ex-
+plainable. These features are outputs from Block 1 through 3 in Figure 3 and have smaller
+spatial sizes in the deeper layers due to the U-Net architecture. In these feature fields,
+small background values may reflect missing values, while the larger values are interpreted
+as representations of each observed point. The wavenumber-2 structure in the ground
+truth becomes more obvious in deeper-level features (Figure 8). This implies that the
+observed grid points may have a larger spatial influence in deeper layers.
+In the fourth panel, “Feature (Block 3)” is quite low near the center, which seems
+to coincide with the negative vortex in the first panel (ground truth). Moreover, this fea-
+ture exhibits similar low values near unobserved points. These findings suggest that the
+NN has difficulty distinguishing between the missing values and minimum normalized
+vorticity, as both are represented by zeros (Section 4.2). The differentiation can be achieved
+by introducing binary masks, which are frequently employed in image inpainting (e.g.,
+G. Liu et al., 2018; Yu et al., 2019). These masks assign 0 to unobserved grid points and
+1 to observed points. Even if the missing and minimum observed values are the same,
+the binary mask enables the NN to distinguish between them. The image inpainting tech-
+niques may be beneficial for future studies.
+–21–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+5.3 Robustness of ST-SRDA Inferences
+Here, we demonstrate that the domain shift can reduce the accuracy of ST-SRDA
+and SR-mixup mitigates this degradation. The domain shift occurs due to the difference
+in the calculation process between the test and training phases. In the test phase, the
+NN inference and LR fluid simulation are performed alternately, where the LR fluid model
+is initialized by the NN inference (Section 2.2 and Figure 2a). In contrast, during the
+training, the LR fluid model is initialized using the HR simulation results, and feedback
+from the NN to the fluid model is not incorporated (Section 2.3 and Figure 2b). We fo-
+cused only on this difference in the calculation process by using the HR instead of the
+UHR ground truth. According to the training and test methods in Section 4.3, the ob-
+servations were generated from the HR simulations during training, whereas they were
+generated from the UHR results during testing. Thus, both the calculation process and
+method of generating observations differ from those in the training phase. This exper-
+imental setup is suitable for evaluating the ST-SRDA accuracy (Section 5.1), but not
+for investigating the influence of domain shift. To eliminate the difference in the obser-
+vations, they are generated here from the HR ground truth. The evaluation metrics (Equa-
+tions 15 and 16) are then computed in the HR space. We first examined that the dif-
+ference in the calculation process leads to a domain shift, namely a statistical difference
+in the input of LR fluid-model states.
+Figure 9 shows an example of the vorticity difference between the HR simulation
+and ST-SRDA inference. In the training phase, the LR fluid model was initialized by the
+low-pass filtered HR simulation results, while in the testing phase, it was initialized by
+the filtered ST-SRDA inferences. The difference in the initial condition tended to be larger
+for the small-scale patterns associated with jet collapse ( t= 5) and vortex merging ( t=
+14), whereas the difference was smaller in the final state with large-scale vortices ( t=
+22). We also confirmed that the probability density functions of vorticity values varied
+significantly in terms of the Kolmogorov-Smirnov test, where the p-value was less than
+0.006. These results indicate that the difference in the initial condition was significant,
+implying that the obtained LR time series was also statistically different between the train-
+ing and test phases, i.e., a domain shift occurred.
+We next investigated the influence of the domain shift. For comparison, the NN
+was trained without SR-mixup. Note that all results presented in Sections 5.1 and 5.2
+employed SR-mixup. The NNs with and without SR-mixup were compared using the two
+evaluation methods illustrated in Figure 2. The first method (Figure 2a) is the same as
+the test method in Section 5.1, where the domain shift occurred. In contrast, in the sec-
+ond method (Figure 2b), the domain shift does not occur because it is the same as the
+method used to generate the training data. In this method, there is no feedback from
+the NN inference to the LR simulation.
+The domain shift potentially reduces ST-SRDA performance, but SR-mixup can
+mitigate this effect. Figure 10 shows vorticity snapshots obtained using the two evalu-
+ation methods. Without SR-mixup, the vorticity was accurately inferred (MAE ratio =
+0.15) when no domain shift occurred (Figure 10b). However, when the feedback was in-
+–22–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+/gid00009/gid00019/gid00001/gid00046/gid00036/gid00040/gid00048/gid00039/gid00028/gid00047/gid00036/gid00042/gid00041 /gid00009/gid00019/gid00001/gid00046/gid00036/gid00040/gid00048/gid00039/gid00028/gid00047/gid00036/gid00042/gid00041
+/gid00506/gid00039/gid00042/gid00050/gid00496/gid00043/gid00028/gid00046/gid00046/gid00001/gid00414/gid00039/gid00047/gid00032/gid00045/gid00032/gid00031/gid00507/gid00020/gid00021/gid00496/gid00020/gid00019/gid00005/gid00002
+/gid00506/gid00039/gid00042/gid00050/gid00496/gid00043/gid00028/gid00046/gid00046/gid00001/gid00414/gid00039/gid00047/gid00032/gid00045/gid00032/gid00031/gid00507/gid00009/gid00019/gid00001/gid00040/gid00036/gid00041/gid00048/gid00046/gid00001/gid00020/gid00019/gid00005/gid00002
+/gid00506/gid00039/gid00042/gid00050/gid00496/gid00043/gid00028/gid00046/gid00046/gid00001/gid00414/gid00039/gid00047/gid00032/gid00045/gid00032/gid00031/gid00507/gid00047/gid00001/gid00715/gid00001/gid00426 /gid00047/gid00001/gid00715/gid00001/gid00422/gid00425 /gid00047/gid00001/gid00715/gid00001/gid00423/gid00423
+Figure 9. An example of the vorticity difference between the HR simulation and ST-SRDA
+inference. In the training phase, the LR fluid model was initialized by the low-pass filtered HR
+data, while in the testing phase, it was initialized by the filtered ST-SRDA inferences. The
+far-right panels show the differences between these two initial conditions. For reference, the
+unfiltered HR data are shown in the far-left panels.
+corporated, i.e., the domain shift occurred (Figure 10a), the vortex shapes were completely
+different from those in the ground truth, resulting in a higher MAE ratio (= 1 .44). In
+contrast, when SR-mixup was employed, the inferences were not strongly dependent on
+the presence or absence of the domain shift (Figures 10a and 10b, respectively). These
+results indicate that SR-mixup makes the inference robust to statistical differences in
+the input.
+The effect of SR-mixup was further examined by varying the observation point ra-
+tio (Figure 11). Without SR-mixup, the MAE ratio was substantially higher over the
+entire range of the observation point ratio when the domain shift occurred (dashed line
+in Figure 11a). In contrast, using SR-mixup, the increase in the MAE ratio was suppressed,
+and the MAE ratio was almost independent of the domain shift (solid lines in Figures
+11a and 11b). Interestingly, when the feedback was not incorporated (Figure 11b), the
+MAE ratio was slightly higher with SR-mixup than without SR-mixup. During the train-
+ing phase, SR-mixup added perturbations to the LR input (Equation 14), whereas in the
+evaluation for Figure 11b, such perturbations were not added, and the LR initial con-
+dition was generated directly from the HR data. Thus, the training without SR-mixup
+resulted in smaller MAE ratios. However, this evaluation method is virtual because the
+LR fluid model is always initialized by the HR data; the inclusion of the feedback cy-
+cle is more realistic (Figure 11a).
+Furthermore, SR-mixup reduced the sensitivity of inference to the NN-weight ini-
+tialization, as shown by the error bars in Figure 11. In general, the NN inference can be
+influenced by randomly initialized weights (e.g., Bengio, 2012; Picard, 2021). To assess
+this sensitivity, we trained the NN five times while changing the random seed for the weight
+–23–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Figure 10. Vorticity snapshots from the ground truth and the inference of the ST-SRDA
+with and without SR-mixup; in (a), the feedback cycle was repeated for evaluation (Figure 2a),
+while in (b), there was no feedback cycle (Figure 2b). Only one snapshot of the ground truth is
+presented because it does not depend on the use of SR-mixup or the evaluation methods. The
+black dots in the ground-truth snapshot represent the observation points. The ratio (1.56%) was
+calculated according to Equation 13.
+initializer (He et al., 2015). The error bars in the figure show the maxima and minima
+of the MAE ratios from these five experiments. When the domain shift did not occur,
+the error bars were quite small, regardless of SR-mixup (Figure 11b). In contrast, when
+the domain shift occurred, the error bars were significantly larger without SR-mixup (dashed
+line in Figure 11a). Therefore, SR-mixup suppressed the sensitivity and promoted the
+stability of the inference.
+The MAE ratio without SR-mixup was saturated at an observation point ratio of
+0.56%, resulting in the small error bar (purple) in Figure 11a. For comparison, we con-
+ducted the LR fluid simulation without DA or SR, which was expected to give an up-
+per error bound for the ST-SRDA. Figure 12 compares the time series of the MAE ra-
+tio when the observation point ratio is 0.56%. As expected, the MAE ratio of the ST-
+SRDA without SR-mixup was comparable to that of the LR simulation, both of which
+were much larger than that of the ST-SRDA with SR-mixup. In particular, the error grew
+rapidly in the initial period ( t≲4). Similar error growth was observed at the other ob-
+servation point ratios, i.e., with denser observations. During the initial period, the jet
+stream collapses while developing fine-scale vorticity filaments (Figure 4), which can en-
+hance the domain shift (Figure 9). This could explain the rapid error growth without
+SR-mixup found in Figure 12.
+–24–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Figure 11. Dependence of the mean absolute error (MAE) ratio on the observation-point
+ratio with and without SR-mixup; in (a), the feedback cycle was repeated (Figure 2a), while in
+(b), there was no feedback cycle (Figure 2b). The MAE ratio is defined by Equation 15, and the
+values were averaged over time. The error bars show the maxima and minima of the MAE ratios
+from five experiments where the random seed for the initializer of neural-network weights was
+varied.
+Figure 12. Time series of the test scores: (a) mean absolute error (MAE) ratio and (b) mean
+structural similarity index measure (MSSIM) loss. The MAE ratio and MSSIM loss are defined
+by Equation 15 and 16, respectively. The observation point ratio was set to 0.56%. For compari-
+son, the LR simulation was conducted without SR or DA, and its time series are labeled “LR (no
+SR/DA).”
+Finally, we discuss three possible reasons why domain-generalization techniques have
+rarely been applied to fluid systems, including the atmosphere and ocean (Brunton et
+al., 2020; Duraisamy, 2021; Kashinath et al., 2021). First, despite the reduced accuracy
+due to domain shift, the NN inference can remain more accurate than that of baselines,
+making domain-generalization methods less necessary. Second, loss functions that include
+physics-based terms, such as the residuals of the governing equations, can act as regu-
+larizers that improve generalizability (e.g., Jiang et al., 2020; C. Wang et al., 2020; Bao
+et al., 2022; Hammoud et al., 2022). Third, incorporating geometric symmetries as prior
+knowledge can enhance the generalization performance (e.g., Ling et al., 2016; R. Wang
+et al., 2021; Chattopadhyay et al., 2022; Yasuda & Onishi, 2023a). Further research is
+needed to evaluate the validity of these factors. As we have demonstrated, domain shifts
+can occur when NNs are incorporated into physics-based models, thereby reducing ac-
+curacy. By utilizing domain-generalization techniques (e.g., J. Wang et al., 2022; Zhou
+et al., 2022), even in the three cases described here, it may be possible to further improve
+the robustness of NNs and extend their applicability to different systems.
+–25–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+6 Conclusions
+This study proposes a four-dimensional super-resolution data assimilation (4D-SRDA)
+scheme. This scheme employs a physics-based model to calculate the time evolution of
+a system using low-resolution (LR) simulations. The resulting time series of LR model
+states, along with observations, are fed into a trained neural network (NN). This NN si-
+multaneously performs data assimilation (DA) and spatio-temporal super-resolution (SR),
+generating flow fields with high spatio-temporal resolution. A snapshot of these high-
+resolution (HR) flow fields is considered the analysis and projected onto the LR grid points
+via algebraic operations, such as linear interpolation. Using this LR analysis, an LR sim-
+ulation is conducted for the next assimilation cycle. 4D-SRDA does not require ensem-
+ble evolution or iterative calculations, making it computationally efficient.
+In the 4D-SRDA system, the NN is trained via supervised or unsupervised learn-
+ing, in which a domain shift, namely a statistical difference between the training and test
+data, can affect the performance of the system (e.g., Moreno-Torres et al., 2012). In gen-
+eral, when physics-based simulations and NN inferences are performed alternately and
+are mutually dependent in the test phase, a domain shift will occur if the training data
+are generated in advance solely by running the physics-based model (i.e., offline train-
+ing).
+To prevent the degradation in accuracy caused by the domain shift, we developed
+a data augmentation method for domain generalization, SR-mixup, based on C-Mixup
+(Yao et al., 2022). In SR-mixup, two similar inputs are randomly sampled and their lin-
+ear combination is used as input to improve robustness to domain shift. Unlike C-Mixup,
+the linear combination is not made for the output, to avoid producing blurred HR im-
+ages in SR problems. SR-mixup is applicable to supervised and unsupervised problems
+because it does not assume paired inputs and outputs.
+We validated the 4D-SRDA and SR-mixup using an idealized barotropic ocean jet
+(David et al., 2017) with supervised learning. Since this jet was modeled as a two-dimensional
+flow, 4D-SRDA was referred to as spatio-temporal SRDA (ST-SRDA). In the case of su-
+pervised learning, the ST-SRDA is regarded as a computationally efficient surrogate scheme
+for generating an HR reanalysis dataset. For comparison, we applied an ensemble Kalman
+filter (EnKF) to the LR or HR fluid model. The former is a baseline model for the ST-
+SRDA, while the latter is considered to give a lower error bound for the ST-SRDA be-
+cause the underlying HR fluid model generates the HR training data. The ST-SRDA al-
+ways tended to be more accurate than the baseline, i.e., the EnKF at the LR. When the
+observations were sparse, the error of the ST-SRDA became comparable to that of the
+EnKF at the HR (i.e., close to a lower error bound). Furthermore, the wall time of ST-
+SRDA was much shorter than that of the EnKFs. These results suggest that ST-SRDA
+is effective for generating HR reanalysis at low computational cost. We also confirmed
+that the error became substantially larger without SR-mixup, indicating that the com-
+bination of SR-mixup and ST-SRDA is useful in achieving robust forecast cycles.
+To improve the applicability of this scheme to real-world contexts, a training method
+using small patches should be developed. In this study, the NN was trained based on the
+–26–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Table A1. Hyperparameters in the encoder. The block and layer names are defined in Figure
+3.
+Block name Layer name Input channels Output channels Stride
+— Conv2D-1 1 64 1
+Downsample-1Conv2D-2 64 128 2
+Conv2D-3 128 128 1
+Downsample-2Conv2D-2 128 256 2
+Conv2D-3 256 256 1
+Downsample-3Conv2D-2 256 128 2
+Conv2D-3 128 128 1
+Downsample-4Conv2D-2 128 64 2
+Conv2D-3 64 64 1
+whole two-dimensional flow fields. The data size of three-dimensional flows is larger, which
+requires the division of a snapshot into small patches. Training methods with small patches
+have been developed in terms of DA (Ouala et al., 2018; Yang & Grooms, 2021) and may
+be effective in applying 4D-SRDA to more realistic three-dimensional data.
+Another direction for future work is to achieve 4D-SRDA with unsupervised learn-
+ing. The proof-of-concept presented here employed supervised learning, assuming that
+sufficiently accurate atmospheric or oceanic data were available in the training phase.
+In practice, such data can be obtained from HR reanalysis datasets. Unsupervised set-
+tings will make 4D-SRDA applicable to a broader range of conditions, in which accurate
+data may not be available. Furthermore, since 4D-SRDA does not require ensembles, it
+is difficult to estimate the uncertainty of the inferences. This may be improved by uti-
+lizing unsupervised-learning frameworks (e.g., Krishnan et al., 2015; Fraccaro et al., 2017).
+Although the numerical experiments in this paper are idealized, the super-resolution and
+domain-generalization techniques presented herein provide a useful basis for future de-
+velopments in the integration of data-driven and physics-based models.
+Appendix A Hyperparameters of the Neural Network
+We list here the hyperparameters of the NN (Figure 3), which were determined through
+a grid search. Further details about the implementation are available at the Zenodo repos-
+itory (see Open Research). Tables A1 and A2 list the layer-dependent hyperparameters
+in the encoder and decoder, respectively. The kernel size of all convolution layers is 3.
+The slope of all leaky ReLU layers is −0.01 (Maas et al., 2013). The upscale factor of
+all pixel shuffle layers is 2 (Shi et al., 2016). The hyperparameters in the transformer en-
+coding blocks are set as follows (Vaswani et al., 2017): the number of input features is
+2048, the number of heads in the multi-head attention is 16, and the dimension of the
+feed-forward network is 2048.
+–27–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Table A2. Hyperparameters in the decoder. The block and layer names are defined in Figure
+3.
+Block name Layer name Input channels Output channels
+Upsample-1Conv2D-4 64 256
+Conv2D-5 64 128
+Upsample-2Conv2D-4 128 512
+Conv2D-5 128 256
+Upsample-3Conv2D-4 256 1024
+Conv2D-5 256 128
+Upsample-4Conv2D-4 128 512
+Conv2D-5 128 64
+—Conv2D-6 192 64
+Conv2D-7 64 1
+Open Research
+The source code used for generating all the datasets and experiments is preserved
+athttps://doi.org/10.5281/zenodo.7946486 and developed openly at https://github
+.com/YukiYasuda2718/4d-srda sr-mixup . The detailed information can be found in
+Yasuda and Onishi (2023b).
+Acknowledgments
+We greatly appreciate the three anonymous reviewers, the associate editor, and the ed-
+itor for their careful review and constructive feedback on the manuscript. This work was
+supported by the JSPS KAKENHI (Grant Number 20H05751). This work used compu-
+tational resources of the TSUBAME3.0 supercomputer provided by the Tokyo Institute
+of Technology through the HPCI System Research Project (Project ID: hp220102). This
+paper is based on results obtained from a project, JPNP22002, commissioned by the New
+Energy and Industrial Technology Development Organization (NEDO).
+References
+Abarbanel, H. D. I., Rozdeba, P. J., & Shirman, S. (2018, 08). Machine Learning:
+Deepest Learning as Statistical Data Assimilation Problems. Neural Computa-
+tion,30(8), 2025-2055. Retrieved from https://doi.org/10.1162/neco\ a\
+01094 doi: 10.1162/neco a01094
+Amendola, M., Arcucci, R., Mottet, L., Casas, C. Q., Fan, S., Pain, C., . . . Guo,
+Y.-K. (2021). Data assimilation in the latent space of a convolutional autoen-
+coder. In Computational science – iccs 2021: 21st international conference,
+krakow, poland, june 16–18, 2021, proceedings, part v (p. 373–386). Berlin,
+Heidelberg: Springer-Verlag. Retrieved from https://doi.org/10.1007/
+978-3-030-77977-1 30doi: 10.1007/978-3-030-77977-1 30
+–28–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Anderson, J. L., & Anderson, S. L. (1999). A monte carlo implementation of
+the nonlinear filtering problem to produce ensemble assimilations and fore-
+casts. Monthly Weather Review ,127(12), 2741 - 2758. Retrieved from
+https://journals.ametsoc.org/view/journals/mwre/127/12/1520-0493
+1999 1272741 amciot 2.0.co 2.xml doi: 10.1175/1520-0493(1999)127 ⟨2741:
+AMCIOT ⟩2.0.CO;2
+Anwar, S., Khan, S., & Barnes, N. (2020, may). A deep journey into super-
+resolution: A survey. ACM Comput. Surv. ,53(3). Retrieved from
+https://doi.org/10.1145/3390462 doi: 10.1145/3390462
+Asch, M., Bocquet, M., & Nodet, M. (2016). Data assimilation . Philadel-
+phia, PA: Society for Industrial and Applied Mathematics. Retrieved from
+https://epubs.siam.org/doi/abs/10.1137/1.9781611974546 doi:
+10.1137/1.9781611974546
+Bao, T., Chen, S., Johnson, T. T., Givi, P., Sammak, S., & Jia, X. (2022). Physics
+guided neural networks for spatio-temporal super-resolution of turbulent flows.
+InThe 38th conference on uncertainty in artificial intelligence. Retrieved from
+https://openreview.net/forum?id=S98VJL8jcxq
+Barth´ el´ emy, S., Brajard, J., Bertino, L., & Counillon, F. (2022, 8). Super-resolution
+data assimilation. Ocean Dynamics ,72, 661-678. doi: 10.1007/s10236-022
+-01523-x
+Beauchamp, M., Febvre, Q., Georgenthum, H., & Fablet, R. (2022). 4dvarnet-
+ssh: end-to-end learning of variational interpolation schemes for nadir and
+wide-swath satellite altimetry. Geoscientific Model Development Discussions ,
+2022 , 1–37. Retrieved from https://gmd.copernicus.org/preprints/
+gmd-2022-241/ doi: 10.5194/gmd-2022-241
+Bengio, Y. (2012). Practical recommendations for gradient-based training of deep
+architectures. In G. Montavon, G. B. Orr, & K.-R. M¨ uller (Eds.), Neural net-
+works: Tricks of the trade: Second edition (pp. 437–478). Berlin, Heidelberg:
+Springer Berlin Heidelberg. Retrieved from https://doi.org/10.1007/978-3
+-642-35289-8 26doi: 10.1007/978-3-642-35289-8 26
+Bengio, Y., Courville, A., & Vincent, P. (2013). Representation learning: A re-
+view and new perspectives. IEEE Transactions on Pattern Analysis and Ma-
+chine Intelligence ,35(8), 1798-1828. doi: 10.1109/TPAMI.2013.50
+Brunton, S. L., Noack, B. R., & Koumoutsakos, P. (2020). Machine learning for
+fluid mechanics. Annual Review of Fluid Mechanics ,52(1), 477-508. Re-
+trieved from https://doi.org/10.1146/annurev-fluid-010719-060214 doi:
+10.1146/annurev-fluid-010719-060214
+Burgers, G., van Leeuwen, P. J., & Evensen, G. (1998). Analysis scheme in
+the ensemble kalman filter. Monthly Weather Review ,126(6), 1719 -
+1724. Retrieved from https://journals.ametsoc.org/view/journals/
+mwre/126/6/1520-0493 1998 1261719 asitek 2.0.co 2.xml doi:
+10.1175/1520-0493(1998)126 ⟨1719:ASITEK ⟩2.0.CO;2
+Chattopadhyay, A., Mustafa, M., Hassanzadeh, P., Bach, E., & Kashinath, K.
+(2022). Towards physics-inspired data-driven weather forecasting: integrat-
+–29–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+ing data assimilation with a deep spatial-transformer-based u-net in a case
+study with era5. Geoscientific Model Development ,15(5), 2221–2237. Re-
+trieved from https://gmd.copernicus.org/articles/15/2221/2022/ doi:
+10.5194/gmd-15-2221-2022
+Chen, R. T. Q., Rubanova, Y., Bettencourt, J., & Duvenaud, D. (2018). Neural or-
+dinary differential equations. In Proceedings of the 32nd international confer-
+ence on neural information processing systems (p. 6572–6583). Red Hook, NY,
+USA: Curran Associates Inc.
+Cheng, S., Quilodran-Casas, C., Ouala, S., Farchi, A., Liu, C., Tandeo, P., . . . Ar-
+cucci, R. (2023). Machine learning with data assimilation and uncertainty
+quantification for dynamical systems: a review.
+Cohen, T. S., Geiger, M., & Weiler, M. (2019). A general theory of equivariant
+cnns on homogeneous spaces. In H. Wallach, H. Larochelle, A. Beygelz-
+imer, F. d 'Alch´ e-Buc, E. Fox, & R. Garnett (Eds.), Advances in neural in-
+formation processing systems (Vol. 32). Curran Associates, Inc. Retrieved
+from https://proceedings.neurips.cc/paper files/paper/2019/file/
+b9cfe8b6042cf759dc4c0cccb27a6737-Paper.pdf
+David, T. W., Marshall, D. P., & Zanna, L. (2017). The statistical nature
+of turbulent barotropic ocean jets. Ocean Modelling ,113, 34-49. Re-
+trieved from https://www.sciencedirect.com/science/article/pii/
+S1463500317300392 doi: https://doi.org/10.1016/j.ocemod.2017.03.008
+Dong, C., Loy, C. C., He, K., & Tang, X. (2014). Learning a deep convolutional
+network for image super-resolution. In D. Fleet, T. Pajdla, B. Schiele, &
+T. Tuytelaars (Eds.), Computer vision – eccv 2014 (pp. 184–199). Cham:
+Springer International Publishing.
+Ducournau, A., & Fablet, R. (2016). Deep learning for ocean remote sensing: an
+application of convolutional neural networks for super-resolution on satellite-
+derived sst data. In (p. 1-6). doi: 10.1109/PRRS.2016.7867019
+Duraisamy, K. (2021, May). Perspectives on machine learning-augmented reynolds-
+averaged and large eddy simulation models of turbulence. Phys. Rev. Flu-
+ids,6, 050504. Retrieved from https://link.aps.org/doi/10.1103/
+PhysRevFluids.6.050504 doi: 10.1103/PhysRevFluids.6.050504
+Evensen, G. (1994). Sequential data assimilation with a nonlinear quasi-geostrophic
+model using monte carlo methods to forecast error statistics. Journal
+of Geophysical Research: Oceans ,99(C5), 10143-10162. Retrieved from
+https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/94JC00572
+doi: https://doi.org/10.1029/94JC00572
+Fablet, R., Chapron, B., Drumetz, L., M´ emin, E., Pannekoucke, O., & Rousseau, F.
+(2021). Learning variational data assimilation models and solvers. Journal of
+Advances in Modeling Earth Systems ,13(10), e2021MS002572. Retrieved
+from https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/
+2021MS002572 (e2021MS002572 2021MS002572) doi: https://doi.org/10.1029/
+2021MS002572
+Fraccaro, M., Kamronn, S., Paquet, U., & Winther, O. (2017). A disentan-
+–30–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+gled recognition and nonlinear dynamics model for unsupervised learning.
+InNips (p. 3604-3613). Retrieved from http://papers.nips.cc/paper/
+6951-a-disentangled-recognition-and-nonlinear-dynamics-model-for
+-unsupervised-learning
+Fuchs, F., Worrall, D., Fischer, V., & Welling, M. (2020). Se(3)-transformers: 3d
+roto-translation equivariant attention networks. In H. Larochelle, M. Ran-
+zato, R. Hadsell, M. F. Balcan, & H. Lin (Eds.), Advances in neural infor-
+mation processing systems (Vol. 33, pp. 1970–1981). Curran Associates,
+Inc. Retrieved from https://proceedings.neurips.cc/paper/2020/file/
+15231a7ce4ba789d13b722cc5c955834-Paper.pdf
+Gaspari, G., & Cohn, S. E. (1999). Construction of correlation functions in two
+and three dimensions. Quarterly Journal of the Royal Meteorological Society ,
+125(554), 723-757. Retrieved from https://rmets.onlinelibrary.wiley
+.com/doi/abs/10.1002/qj.49712555417 doi: https://doi.org/10.1002/
+qj.49712555417
+Grooms, I. (2021). Analog ensemble data assimilation and a method for con-
+structing analogs with variational autoencoders. Quarterly Journal of
+the Royal Meteorological Society ,147(734), 139-149. Retrieved from
+https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.3910
+doi: https://doi.org/10.1002/qj.3910
+Ha, V. K., Ren, J.-C., Xu, X.-Y., Zhao, S., Xie, G., Masero, V., & Hussain,
+A. (2019). Deep learning based single image super-resolution: A sur-
+vey. International Journal of Automation and Computing . doi: 10.1007/
+s11633-019-1183-x
+Hammoud, M. A. E. R., Titi, E. S., Hoteit, I., & Knio, O. (2022). Cdanet: A
+physics-informed deep neural network for downscaling fluid flows. Journal of
+Advances in Modeling Earth Systems ,14(12), e2022MS003051. Retrieved
+from https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/
+2022MS003051 (e2022MS003051 2022MS003051) doi: https://doi.org/10.1029/
+2022MS003051
+He, K., Zhang, X., Ren, S., & Sun, J. (2015, December). Delving deep into rectifiers:
+Surpassing human-level performance on imagenet classification. In Proceedings
+of the ieee international conference on computer vision (iccv).
+Jiang, C., Esmaeilzadeh, S., Azizzadenesheli, K., Kashinath, K., Mustafa, M.,
+Tchelepi, H. A., . . . Anandkumar, A. (2020, nov). Meshfreeflownet: A physics-
+constrained deep continuous space-time super-resolution framework. In 2020
+sc20: International conference for high performance computing, networking,
+storage and analysis (sc) (p. 1-15). Los Alamitos, CA, USA: IEEE Computer
+Society. Retrieved from https://doi.ieeecomputersociety.org/10.1109/
+SC41405.2020.00013 doi: 10.1109/SC41405.2020.00013
+Kashinath, K., Mustafa, M., Albert, A., Wu, J.-L., Jiang, C., Esmaeilzadeh, S.,
+. . . Prabhat, n. (2021). Physics-informed machine learning: case studies for
+weather and climate modelling. Philosophical Transactions of the Royal Society
+A: Mathematical, Physical and Engineering Sciences ,379(2194), 20200093.
+–31–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Retrieved from https://royalsocietypublishing.org/doi/abs/10.1098/
+rsta.2020.0093 doi: 10.1098/rsta.2020.0093
+Kingma, D. P., & Ba, J. (2015). Adam: A method for stochastic optimization. In
+Y. Bengio & Y. LeCun (Eds.), . Retrieved from http://arxiv.org/abs/1412
+.6980
+Krasnopolsky, V., & Belochitski, A. A. (2020). Using machine learning for model
+physics: an overview. arXiv. Retrieved from https://arxiv.org/abs/2002
+.00416 doi: 10.48550/ARXIV.2002.00416
+Krishnan, R. G., Shalit, U., & Sontag, D. (2015). Deep kalman filters. arXiv.
+Retrieved from https://arxiv.org/abs/1511.05121 doi: 10.48550/ARXIV
+.1511.05121
+Li, B., Zhang, Y., Zhao, B., & Shao, H. (2020). 3d-reconstnet: A single-view 3d-
+object point cloud reconstruction network. IEEE Access ,8, 83782-83790. doi:
+10.1109/ACCESS.2020.2992554
+Ling, J., Kurzawski, A., & Templeton, J. (2016). Reynolds averaged turbulence
+modelling using deep neural networks with embedded invariance. Journal of
+Fluid Mechanics ,807, 155–166. doi: 10.1017/jfm.2016.615
+Liu, C., Fu, R., Xiao, D., Stefanescu, R., Sharma, P., Zhu, C., . . . Wang, C.
+(2022). Enkf data-driven reduced order assimilation system. Engineering
+Analysis with Boundary Elements ,139, 46-55. Retrieved from https://
+www.sciencedirect.com/science/article/pii/S0955799722000510 doi:
+https://doi.org/10.1016/j.enganabound.2022.02.016
+Liu, G., Reda, F. A., Shih, K. J., Wang, T.-C., Tao, A., & Catanzaro, B. (2018,
+September). Image inpainting for irregular holes using partial convolutions. In
+Proceedings of the european conference on computer vision (eccv).
+Maas, A. L., Hannun, A. Y., Ng, A. Y., et al. (2013). Rectifier nonlinearities im-
+prove neural network acoustic models. In Proc. icml (Vol. 30, p. 3).
+Mancini, M., Akata, Z., Ricci, E., & Caputo, B. (2020). Towards recognizing un-
+seen categories in unseen domains. In A. Vedaldi, H. Bischof, T. Brox, & J.-
+M. Frahm (Eds.), Computer vision – eccv 2020 (pp. 466–483). Cham: Springer
+International Publishing.
+Mandikal, P., Navaneet, K. L., Agarwal, M., & Babu, R. V. (2018). 3D-LMNet:
+Latent embedding matching for accurate and diverse 3d point cloud recon-
+struction from a single image. In Proceedings of the british machine vision
+conference (BMVC).
+Moreno-Torres, J. G., Raeder, T., Alaiz-Rodr´ ıguez, R., Chawla, N. V., & Herrera,
+F. (2012). A unifying view on dataset shift in classification. Pattern Recog-
+nition ,45(1), 521-530. Retrieved from https://www.sciencedirect.com/
+science/article/pii/S0031320311002901 doi: https://doi.org/10.1016/
+j.patcog.2011.06.019
+Niu, Z., Zhong, G., & Yu, H. (2021). A review on the attention mechanism of
+deep learning. Neurocomputing ,452, 48-62. Retrieved from https://
+www.sciencedirect.com/science/article/pii/S092523122100477X doi:
+https://doi.org/10.1016/j.neucom.2021.03.091
+–32–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Onishi, R., Sugiyama, D., & Matsuda, K. (2019). Super-resolution simulation for
+real-time prediction of urban micrometeorology. SOLA ,15, 178-182. doi: 10
+.2151/sola.2019-032
+Ouala, S., Fablet, R., Herzet, C., Chapron, B., Pascual, A., Collard, F., & Gaultier,
+L. (2018). Neural network based kalman filters for the spatio-temporal in-
+terpolation of satellite-derived sea surface temperature. Remote Sensing ,
+10(12). Retrieved from https://www.mdpi.com/2072-4292/10/12/1864 doi:
+10.3390/rs10121864
+Peyron, M., Fillion, A., G¨ urol, S., Marchais, V., Gratton, S., Boudier, P., & Goret,
+G. (2021). Latent space data assimilation by using deep learning. Quarterly
+Journal of the Royal Meteorological Society ,147(740), 3759-3777. Retrieved
+from https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/qj.4153
+doi: https://doi.org/10.1002/qj.4153
+Picard, D. (2021). Torch.manual seed(3407) is all you need: On the influence
+of random seeds in deep learning architectures for computer vision. CoRR ,
+abs/2109.08203 . Retrieved from https://arxiv.org/abs/2109.08203
+Rasp, S. (2020). Coupled online learning as a way to tackle instabilities and bi-
+ases in neural network parameterizations: general algorithms and lorenz 96
+case study (v1.0). Geoscientific Model Development ,13(5), 2185–2196. Re-
+trieved from https://gmd.copernicus.org/articles/13/2185/2020/ doi:
+10.5194/gmd-13-2185-2020
+Ronneberger, O., Fischer, P., & Brox, T. (2015). U-net: Convolutional networks for
+biomedical image segmentation. In N. Navab, J. Hornegger, W. M. Wells, &
+A. F. Frangi (Eds.), Medical image computing and computer-assisted interven-
+tion – miccai 2015 (pp. 234–241). Cham: Springer International Publishing.
+Shi, W., Caballero, J., Huszar, F., Totz, J., Aitken, A. P., Bishop, R., . . . Wang,
+Z. (2016, jun). Real-time single image and video super-resolution us-
+ing an efficient sub-pixel convolutional neural network. In 2016 ieee
+conference on computer vision and pattern recognition (cvpr) (p. 1874-
+1883). Los Alamitos, CA, USA: IEEE Computer Society. Retrieved from
+https://doi.ieeecomputersociety.org/10.1109/CVPR.2016.207 doi:
+10.1109/CVPR.2016.207
+Sosnovik, I., Moskalev, A., & Smeulders, A. W. (2021, January). Scale equivariance
+improves siamese tracking. In Proceedings of the ieee/cvf winter conference on
+applications of computer vision (wacv) (p. 2765-2774).
+Stengel, K., Glaws, A., Hettinger, D., & King, R. N. (2020, 7). Adversarial super-
+resolution of climatological wind and solar data. Proceedings of the Na-
+tional Academy of Sciences ,117, 16805-16815. Retrieved from https://
+www.pnas.org/content/117/29/16805 doi: 10.1073/PNAS.1918964117
+Vandal, T., Kodra, E., Ganguly, S., Michaelis, A., Nemani, R., & Ganguly, A. R.
+(2017). Deepsd: Generating high resolution climate change projections through
+single image super-resolution. In (p. 1663-1672). Association for Computing
+Machinery. Retrieved from https://doi.org/10.1145/3097983.3098004
+doi: 10.1145/3097983.3098004
+–33–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., . . .
+Polosukhin, I. (2017). Attention is all you need. In I. Guyon et al. (Eds.), Ad-
+vances in neural information processing systems (Vol. 30). Curran Associates,
+Inc. Retrieved from https://proceedings.neurips.cc/paper/2017/file/
+3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf
+Verma, V., Lamb, A., Beckham, C., Najafi, A., Mitliagkas, I., Lopez-Paz, D., &
+Bengio, Y. (2019, 09–15 Jun). Manifold mixup: Better representations by
+interpolating hidden states. In K. Chaudhuri & R. Salakhutdinov (Eds.), Pro-
+ceedings of the 36th international conference on machine learning (Vol. 97, pp.
+6438–6447). PMLR. Retrieved from https://proceedings.mlr.press/v97/
+verma19a.html
+Wang, C., Bentivegna, E., Zhou, W., Klein, L., & Elmegreen, B. (2020). Physics-
+informed neural network super resolution for advection-diffusion models. In
+Third workshop on machine learning and the physical sciences (neurips 2020).
+Retrieved from https://ml4physicalsciences.github.io/2020/
+Wang, J., Lan, C., Liu, C., Ouyang, Y., Qin, T., Lu, W., . . . Yu, P. (2022). Gen-
+eralizing to unseen domains: A survey on domain generalization. IEEE
+Transactions on Knowledge and Data Engineering , 1-1. doi: 10.1109/
+TKDE.2022.3178128
+Wang, J., Liu, Z., Foster, I., Chang, W., Kettimuthu, R., & Kotamarthi, V. R.
+(2021). Fast and accurate learned multiresolution dynamical downscaling
+for precipitation. Geoscientific Model Development ,14(10), 6355–6372. Re-
+trieved from https://gmd.copernicus.org/articles/14/6355/2021/ doi:
+10.5194/gmd-14-6355-2021
+Wang, L., Luo, Z., Xu, J., Luo, W., & Yuan, J. (2021). A novel framework for cost-
+effectively reconstructing the global flow field by super-resolution. Physics of
+Fluids ,33(9), 095105. Retrieved from https://doi.org/10.1063/5.0062775
+doi: 10.1063/5.0062775
+Wang, R., Walters, R., & Yu, R. (2021). Incorporating symmetry into deep dynam-
+ics models for improved generalization. In (Vol. abs/2002.03061). Retrieved
+from https://iclr.cc/virtual/2021/poster/2785
+Wang, Z., Bovik, A., Sheikh, H., & Simoncelli, E. (2004). Image quality assessment:
+from error visibility to structural similarity. IEEE Transactions on Image Pro-
+cessing ,13(4), 600-612. doi: 10.1109/TIP.2003.819861
+Whitaker, J. S., Hamill, T. M., Wei, X., Song, Y., & Toth, Z. (2008). Ensemble data
+assimilation with the ncep global forecast system. Monthly Weather Review ,
+136(2), 463 - 482. Retrieved from https://journals.ametsoc.org/view/
+journals/mwre/136/2/2007mwr2018.1.xml doi: https://doi.org/10.1175/
+2007MWR2018.1
+Wu, Y., Teufel, B., Sushama, L., Belair, S., & Sun, L. (2021). Deep learning-
+based super-resolution climate simulator-emulator framework for urban heat
+studies. Geophysical Research Letters ,48(19), e2021GL094737. Retrieved
+from https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/
+2021GL094737 (e2021GL094737 2021GL094737) doi: https://doi.org/10.1029/
+–34–
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+2021GL094737
+Yang, L. M., & Grooms, I. (2021). Machine learning techniques to construct
+patched analog ensembles for data assimilation. Journal of Computational
+Physics ,443, 110532. Retrieved from https://www.sciencedirect.com/
+science/article/pii/S0021999121004277 doi: https://doi.org/10.1016/
+j.jcp.2021.110532
+Yao, H., Wang, Y., Zhang, L., Zou, J. Y., & Finn, C. (2022). C-mixup: Improv-
+ing generalization in regression. In S. Koyejo, S. Mohamed, A. Agarwal,
+D. Belgrave, K. Cho, & A. Oh (Eds.), Advances in neural information pro-
+cessing systems (Vol. 35, pp. 3361–3376). Curran Associates, Inc. Retrieved
+from https://proceedings.neurips.cc/paper files/paper/2022/file/
+1626be0ab7f3d7b3c639fbfd5951bc40-Paper-Conference.pdf
+Yasuda, Y., & Onishi, R. (2023a, 04). Rotationally equivariant super-resolution of
+velocity fields in two-dimensional flows using convolutional neural networks.
+APL Machine Learning ,1(2). Retrieved from https://doi.org/10.1063/
+5.0132326 (026107) doi: 10.1063/5.0132326
+Yasuda, Y., & Onishi, R. (2023b, May). Yukiyasuda2718/4d-srda sr-mixup:
+v0.2.0 [software]. Zenodo. Retrieved from https://doi.org/10.5281/
+zenodo.7946486 doi: 10.5281/zenodo.7946486
+Yasuda, Y., Onishi, R., & Matsuda, K. (2023). Super-resolution of three-dimensional
+temperature and velocity for building-resolving urban micrometeorology using
+physics-guided convolutional neural networks with image inpainting tech-
+niques. Building and Environment ,243, 110613. Retrieved from https://
+www.sciencedirect.com/science/article/pii/S0360132323006406 doi:
+https://doi.org/10.1016/j.buildenv.2023.110613
+Yu, J., Lin, Z., Yang, J., Shen, X., Lu, X., & Huang, T. S. (2019, October). Free-
+form image inpainting with gated convolution. In Proceedings of the ieee/cvf
+international conference on computer vision (iccv).
+Zeiler, M. D., & Fergus, R. (2014). Visualizing and understanding convolutional net-
+works. In D. Fleet, T. Pajdla, B. Schiele, & T. Tuytelaars (Eds.), Computer vi-
+sion – eccv 2014 (pp. 818–833). Cham: Springer International Publishing.
+Zhang, H., Cisse, M., Dauphin, Y. N., & Lopez-Paz, D. (2018). mixup: Beyond em-
+pirical risk minimization. In International conference on learning representa-
+tions. Retrieved from https://openreview.net/forum?id=r1Ddp1-Rb
+Zhou, K., Liu, Z., Qiao, Y., Xiang, T., & Loy, C. C. (2022). Domain generalization:
+A survey. IEEE Transactions on Pattern Analysis and Machine Intelligence , 1-
+20. doi: 10.1109/TPAMI.2022.3195549
+–35–

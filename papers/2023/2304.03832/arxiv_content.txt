@@ -1,0 +1,2131 @@
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Deep learning of systematic sea ice model errors from
+data assimilation increments
+William Gregory1, Mitchell Bushuk2, Alistair Adcroft1, Yongfei Zhang1, Laure
+Zanna3
+1Atmospheric and Oceanic Sciences Program, Princeton University, NJ, USA
+2Geophysical Fluid Dynamics Laboratory, NOAA, Princeton, NJ, USA
+3Courant Institute of Mathematical Sciences, New York University, New York, NY, USA
+Key Points:
+We show that sea ice data assimilation increments closely reect the systematic
+bias patterns of a global ice-ocean model
+Convolutional neural networks can make skillful predictions of sea ice data assim-
+ilation increments, using only model state variables
+The skillful predictions suggest the network could be used as a parameterization
+to reduce sea ice biases in free-running model simulations
+Corresponding author: Will Gregory, wg4031@princeton.edu
+{1{arXiv:2304.03832v1  [physics.ao-ph]  7 Apr 2023
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Abstract
+Data assimilation is often viewed as a framework for correcting short-term error growth
+in dynamical climate model forecasts. When viewed on the time scales of climate how-
+ever, these short-term corrections, or analysis increments, can closely mirror the system-
+atic bias patterns of the dynamical model. In this study, we use convolutional neural net-
+works (CNNs) to learn a mapping from model state variables to analysis increments, in
+order to showcase the feasibility of a data-driven model parameterization which can pre-
+dict state-dependent model errors. We undertake this problem using an ice-ocean data
+assimilation system within the Seamless system for Prediction and EArth system Re-
+search (SPEAR) model, developed at the Geophysical Fluid Dynamics Laboratory, which
+assimilates satellite observations of sea ice concentration every 5 days between 1982{2017.
+The CNN then takes inputs of data assimilation forecast states and tendencies, and makes
+predictions of the corresponding sea ice concentration increments. Specically, the in-
+puts are states and tendencies of sea ice concentration, sea-surface temperature, ice ve-
+locities, ice thickness, net shortwave radiation, ice-surface skin temperature, sea-surface
+salinity, as well as a land-sea mask. We nd the CNN is able to make skillful predictions
+of the increments in both the Arctic and Antarctic and across all seasons, with skill that
+consistently exceeds that of a climatological increment prediction. This suggests that the
+CNN could be used to reduce sea ice biases in free-running SPEAR simulations, either
+as a sea ice parameterization or an online bias correction tool for numerical sea ice fore-
+casts.
+Plain Language Summary
+To make predictions of the Earth's climate system we use expensive computer sim-
+ulations, called climate models. These models are not perfect however, as we often need
+to approximate certain physical laws in order to save on compute time. On the other hand
+we have observational climate data, however these data have limited space and time cov-
+erage and also contain errors because of noise and assumptions about how our measure-
+ments relate to the quantity we are interested in. Therefore we often use a process called
+data assimilation to combine our climate model predictions together with observations,
+to produce our `best guess' of the climate system. The dierence between our best-guess-
+model and our original climate model prediction then gives us clues as to how wrong our
+original climate model is. In this work we use some fancy statistics, called machine learn-
+ing, where we show a computer algorithm lots of examples of sea ice, atmosphere and
+ocean climate model predictions, and see if it can learn its own inherent sea ice errors.
+We nd that it can do this well, which means that we can hopefully incorporate the ma-
+chine learning algorithm into the original climate model to improve its future climate
+predictions.
+1 Introduction
+The inuence of structural errors within climate models due to missing physics, im-
+perfect parameterizations of subgrid-scale processes, as well as errors in the underlying
+numerics, leads to systematic biases across the atmosphere, land, sea ice, and ocean. Sub-
+sequently, our ability to diagnose and correct these biases ultimately governs the accu-
+racy of numerical weather and climate predictions on dierent time scales (Stevens &
+Bony, 2013). In the context of sea ice for example, much eort has been aorded to the
+improvement of model physics and subgrid parameterizations through the development
+of e.g., ice thickness distribution (Thorndike et al., 1975; Bitz et al., 2001) and oe-size
+distribution theory (Rothrock & Thorndike, 1984; Horvat & Tziperman, 2015), surface
+melt-pond (Flocco et al., 2012), ice drift (Tsamados et al., 2013) and lateral melt pa-
+rameterizations (M. Smith et al., 2022), as well as sea ice rheology (Hibler, 1979; Dansereau
+et al., 2016; Olason et al., 2022). Such studies have shown how the improved represen-
+{2{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+tation of sea ice physics produces model simulations which more closely reect observa-
+tions in terms of either their mean sea ice volume, drift, or ice thickness distribution. De-
+spite this, however, biases will often persist due to the fact that physical processes must
+be approximated in order to meet computational restraints, and that parameterizations
+are often based on sparse observations which were collected under a climate regime which
+may not generalize to future conditions (Notz, 2012). Sea ice is also strongly coupled to
+both the atmosphere and ocean via mechanical and thermodynamic forcing, thus sea ice
+biases can also manifest from biases in these components.
+Many previous studies have leveraged data assimilation (DA) as a way to either
+assess model error or better understand model physics within numerical weather predic-
+tion (NWP) systems (Leith, 1978; Klinker & Sardeshmukh, 1992; Dee, 2005; Rodwell
+& Palmer, 2007; Palmer & Weisheimer, 2011; Carrassi & Vannitsem, 2011; Mitchell &
+Carrassi, 2015; Crawford et al., 2020; Laloyaux et al., 2020). Generally, DA can be con-
+sidered a Bayesian framework for combining a model forecast with observations in or-
+der to produce an optimal estimate of a given set of climate state variables, often called
+theanalysis state . The dierence between this analysis state and the model forecast prior
+to assimilation is then the analysis increment , which represents our `best guess' as to the
+appropriate correction to the model forecast when taking into account both model and
+observational uncertainty. One caveat to this is that many DA systems do not formally
+account for systematic model biases, and so these systems often produce non-zero val-
+ues in the time-mean of their analysis increments; indicating consistent discrepancies be-
+tween the model and observations. Attributing such errors to their correct source is also
+non-trivial (Dee, 2004, 2005), as model biases can manifest non-locally in space and time
+(Palmer & Weisheimer, 2011; C. Wang et al., 2014) and involve non-linear interactions
+across dierent model components (Large & Danabasoglu, 2006; Kim et al., 2022). Ob-
+servations themselves may also contain systematic errors, such as the design of weather
+lters in satellite-derived sea ice area retrievals (Kern et al., 2019) and uncertainties re-
+lated to summer ice surface properties (Kern et al., 2020). While some studies have shown
+relative success in separating systematic errors between observations and models (Aulign e
+et al., 2007; Dee & Uppala, 2009), many assimilation systems simply assume that the
+observational errors are uncorrelated and Gaussian, and subsequently any systematic pat-
+terns within the analysis increments can largely be considered a manifestation of the var-
+ious model biases. Under this assumption, the increments can be seen as a reection of
+model error growth associated with missing or imbalanced physical processes occurring
+over short time scales, often called fast physics errors, however such errors ultimately
+have an impact on the model's bias patterns over climate time scales as well (J. M. Mur-
+phy et al., 2004; Rodwell & Palmer, 2007).
+The analysis increments therefore provide useful information on model deciencies,
+which could inform new parameterizations to reduce systematic model biases. Indeed,
+variational schemes such as weak-constraint 4D-Var (Wergen, 1992; Zupanski, 1993; Tr emolet,
+2007; Laloyaux et al., 2020) already aim to account for systematic model error during
+DA, and while this is invaluable in NWP, the underlying model physics remains unchanged,
+meaning that a free-running model simulation invariably remains biased. An alternative
+approach which has been explored in the ocean modeling community (Chepurin et al.,
+2005; Balmaseda et al., 2007; Lu et al., 2020) is to use DA to rst derive the climato-
+logical components of the systematic model biases, and then incorporate these compo-
+nents back into the model as an adjustment to the model state tendencies. Lu et al. (2020)
+for example designed an ocean DA system which assimilates temperature and salinity
+prole data into version 6 of the Modular Ocean Model (MOM6), and from this they de-
+rived analysis increments of temperature and salinity at each model grid cell location and
+vertical level. They subsequently computed the daily climatology of the increments, which
+represent the systematic component of model error for each eld on any given day of the
+year, and incorporated these as a three-dimensional adjustment to the model temper-
+ature and salinity tendencies for subsequent MOM6 ocean simulations. This `ocean ten-
+{3{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+dency adjustment' was found to reduce ocean model bias and improve the skill of cou-
+pled model seasonal predictions of the El Ni~ no Southern Oscillation.
+More recently, machine learning (ML) has been put forward as a data-driven frame-
+work for targeting model biases. ML, in particular deep learning (DL), algorithms have
+become increasingly popular in climate research for a variety of applications ranging from
+NWP (Pathak et al., 2022; Bi et al., 2022) to satellite altimetry data processing (Dawson
+et al., 2022; Landy et al., 2022). In the context of dynamical climate models, DL algo-
+rithms have proven eective tools for deriving model parameterizations directly from nu-
+merical simulations. For example, many past studies have focused on learning subgrid
+parameterizations from high resolution experiments and/or observations of the ocean (Bolton
+& Zanna, 2019; Zanna & Bolton, 2020; Zhu et al., 2022), atmosphere (Brenowitz & Brether-
+ton, 2018; Gentine et al., 2018; Rasp et al., 2018; O'Gorman & Dwyer, 2018; Yuval &
+O'Gorman, 2020; P. Wang et al., 2022), and sea ice (Finn et al., 2023). In the context
+of DA-based approaches, some recent studies have relied on iterative sequences of DA
+and ML to infer unresolved scale parameterizations from sparse and noisy observations
+(Brajard et al., 2021), or to learn state-dependent model error from analysis increments
+(Farchi et al., 2021) and nudging tendencies (Watt-Meyer et al., 2021; Bretherton et al.,
+2022), while others have combined DA with equation discovery to extract interpretable
+structural model errors (Mojgani et al., 2022). Many of these studies have relied on ide-
+alized models to showcase the feasibility of various DA-ML methodologies, however re-
+cently Bonavita and Laloyaux (2020) used ML to learn state-dependent model errors from
+atmospheric analysis increments produced from a 4D-Var simulation within the the In-
+tegrated Forecasting System (IFS) model at the European Centre for Medium-range Weather
+Forecasts (ECMWF), and similarly, Laloyaux et al. (2022) attempted to learn atmospheric
+temperature errors within the same IFS model using the model bias directly, as a way
+to a-priori dene the bias model within subsequent 4D-Var simulations. This latter ap-
+proach however was unable to outperform the current operational weak-constraint 4D-
+Var system at ECMWF.
+In this study, we present a DA-based ML approach to learn the systematic biases
+of a large-scale sea ice model used for climate simulations. We learn state-dependent sea
+ice errors within the Seamless system for Prediction and EArth system Research (SPEAR)
+model (Delworth et al., 2020), developed at the Geophysical Fluid Dynamics Labora-
+tory (GFDL), by constructing convolutional neural networks (CNNs) which learn a func-
+tional mapping from model state variables to sea ice DA increments. Somewhat dier-
+ent to previous studies which have been centered around DA and ML in idealized model
+contexts (Brajard et al., 2021; Farchi et al., 2021; Mojgani et al., 2022), our application
+here is, to our knowledge, the rst example of using ML to learn systematic model er-
+ror from DA increments in a global ice-ocean model (though similar approaches have pre-
+viously been explored within large-scale atmospheric models (Bonavita & Laloyaux, 2020;
+Chen et al., 2022)). We also choose to learn sea ice errors from DA increments as op-
+posed to learning the model bias directly (e.g., Laloyaux et al. (2022)), as the increments
+have inherently accounted for model and observational uncertainty, and they also pro-
+vide a full spatio-temporal record of errors for model state variables which are not di-
+rect observables, such as subgrid ice thickness distribution category concentrations. It
+is also worth noting that while we present this article in the context of using ML to make
+oine predictions of sea ice DA increments, we are ultimately working towards an ML
+model which can be implemented as an online sea ice parameterization within SPEAR.
+Similar to previous works (Grundner et al., 2022; P. Wang et al., 2022), this article is
+therefore an initial evaluation into the feasibility of this task, based on oine performance.
+This paper is structured as follows: Section 2 provides a brief overview of the SPEAR
+ice-ocean model conguration, as well as the sea ice DA setup. Section 3 then highlights
+how the climatological sea ice concentration (SIC) bias of a SPEAR ice-ocean model ex-
+periment maps closely onto the SPEAR SIC DA increments, motivating the idea of learn-
+{4{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+ing systematic model error from analysis increments. Section 4 describes the ML prob-
+lem setup and documents the CNN architectures and hyperparameter settings. Section
+5 then showcases the predictive performance of the CNN, and provides an assessment
+of the CNN sensitivity and generalization ability. Section 6 presents a discussion on the
+results and outlines considerations for future work relating to sea ice parameterizations
+and climate prediction. A nal summary is then given in section 7, as well as an out-
+look on the broader implications of this work within the climate modeling community.
+2 Model conguration
+2.1 SPEAR ice-ocean model
+SPEAR is a fully coupled ice-ocean-atmosphere-land model, with nominal 1hor-
+izontal resolution in the ice and ocean components (Delworth et al., 2020). The SPEAR
+ocean component is based on MOM6, with 75 vertical layers, and the sea ice component
+on version 2 of the Sea Ice Simulator (SIS2; see Adcroft et al. (2019) for details on both
+MOM6 and SIS2). In this work, we consider an ice-ocean model conguration of SPEAR
+forced by atmospheric conditions and river runo from the Japanese 55-year Reanaly-
+sis for driving ocean-sea-ice models (JRA55-do; Tsujino et al. (2018)).
+The SIS2 ice dynamics are solved using a elastic-viscous-plastic rheology on a tripo-
+lar Arakawa C-grid (Bouillon et al., 2009), with advection performed with a modied
+upwind scheme (Adcroft et al., 2019). The energy-conserving thermodynamics of the ice
+follows that of Bitz and Lipscomb (1999), and uses a vertical structure consisting of four
+ice layers and a single snow layer. Following Bitz et al. (2001), ve ice thickness distri-
+bution categories are implemented in a Lagrangian scheme, with thickness boundaries
+of 0.1, 0.3, 0.7, 1.1 metres. The coupling between ice and ocean occurs at a frequency
+of 60 minutes, with a temperature coupling coecient of 240 Wm 2K 1, while faster
+coupling with the atmosphere occurs through a surface skin temperature every 20 min-
+utes. The model does not contain melt-pond, subgrid ridging, lateral melt, or land-fast
+ice parameterizations.
+2.2 Sea ice data assimilation and model experiments
+An experimental ice-ocean DA system within SPEAR was recently developed by
+Y. Zhang et al. (2021), whereby satellite-derived SIC from the National Snow and Ice
+Data Center (NSIDC; Cavalieri et al. (1996)) NASA Team algorithm is assimilated into
+SIS2 via the Ensemble Adjustment Kalman Filter (EAKF; Anderson (2001)), and MOM6
+sea-surface temperatures are nudged towards observations from version 2 of the 1grid-
+ded Optimum Interpolation Sea-Surface Temperature (OISSTv2) data set (Reynolds et
+al., 2007; Banzon et al., 2016). In this section we give a brief overview of this DA setup,
+although the reader is referred to Y. Zhang et al. (2021) for further details.
+A single SPEAR ensemble member is initialised in 1958 with World Ocean Atlas
+ocean conditions, and a prescribed atmosphere from JRA55-do reanalysis. This single
+member is then integrated forward to 1979 in order to `spin up' the ocean and sea ice,
+which then provides the initial ice and ocean conditions for a set of 30 ensemble mem-
+bers, each with individual perturbed sea ice physics. These perturbations correspond to
+independent random draws from a uniform distribution for sea ice model parameters in-
+cluding the ice strength parameter (Hibler, 1979), as well as the ice, snow, and pond albedo
+parameters (Briegleb & Light, 2007). The distribution for ice strength spans 20,000{50,000
+Nm 1, while the distribution for albedo parameters spans -1.6{1.6 standard deviations
+(Y. Zhang et al., 2021). The 30 perturbed physics ensemble members are then integrated
+forward from 1979 to 1982 in order to spin up the sea ice and generate sucient spread
+across the ensemble. After which, the rst sea ice DA update is made on January 6th
+1982 and continues every 5 days until December 27th2017, providing a total of 2618 as-
+{5{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+similation cycles. This corresponds to 73 cycles per year except for 1982, 1987 and 1988,
+which contain 71, 68 and 70 cycles, respectively. There are 71 cycles in 1982 because the
+rst cycle begins after the initial update on January 6th, and 68 and 70 in 1987 and 1988
+due to missing satellite observations between December 3rd1987 and January 13th1988
+(Cavalieri et al., 1996). Note that, for convenience, the model is run with a `no leap' cal-
+endar which excludes leap-year days.
+During each assimilation cycle, a model forecast is run until 00:00 hours UTC on
+the assimilation day (e.g., Jan 6th), at which point the ice concentration from each of
+the model's ve individual ice thickness distribution categories (hereafter SICN; note that
+SIC =P5
+k=1SICN k) are passed to the EAKF, along with the satellite SIC observations,
+and subsequently the SICN forecasts are updated by the lter to produce their analy-
+sis states. Given that the aggregate SIC analysis state corresponds to the sum of the SICN
+analysis states, it is necessary to post-process SICN after each DA cycle in order avoid
+non-physical values in SIC, which is bounded between 0 and 1. This is achieved by ap-
+propriately scaling each of the SICN states when SIC is greater than 1, and setting SICN
+to 0 when SIC is negative. After post-processing, the analysis increments are then com-
+puted for each of the ve category concentrations (SICN), and for each of the 30 en-
+semble members. State variables for each ensemble member are saved as daily mean elds
+during model integration, giving 365 days 36 years = 13140 daily forecasts for each
+variable. For the remainder of this article we consider only the ensemble mean elds for
+both the model state variables and the analysis increments.
+In order to understand the inherent SIC bias patterns within SPEAR, the next sec-
+tion includes a comparison of the SIC DA increments (SIC) to an additional model ex-
+periment without SIC DA, referred to here as FREE. This experiment corresponds to
+the same JRA-forced ice-ocean model conguration with sea-surface temperature nudg-
+ing, as well as the same perturbed sea ice physics, and initial conditions from the spinup
+run as the SIC DA experiment. Therefore the FREE experiment conguration is iden-
+tical to the SIC DA run, except for the assimilation of SIC observations.
+3 Analysis increments and model bias in SPEAR
+Learning systematic model error from DA increments, with the goal of an even-
+tual sea ice parameterization which reduces climate model bias, relies on the assump-
+tion that the fast physics errors captured within the DA increments reect the long-term
+systematic biases of the free-running model (Rodwell & Palmer, 2007). In this section,
+we examine whether this necessary condition is satised, making comparisons of SIC
+to the climatological bias of the FREE experiment. The model bias is computed rela-
+tive to NSIDC NASA Team satellite SIC observations.
+Figure 1 shows seasonal climatologies of the SPEAR FREE SIC model bias and
+SIC between 1982{2017, for both the Arctic and Antarctic. Here we notice that the
+free-running model is, on average, positively biased in both hemispheres, with larger mag-
+nitude biases in the Antarctic. Crucially, we nd largely consistent patterns between the
+model bias and SIC. In the Arctic for example, the large positive biases in the Green-
+land, Iceland, Norwegian (GIN) and Barents seas (east Atlantic) are mirrored by over-
+all negative increments, hence the DA is acting to remove sea ice in this region. The win-
+ter Arctic SIC biases appear to be related to systematic biases in the sea ice edge po-
+sition, which is apparent when noticing that the increments in the fully covered ice pack
+(north of the 75% observed SIC contour) are relatively small compared to the marginal
+ice zones in DJF and MAM. The presence of larger increments in the central ice pack
+in JJA and SON are then likely a reection of local SIC errors in the ice-covered zone
+in addition to ice edge position errors. The only notable discrepancy between model bias
+and SIC in the Arctic appears to be in the Kara and Laptev shelf seas in JJA, where
+both the model bias and increments are positive. This suggests that the assimilation fore-
+{6{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)DJF
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(b)MAM
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(c)JJA
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(d)SON
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(e)
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(f)
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(g)
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(h)
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(i)
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(j)
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(k)
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(l)
+−20−10 0 10 20
+Sea ice concentration bias (%)
+(m)
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(n)
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(o)
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(p)
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+Figure 1. Seasonal climatologies of SPEAR free-running model bias (model minus observa-
+tions) and sea ice concentration analysis increments, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over the
+period 1982{2017. Dashed and solid contours denote the observed climatology marginal ice zone
+boundaries over the same period (15 and 75% SIC contours, respectively). Yellow markers in (a)
+and (i) are example grid-point locations used for analysis in Figure 2.
+casts are negatively biased in this region, which may be related to a residual overshoot-
+ing problem in the DA experiment, as highlighted in the original SPEAR sea ice DA study
+by Y. Zhang et al. (2021).
+Turning to the Antarctic, despite largely positive biases across all seasons, nega-
+tive biases dominate many of the coastal regions in the austral summer (DJF), includ-
+ing the Weddell Sea, whereby many of these biases become lower in magnitude or even
+positive by austral winter (JJA). Interestingly, the isolated negative bias towards the north-
+{7{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+0102030405060708090Sea ice concentration (%)(a)
+Dec 2nd
+Dec 7th
+Dec 12th
+Dec 17th
+Dec 22nd
+Dec 27th
+Jan 1st
+Jan 6th
+Jan 11th
+Jan 16th
+Jan 21st
+Jan 26th
+Jan 31st
+Feb 5th
+Feb 10th
+Feb 15th
+Feb 20th
+Feb 25th
+Mar 2nd65707580859095100Sea ice concentration (%)(b)
+Daily mean FREE
+Daily mean forecast (DA)
+DA forecast at 00:00 UTCAnalysis at 00:00 UTC
+Analysis increment
+Daily mean observations
+Figure 2. SPEAR sea ice concentration data assimilation example, shown for one grid cell
+as daily climatologies (1982{2017). Examples are presented for the Arctic (a) and Antarctic
+(b) through the period December{February. The grid cells for both the Arctic and Antarctic
+examples correspond to locations in the GIN Sea and Weddell Sea, respectively (see the yellow
+markers in Figures 1a and 1i).
+eastern edge of the Ross Sea is a persistent feature from MAM through to SON, reach-
+ing its largest magnitude in SON. This may be related to strong deep ocean convection
+in this region (Adcroft et al., 2019), which manifests as positively biased sea-surface tem-
+peratures which are co-located with the negatively biased SIC zone (see Figure S1 in Sup-
+porting Information S1). Overall, the strong spatial and seasonal agreement between the
+free-running model bias and SIC supports this study's plan to use DA increments to
+learn a parameterization of sea ice model error.
+Visualising the time evolution of the sea ice DA forecasts (Figure 2) shows the re-
+lationship between systematic biases and analysis increments more clearly. In the GIN
+Sea (Figure 2a), we can see that the model forecasts in each DA cycle (black dots) are
+drifting towards the positively-biased free-running model state (dark blue dots) over the
+5-day forecast period, and as such the analysis increments (dashed black lines) are sys-
+tematically negative to account for this. Similarly, in the Weddell Sea (Figure 2b) the
+forecasts are drifting towards the negatively-biased free-running model state, resulting
+in systematically positive increments. The forecast drift that is observed in either case
+can be quantied by the assimilation forecast tendencies, which for a given assimilation
+cyclei, corresponds to the time-derivative of the forecast cat timet, or more simply _ ci(t) =
+ci(t) ci(t 1). The total forecast tendency for a given assimilation cycle is then the
+{8{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Inputs (SIC,SST,SIU,…)Outputs(ΔSICCNN)
+32836836036636436232017
+3223243261286432
+32012
+Outputs(ΔSICNCNN)360320
+5
+Inputs (ΔSICCNN,SICN)Network A
+Network B360Convolution+ ReLUConvolution+ ReLUConvolution+ ReLU
+3603603603203203201286432Convolution+ ReLUConvolution+ ReLUConvolution+ ReLU
+Figure 3. Schematic of the CNN architectures used to learn functional mappings from state
+vectors to analysis increments. The yellow and purple squares represent 3 3 and 1 1 kernels
+over which the convolution operations are performed in each layer, respectively, where there is
+one kernel for every feature map in each layer. The white pixel is then the sum of convolution
+outputs from all features in the previous layer, which has subsequently been passed through a
+ReLU activation function. The activation function after the last convolution operation to the
+output layer is the identity function.
+sum of the individual daily tendencies: _ ci(1)+ _ci(2)+:::+ _ci(5). Klinker and Sardesh-
+mukh (1992) showed that the mean total tendencies across a large number of assimila-
+tion cycles, referred to as the systematic forecast tendency , is approximately equal to the
+negative of the analysis increments, which is also the case in our SPEAR DA experiments
+(see Figure S2). Building on this, Rodwell and Palmer (2007) then later described how
+the forecast tendencies can be broken down into tendencies associated with the model's
+representation of various resolved and parameterized physical processes, and subsequently
+used them to make assessments of model physics errors after a model change had been
+made. In our study here, we utilize this inherent link between forecast tendencies and
+analysis increments to construct CNNs which use inputs of both state variables from the
+DA forecasts, as well as their associated forecast tendencies, in order to predict SICN.
+4 Convolutional neural networks
+CNNs are a specic class of DL algorithms which are well-suited to problems where
+inputs contain local correlation structure in space and/or time (K. Murphy, 2022). For
+this reason they have historically been successful in the domains of image recognition
+and segmentation (Simonyan & Zisserman, 2014; Zeiler & Fergus, 2014; Dong et al., 2015;
+Ronneberger et al., 2015; Krizhevsky et al., 2017), where the aim is to e.g., classify ob-
+jects or isolate features within medical images. In Earth system modeling CNNs have
+subsequently been utilized for their ability to exploit the two-dimensional structure as-
+sociated with turbulent uids, and hence learn subgrid parameterizations of ocean mesoscale
+{9{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Table 1. Details of the convolutional neural networks (CNNs) inputs, outputs, architecture,
+and hyperparameters used during training.
+Network A Network B
+Inputs (* states & tenden-
+cies)SIC*, SST*, SIU*,
+SIV*, SIT*, SW*,
+TS*, SSS*, Land-
+sea maskSICCNN, SICN*,
+Land-sea mask
+Outputs SIC SICN
+Size of input data set 209417328368 209412320360
+Size of output data set 20941320360 20945320360
+Normalization Inputs standard-
+ized (see main
+text)Inputs standard-
+ized (see main
+text)
+Convolution layers 4 4
+Features per layer 32, 64, 128, 1 32, 64, 128, 5
+Activation function(s) ReLU, ReLU,
+ReLU, LinearReLU, ReLU,
+ReLU, Linear
+Kernel size(s) 33 1 1
+Kernel stride(s) 1 1
+Bias parameters False False
+Zero-padding None None
+Total weights 98,208 11,264
+Batch size 10 10
+Optimizer Adam Adam
+Learning rate 0.001 0.001
+Weight decay 110 7110 7
+Epochs 150 125
+Seed 711 711
+eddies (Bolton & Zanna, 2019; Zanna & Bolton, 2020) and cloud moisture convection
+(Han et al., 2020). For this reason, we use them here to learn sea ice model errors, which
+also inherently exhibit two-dimensional structure.
+4.1 Architecture
+Generally speaking, a CNN can be seen as a series of linear weighted sums in which
+a rectangular weight matrix, or kernel , slides over an input image in order to produce
+a new feature representation of that same input. By sequentially repeating this proce-
+dure on each new feature map, and adding nonlinear activation functions between net-
+work layers, the network is then able to extract increasingly complex behaviour from the
+inputs, before a nal operation which maps the last set of features to each pixel of the
+output image. Figure 3 shows this procedure in the present context of learning `images'
+of sea ice DA increments. In this case we develop two independent CNNs, where each
+can be classied as a `fully CNN' as the outputs of each layer are produced only by con-
+volution operations. Network A is used to learn the aggregate (SIC) increments from
+various atmosphere, ocean and sea ice model states and forecast tendencies, while net-
+work B uses the predictions of SIC from network A in order to learn a mapping from
+SIC to SICN. We nd this two-step approach yields signicantly lower prediction er-
+ror than using a single network to predict SICN directly. Table 1 summarizes the ar-
+chitectural choices made for Networks A and B.
+{10{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Each of the inputs of a given CNN have independent kernels that connect to ev-
+ery feature map in the subsequent layer of the network, hence with 3 3 kernels in each
+layer, 17 input variables, and features per layer of 32, 64, 128, and 1, network A has a
+total number of weights given by (3 31732)+(333264)+(3364128)+
+(331281) = 98;208. Meanwhile, with 1 1 kernels in each layer, 12 input vari-
+ables, and features per layer of 32, 64, 128, and 5, network B has a total number of weights
+given by (111232) + (113264) + (1164128) + (11
+1285) = 11;264. An advantage of the CNN approach is that a single kernel matrix
+is used for the entire spatial domain of a given input, meaning that structures which ex-
+hibit similar characteristics, but occur at dierent locations within the input, will be equally
+resolved. This property of translational invariance is not guaranteed in e.g., typical feed-
+forward (articial) neural networks which use the whole domain at once as input (Gardner
+& Dorling, 1998). Non-linearities within the system can also be exploited by passing each
+feature map through a non-linear activation function, such as the rectied linear unit
+(ReLU) function, which is the identity function for positive values and zero for negative
+values. In both networks in our application, the rst three convolution operations are
+followed by ReLU activation functions, while the nal convolution to the output layer
+is simply linear.
+The inputs to network A correspond to the 5-day means of the model states and
+5-day forecast tendencies from each DA cycle, for each of SIC, sea-surface temperature
+(SST), zonal and meridional components of ice velocities (SIU and SIV, respectively),
+sea ice thickness (SIT), net shortwave radiation (SW), ice-surface skin temperature (TS),
+sea-surface salinity (SSS), and nally a land-sea mask containing zeros over land grid
+cells and ones over ocean grid cells. Note that SIU and SIV are vector elds with val-
+ues located at C-grid cell edges, while the other scalar elds have values centered within
+each grid cell (see e.g., Gries et al. (2004)). This means that SIU and SIV contain one
+additional matrix column and row, respectively, compared to the scalar elds. We there-
+fore compute a 2-point average along the columns of SIU and rows of SIV, so that the
+these variables are dened on the same tracer grid as the scalar elds. The inputs to net-
+work B correspond to the SIC predictions from network A, along with the model states
+and forecast tendencies of SICN, as well as a land-sea mask. It should also be noted that
+the inputs of each network (excluding the land-sea mask) are standardized by subtract-
+ing their respective mean and normalizing by their respective standard deviation, where
+both mean and standard deviations are computed over ocean grid cells poleward of 40
+latitude, across all training samples (see section 4.2). This provides a single value of the
+mean and standard deviation for each network input. Furthermore, given that, in our
+network architecture, each convolution operation in network A reduces the size of the
+input image by 2 pixels in both matrix dimensions, the nal outputs are 8 pixels smaller
+than the original inputs (hence a 9 9 centered stencil is required to make a local pre-
+diction at any grid point). To ensure we utilize the appropriate information at the im-
+age boundaries, we therefore pad the input data by 4 pixels on each side in the follow-
+ing way: the last 4 columns of the image are padded in front of the rst column (zonal
+periodicity), the original rst 4 columns are padded to the last column (zonal period-
+icity), a copy of the rst 4 rows is ipped 180counter-clockwise and padded in front
+of the rst row (symmetry across the model's Arctic bipolar fold, see Gries et al. (2004);
+the sign of the ice velocities in the rst 4 rows is also ipped during this process), and
+nally the last row is padded with 4 rows of zeros (the nal row corresponds to the Antarc-
+tic continental land mass).
+4.2 Training
+In order to generate accurate predictions, the weights of each CNN must be opti-
+mized. This is typically achieved by minimizing an appropriate loss function Lwhich
+describes the similarity between the nal outputs of the network and the target variable
+(i.e., the analysis increments). For network A the loss function ( LA) is the mean-squared
+{11{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+error (MSE) of the SIC predictions, while for network B the loss function ( LB) is the
+sum of the MSE of each of the ve SICNs, as well as an additional term to impose a
+soft constraint that the sum of the ve SICNs are equal to SIC:
+LA=1
+NSNSX
+i=1 
+SICCNN
+i SICTrue
+i2; (1)
+LB=5X
+k=11
+NSNSX
+i=1 
+SICNCNN
+ki SICNTrue
+ki2
++1
+NSNSX
+i=1 5X
+k=1SICNCNN
+ki 5X
+k=1SICNTrue
+ki2
+:(2)
+Here,N= 320360 = 115;200 is the number of model grid points, which cor-
+responds to the entire globe. S= 10 is the batch size (randomly shued temporal sam-
+ples), and= 5 is a scaling constant. The loss function is minimized using the Adam
+stochastic gradient descent method (Kingma & Ba, 2014) within the PyTorch Python
+library (Paszke et al., 2019), which accommodates graphical processing unit (GPU) and
+batch processing facilities for signicant computational speed-ups and ecient memory
+handling, respectively. Recall Table 1 for a full list of the details of each CNN.
+As well as optimizing the weights of each CNN, there are other factors which in-
+uence the predictive performance that also need to be considered. For one, there is the
+physical architecture of each CNN, which includes e.g., the number of layers within each
+network, the type of activation function, and the size of the convolution kernels. Then
+there are also specic hyperparameters, which include e.g., the learning rate of the Adam
+optimizer, and the number of training epochs. Choosing the optimal architectures and
+hyperparameters is referred to as model selection and is generally approached by select-
+ing the model which produces the lowest error score on unseen validation data (i.e., data
+that were not used to optimize the CNN weights). In order to ensure that the valida-
+tion error is representative of the model's predictive performance across all samples it
+is often necessary to perform K-fold cross-validation, where the data are split into Kequal-
+sized temporally contiguous chunks. The model is then trained on K 1 chunks, and
+predictions are validated on the remaining chunk. We opt for temporally contiguous chunks
+here, as opposed to random sampling of training and validation points, due to inherent
+temporal auto-correlation within the data, which would likely lead to data leakage is-
+sues during the validation stage. In any case, this process is repeated Knumber of times
+where each time a dierent chunk is chosen to be the validation set. The average val-
+idation error across all Ktests is then the generalization error of that particular CNN
+model. To arrive at the nal CNN architectures and hyperparameters detailed in Table
+1, we performed 5-fold cross-validation at each model selection step, hence for a given
+architecture and set of hyperparameters the model was trained 5 times, where each time
+the 2618 temporal samples were split into dierent combinations of 2094 training and
+524 validation points. Specic architectures and hyperparameters were subsequently cho-
+sen based on the model which showed the lowest average 5-fold cross-validation score.
+Ideally, one would perform model selection by scanning all possible combinations of hy-
+perparameters and CNN architectures and nding which combination produces the low-
+est cross-validation score. For large data sets however, this is computationally imprac-
+tical and as such we proceeded with model selection by testing one hyperparameter and/or
+architecture at a time and taking the model with the lowest 5-fold cross-validation score
+forward to the next test (see Figure S3 for example learning curves from various model
+selection tests). The results in the next section are based on predictions on validation
+data from the nal CNN models, as described in Table 1. Note that, for convenience,
+hereafter we refer to networks A and B together as our nal network architecture.
+{12{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+5 Results
+Before presenting the results of the CNN predictions, we rst introduce the error
+metrics which are used to evaluate the model's performance. For a given spatial map of
+the SIC increments on any given day, SICTrue, and the equivalent CNN prediction on
+the same day, SICCNN, the regional uncentered spatial pattern correlation (Barnett &
+Schlesinger, 1987) between these two elds is given as:
+=Pn
+i=1SICCNN
+iSICTrue
+i
+kSICCNNk2kSICTruek2; (3)
+wherekk2is the`2vector norm, and n= 100360 = 36;000 for either pan-Arctic or
+pan-Antarctic regions (approx. 45N and 30S, respectively). We opt for this metric over
+the standard (centered) linear correlation coecient as the subtraction of the mean to
+compute the covariance in the centered case may result in dierences between SICTrue
+and SICCNNat open-ocean grid cells (e.g., Legates and Davis (1997)). Similar to the
+centered pattern correlation, an uncentered pattern correlation value of 1 represents a
+perfect agreement between the true and predicted increments on day t, while a value of
+ 1 represents a perfect out-of-phase agreement. A value of 0 subsequently represents no
+agreement.
+We also introduce the regional root-MSE (RMSE) as:
+RMSE =vuut1
+nnX
+i=1 
+SICCNN
+i SICTrue
+i2: (4)
+This metric captures the average deviation of the predictions from the true increments,
+hence an RMSE value of 0 represents perfect predictions.
+5.1 Predictions
+In this section we show the predictions of SIC as the sum of the ve predicted
+SICNs, on the held-out data that were not used to optimize the network weights dur-
+ing training. We therefore generate 2618 predictions spanning the 1982{2017 period, which
+correspond to combining the 5 individual held-out chunks from the cross-validation ex-
+periment of the nal model, into a continuous time series record. We focus on SIC here,
+as opposed to SICN, as the former is the direct observable quantity and as such lends
+to more intuitive interpretation of the results, although the reader is referred to Figures
+S4{S8 for comparable versions of Figure 4 for each SICN.
+Figure 4 shows the seasonal climatologies of the SIC predictions, where we no-
+tice that, in both hemispheres, the CNN is able to predict the average spatial pattern
+of the increments very well. In the Arctic, the network performs best in DJF, with av-
+erage daily spatial pattern correlations of 0.73, and a spatial pattern correlation of 0.98
+between the climatologies of the daily DJF predicted and true increments. The poor-
+est predictions in the Arctic are in JJA and SON with average daily spatial pattern cor-
+relations of 0.64 and 0.62, respectively, and correlations of 0.96 and 0.98, respectively be-
+tween the climatologies. In JJA for example, while the network reproduces the average
+spatial pattern well, the magnitude of the increments to the north of Greenland and in
+the Canada basin is generally too low. Similarly, in the Antarctic, the CNN also performs
+best in DJF with average daily spatial pattern correlations of 0.80, however the average
+magnitude of the predicted increments is generally too low in regions such as the Wed-
+dell Sea. The poorest predictions in the Antarctic are in MAM with average daily spa-
+tial pattern correlations of 0.64, perhaps owing to the network's inability to fully resolve
+the relatively small-scale heterogeneities in e.g., the Ross and Weddell seas. The large-
+scale patterns are generally in good accordance however. These initial results suggest
+that the network is able to learn the mean bias patterns of the model with considerable
+skill.
+{13{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+TrueDJF
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(b)
+TrueMAM
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(c)
+TrueJJA
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(d)
+TrueSON
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(e)
+CNN
+0.73[1]
+0.98[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(f)
+CNN
+0.69[1]
+0.98[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(g)
+CNN
+0.64[1]
+0.96[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(h)
+CNN
+0.62[1]
+0.98[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(i)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(j)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(k)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(l)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(m)
+CNN
+0.80[1]
+0.99[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(n)
+CNN
+0.64[1]
+0.96[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(o)
+CNN
+0.75[1]
+0.98[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(p)
+CNN
+0.69[1]
+0.97[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+Figure 4. Seasonal climatologies of the (true) SPEAR aggregate sea ice concentration anal-
+ysis increments and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over
+the period 1982{2017. Values with the superscript [1] are the average of daily spatial pattern
+correlations between SICTrueand SICCNNin each respective season, while values with [2] are
+the spatial pattern correlations between the respective climatologies of the true and predicted
+increments.
+Moving beyond assessments of climatologies, Figure 5 shows randomly sampled snap-
+shots of the predictions for individual days across each season, as a way to assess how
+the CNN performs at capturing the fast physics errors (for an animation of the CNN per-
+formance on additional daily snapshots, see Supporting Information S2). Broadly speak-
+ing, we nd that the CNN is able to capture the large-scale structure of the increments,
+but often fails to capture smaller-scale features. The February prediction in the Arctic
+(Figure 5e) shows high skill with a spatial pattern correlation of 0.74, however at this
+{14{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+True
+20070205
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(b)
+True
+19920516
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(c)
+True
+20130705
+−2−1 0 1 2
+Analysis increments (% per day)
+(d)
+True
+19820903
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(e)
+CNN
+200702050.74
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(f)
+CNN
+199205160.63
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(g)
+CNN
+201307050.55
+−2−1 0 1 2
+Analysis increments (% per day)
+(h)
+CNN
+198209030.43
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(i)
+True
+20010131
+−2−1 0 1 2
+Analysis increments (% per day)
+(j)
+True
+19950421
+−2−1 0 1 2
+Analysis increments (% per day)
+(k)
+True
+19880725
+−2−1 0 1 2
+Analysis increments (% per day)
+(l)
+True
+20121117
+−2−1 0 1 2
+Analysis increments (% per day)
+(m)
+CNN
+200101310.84
+−2−1 0 1 2
+Analysis increments (% per day)
+(n)
+CNN
+199504210.62
+−2−1 0 1 2
+Analysis increments (% per day)
+(o)
+CNN
+198807250.75
+−2−1 0 1 2
+Analysis increments (% per day)
+(p)
+CNN
+201211170.68
+−2−1 0 1 2
+Analysis increments (% per day)
+Figure 5. Daily snapshots of the (true) SPEAR aggregate sea ice concentration analysis in-
+crements and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic (i){(p).
+Columns from left to right show random days in DJF, MAM, JJA, and SON over the period
+1982{2017. Spatial pattern correlations are reported for each prediction.
+time of year the increments are primarily associated with sea ice edge errors, while the
+increments in the central ice pack (i.e., the majority of the Arctic domain) are eectively
+zero. Nonetheless, the CNN is able to predict these ice edge errors very well, particu-
+larly in the Labrador, GIN, Barents, Okhotsk, and Bering seas. As the melt season pro-
+gresses, the prediction skill generally drops, where it is lowest in September (Figure 5h),
+with a spatial pattern correlation of 0.43. The true July and September increments (Fig-
+ures 5c and 5d, respectively) exhibit signicant variability within the core ice pack which,
+in some regions, the network is unable to reproduce. For example, the large negative in-
+crements in the Beaufort and Chukchi seas in July. The CNN does however manage to
+{15{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+0.20.40.60.81.0Spatial pattern correlationClimatology prediction
+Sea ice areaArctic
+0.20.40.60.81.0
+SIC
+SST
+SIU,SIVSIT
+SWTSSSSAntarctic
+JFMAM JJASOND0.250.500.751.001.25RMSE (% per day)
+JFMAM JJASOND0.250.500.751.001.25
+Increment std. dev
+468101214
+051015
+Sea ice area (106km2)
+Figure 6. Prediction skill metrics for independent sensitivity tests to network inputs, pre-
+sented as daily climatologies of predictions on held-out samples, computed over the period 1982{
+2017, for the Arctic (left column) and Antarctic (right column). The shaded region reects the
+improvement in skill of the nal network (solid black curve) over the benchmark climatology
+prediction (dashed black curve).
+capture some amount of the variability in July, such as the large positive increments in
+the Kara and Laptev shelf seas.
+The prediction skill in the Antarctic is generally higher than in the Arctic, and com-
+paring Figures 5i and 5m, we can see that the CNN accurately predicts a signicant amount
+of the variability in summer, with a spatial pattern correlation of 0.84. The subsequent
+predictions in April, July and November (Figures 5n-p) show slightly lower skill than in
+January, with the lowest skill in April with a spatial pattern correlation of 0.62. At these
+times the increments are largely related to sea ice edge errors, and the CNN is gener-
+ally able to capture the large-scale patterns, as well as some of the localized features, such
+as the positive increments at the north-eastern edge of the Ross Sea in November (Fig-
+ure 5p), and the band of positive increments along the northern edge of the Weddell Sea
+in April (Figure 5n).
+From the daily snapshots we can infer that the CNN captures large amounts of the
+fast physics errors, although there is some seasonal variation to the skill, where the pre-
+dictions in the Arctic are generally best over the winter period and poorest in the sum-
+mer. Meanwhile in the Antarctic the predictions appear most skillful in the summer and
+poorest in the early growth season (April). In the next section we provide an assessment
+of the CNN's sensitivity to various inputs, as well as its sensitivity to the geographic train-
+ing domain. In doing so, we subsequently highlight this seasonal skill variation in more
+detail.
+5.2 Sensitivity analysis
+5.2.1 Network inputs
+In this section we perform sensitivity tests to determine which model states and
+forecast tendencies contribute most to the prediction skill of SIC (again, as the sum
+of the ve predicted SICNs on held-out samples), at dierent times of the year. The
+sensitivity analysis is performed by training a series of initial networks which each con-
+{16{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+tain a single variable as inputs (e.g., SIC states and forecast tendencies), and assessing
+which of these networks results in the highest prediction skill of SIC in both hemispheres.
+The input variable of this network is then assumed to be the most physically-relevant
+predictor of SIC. The testing then continues by training a second series of networks
+which contain two input variables: the best predictor from the rst test, as well as any
+one of the remaining input variables. The network which results in the largest improve-
+ment in skill relative to the best network from the rst test is then taken forward, and
+so on. For 7 network input variables (classifying SIU and SIV as a single input), we there-
+fore trained 28 independent network congurations in order to establish a hierarchy of
+predictors.
+Figure 6 shows daily 36-year climatologies of spatial pattern correlation and RMSE
+error metrics, for sensitivity tests in both the Arctic and Antarctic domains. The hier-
+archy of predictors in terms of largest skill contribution proceeds as: SIC, SST, SIU and
+SIV, SIT, SW, TS, and nally SSS. Hence for the SIC curves, the network inputs to gen-
+erate these predictions are only SIC states and forecast tendencies, while for the SST curves,
+the network inputs are SIC and SST states and forecast tendencies, and so on. The SSS
+curve then represents the predictions from the nal model (i.e., the network architecture
+presented in section 4.1). The climatology prediction (black dashed curve) refers to us-
+ing the daily 36-year climatology of the true SIC increments to predict the true SIC
+increment on any given day. This is an oine-equivalent to the `ocean tendency adjust-
+ment' approach by Lu et al. (2020), as discussed in section 1, and as such serves as our
+benchmark here, where we can see that each sensitivity test provides improvement in skill
+over this climatological tendency benchmark. From this analysis we can also see that,
+relative to the benchmark climatology, SIC is responsible for a signicant fraction of the
+overall network skill (approx. 66% in both hemispheres). SST, SIU and SIV then account
+for an additional 20%, with the remaining variables SIT, SW, TS and SSS making up
+the last 14%. Furthermore, while SIC, SST, SIU and SIV are essential inputs in all months
+of the year, the contributions from other variables such as SW and TS are generally lim-
+ited to the summer months.
+In terms of spatial pattern correlation, the maximum skill of the nal network in
+the Arctic occurs at the beginning of March, after which the skill declines somewhat con-
+tinuously until the end of July, and then more rapidly to its minimum in early Septem-
+ber. Meanwhile in the Antarctic, the points of maximum and minimum skill are sepa-
+rated by approximately 1.5 months, with the maximum occurring at the end of January,
+and the minimum at the beginning of March. Although the skill variation in the Arc-
+tic appears to somewhat correlate with the climatological sea ice area, the rate of change
+in sea ice area in the melt and growth season is generally not consistent with that of the
+CNN prediction skill. Furthermore, in the Antarctic the skill is increasing between Novem-
+ber and January, while the sea ice area is decreasing. This therefore suggests that the
+skill variation is not directly tied to the seasonal cycle of sea ice area. When also con-
+sidering the standard deviation of the increments, we can see that the low spatial pat-
+tern correlation scores coincide with times when the standard deviation of the increments,
+and hence the RMSE, are relatively low. This may initially suggest that the lower spa-
+tial pattern correlation at these times is either a consequence of low signal variance, or
+that the network training does little to optimize these points as they inherently have lower
+MSE than e.g., the winter months. If however the spatial pattern correlation scores were
+a direct reection of the increment standard deviation, we would expect to see similarly
+low spatial pattern correlations in e.g., April in the Arctic or November in the Antarc-
+tic, however this is not generally the case. What is noticeable, is that the climatology
+benchmark also exhibits the same seasonal variation in spatial pattern correlation and
+RMSE as the CNN predictions, highlighting that the lower skill in the late summer in
+both hemispheres is not likely due to any shortcomings in the ML model, but rather a
+feature of the increments themselves. In particular, the climatological prediction is less
+{17{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+0.00.20.40.60.81.0Spatial pattern correlationArctic
+0.00.20.40.60.81.0Antarctic
+JFMAM JJASOND0.40.60.81.01.21.4RMSE (% per day)
+JFMAM JJASOND0.40.60.81.01.21.4
+Climatology prediction
+Train globalTrain Arctic
+Train Antarctic
+Figure 7. Prediction skill metrics for independent sensitivity tests to the network training
+domain, presented as daily climatologies of predictions on held-out samples, computed over the
+period 1982{2017, for the Arctic (left column) and Antarctic (right column).
+skillful in the low-CNN-skill months, suggesting that these months are inherently more
+challenging to predict.
+5.2.2 Training domain
+The network in this study is trained on data from the entire globe, meaning that
+it must nd the optimal set of weights which generalize to make accurate predictions of
+the analysis increments in both the Arctic and the Antarctic. Given that the bias pat-
+terns, and hence characteristics of the increments, are somewhat dierent between the
+two hemispheres, we conduct further sensitivity tests to determine how well the network
+has generalized. As before, error metrics are shown in terms of the sum of the ve pre-
+dicted SICNs on held-out samples that were not used to train the model.
+Figure 7 shows daily climatologies of spatial pattern correlation and RMSE error
+metrics, for three variations of the network training setup. One where the network is trained
+on the entire globe (i.e., our proposed network in section 4.1), one where the network
+is trained on just the Arctic domain, and one where the network is trained on just the
+Antarctic domain. Here we notice that the network which is trained on global data is
+able to make just as skillful predictions of SIC in the Arctic, as the network which is
+trained only on Arctic data. The same is also true for the Antarctic case. Interestingly,
+we can also see that the network which is trained only on the Arctic are still able to make
+relatively skillful predictions of the Antarctic increments, even performing better than
+the benchmark climatology predictions between the months of December and February.
+Meanwhile, the network which is trained on Antarctic data is not able to generalize as
+well to the Arctic, although still shows some small amount of skill between July and Au-
+gust. This analysis therefore conrms that training on global data is vital for general-
+izing across domains while still matching the skill of networks trained on each individ-
+ual domain.
+{18{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+0.000.250.500.751.00Spatial pattern correlationArctic
+0.000.250.500.751.00Antarctic
+Jan 2018Jul 2018
+Jan 2019Jul 2019
+Jan 2020Jul 2020
+Jan 2021Jul 2021
+Jan 20220.51.01.52.0RMSE (% per day)
+Jan 2018Jul 2018
+Jan 2019Jul 2019
+Jan 2020Jul 2020
+Jan 2021Jul 2021
+Jan 20220.51.01.52.0
+Climatology prediction CNN skill 1982–2017 CNN skill 2018–2021
+Figure 8. Generalization performance of CNN predictions for the extended period between
+January 2018 and December 2021. Error metrics for the black curves are shown at the frequency
+of the data assimilation system (5-daily), while the blue curve is the daily climatology skill of the
+nal network over the 1982{2017 period.
+5.3 Final validation
+Due to the fact that we perform model selection by choosing specic CNN archi-
+tectures and hyperparameters which minimize the average cross-validation score on data
+that were not used to optimize the CNN weights, there is an inherent risk of over-tting
+the model to these validation data. As such, it is often necessary to retain an additional
+data set which has not been used for validation at any point during the model selection
+process. For this, we extend the Y. Zhang et al. (2021) sea ice DA experiment from De-
+cember 27th2017, through to December 27th2021, providing an additional 291 valida-
+tion data points. We subsequently evaluate the performance of our CNN model by train-
+ing on all 2618 samples between 1982{2017, and validating on the extended data period
+between 2018{2021. It should be noted that this extended DA experiment is identical
+in conguration to that which was outlined in section 2.2, except that in this extended
+case the atmospheric forcing from JRA55-do reanalysis corresponds to version 1.5, while
+previously it was version 1.3. This version change relates to a correction in the sign and
+rotation of tropical cyclones, and as such we do not expect this to result in signicant
+dierences in the representation of sea ice in the extended DA simulations.
+Figure 8 shows daily spatial pattern correlation and RMSE error metrics over the
+2018{2021 period for both the Arctic and Antarctic domains (black curves). We also over-
+lay the daily climatology skill of the nal network architecture from the cross-validation
+experiments between 1982{2017, hence the blue curves here are identical to the `Train
+global' curves in Figure 7, and are simply repeated for each of the 4 validation years pre-
+sented. The predictions appear to generalize well to the future data, where spatial pat-
+tern correlation values are generally in accordance with the 1982{2017 period, partic-
+ularly in the Antarctic, and are still out-performing the climatology prediction in both
+hemispheres. On average, the RMSE over the 2018{2021 period is slightly higher than
+the 1982{2017 climatology, which is due to the fact that there is a non-stationary com-
+{19{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+ponent to the increments, whereby the variance increases over the course of the time se-
+ries record (see Figure S9). Therefore naturally the climatological RMSE of the CNN
+predictions increases over time as well (see Figure S10). In any case, the generalization
+ability of the predictions suggests that the CNN has not simply over-tted to the train-
+ing and/or validation data during model selection.
+6 Discussion
+The ability of the proposed CNN to make skillful predictions of the sea ice concen-
+tration analysis increments, using only information on local model state variables and
+their tendencies, provides interesting avenues for future work. The fact that the predic-
+tions show improvements in skill relative to a daily increment climatology (e.g., Lu et
+al. (2020)), generalize well to each hemisphere, and show skill on a separate validation
+data set, strongly suggests that the CNN could be used to reduce sea ice biases within
+SPEAR, either as an online sea ice model parameterization, or as a bias correction tool
+for numerical sea ice prediction. Ultimately, one could argue that there is still room for
+improvement in the CNN performance, particularly in the late summer months. Con-
+sidering the inherent complexity of the problem at hand, and the likely inuence of both
+non-linear and non-local processes, it is conceivable to push the limit of predictive skill
+further by increasing the complexity of the network, both in terms of the total number
+of weights, and the 9 9 grid cell domain of inuence on a local prediction. Indeed, such
+changes could be implemented through increasing the width and/or depth of the net-
+work, as well as incorporating non-local connections (in space) through e.g., fully-connected
+layers. On the other hand, the architectures here been developed specically with the
+goal of a sea ice model parameterization in mind, and as such, factors including com-
+putational cost and practicality of implementation in parallelized high-performance com-
+puting environments have been considered throughout the development. In the follow-
+ing sections we provide a discussion on the directions for future work relating to both
+sea ice parameterization and seasonal sea ice prediction.
+6.1 Considerations for parameterization
+ML models have been shown to be successful at parameterizing subgrid-scale pro-
+cesses within dynamical models, including ocean mesoscale eddies (Guillaumin & Zanna,
+2021), atmospheric convection (Yuval & O'Gorman, 2020), and sea ice dynamics (Finn
+et al., 2023). Common to each of these studies is that the ML models target specic phys-
+ical processes, with the aim of replacing pre-existing knowledge-based parameterizations,
+or deriving new parameterizations for physical processes which are not currently repre-
+sented. On the other hand, our proposed CNN is trained to predict sea ice increments
+which reect numerous interacting model errors across various model components. To
+subsequently disentangle these coupled model physics errors a-posteriori and then ap-
+ply them as parameterizations to their respective components, is not straightforward.
+In our goal of constructing a sea ice model parameterization, it is critical to ensure that
+the parameterization is not acting to correct coupled model errors that originate in other
+model components (e.g., an ocean heat transport bias or atmospheric circulation bias
+that imprints upon the sea ice). Our DA-ML methodology attempts to mitigate this pos-
+sibility, as the ice-ocean DA system is driven by atmospheric reanalysis and also nudges
+SST and SSS towards observed values. These observational constraints on the atmosphere
+and ocean allow us to interpret the DA increments as isolated sea ice model physics er-
+rors, however this assumption is not perfect as the ocean component of the DA system
+can still imprint some errors on the sea ice state (e.g., Figure S1). Future investigation
+will be required to determine how the CNN generalizes in a fully coupled setting with
+fully-interactive atmosphere-ice-ocean feedbacks (see section 6.2).
+{20{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Another major consideration for a sea ice parameterization is how to appropriately
+conserve mass, heat, and salt. In the context of the ocean, Lu et al. (2020) achieved global
+conservation of heat and salinity when implementing the climatological ocean DA incre-
+ments into MOM6 by ensuring that the global integral of the correction to each variable
+was zero. In the case of sea ice, assuming the parameterization enters the thermodynamic
+solver, then appropriately coupling this parameterization with the upper ocean would
+mean that a predicted negative sea ice concentration increment would remove sea ice (column-
+wise) by adding mass and salt to the ocean mixed layer, while also removing heat. This
+step is likely to come in the form of a mass, heat, and salt budget assessment between
+the ice and ocean after evaluating the amount of local sea ice mass change associated
+with a given predicted SIC increment, rather than adapting the CNN architectures them-
+selves to respect conservation.
+Although we have considered implementation cost in the design of our network, some
+investigation will be required to quantify this cost in terms of both matrix computations
+and additional memory load. Regarding memory load, our parameterization will not re-
+quire any additional memory in terms of the number of grid cells stored on any one cen-
+tral processing unit (CPU), as our 9 9 network stencil requires the same number of `halo'
+grid points as the default SPEAR conguration, which uses a halo size of 4. There will
+be some small amount of memory cost for storing the network weights on each CPU how-
+ever. Looking to similar studies, Guillaumin and Zanna (2021) found that implement-
+ing a fully CNN with 8 convolutional layers as a stochastic parameterization into an ide-
+alized shallow water model resulted in a 25% increase in the run time, compared to an
+unparameterized simulation. C. Zhang et al. (2023) also found that the cost of doing in-
+ference with this same network as a parameterization in MOM6 was 10 times more ex-
+pensive than the CPU cost of the simulation itself. Although we eectively have 8 con-
+volutional layers when considering both networks A and B, we can still expect much lower
+computational overheads given that ours is a deterministic model (i.e., we predict a sin-
+gle output at each grid point for each SICN, rather a, potentially larger, number of pa-
+rameters which describe a distribution of values), and that our kernel size for network
+B is 11 in each layer, while the Guillaumin and Zanna (2021) network uses variable size
+kernels throughout, ranging from sizes 3 3 to 55. Like in this study, they also did not
+use zero-padding, though in their case given the larger kernel sizes, they required a sten-
+cil of 2121 grid points to make a local prediction.
+Finally, the increments in this study represent error growth over a 5-day period,
+and the input states and tendencies of the CNN are given as 5-day means. After imple-
+mentation, the CNN predictions will need to produce a correction which reects error
+growth over a given model timestep, and similarly the input states and tendencies will
+need to be adjusted accordingly. This will therefore require further sensitivity tests to
+determine how to appropriately perform this scaling.
+6.2 Considerations for sea ice forecasting
+Some of the initial concerns over implementation of the CNN as a sea ice model
+parameterization can be alleviated by assessing how the network performs as an online
+bias correction tool within the context of seasonal sea ice forecasting. In previous work,
+Y. Zhang et al. (2022) showcased the benets of using SIC assimilation to initialize the
+sea ice conditions for SPEAR retrospective forecasts (hereafter reforecasts) of the Arc-
+tic sea ice cover between 1992{2017. In Y. Zhang et al. (2022), the same ice-ocean SPEAR
+model conguration and initial conditions as outlined here in section 2.2, were used to
+perform DA between 1982 and the rst day of each month, for all years between 1992
+and 2017. Whereby the rst day of each month represented the initialization point, af-
+ter which the model would run in fully coupled mode to generate forecasts out to 1-year
+lead time. Assimilation in Y. Zhang et al. (2021, 2022) was performed by passing the
+prior model state variables and observations to the Data Assimilation Research Testbed
+{21{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(DART; Anderson et al. (2009)), which then computes the set of analysis states oine,
+providing the new set of initial conditions with which to begin the next assimilation cy-
+cle. Given that our CNN is inherently independent of the observations, we propose that
+it would be relatively straightforward to bias correct the sea ice within the fully coupled
+reforecast period by replacing the standard call to DART with our CNN. In this scenario,
+we could perform seasonal reforecasts (up to 12-month lead times) to assess how the net-
+work generalizes to the fully coupled SPEAR model, while not requiring strict conser-
+vation properties due to the shorter time scales. Furthermore, we could continue in the
+same 5-day cycle conguration so that the network predictions would not need to be scaled
+for dierent temporal sampling. If the reforecasts then have improved skill relative to
+the SPEAR DA-initialized reforecasts from Y. Zhang et al. (2022), they may be t-for-
+purpose as a model parameterization.
+7 Concluding remarks
+7.1 Summary
+In this study we have shown that deep learning (DL), specically convolutional neu-
+ral networks (CNNs), can be used to make skillful predictions of sea ice model errors,
+in the form of data assimilation (DA) increments, using only information from model state
+variables and tendencies (the time derivative of the model state variables). We devel-
+oped a CNN using an ice-ocean DA system which assimilates satellite observations of
+sea ice concentration (SIC) into the Seamless system for Prediction and EArth system
+Research (SPEAR) model every 5 days between 1982{2017. SPEAR has a 5-category
+ice thickness distribution, hence concentration increments are produced for each subgrid
+category, where the observable (aggregate) SIC increment corresponds to the sum of 5
+categories. We therefore developed a two-step CNN architecture, in which the rst step
+learns the physical mapping from various local sea ice, ocean and atmosphere state vari-
+ables and forecast tendencies to the aggregate SIC increments. The second step then learns
+the mapping from the aggregate concentration error to each of the subgrid terms. We
+subsequently showed that our DL architecture is able to make skillful predictions of the
+SIC increments in both the Arctic and the Antarctic and across all seasons. Spatial pat-
+tern correlations between the climatologies of the observed and predicted increments are
+high, with values of at least 0.96 for both the Arctic and Antarctic, demonstrating that
+the CNN is able to skillfully capture the mean model bias. The CNN also has skill at
+predicting the state-dependent model errors, with daily pattern correlation values rang-
+ing from 0.64{0.80 and 0.62{0.73 in the Antarctic and Arctic, respectively. This shows
+that the CNN is able to predict the fast physics errors and systematic bias patterns of
+the SPEAR model with considerable skill, which is also conrmed by the fact that the
+predictions show improved skill over a model which simply predicts the climatological
+mean increment on any given day of the year. Sensitivity analysis revealed that SIC as
+an input to the network is responsible for approximately 66% of the overall network skill,
+followed by sea-surface temperature (SST) and ice velocities which account for 20%, and
+nally ice thickness, net shortwave radiation, ice-surface skin temperature and sea-surface
+salinity which account for the remaining 14%.
+7.2 Outlook
+Recent studies have highlighted how DA provides a unique opportunity to lever-
+age sparse and/or noisy observations, in order to facilitate machine learning of structural
+model errors (Bonavita & Laloyaux, 2020; Brajard et al., 2021; Farchi et al., 2021; Mo-
+jgani et al., 2022; Chen et al., 2022). Building on this, we have shown here how DA also
+provides the ability to learn errors within unobserved model state variables, and hence
+provides a new framework for learning subgrid-scale parameterizations for climate mod-
+els. In section 6 we subsequently outlined how the strong predictive performance of the
+{22{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+CNN and its generalization ability suggests that the network has the potential to reduce
+sea ice biases in free-running climate simulations, as a sea ice model parameterization
+within SPEAR. Irrespective of this eventual goal however, the ndings in this work ul-
+timately have wider implications for the climate modeling and numerical weather pre-
+diction (NWP) community in general. With regards to NWP, previous studies have al-
+ready shown that ML techniques can be used to learn state-dependent fast physics er-
+rors within large-scale atmospheric models, subsequently leading to improved online pre-
+dictions by using the ML model as a bias correction tool (Bonavita & Laloyaux, 2020;
+Chen et al., 2022). In our study, we have shown that the concept of learning state-dependent
+fast physics errors is transferable to a global ice-ocean model, which could further aid
+NWP when considering that coupling the atmosphere with an ice-ocean model has pre-
+viously shown to improve short-term weather predictions (G. Smith et al., 2018).
+Turning to longer-term simulations, the fact that the systematic errors are also pre-
+dictable suggests that a parameterization built from DA increments has the potential
+to reduce persistent climate model biases and improve the delity of climate change pro-
+jections. On the other hand, while we have shown that state variables such as SIC and
+SST explain a signicant fraction of the variance in the analysis increments, our current
+framework does not allow us to attribute these correlations to a specic model deciency,
+for example an incorrectly parameterized or missing physical process. One additional av-
+enue for future work could therefore involve designing a perfect model experiment in which
+a single ensemble member is run with a specic parameterization that has been tuned
+or turned on (e.g., sea ice ridging or melt-pond formation). This member would then be
+treated as the ground truth and assimilated into the original model. The resultant anal-
+ysis increments would then be a manifestation of the systematic bias within the origi-
+nal model, associated with this specic incorrect/missing parameterization, and hence
+one could more condently isolate which state variables within an ML model contribute
+most to predicting this particular structural error.
+8 Open Research
+All data for training each CNN are openly available at the following locations:
+Inputs (DA forecast states and tendencies): ftp://sftp.gfdl.noaa.gov/perm/
+William.Gregory/seaice DA-ML inputs 1982-2017.nc
+Outputs (DA increments): ftp://sftp.gfdl.noaa.gov/perm/William.Gregory/
+seaice DA-ML outputs 1982-2017.nc
+Python code to pre-process the input data and train the CNNs can also be found at https://
+github.com/m2lines/seaice DA-ML . The optimized weights of the CNNs and standard-
+ization statistics for the inputs are also saved within the same repository.
+Acknowledgments
+William Gregory, Mitchell Bushuk, Alistair Adcroft and Laure Zanna received M2LInES
+research funding by the generosity of Eric and Wendy Schmidt by recommendation of
+the Schmidt Futures program. This work was also intellectually supported by various
+other members of the M2LInES project, as well as being supported through the provi-
+sions of computational resources from the National Oceanic and Atmospheric Admin-
+istration (NOAA) Geophysical Fluid Dynamics Laboratory (GFDL). We also thank Spencer
+Clark and Zachary Labe for their invaluable feedback on this article.
+References
+Adcroft, A., Anderson, W., Balaji, V., Blanton, C., Bushuk, M., Dufour, C. O., . . .
+{23{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+others (2019). The GFDL global ocean and sea ice model OM4.0: Model
+description and simulation features. Journal of Advances in Modeling Earth
+Systems ,11(10), 3167{3211. doi: https://doi.org/10.1029/2019MS001726
+Anderson, J. (2001). An ensemble adjustment Kalman lter for data assimilation.
+Monthly weather review ,129(12), 2884{2903. doi: https://doi.org/10.1175/
+1520-0493(2001)129 h2884:AEAKFFi2.0.CO;2
+Anderson, J., Hoar, T., Raeder, K., Liu, H., Collins, N., Torn, R., & Avellano,
+A. (2009). The data assimilation research testbed: A community facility.
+Bulletin of the American Meteorological Society ,90(9), 1283{1296. doi:
+https://doi.org/10.1175/2009BAMS2618.1
+Aulign e, T., McNally, A., & Dee, D. (2007). Adaptive bias correction for satel-
+lite data in a numerical weather prediction system. Quarterly Journal of
+the Royal Meteorological Society: A journal of the atmospheric sciences,
+applied meteorology and physical oceanography ,133(624), 631{642. doi:
+https://doi.org/10.1002/qj.56
+Balmaseda, M., Dee, D., Vidard, A., & Anderson, D. (2007). A multivariate
+treatment of bias for sequential data assimilation: Application to the tropi-
+cal oceans. Quarterly Journal of the Royal Meteorological Society: A journal
+of the atmospheric sciences, applied meteorology and physical oceanography ,
+133(622), 167{179. doi: https://doi.org/10.1002/qj.12
+Banzon, V., Smith, T. M., Chin, T. M., Liu, C., & Hankins, W. (2016). A long-term
+record of blended satellite and in situ sea-surface temperature for climate mon-
+itoring, modeling and environmental studies. Earth System Science Data ,8(1),
+165{176. doi: https://doi.org/10.5194/essd-8-165-2016
+Barnett, T. P., & Schlesinger, M. E. (1987). Detecting changes in global climate
+induced by greenhouse gases. Journal of Geophysical Research: Atmospheres ,
+92(D12), 14772{14780. doi: https://doi.org/10.1029/JD092iD12p14772
+Bi, K., Xie, L., Zhang, H., Chen, X., Gu, X., & Tian, Q. (2022). Pangu-Weather: A
+3D high-resolution model for fast and accurate global weather forecast. arXiv
+preprint arXiv:2211.02556 . doi: https://doi.org/10.48550/arXiv.2211.02556
+Bitz, C. M., Holland, M. M., Weaver, A. J., & Eby, M. (2001). Simulating the
+ice-thickness distribution in a coupled climate model. Journal of Geophys-
+ical Research: Oceans ,106(C2), 2441{2463. doi: https://doi.org/10.1029/
+1999JC000113
+Bitz, C. M., & Lipscomb, W. H. (1999). An energy-conserving thermodynamic
+model of sea ice. Journal of Geophysical Research: Oceans ,104(C7), 15669{
+15677. doi: https://doi.org/10.1029/1999JC900100
+Bolton, T., & Zanna, L. (2019). Applications of deep learning to ocean data in-
+ference and subgrid parameterization. Journal of Advances in Modeling Earth
+Systems ,11(1), 376{399. doi: https://doi.org/10.1029/2018MS001472
+Bonavita, M., & Laloyaux, P. (2020). Machine learning for model error inference
+and correction. Journal of Advances in Modeling Earth Systems ,12(12),
+e2020MS002232. doi: https://doi.org/10.1029/2020MS002232
+Bouillon, S., Maqueda, M. A. M., Legat, V., & Fichefet, T. (2009). An elastic{
+viscous{plastic sea ice model formulated on Arakawa b and c grids. Ocean
+Modelling ,27(3-4), 174{184. doi: https://doi.org/10.1016/j.ocemod.2009.01
+.004
+Brajard, J., Carrassi, A., Bocquet, M., & Bertino, L. (2021). Combining data
+assimilation and machine learning to infer unresolved scale parametrization.
+Philosophical Transactions of the Royal Society A ,379(2194), 20200086. doi:
+https://doi.org/10.1098/rsta.2020.0086
+Brenowitz, N. D., & Bretherton, C. S. (2018). Prognostic validation of a neural net-
+work unied physics parameterization. Geophysical Research Letters ,45(12),
+6289{6298. doi: https://doi.org/10.1029/2018GL078510
+Bretherton, C. S., Henn, B., Kwa, A., Brenowitz, N. D., Watt-Meyer, O., McGib-
+{24{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+bon, J., . . . Harris, L. (2022). Correcting coarse-grid weather and climate
+models by machine learning from global storm-resolving simulations. Jour-
+nal of Advances in Modeling Earth Systems ,14(2), e2021MS002794. doi:
+https://doi.org/10.1029/2021MS002794
+Briegleb, B., & Light, B. (2007). A delta-eddington mutiple scattering param-
+eterization for solar radiation in the sea ice component of the Community
+Climate System Model. University Corporation for Atmospheric Research . doi:
+https://doi.org/10.5065/D6B27S71
+Carrassi, A., & Vannitsem, S. (2011). Treatment of the error due to unresolved
+scales in sequential data assimilation. International Journal of Bifurcation and
+Chaos ,21(12), 3619{3626. doi: https://doi.org/10.1142/S0218127411030775
+Cavalieri, D. J., Parkinson, C. L., Gloersen, P., & Zwally, H. J. (1996). Sea ice
+concentrations from Nimbus-7 SMMR and DMSP SSM/I-SSMIS passive mi-
+crowave data, version 1. NASA Natl. Snow and Ice Data Cent. Distrib. Active
+Arch. Cent., Boulder, Colo. . doi: https://doi.org/10.5067/8GQ8LZQVL0VL
+Chen, T.-C., Penny, S. G., Whitaker, J. S., Frolov, S., Pincus, R., & Tulich, S.
+(2022). Correcting systematic and state-dependent errors in the NOAA FV3-
+GFS using neural networks. Journal of Advances in Modeling Earth Systems ,
+14(11). doi: https://doi.org/10.1029/2022MS003309
+Chepurin, G. A., Carton, J. A., & Dee, D. (2005). Forecast model bias correction
+in ocean data assimilation. Monthly weather review ,133(5), 1328{1342. doi:
+https://doi.org/10.1175/MWR2920.1
+Crawford, W., Frolov, S., McLay, J., Reynolds, C. A., Barton, N., Ruston, B., &
+Bishop, C. H. (2020). Using analysis corrections to address model error in
+atmospheric forecasts. Monthly Weather Review ,148(9), 3729{3745. doi:
+https://doi.org/10.1175/MWR-D-20-0008.1
+Dansereau, V., Weiss, J., Saramito, P., & Lattes, P. (2016). A maxwell elasto-
+brittle rheology for sea ice modelling. The Cryosphere ,10(3), 1339{1359. doi:
+https://doi.org/10.5194/tc-10-1339-2016
+Dawson, G., Landy, J., Tsamados, M., Komarov, A. S., Howell, S., Heorton, H.,
+& Krumpen, T. (2022). A 10-year record of Arctic summer sea ice free-
+board from CryoSat-2. Remote Sensing of Environment ,268, 112744. doi:
+https://doi.org/10.1016/j.rse.2021.112744
+Dee, D. P. (2004). Variational bias correction of radiance data in the ECMWF sys-
+tem. In Proceedings of the ecmwf workshop on assimilation of high spectral res-
+olution sounders in nwp, reading, uk (Vol. 28, pp. 97{112).
+Dee, D. P. (2005). Bias and data assimilation. Quarterly Journal of the
+Royal Meteorological Society: A journal of the atmospheric sciences, ap-
+plied meteorology and physical oceanography ,131(613), 3323{3343. doi:
+https://doi.org/10.1256/qj.05.137
+Dee, D. P., & Uppala, S. (2009). Variational bias correction of satellite radiance data
+in the ERA-Interim reanalysis. Quarterly Journal of the Royal Meteorological
+Society: A journal of the atmospheric sciences, applied meteorology and physi-
+cal oceanography ,135(644), 1830{1841. doi: https://doi.org/10.1002/qj.493
+Delworth, T. L., Cooke, W. F., Adcroft, A., Bushuk, M., Chen, J.-H., Dunne,
+K. A., . . . others (2020). SPEAR: The next generation GFDL model-
+ing system for seasonal to multidecadal prediction and projection. Jour-
+nal of Advances in Modeling Earth Systems ,12(3), e2019MS001895. doi:
+https://doi.org/10.1029/2019MS001895
+Dong, C., Loy, C. C., He, K., & Tang, X. (2015). Image super-resolution using
+deep convolutional networks. IEEE transactions on pattern analysis and ma-
+chine intelligence ,38(2), 295{307. doi: https://doi.org/10.1109/TPAMI.2015
+.2439281
+Farchi, A., Laloyaux, P., Bonavita, M., & Bocquet, M. (2021). Using machine
+learning to correct model error in data assimilation and forecast applications.
+{25{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Quarterly Journal of the Royal Meteorological Society ,147(739), 3067{3084.
+doi: https://doi.org/10.1002/qj.4116
+Finn, T., Durand, C., Farchi, A., Bocquet, M., Chen, Y., Carrassi, A., & Dansereau,
+V. (2023). Deep learning of subgrid-scale parametrisations for short-term fore-
+casting of sea-ice dynamics with a maxwell-elasto-brittle rheology. EGUsphere ,
+2022-1342. doi: https://doi.org/10.5194/egusphere-2022-1342
+Flocco, D., Schroeder, D., Feltham, D. L., & Hunke, E. C. (2012). Impact of melt
+ponds on Arctic sea ice simulations from 1990 to 2007. Journal of Geophysical
+Research: Oceans ,117(C9). doi: https://doi.org/10.1029/2012JC008195
+Gardner, M. W., & Dorling, S. (1998). Articial neural networks (the multilayer
+perceptron) | a review of applications in the atmospheric sciences. Atmo-
+spheric environment ,32(14-15), 2627{2636. doi: https://doi.org/10.1016/
+S1352-2310(97)00447-0
+Gentine, P., Pritchard, M., Rasp, S., Reinaudi, G., & Yacalis, G. (2018). Could
+machine learning break the convection parameterization deadlock? Geo-
+physical Research Letters ,45(11), 5742{5751. doi: https://doi.org/10.1029/
+2018GL078202
+Gries, S. M., Harrison, M. J., Pacanowski, R. C., & Rosati, A. (2004). A technical
+guide to MOM4. GFDL Ocean Group Tech. Rep ,5, 342.
+Grundner, A., Beucler, T., Gentine, P., Iglesias-Suarez, F., Giorgetta, M. A., &
+Eyring, V. (2022). Deep learning based cloud cover parameterization for
+ICON. Journal of Advances in Modeling Earth Systems , e2021MS002959. doi:
+https://doi.org/10.1029/2021MS002959
+Guillaumin, A. P., & Zanna, L. (2021). Stochastic-deep learning parameterization
+of ocean momentum forcing. Journal of Advances in Modeling Earth Systems ,
+13(9), e2021MS002534. doi: https://doi.org/10.1029/2021MS002534
+Han, Y., Zhang, G. J., Huang, X., & Wang, Y. (2020). A moist physics parame-
+terization based on deep learning. Journal of Advances in Modeling Earth Sys-
+tems ,12(9), e2020MS002076. doi: https://doi.org/10.1029/2020MS002076
+Hibler, W. D. (1979). A dynamic thermodynamic sea ice model. Journal of physi-
+cal oceanography ,9(4), 815{846. doi: https://doi.org/10.1175/1520-0485(1979)
+009h0815:ADTSIMi2.0.CO;2
+Horvat, C., & Tziperman, E. (2015). A prognostic model of the sea-ice oe size and
+thickness distribution. The Cryosphere ,9(6), 2119{2134. doi: https://doi.org/
+10.5194/tc-9-2119-2015
+Kern, S., Lavergne, T., Notz, D., Pedersen, L. T., & Tonboe, R. (2020). Satel-
+lite passive microwave sea-ice concentration data set inter-comparison
+for Arctic summer conditions. The Cryosphere ,14(7), 2469{2493. doi:
+https://doi.org/10.5194/tc-14-2469-2020
+Kern, S., Lavergne, T., Notz, D., Pedersen, L. T., Tonboe, R. T., Saldo, R., &
+Srensen, A. M. (2019). Satellite passive microwave sea-ice concentration data
+set intercomparison: closed ice and ship-based observations. The Cryosphere ,
+13(12), 3261{3307. doi: https://doi.org/10.5194/tc-13-3261-2019
+Kim, H., Kang, S. M., Kay, J. E., & Xie, S.-P. (2022). Subtropical clouds
+key to Southern Ocean teleconnections to the tropical Pacic. Proceed-
+ings of the National Academy of Sciences ,119(34), e2200514119. doi:
+https://doi.org/10.1073/pnas.2200514119
+Kingma, D. P., & Ba, J. (2014). Adam: A method for stochastic optimization. arXiv
+preprint arXiv:1412.6980 . doi: https://doi.org/10.48550/arXiv.1412.6980
+Klinker, E., & Sardeshmukh, P. D. (1992). The diagnosis of mechanical dissi-
+pation in the atmosphere from large-scale balance requirements. Journal
+of Atmospheric Sciences ,49(7), 608{627. doi: https://doi.org/10.1175/
+1520-0469(1992)049 h0608:TDOMDIi2.0.CO;2
+Krizhevsky, A., Sutskever, I., & Hinton, G. E. (2017). Imagenet classication with
+deep convolutional neural networks. Communications of the ACM ,60(6), 84{
+{26{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+90. doi: https://doi.org/10.1145/3065386
+Laloyaux, P., Bonavita, M., Dahoui, M., Farnan, J., Healy, S., H olm, E., &
+Lang, S. (2020). Towards an unbiased stratospheric analysis. Quarterly
+Journal of the Royal Meteorological Society ,146(730), 2392{2409. doi:
+https://doi.org/10.1002/qj.3798
+Laloyaux, P., Kurth, T., Dueben, P. D., & Hall, D. (2022). Deep learning
+to estimate model biases in an operational NWP assimilation system.
+Journal of Advances in Modeling Earth Systems , e2022MS003016. doi:
+https://doi.org/10.1029/2022MS003016
+Landy, J. C., Dawson, G. J., Tsamados, M., Bushuk, M., Stroeve, J. C., Howell,
+S. E., . . . others (2022). A year-round satellite sea-ice thickness record from
+CryoSat-2. Nature , 1{6. doi: https://doi.org/10.1038/s41586-022-05058-5
+Large, W., & Danabasoglu, G. (2006). Attribution and impacts of upper-ocean bi-
+ases in CCSM3. Journal of Climate ,19(11), 2325{2346. doi: https://doi.org/
+10.1175/JCLI3740.1
+Legates, D. R., & Davis, R. E. (1997). The continuing search for an anthropogenic
+climate change signal: Limitations of correlation-based approaches. Geo-
+physical Research Letters ,24(18), 2319{2322. doi: https://doi.org/10.1029/
+97GL02207
+Leith, C. (1978). Objective methods for weather prediction. Annual Review of Fluid
+Mechanics ,10(1), 107{128. doi: https://doi.org/10.1146/annurev..10.010178
+.000543
+Lu, F., Harrison, M. J., Rosati, A., Delworth, T. L., Yang, X., Cooke, W. F., . . .
+others (2020). GFDL's SPEAR seasonal prediction system: Initialization
+and ocean tendency adjustment (OTA) for coupled model predictions. Jour-
+nal of Advances in Modeling Earth Systems ,12(12), e2020MS002149. doi:
+https://doi.org/10.1029/2020MS002149
+Mitchell, L., & Carrassi, A. (2015). Accounting for model error due to unresolved
+scales within ensemble kalman ltering. Quarterly Journal of the Royal Meteo-
+rological Society ,141(689), 1417{1428. doi: https://doi.org/10.1002/qj.2451
+Mojgani, R., Chattopadhyay, A., & Hassanzadeh, P. (2022). Discovery of inter-
+pretable structural model errors by combining Bayesian sparse regression
+and data assimilation: A chaotic Kuramoto{Sivashinsky test case. Chaos:
+An Interdisciplinary Journal of Nonlinear Science ,32(6), 061105. doi:
+https://doi.org/10.1063/5.0091282
+Murphy, J. M., Sexton, D. M., Barnett, D. N., Jones, G. S., Webb, M. J., Collins,
+M., & Stainforth, D. A. (2004). Quantication of modelling uncertainties in a
+large ensemble of climate change simulations. Nature ,430(7001), 768{772. doi:
+https://doi.org/10.1038/nature02771
+Murphy, K. (2022). Probabilistic machine learning: An introduction . Cambridge
+MIT press.
+Notz, D. (2012). Challenges in simulating sea ice in Earth system models. Wiley In-
+terdisciplinary Reviews: Climate Change ,3(6), 509{526. doi: https://doi.org/
+10.1002/wcc.189
+O'Gorman, P. A., & Dwyer, J. G. (2018). Using machine learning to parameter-
+ize moist convection: Potential for modeling of climate, climate change, and
+extreme events. Journal of Advances in Modeling Earth Systems ,10(10),
+2548{2563. doi: https://doi.org/10.1029/2018MS001351
+Olason, E., Boutin, G., Korosov, A., Rampal, P., Williams, T., Kimmritz, M., . . .
+Samak e, A. (2022). A new brittle rheology and numerical framework for large-
+scale sea-ice models. Journal of Advances in Modeling Earth Systems ,14(8),
+e2021MS002685. doi: https://doi.org/10.1029/2021MS002685
+Palmer, T., & Weisheimer, A. (2011). Diagnosing the causes of bias in climate mod-
+els { why is it so hard? Geophysical & Astrophysical Fluid Dynamics ,105(2-
+3), 351{365. doi: https://doi.org/10.1080/03091929.2010.547194
+{27{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., . . . others
+(2019). Pytorch: An imperative style, high-performance deep learning library.
+Advances in neural information processing systems ,32.
+Pathak, J., Subramanian, S., Harrington, P., Raja, S., Chattopadhyay, A., Mardani,
+M., . . . others (2022). Fourcastnet: A global data-driven high-resolution
+weather model using adaptive fourier neural operators. arXiv preprint
+arXiv:2202.11214 . doi: https://doi.org/10.48550/arXiv.2202.11214
+Rasp, S., Pritchard, M. S., & Gentine, P. (2018). Deep learning to represent subgrid
+processes in climate models. Proceedings of the National Academy of Sciences ,
+115(39), 9684{9689. doi: https://doi.org/10.1073/pnas.1810286115
+Reynolds, R. W., Smith, T. M., Liu, C., Chelton, D. B., Casey, K. S., & Schlax,
+M. G. (2007). Daily high-resolution-blended analyses for sea surface temper-
+ature. Journal of climate ,20(22), 5473{5496. doi: https://doi.org/10.1175/
+2007JCLI1824.1
+Rodwell, M., & Palmer, T. (2007). Using numerical weather prediction to assess
+climate models. Quarterly Journal of the Royal Meteorological Society: A jour-
+nal of the atmospheric sciences, applied meteorology and physical oceanography ,
+133(622), 129{146. doi: https://doi.org/10.1002/qj.23
+Ronneberger, O., Fischer, P., & Brox, T. (2015). U-net: Convolutional networks for
+biomedical image segmentation. In International conference on medical image
+computing and computer-assisted intervention (pp. 234{241). doi: https://doi
+.org/10.1007/978-3-319-24574-4 28
+Rothrock, D., & Thorndike, A. (1984). Measuring the sea ice oe size distribution.
+Journal of Geophysical Research: Oceans ,89(C4), 6477{6486. doi: https://doi
+.org/10.1029/JC089iC04p06477
+Simonyan, K., & Zisserman, A. (2014). Very deep convolutional networks for large-
+scale image recognition. arXiv preprint arXiv:1409.1556 . doi: https://doi.org/
+10.48550/arXiv.1409.1556
+Smith, G., B elanger, J.-M., Roy, F., Pellerin, P., Ritchie, H., Onu, K., . . . oth-
+ers (2018). Impact of coupling with an ice{ocean model on global medium-
+range NWP forecast skill. Monthly Weather Review ,146(4), 1157{1180. doi:
+https://doi.org/10.1175/MWR-D-17-0157.1
+Smith, M., Holland, M., & Light, B. (2022). Arctic sea ice sensitivity to lateral
+melting representation in a coupled climate model. The Cryosphere ,16(2),
+419{434. doi: https://doi.org/10.5194/tc-16-419-2022
+Stevens, B., & Bony, S. (2013). What are climate models missing? Science ,
+340(6136), 1053{1054. doi: https://doi.org/10.1126/science.1237554
+Thorndike, A. S., Rothrock, D. A., Maykut, G. A., & Colony, R. (1975). The
+thickness distribution of sea ice. Journal of Geophysical Research ,80(33),
+4501{4513. doi: https://doi.org/10.1029/JC080i033p04501
+Tr emolet, Y. (2007). Incremental 4d-Var convergence study. Tellus A: Dynamic
+Meteorology and Oceanography ,59(5), 706{718. doi: https://doi.org/10.1111/j
+.1600-0870.2007.00271.x
+Tsamados, M., Feltham, D. L., & Wilchinsky, A. (2013). Impact of a new
+anisotropic rheology on simulations of arctic sea ice. Journal of Geophys-
+ical Research: Oceans ,118(1), 91{107. doi: https://doi.org/10.1029/
+2012JC007990
+Tsujino, H., Urakawa, S., Nakano, H., Small, R. J., Kim, W. M., Yeager, S. G., . . .
+others (2018). JRA-55 based surface dataset for driving ocean{sea-ice models
+(JRA55-do). Ocean Modelling ,130, 79{139. doi: https://doi.org/10.1016/
+j.ocemod.2018.07.002
+Wang, C., Zhang, L., Lee, S.-K., Wu, L., & Mechoso, C. R. (2014). A global per-
+spective on CMIP5 climate model biases. Nature Climate Change ,4(3), 201{
+205. doi: https://doi.org/10.1038/nclimate2118
+Wang, P., Yuval, J., & O'Gorman, P. A. (2022). Non-local parameteriza-
+{28{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+tion of atmospheric subgrid processes with neural networks. Journal
+of Advances in Modeling Earth Systems ,14(10), e2022MS002984. doi:
+https://doi.org/10.1029/2022MS002984
+Watt-Meyer, O., Brenowitz, N. D., Clark, S. K., Henn, B., Kwa, A., McGibbon,
+J., . . . Bretherton, C. S. (2021). Correcting weather and climate models by
+machine learning nudged historical simulations. Geophysical Research Letters ,
+48(15), e2021GL092555. doi: https://doi.org/10.1029/2021GL092555
+Wergen, W. (1992). The eect of model errors in variational assimilation. Tellus A ,
+44(4), 297{313. doi: https://doi.org/10.1034/j.1600-0870.1992.t01-3-00002.x
+Yuval, J., & O'Gorman, P. A. (2020). Stable machine-learning parameterization of
+subgrid processes for climate modeling at a range of resolutions. Nature com-
+munications ,11(1), 1{10. doi: https://doi.org/10.1038/s41467-020-17142-3
+Zanna, L., & Bolton, T. (2020). Data-driven equation discovery of ocean mesoscale
+closures. Geophysical Research Letters ,47(17), e2020GL088376. doi: https://
+doi.org/10.1029/2020GL088376
+Zeiler, M. D., & Fergus, R. (2014). Visualizing and understanding convolutional net-
+works. In European conference on computer vision (pp. 818{833). doi: https://
+doi.org/10.1007/978-3-319-10590-1 53
+Zhang, C., Perezhogin, P., Gultekin, C., Adcroft, A., Fernandez-Granda, C., & L, Z.
+(2023). Implementation and evaluation of a machine learned mesoscale eddy
+parameterization into a numerical ocean circulation model. arXiv preprint
+arXiv: 2303.00962 . doi: https://doi.org/10.48550/ARXIV.2303.00962
+Zhang, Y., Bushuk, M., Winton, M., Hurlin, B., Delworth, T., Harrison, M., . . .
+Yang, X. (2022). Subseasonal-to-seasonal Arctic sea ice forecast skill improve-
+ment from sea ice concentration assimilation. Journal of Climate , 1{48. doi:
+https://doi.org/10.1175/JCLI-D-21-0548.1
+Zhang, Y., Bushuk, M., Winton, M., Hurlin, B., Yang, X., Delworth, T., & Jia, L.
+(2021). Assimilation of satellite-retrieved sea ice concentration and prospects
+for September predictions of Arctic sea ice. Journal of Climate ,34(6), 2107{
+2126. doi: https://doi.org/10.1175/JCLI-D-20-0469.1
+Zhu, Y., Zhang, R.-H., Moum, J. N., Wang, F., Li, X., & Li, D. (2022). Physics-
+informed deep learning parameterization of ocean vertical mixing improves
+climate simulations. National Science Review . doi: https://doi.org/10.1093/
+nsr/nwac044
+Zupanski, M. (1993). Regional four-dimensional variational data assimilation in
+a quasi-operational forecasting environment. Monthly weather review ,121(8),
+2396{2408. doi: https://doi.org/10.1175/1520-0493(1993)121 h2396:RFDVDAi2
+.0.CO;2
+{29{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+Supporting Information S1: Deep learning of
+systematic sea ice model errors from data assimilation
+increments
+William Gregory1, Mitchell Bushuk2, Alistair Adcroft1, Yongfei Zhang1, Laure
+Zanna3
+1Atmospheric and Oceanic Sciences Program, Princeton University, NJ, USA
+2Geophysical Fluid Dynamics Laboratory, NOAA, Princeton, NJ, USA
+3Courant Institute of Mathematical Sciences, New York University, New York, NY, USA
+(a)
+ (b)
+−1.0−0.50.00.51.0
+Sea-surface temperature bias (◦C)
+−20−1001020
+Sea ice concentration bias (%)
+Figure S1. Seasonal climatologies of the SPEAR free-running model bias. Inside the clima-
+tological sea ice extent contour (black dashed line) are the aggregate sea ice concentration biases
+(model minus observations). Outside the contour are the sea-surface temperature biases (model
+minus observations). a) Arctic biases (December{February), b) Antarctic biases (September{
+November).
+Corresponding author: Will Gregory, wg4031@princeton.edu
+{30{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+−0.2−0.1 0.0 0.1 0.2
+Analysis Increments (% per day)
+(b)
+−0.2−0.1 0.0 0.1 0.2
+Forecast tendency (% per day)
+(c)
+−0.4−0.2 0.0 0.2 0.4
+Analysis Increments (% per day)
+(d)
+−0.4−0.2 0.0 0.2 0.4
+Forecast tendency (% per day)
+Figure S2. Comparisons of the climatological aggregate sea ice concentration analysis in-
+crements (a,c), and the aggregate sea ice concentration forecast tendencies (b,d). The spatial
+pattern correlation between panels a) and b) is -0.99. Similarly, the spatial pattern correlation
+between panels c) and d) is also -0.99.
+{31{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+0.350.400.450.500.550.60RMSE (% per day)(a) Arctic
+0.40.50.60.70.8Antarctic
+states (SIC, SST, SIU, SIV, SIT, SW, TS, SSS)
+tendencies (SIC, SST, SIU, SIV, SIT, SW, TS, SSS)
+states + tendencies (SIC, SST, SIU, SIV, SIT, SW, TS, SSS)
+0.350.400.450.500.550.60RMSE (% per day)(b)
+0.40.50.60.70.8
+2 layer (32×1)
+3 layer (32×64×1)4 layer (32×64×128×1)
+5 layer (32×64×128×256×1)
+0.350.400.450.500.550.60RMSE (% per day)(c)
+0.40.50.60.70.8
+16×32×64×1
+32×64×128×164×128×256×1
+128×256×512×1
+0.350.400.450.500.550.60RMSE (% per day)(d)
+0.40.50.60.70.8
+0.0007
+0.001
+0.003
+0.005
+0.350.400.450.500.550.60RMSE (% per day)(e)
+0.40.50.60.70.8
+ReLU
+GELU
+SELUTanh
+Linear
+0 25 50 75 100 125 150
+Epoch0.350.400.450.500.550.60RMSE (% per day)(f)
+0 25 50 75 100 125 150
+Epoch0.40.50.60.70.8
+1×1
+3×3
+5×5
+7×7
+Figure S3. Learning curve examples for various CNN model selection tests. Each curve is the
+mean 5-fold cross-validation error on SIC predictions (solid lines = error on training samples,
+transparent curves = error on validation samples). (a) Tests of the network sensitivity to the
+inputs (i.e., using just state variables, or just tendencies, or both). (b) Tests of the network depth
+(number of convolutional layers). (c) Tests of the network width (features per convolutional
+layer). (d) Tests of the optimizer learning rate. (e) Tests of the activation function used after
+each convolution operation. (f) Tests of the size of the convolution kernel used in each layer.
+{32{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+TrueDJF
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(b)
+TrueMAM
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(c)
+TrueJJA
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(d)
+TrueSON
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(e)
+CNN
+0.15[1]
+0.26[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(f)
+CNN
+0.25[1]
+0.62[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(g)
+CNN
+0.41[1]
+0.67[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(h)
+CNN
+0.17[1]
+0.57[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(i)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(j)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(k)
+True
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(l)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(m)
+CNN
+0.51[1]
+0.61[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(n)
+CNN
+0.41[1]
+0.9[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(o)
+CNN
+0.48[1]
+0.95[2]
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(p)
+CNN
+0.36[1]
+0.82[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+Figure S4. Seasonal climatologies of the (true) SPEAR category 1 sea ice concentration anal-
+ysis increments and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over
+the period 1982{2017. Values with the superscript [1] are the average of daily spatial pattern
+correlations between SICNTrueand SICNCNNin each respective season, while values with [2]
+are the spatial pattern correlations between the respective climatologies of the true and predicted
+increments.
+{33{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+TrueDJF
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(b)
+TrueMAM
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(c)
+TrueJJA
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(d)
+TrueSON
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(e)
+CNN
+0.24[1]
+0.39[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(f)
+CNN
+0.22[1]
+0.55[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(g)
+CNN
+0.35[1]
+0.72[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(h)
+CNN
+0.17[1]
+0.32[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(i)
+True
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(j)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(k)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(l)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(m)
+CNN
+0.44[1]
+0.92[2]
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(n)
+CNN
+0.21[1]
+0.67[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(o)
+CNN
+0.28[1]
+0.72[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(p)
+CNN
+0.27[1]
+0.73[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+Figure S5. Seasonal climatologies of the (true) SPEAR category 2 sea ice concentration anal-
+ysis increments and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over
+the period 1982{2017. Values with the superscript [1] are the average of daily spatial pattern
+correlations between SICNTrueand SICNCNNin each respective season, while values with [2]
+are the spatial pattern correlations between the respective climatologies of the true and predicted
+increments.
+{34{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+TrueDJF
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(b)
+TrueMAM
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(c)
+TrueJJA
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(d)
+TrueSON
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(e)
+CNN
+0.27[1]
+0.76[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(f)
+CNN
+0.25[1]
+0.72[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(g)
+CNN
+0.25[1]
+0.52[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(h)
+CNN
+0.2[1]
+0.27[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(i)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(j)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(k)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(l)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(m)
+CNN
+0.35[1]
+0.64[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(n)
+CNN
+0.18[1]
+0.68[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(o)
+CNN
+0.22[1]
+0.76[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(p)
+CNN
+0.17[1]
+0.65[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+Figure S6. Seasonal climatologies of the (true) SPEAR category 3 sea ice concentration anal-
+ysis increments and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over
+the period 1982{2017. Values with the superscript [1] are the average of daily spatial pattern
+correlations between SICNTrueand SICNCNNin each respective season, while values with [2]
+are the spatial pattern correlations between the respective climatologies of the true and predicted
+increments.
+{35{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+TrueDJF
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(b)
+TrueMAM
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(c)
+TrueJJA
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(d)
+TrueSON
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(e)
+CNN
+0.13[1]
+0.5[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(f)
+CNN
+0.2[1]
+0.53[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(g)
+CNN
+0.21[1]
+0.27[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(h)
+CNN
+0.1[1]
+0.23[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(i)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(j)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(k)
+True
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(l)
+True
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(m)
+CNN
+0.3[1]
+0.82[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(n)
+CNN
+0.19[1]
+0.44[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(o)
+CNN
+0.4[1]
+0.92[2]
+−0.5 0.0 0.5
+Analysis increments (% per day)
+(p)
+CNN
+0.4[1]
+0.93[2]
+−0.5 0.0 0.5
+Analysis increments (% per day)
+Figure S7. Seasonal climatologies of the (true) SPEAR category 4 sea ice concentration anal-
+ysis increments and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over
+the period 1982{2017. Values with the superscript [1] are the average of daily spatial pattern
+correlations between SICNTrueand SICNCNNin each respective season, while values with [2]
+are the spatial pattern correlations between the respective climatologies of the true and predicted
+increments.
+{36{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+(a)
+TrueDJF
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(b)
+TrueMAM
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(c)
+TrueJJA
+−0.50−0.25 0.00 0.25 0.50
+Analysis increments (% per day)
+(d)
+TrueSON
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(e)
+CNN
+0.19[1]
+0.62[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(f)
+CNN
+0.27[1]
+0.72[2]
+−0.2−0.1 0.0 0.1 0.2
+Analysis increments (% per day)
+(g)
+CNN
+0.24[1]
+0.35[2]
+−0.50−0.25 0.00 0.25 0.50
+Analysis increments (% per day)
+(h)
+CNN
+0.33[1]
+0.53[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(i)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(j)
+True
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(k)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(l)
+True
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(m)
+CNN
+0.17[1]
+0.33[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(n)
+CNN
+0.16[1]
+0.94[2]
+−0.4−0.2 0.0 0.2 0.4
+Analysis increments (% per day)
+(o)
+CNN
+0.44[1]
+0.95[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+(p)
+CNN
+0.42[1]
+0.91[2]
+−1.0−0.5 0.0 0.5 1.0
+Analysis increments (% per day)
+Figure S8. Seasonal climatologies of the (true) SPEAR category 5 sea ice concentration anal-
+ysis increments and the equivalent CNN predictions, for both the Arctic (a){(h) and Antarctic
+(i){(p). Columns from left to right show DJF, MAM, JJA, SON climatologies, computed over
+the period 1982{2017. Values with the superscript [1] are the average of daily spatial pattern
+correlations between SICNTrueand SICNCNNin each respective season, while values with [2]
+are the spatial pattern correlations between the respective climatologies of the true and predicted
+increments.
+{37{
+manuscript submitted to Journal of Advances in Modeling Earth Systems (JAMES)
+JFMAM JJASOND0.60.81.01.2∆SIC std.dev (% per day)Arctic
+JFMAM JJASOND0.500.751.001.251.50Antarctic
+1982–1989
+1989–19961996-2003
+2003–20102010–2017
+Figure S9. The standard deviation of the true aggregate sea ice concentration analysis incre-
+ments (SICTrue), computed over each of the 5 cross-validation periods used for validating the
+CNN predictions. Shown as daily climatologies.
+0.000.250.500.751.00Spatial pattern correlationArctic
+0.000.250.500.751.00Antarctic
+Jan 2018Jul 2018
+Jan 2019Jul 2019
+Jan 2020Jul 2020
+Jan 2021Jul 2021
+Jan 20220.51.01.52.0RMSE (% per day)
+Jan 2018Jul 2018
+Jan 2019Jul 2019
+Jan 2020Jul 2020
+Jan 2021Jul 2021
+Jan 20220.51.01.52.0
+Climatology prediction
+CNN skill 1982–2017CNN skill 1982–1989
+CNN skill 2010–2017CNN skill 2018–2021
+Figure S10. As in Figure 8 from the main article, except now highlighting the eect of
+non-stationarity within the increments by also including the climatological prediction skill for
+cross-validation chunks corresponding to the beginning of the time series record (1982{1989), as
+well as the end of the time series record (2010{2017).
+{38{

@@ -1,0 +1,1522 @@
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 1
+GNN-Surrogate: A Hierarchical and Adaptive
+Graph Neural Network for Parameter Space
+Exploration of Unstructured-Mesh Ocean
+Simulations
+Neng Shi, Jiayi Xu, Skylar W. Wurster, Hanqi Guo, Member, IEEE, Jonathan Woodring,
+Luke P . Van Roekel, and Han-Wei Shen, Member, IEEE
+Abstract —We propose GNN-Surrogate, a graph neural network-based surrogate model to explore the parameter space of ocean climate
+simulations. Parameter space exploration is important for domain scientists to understand the inﬂuence of input parameters (e.g., wind
+stress) on the simulation output (e.g., temperature). The exploration requires scientists to exhaust the complicated parameter space by
+running a batch of computationally expensive simulations. Our approach improves the efﬁciency of parameter space exploration with a
+surrogate model that predicts the simulation outputs accurately and efﬁciently. Speciﬁcally, GNN-Surrogate predicts the output ﬁeld with
+given simulation parameters so scientists can explore the simulation parameter space with visualizations from user-speciﬁed visual
+mappings. Moreover, our graph-based techniques are designed for unstructured meshes, making the exploration of simulation outputs on
+irregular grids efﬁcient. For efﬁcient training, we generate hierarchical graphs and use adaptive resolutions. We give quantitative and
+qualitative evaluations on the MPAS-Ocean simulation to demonstrate the effectiveness and efﬁciency of GNN-Surrogate. Source code is
+publicly available at https://github.com/trainsn/GNN-Surrogate.
+Index Terms —Parameter Space Exploration, Ensemble Visualization, Unstructured Mesh, Surrogate Modeling, Graph Neural Network,
+Adaptive Resolution.
+F
+1 I NTRODUCTION
+INoceanography, environment, and climate sciences, scientists
+usually run ensemble simulations [1] given different input
+parameters to perform parameter space analysis and exploration.
+One of the analyses and exploration is to ﬁnd out the potential
+relationship between the simulation parameters and outputs [2].
+For example, Model for Prediction Across Scales-Ocean (MPAS-
+Ocean) is an ocean model on unstructured grids, and oceanog-
+raphers control input parameters of interest (e.g., bulk wind
+stress ampliﬁcation) to analyze output ﬁelds (e.g., temperature)
+change among different simulation results. Scientiﬁc visualizations
+help scientists explore, verify, and summarize differences and
+similarities between ensemble simulations efﬁciently and intuitively.
+However, the simulation space exploration requires exhausting the
+complicated parameter space by running a batch of computationally
+expensive simulations.
+To make the parameter space exploration efﬁcient, scientists
+utilize and train a surrogate model by sampling parameter set-
+Neng Shi, Jiayi Xu, Skylar W. Wurster and Han-Wei Shen are with
+the Department of Computer Science and Engineering, The Ohio State
+University, Columbus, OH, 43210, USA.
+E-mail: fshi.1337, xu.2205, wurster.18, shen.94 g@osu.edu
+Hanqi Guo is with the Mathematics and Computer Science Division,
+Argonne National Laboratory, Lemont, IL 60439, USA.
+E-mail: hguo@anl.gov
+Jonathan Woodring is with the Applied Computer Science Group (CCS-7),
+Los Alamos National Laboratory, Los Alamos, NM 87544.
+Email: woodring@lanl.gov
+Luke P . Van Roekel is with the Fluid Dynamics and Solid Mechanics Group
+(T-3), Los Alamos National Laboratory, Los Alamos, NM 87544.
+Email: lvanroekel@lanl.govtings from the parameter space. Existing surrogate model-based
+parameter space analyses usually are either image-based (e.g.,
+InSituNet [3]) or focus on regular grids [4], [5], which leads to
+two limitations. First, image-based surrogate models visualize the
+generated simulation data with several predeﬁned visual mappings
+so that scientists are not able to adjust the setting of visual mappings
+to ﬁnd features of interest after the models have been trained.
+Second, existing regular grid-based methods do not directly work
+for unstructured data since they learn the mapping between the
+simulation parameters and the raw simulation data on regular grids.
+In this work, to solve the two limitations mentioned above,
+we present a Graph Neural Network (GNN)-based method to
+predict raw data on unstructured grids with given simulation
+parameters. We model MPAS-Ocean unstructured meshes as a
+graph and propose GNN-Surrogate that supports graph operations
+to learn from MPAS-Ocean simulation output. A graph can
+capture the vertex connectivity and distance information, and
+thus is one of the common choices to represent unstructured
+meshes [6]–[8]. For efﬁcient training, we generate hierarchical
+graphs, where coarse graphs help GNN-Surrogate capture the
+global phenomena quickly. To generate hierarchical graphs, we
+perform a graph coarsening algorithm. Furthermore, we cut the
+graph hierarchy to reduce the I/O and training computation cost.
+Speciﬁcally, with the graph hierarchy cutting, GNN-Surrogate
+adaptively decides which resolutions to use at different locations,
+depending on how complicated phenomena happen at locations.
+Also, the simulation outputs in the training dataset are represented
+by adaptive resolutions, which supervise the GNN-Surrogate
+training. Given the hierarchical graphs, GNN-Surrogate is anarXiv:2202.08956v2  [physics.ao-ph]  21 Feb 2022
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 2
+upsampling-convolution generator. The graph convolution can
+reﬁne the feature map represented on graphs. Moreover, its local
+connectivity and weight sharing scheme allow GNN-Surrogate to
+avoid over-ﬁtting. Domain scientists evaluate our proposed method
+on MPAS-Ocean [9].
+Overall, our workﬂow is composed of four parts. The ﬁrst part
+isgraph hierarchy generation . Given MPAS-Ocean unstructured
+meshes, we perform a graph coarsening algorithm to build a
+graph hierarchy consisting of graphs at different resolution levels.
+Then, we cut the graph hierarchy and transform the graphs.
+The second part is training data generation . Note that all the
+simulation outputs in the training dataset are represented by
+adaptive resolutions, depending on where complex phenomena
+appear, which can reduce the I/O and training computation cost.
+The third part is ofﬂine training . We train GNN-Surrogate based
+on simulation parameters as the input of our model and adaptive
+resolution output data as the output. The fourth part is post-
+hoc exploration and analysis . With a trained GNN-Surrogate,
+simulation outputs can be predicted with given input parameters
+and then visualized with existing algorithms.
+GNN-Surrogate can be used for visual analysis on unstructured
+data, allowing scientists to have a quick preview of simulation
+outputs given a set of input simulation parameters. From the
+prediction of raw data, various visualization technologies can be
+applied to let scientists analyze features of interest from different
+aspects. The quick preview makes the visual exploration of the
+input parameter space more convenient. Therefore, scientists can
+efﬁciently run simulations to analyze the features of interest
+without going through the entire parameter space. Moreover, GNN-
+Surrogate allows parameter sensitivity analysis for scientists to
+understand parameter selections better.
+In summary, the main contributions of this paper are twofold:
+We propose GNN-Surrogate to predict simulation outputs
+given input parameters so that scientists can explore the
+simulation parameter space with visualizations using user-
+speciﬁed visual mappings.
+Our graph-based techniques are designed speciﬁcally for
+unstructured meshes, facilitating the efﬁcient exploration of
+simulation outputs on irregular grids.
+2 R ELATED WORK
+In this section, we review related work in parameter space
+exploration and graph neural networks on unstructured data.
+GNN-Surrogate is also categorized as deep learning for scientiﬁc
+visualization work. Readers can check the supplementary material
+or one survey paper [10] for more details.
+2.1 Parameter Space Exploration
+We divide existing parameter space exploration work into two
+categories: (1) traditional methods without surrogate models and
+(2) surrogate-model based methods.
+Traditional parameter space exploration methods ﬁrst collect
+the simulation input and output pairs from ensemble runs, and
+perform parameter space exploration on the collected pairs. In
+the visualization ﬁeld, to explore the parameter space of high-
+dimensional ensemble data, researchers rely on visualization
+methods such as glyphs [11], matrices [12], line charts [13], parallel
+plots [2], [14], scatter plots [15]–[17], and radial plots [18]–[20].
+The major limitation of these methods is the inability to analyze
+input parameters that have not been simulated.Surrogate models, including our GNN-Surrogate, can predict
+simulation outputs of unseen input parameters for parameter space
+exploration. The surrogate model can be at (1) the image level or
+(2) the data level. First, an image-based surrogate model called
+InSituNet [3] supports parameter space exploration for ensemble
+simulations that are visualized in situ. Its major limitation is that
+the simulation output is only visualized with several predeﬁned
+visual mappings, meaning scientists cannot adjust visual mappings
+to ﬁnd features of interest after models have been trained. Second,
+researchers have also used different techniques such as machine
+learning [4], [5] and Gaussian process [21], [22] to predict raw
+data using surrogate models. Hazarika et al. [4] trained a surrogate
+model to approximate the yeast cell polarization simulation model
+in the NNV A system. Alden et al. [5] used a machine learning-
+based surrogate model to increase users’ biological understanding
+of a simulator of lymphoid tissue organogenesis. Urban et al. [21]
+proposed a Latin hypercube to improve the quality of a Gaussian
+process emulator on a simple Earth system model. For ensemble-
+based sensitivity analysis, Erdal et al. [22] used a Gaussian
+process emulator and active subspaces to sample behavioral model
+parameters. However, these data-level methods do not directly work
+for our unstructured-mesh simulations since they learn the mapping
+between the simulation parameters and the raw simulation data on
+regular grids. Our work is a Graph Neural Network (GNN)-based
+method speciﬁcally designed for unstructured meshes, which makes
+the exploration of simulation outputs on irregular grids efﬁcient.
+2.2 Graph Neural Networks on Unstructured Data
+Graph neural networks have been used to learn representations
+from unstructured data. These methods can be divided into (1)
+spectral methods and (2) spatial methods.
+Spectral methods ﬁrst calculate the eigendecomposition of a
+graph Laplacian to transform graph signals from the spatial domain
+to the spectral domain. Then the graph convolution is applied to
+the graph’s spectral representation. Researchers have applied these
+methods to spherical data. DeepSphere [6], [7] is a spherical CNN
+constructed by representing the sphere as a graph, and spectral
+CNN operations such as convolution and pooling are deﬁned on it.
+Nevertheless, it is hard for us to exploit edge attribute information
+of the graph by spectral methods since ﬁlters are learned from the
+spectral domain. Thus, we solve our problem by spatial methods.
+Spatial methods, on the other hand, deﬁne convolutions directly
+on the graph by grouping neighbors. To make use of the edge
+attributes, researchers designed dynamic edge-conditioned ﬁlters.
+Simonovsky and Komodakis [23] used a multi-layer perceptron
+to compute the convolution kernels given edge labels. Valsesia et
+al. [24] represented the edge information by the difference between
+features on two neighboring nodes. Lan et al. [25] proposed Geo-
+Conv by exploiting the edges’ Euclidean geometric information.
+Our kernel is similar to Geo-Conv, while the difference is that we
+model edges in the spherical polar coordinate rather than Cartesian
+coordinate since it is more suitable for the MPAS-Ocean datasets.
+3 MPAS-O CEAN MODEL BACKGROUND
+MPAS-Ocean [9] is a model for describing and evaluating the ocean.
+By exploiting unstructured meshes, MPAS-Ocean is particularly
+suitable for regionally enhancing the resolution without inﬂuencing
+the global simulation quality.
+MPAS-Ocean’s mesh structure is shown in Figure 1. In earth
+science, the directions consistent with and perpendicular to the
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 3
+(c) (a) (b)
+Fig. 1. (a) MPAS-Ocean’s structure. (b) Horizontal Voronoi polygons.
+Dashed lines form Voronoi polygons. v0;i,v$
+0;0,v$
+0;1,v$
+0;2,v$
+0;3,v$
+0;4,v$
+0;5are
+Voronoi polygon cell centers. Solid lines link cell centers. (c) Cross section.
+vl
+0;0,vl
+0;1arev0;i’s vertical neighbors. Blue lines link vertical neighbors.
+gravity are deﬁned as vertical andhorizontal , respectively. The
+oceans are divided both horizontally and vertically by oceanog-
+raphers. Scientists try to solve issues related to horizontal and
+vertical discretization by MPAS Ocean. The horizontal grids
+depend on Spherical Centroidal V oronoi Tessellations (SCVTs),
+i.e., a spherical surface is composed of V oronoi regions. Some
+variables of interest (e.g., temperature) are stored at the V oronoi
+polygon cell centers. Note that in one horizontal spherical layer,
+the V oronoi region distributions on the sphere are based on a
+user-deﬁned mesh-density function, as shown in Figure 3(a). For
+example, for the EC60to30 [26] mesh, the grids’ cell sizes vary
+from 30km to 60km. As shown in Figure 3(b), scientists want
+to use high resolution in equatorial and polar regions because
+some interesting natural phenomenon happens there such as eastern
+equatorial Paciﬁc cold tongue, which can be reﬂected from the
+temperature ﬁeld in Figure 3(c).
+Vertically, to model the 3D ocean, scientists scale and copy the
+V oronoi polygons to different depth levels and build spherical layers
+perpendicular to the Earth’s surface. Scientists sample densely near
+the ocean surface to model complex phenomenons.
+4 GNN-S URROGATE OVERVIEW
+Our goal is to develop a model to support parameter exploration
+and visualization of ocean ensemble simulations with some input
+simulation parameters. We achieve this by creating a surrogate
+model predicting simulation outputs given simulation parameters.
+As mentioned in Section 3, MPAS is successful because it exploits
+unstructured meshes. To support machine learning on unstructured
+meshes, we design a graph neural network (GNN)-based model,
+GNN-Surrogate, to directly predict the ocean data presented by
+unstructured grids.
+Figure 2 provides the workﬂow of our approach. GNN-
+Surrogate is an upsampling-convolution generator, which requires
+graphs at different resolution levels. We construct a level-zero
+graph ( G0) given the full resolution of MPAS-Ocean’s unstructured
+meshes (Section 5.1) and perform a graph coarsening algorithm to
+build a graph hierarchy consisting of graphs at different resolution
+levels ( G1;G2; ::: ) (Section 5.2). Due to the GPU memory
+size constraint, GPU memory may not be sufﬁcient to hold the
+intermediate feature maps of full-resolution data.
+Our solution to the GPU memory size constraint problem is
+to use adaptive data resolutions. We ﬁrst run a few simulations
+with random input simulation parameters to gather the graph
+hierarchy cutting policy. The cutting policy is made by ﬁnding
+where complex phenomena appear in the simulation outputs. We
+discuss the number of simulation runs required for the cuttingpolicy in the supplementary material. Following the cutting policy,
+we cut the graph hierarchy and transform the hierarchical graphs,
+which can reduce the I/O and training computation cost. (Sec-
+tion 5.3). The transformed graphs are used as templates to generate
+adaptive resolution outputs for future simulation runs. (Section 5.4).
+Then, GNN-Surrogate that consists of speciﬁcally designed graph
+convolution (Section 6.2) and upsampling (Section 6.3) operators,
+is trained to learn the mapping from simulation parameters to
+simulation outputs with adaptive resolutions (Section 6.4). GNN-
+Surrogate can ﬁrst create low-resolution feature maps containing the
+global data information and represent them in coarser graphs with
+the transformed graph hierarchy. Then GNN-Surrogate can reﬁne
+the feature maps until the feature maps become a full resolution.
+Finally, during post-hoc exploration and analysis, with a trained
+GNN-Surrogate, scientists can predict a simulation output given
+a new input parameter setting and then use existing visualization
+algorithms to generate visualization images and perform further
+analysis and evaluation.
+5 D ATA STRUCTURE : H IERARCHICAL GRAPHS
+FOR DATA WITH ADAPTIVE RESOLUTIONS
+Our goal is to learn a function Fthat maps a set of input simulation
+parameters Psimto the corresponding simulation output Sused
+for visualization. The function can be deﬁned as: F(Psim)!S.
+Training a deep model for high-resolution MPAS-Ocean data can
+be prohibitively expensive. To reduce the computation and memory
+cost, we decompose the function as F(Psim) =Far!s(Fp!ar(Psim)),
+where Fp!aris the function maps the input simulation parameter to
+the output represented with adaptive resolutions, and Far!sconverts
+the adaptive resolution result to the predicted simulation output
+with full resolution.
+In this section, we build hierarchical graphs ( G0;G1;G2; :::)
+to represent outputs with adaptive resolutions. The graph G0is
+built on the meshes with full resolution, which is presented next.
+5.1 Edge-weighted Graph Construction
+We build a directed graph G0= (V0;E0)of level zero from MPAS-
+Ocean unstructured geodesic grids, where V0is the node set, E0
+is the edge set. A variable of interest (cell-centered) such as
+temperature is deﬁned on a node v0;i. Every node v0;iis attached
+with its Cartesian coordinate (x0;i;y0;i;z0;i)and spherical coordinate
+(r0;i;q0;i;f0;i).
+E0can be decomposed into two groups, horizontal edges
+E$
+0and vertical edges El
+0, based on geographic information of
+edges, where E0=E$
+0[El
+0. Note that horizontal andvertical are
+the directions perpendicular to and consistent with the gravity,
+respectively, as illustrated in Figure 1. We deﬁne horizontal
+and vertical edges separately because the horizontal and vertical
+resolutions are not on the same scale. A node v0;iis connected with
+its horizontal neighbors across the cell walls, which are denoted
+as graph nodes v$
+0;j, and (v0;i;v$
+0;j)2E$
+0is formed as horizontal
+edges, as shown in Figure 1(b). Most nodes are connected with
+six horizontal neighbors, but many nodes near the continents have
+15horizontal neighbors. Also, v0;iis connected to no more
+than two vertical neighbors vl
+0;j, and (v0;i;vl
+0;j)2El
+0is formed as
+vertical edges, as shown in Figure 1(c).
+To describe the geographical relationships, we ﬁrst compute
+the distance between two edge-connected nodes, where a shorter
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 4
+parameter 
+1
+parameter 
+N1-1 output 1
+output 
+N1-1graph  
+constructiongraph 
+coarsening
+run  
+simulations
+parameter 
+0 output 0
+(reference )
+residual 1subtract 
+reference
+residual 0
+residual 
+N1-1graph 
+transformation(a)
+(b)
+ output 
+N1+N2-1run  
+simulations
+ output N 1subtract 
+reference
+residual 
+N1
+residual 
+N1+N2-1adaptive 
+resolution
+residual N 1
+adaptive 
+resolution
+residual N 1+N2-1adaptive 
+resolutionadaptive 
+resolution
+residual 0...N1-1(c)
+parameters
+GeneratorTraining
+predicted adaptive 
+resolution   residualground truth 
+adaptive resolution  
+residual
+new 
+parameter
+Trained 
+generatorInference
+predicted residualpredicted adaptive 
+resolution residual(d)
+predicted 
+simulation outputadd 
+reference (e)
+………………parameter 
+0...N1-1
+parameter 
+N1+N2-1parameter 
+N1…
+predicted 
+visualization visualizeTraining  Data GenerationCutting Policy 
+Generation
+adaptive 
+resolution
+residual 0...N1-1Graph Hierarchy 
+Generation
+upsample01 23 4
+5 601 23 4
+5 6
+1112
+13789
+10
+1112
+13789
+10789
+5 6
+=
+Fig. 2. Workﬂow of our approach. (a) Given the MPAS-Ocean mesh structure, a corresponding graph hierarchy is generated. (b) A few simulations are
+run for generating the graph hierarchy cutting policy. The cutting policy is used to guide representing the simulation output with adaptive resolutions.
+(c) Another batch of ensemble simulations is run for collecting the training data. (d) A deep surrogate model (i.e., GNN-Surrogate) is trained based on
+the generated training dataset. (e) In the inference stage, GNN-Surrogate is used to predict the simulation output. The predicted simulation output
+can be visualized later for parameter space exploration.
+(a) (b) (c)
+Fig. 3. Scalar ﬁelds. (a)Mesh Density. (b)Cell Size. (c)Temperature.
+distance means the two nodes strongly inﬂuence each other. The
+distance is measured as follows,
+d(v0;i;v0;j) =8
+<
+:d$(v0;i;v0;j)if(v0;i;v0;j)2E$
+0;
+dl(v0;i;v0;j) if(v0;i;v0;j)2El
+0;
++¥ otherwise ;
+where d$(v0;i;v0;j)is the great-circle distance [27] and
+dl(v0;i;v0;j)is the Euclidean distance.
+Inspired by DeepSphere [6], we formulate the geographical
+relationships between two edge-connected nodes by weight of the
+edge, which is deﬁned as
+w0(v0;i;v0;j) =8
+>>>>><
+>>>>>:exp
+ (d$(v0;i;v0;j))2
+4r$
+0
+if(v0;i;v0;j)2E$
+0;
+exp 
+ (dl(v0;i;v0;j))2
+4rl
+0!
+if(v0;i;v0;j)2El
+0;
+0 otherwise ;
+(1)
+A higher weight comes from a shorter distance, indicating that two
+nodes have a stronger relationship, and
+r$
+0=1E$
+0å
+(v0;i;v0;j)2E$
+0(d$(v0;i;v0;j))2;
+rl
+0=1El
+0å
+(v0;i;v0;j)2El
+0(dl(v0;i;v0;j))2are the average distance square of all the horizontal and vertical
+edges, respectively. This weighting scheme performs well empiri-
+cally, demonstrated in both DeepSphere [6] and our experiments.
+To further describe the geographical directional relationship
+between two edge-connected nodes, we deﬁne six directions:
+toward high latitude ( jfj"), toward low latitude ( jfj#), westward
+(West), eastward (East), Shallower ( r"), and Deeper ( r#), which is
+illustrated in Figure 4. The six directions are needed because
+the geographical directional relationship matters for planetary
+signals such as ocean data. East and West are earth rotation and
+counter-earth rotation direction. jfj"andr#are the directions
+where solar radiation energy decreases horizontally and vertically,
+respectively, and the opposite for direction jfj#and r". A
+edge direction set D=fjfj";jfj#;West;East;r";r#gis built
+to describe every edge between two connected nodes. Then, the
+attribute of an edge (v0;i;v0;j)2E0is represented as an edge
+attribute vector GGG000(v0;i;v0;j). To calculate GGG000(v0;i;v0;j), we ﬁrst
+deﬁne offset between two nodes v0;iandv0;jas
+dx
+0=x0;j x0;i;dy
+0=y0;j y0;i;dr
+0=r0;j r0;i;
+dlat
+0=jf0;jj jf0;ij;dlng
+0=jj(dx
+0;dy
+0)jj2
+r0;i;dh
+0=jdlat
+0j+jdlng
+0j;
+wherejj(dx
+0;dy
+0)jj2is the 2-norm of (dx
+0;dy
+0). Then, GGG000(v0;i;v0;j) =
+(gjfj"
+0;gjfj#
+0;gwest
+0;geast
+0;gr"
+0;gr#
+0)Tis initialized by all zeros and
+updated by:
+gjfj"
+0=w0(v0;i;v0;j)jdlat
+0j
+dh
+0ifdlat
+0>0;
+gjfj#
+0=w0(v0;i;v0;j)jdlat
+0j
+dh
+0ifdlat
+0<0;
+gwest
+0=w0(v0;i;v0;j)jdlng
+0j
+dh
+0if(x0;i;y0;i)T(dx
+0;dy
+0)T>0;
+geast
+0=w0(v0;i;v0;j)jdlng
+0j
+dh
+0if(x0;i;y0;i)T(dx
+0;dy
+0)T<0;
+gr"
+0=w0(v0;i;v0;j) ifdr
+0>0;
+gr#
+0=w0(v0;i;v0;j) ifdr
+0<0;
+(2)
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 5
+xyz
+ABP
+y
+xB’
+A’
+(a) (b)O Or
+ϕ
+θ|ϕ|↑
+|ϕ|↑west east|ϕ|↓
+|ϕ|↓
+Fig. 4. Horizontal Edge Attribute. (a) The horizontal edge (A;B)and
+itsjfj"component_
+AP. (b) The platform. A0B0is edge (A;B)’s west
+component.
+whereis the cross product, and we guarantee gjfj"
+0+gjfj#
+0+
+gwest
+0+geast
+0+gr"
+0+gr#
+0=w0(v0;i;v0;j)to ensure the sum of vector
+components is the edge weight.
+For example, in Figure 4, for one horizontal edge (vA;vB), the
+edge attribute vector is
+GGG000(vA;vB)
+= (w0(vA;vB)j_
+APj
+j_
+APj+jA0B0j;0;w0(vA;vB)jA0B0j
+j_
+APj+jA0B0j;0;0;0)T:
+5.2 Graph Hierarchy Generation for Efﬁcient Training
+We generate a graph hierarchy for GNN-Surrogate efﬁcient training
+by using a graph coarsening algorithm. The graph coarsening
+operation receives an input graph Gland outputs the next level
+coarser graph Gl+1which has fewer nodes and edges but preserves
+the input graph’s topological structures. We repeat the coarsening
+process until we are left with a single node in the coarsened graph.
+In this work, we use two simple and efﬁcient edge matching
+algorithms [28] on horizontal and vertical edges, respectively.
+We want to avoid mixing horizontal and vertical edges because,
+in coarser graphs, we want to use the same structure for every
+spherical layer and have the edges in the coarser graphs be either
+horizontal or vertical, but not mixed, as in the original graph G0.
+The horizontal matching works as follows: given a graph Gl,
+all the nodes are initially marked as unvisited. Starting from the
+top horizontal layer, we match a node vl;iwith its cloest horizontal
+neighbor vl;j(the one that maximizes wl(vl;i;vl;j)) and generate
+one super-node vl+1;kin the next coarser graph Gl+1. The super-
+node’s position is the two matched nodes’ great circle midpoint.
+If there is no unvisited horizontal neighbor, we copy vl;iitself to
+the the coarser graph as the super-node vl+1;k(such as G0node
+4 in Figure 5(a)). The one singleton or two matched nodes are
+then marked as visited. We repeat the matching process until all
+nodes in the top horizontal layer are marked as visited. Figure 5(a)
+illustrates the process. We then apply the same strategy for nodes
+in other horizontal layers. Given two super-nodes vl+1;iandvl+1;j
+inGl+1, if any of vl+1;i’s children and any of vl+1;j’s children
+are neighbors, vl+1;iandvl+1;jare considered as neighbors and
+an edge is linked between them. We use the same edge attribute
+generation and weighting scheme for Gl+1as for the initial graph
+G0described in Section 5.1.For vertical matching, we match nodes in the odd horizontal
+layers with their neighbors in the deeper layer. If the number of
+horizontal layers is odd, the nodes in the deepest horizontal layer
+would be singletons. The edge forming, weighting scheme, and
+edge attribute generation are the same as the horizontal matching.
+Both edge matching algorithms’ time complexity are O(jVlj).
+During coarsening, starting from the original graph G0, we
+alternately perform horizontal and vertical edge matching to
+generate graphs at different resolution levels G1;G2;:::; GL 1.
+The graph coarsening details can be found in the supplementary
+material. We store all the graphs into a list, which is called the
+graph hierarchy. We also store the parent-children links in the
+graph hierarchy and construct a graph hierarchical tree (GHT).
+Figure 5(b) shows a GHT example. The graph hierarchy is used
+for a ﬁnal transformation process to decide the graphs used in our
+GNN-Surrogate, described in the next section.
+5.3 Hierarchical Tree Cutting
+For ocean ensemble simulations, as input parameters change, severe
+changes occur only in sub-areas, which means we can represent in-
+sensitive regions, where signals slightly change regarding different
+simulation parameters, with low resolutions to save memory.
+Regions’ sensitivities. We compare simulation outputs with
+a reference to model regions’ sensitivities to the input parameter.
+We run N1simulations for N1simulation outputs and use the medoid
+of these outcomes as the reference. As a learning task, GNN-
+Surrogate learns the difference between future simulation outputs
+to the reference, where insensitive regions have low difference
+values and hence can be represented using low resolutions. When
+running a future simulation, an output residual is deﬁned as the
+difference between the future simulation output and the reference.
+We calculate the difference between the N1simulation outputs and
+the reference for N1simulation output residuals.
+Graph hierarchical tree cutting. We perform a cutting on
+our graph hierarchical tree for each simulation output residual,
+such that computation and memory are reduced to support training
+GNN-Surrogate given limited computing resources. For example,
+in Figure 5(b), nodes above the orange line form a valid cut. The
+goal of the tree cutting is to group graph nodes in contiguous
+regions that have absolute residual values smaller than a threshold
+e; those nodes with smaller absolute residual values will be cut
+and represented by their ancestor where an ancestor represents
+a group of those nodes. The selection of ecan be found in the
+supplementary material. For later data reconstruction, each such
+ancestor is attached with one single residual value, which is the
+average of the residual values of its leaf descendants. After the
+cutting, we call the remaining hierarchical tree C, which has a
+property that, if one tree node is in C, all of its ancestors and
+siblings are also in C. We determine whether a node is cut or not by
+examining whether all its leaf descendants have absolute residual
+values smaller than a threshold e. After the remaining tree Cis
+generated, we can use its lowest remaining ancestor as a proxy
+node to reconstruct the signal of a node being cut. We deﬁne the
+proxy node of a cut node vl;jas
+yC(vl;j) =vl;jifvl;j2C;
+vl0;kotherwise ;
+where vl0;k(l0>l)isvl;j’s lowest ancestor in C.
+Our next goal is to integrate multiple cuts of different output
+residuals into one to build a uniﬁed adaptive-resolution repre-
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 6
+01 23 4
+5 6(0, 4)
+(0, 0) (6, 0)(10, 0)(8, 4)(8, 8)(14, 8)
+1112
+(4, 1)(11, 7)
+13(7.5, 4)G0 G1 G2 G3
+(a)
+13
+11 12
+7 10 8 9
+0 1 5 6 2 3 4G3
+G2
+G1
+G0
+(b)13
+11 12
+7 10 8 9
+5 6 9G3'
+G2'
+G1'
+G0'
+(c)7 8789
+10(0, 2)(8, 6)
+(14, 8)
+(8, 0)789
+(0, 2)(8, 6)
+(14, 8)
+(d)G0'
+5 6
+(6, 0)(10, 0)
+Fig. 5. Pipeline of the graph hierarchy generation and graph transformation. (a) Example of the graph coarsening by horizontal edge matching. Given
+the original graph G0, horizontal matching is performed for a coarser graph until G3, a graph with an isolated point, is reached. G0,G1,G2,G3form a
+graph hierarchy. (b) The graph hierarchical tree (GHT) is created by storing the parent-children links in the graph hierarchy. A GHT cut is generated.
+In the example, nodes below the orange curve are cut. (c) Tree view of the transformed graph hierarchy. The transformation is performed based on
+the cutting. G0is affected in the transformation. (d) G0
+0is transformed from G0.
+(v0,0, v0,2, East)  
+(v0,0, v0,2, |ϕ|↑) 
+(v0,1, v0,2, East)  
+(v0,2, v0,2, Self) 
+(v0,3, v0,2, |ϕ|↓) 
+(v0,4, v0,2, West)  
+(v0,4, v0,2, |ϕ|↓) 
+(v0,5, v0,2, East)  
+(v0,5, v0,2, |ϕ|↑) 
+(v0,6, v0,2, West)  
+(v0,6, v0,2, |ϕ|↑) 
+ 
+Γ’(v0,0, v0,2, East)U East 
+Γ’(v0,0, v0,2, |ϕ|↑)U|ϕ|↑ 
+Γ’(v0,1, v0,2, East)U East 
+USelf 
+Γ’(v0,3, v0,2,|ϕ|↓)U|ϕ|↓ 
+Γ’(v0,4, v0,2, West )UWest 
+Γ’(v0,4, v0,2, |ϕ|↓)U|ϕ|↓ 
+Γ’(v0,5, v0,2, East)U East 
+Γ’(v0,5, v0,2, |ϕ|↑)U|ϕ|↑ 
+Γ’(v0,6, v0,2, West )UWest 
+Γ’(v0,6, v0,2, |ϕ|↑)U|ϕ|↑ 
+ 
+Ω0,0 
+Ω0,0 
+Ω0,1 
+Ω0,2 
+Ω0,3 
+Ω0,4 
+Ω0,4 
+Ω0,5 
+Ω0,6 
+Ω0,6 
+Ω0,6 
+ avg
+Fig. 6. Illustration of graph convolution on G0. The output feature ¡0;2is
+computed from a weighted sum of input features on node v0;2and its
+neighbors. Each non-zero edge attribute component in edge pointing to
+node v0;2corresponds to a weighted matrix, which is the product of the
+attribute component G0(v0;j;v0;2;d)and the basis matrix Ud.
+sentation for future simulation runs. For ocean simulation, high-
+frequency features are usually at speciﬁc locations, such as regions
+near the equators where the eastern equatorial Paciﬁc (EEP) cold
+tongue happens, making separate cuts similar. The guideline to our
+cut integration is that a node vl;jis cut after the integration only if
+its parent has the approximating ability for all the residuals. If N1
+simulations are run to generate N1residuals for the GHT cut, the
+time complexity for generating the GHT cut is O(N1jV0j).
+After obtaining the integrated GHT cut, a graph Glis trans-formed into G0
+l, where we aggregate nodes and edges. For example,
+in Figure 5(c), based on the tree cut shown in Figure 5(b), G0
+is transformed into G0
+0, as shown in Figure 5(d). Speciﬁcally,
+for graphs at each level, we ﬁrst calculate the reduced node set
+V0
+lby replacing the nodes in Vlwith their proxy nodes. Second,
+we generate the new edge set E0
+land edge attribute vectors GGG000
+lll.
+For two proxy nodes pAand pB, if there are edges connecting
+nodes whose proxy are pAand nodes whose proxy are pB, then
+pAand pBare linked. Each new edge attribute vector is the
+average of edge attribute vectors from edges connecting nodes
+whose proxy is pAand nodes whose proxy is pB. After the graph
+transformation, a transformed graph hierarchy fG0
+0;G0
+1;:::; G0
+L 1g
+with an edge attribute vector list fGGG000
+000;GGG000
+111;:::;GGG000
+LLL   111gis generated.
+The graph transformation algorithm pseudocode can be found in
+the supplementary material.
+5.4 Generation of Training Data with Adaptive Resolu-
+tions
+The training dataset comprises data pairs of input simulation param-
+eters and the corresponding residuals with adaptive resolutions. We
+have collected N1ensemble members for training when we build
+hierarchical tree cuts in Section 5.3. We further run N2simulations
+to generate additional training data. For the new N2simulations,
+we save the simulation outputs with adaptive resolutions (without
+saving full-resolution raw data) to the disk to reduce I/O costs. All
+theN1+N2ensemble members constitute the training dataset.
+6 A RCHITECTURE AND OPERATIONS
+We explain the architecture of GNN-Surrogate and related opera-
+tions in this section.
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 7
+simulation 
+parameters
+(m, 256)
+(256, 512)
+reshape
+(in=16k, out=16k)
+(in=16k, out=8k)
+(in=8k, out=4k)
+(in=4k, out=2k)
+(in=2k, out=k)
+tanh
+adaptive 
+resolution 
+residual
+Upsampling
+Upsampling
+(in, out, 1, 1)
+sum
+  instance 
+normalization
+input /output
+fully connected
+residual block
+1D convolution
+  ReLU
+  others
+(512, 512)
+(in=8k, out=8k)
+(in=k, out=k)
+graph convolution
+(out, out)
+(in, out)
+(k, 1)
+(|𝐺𝐿−1′|,16𝑘) 
+(512,|𝐺𝐿−1′|×16𝑘) 
+Fig. 7. Upsampling-convolution generator architecture of GNN-Surrogate.
+6.1 Architecture
+GNN-Surrogate (denoted as R) is an upsampling-convolution
+generator and is trained to generate outputs close to the ground
+truth adaptive resolution residuals. The network architecture with
+an upsampling-convolution generator proved effective and com-
+putationally efﬁcient [3], [29]. Here we provide the architecture
+details.
+Figure 7 shows the architecture of R, which takes Psimas input
+and outputs the adaptive resolution residual data. A forward pass
+in GNN-Surrogate contains three steps. First, the input parameter
+Psimis fed into fully connected layers to generate a latent vector.
+Second, the latent vector is reshaped to a feature map WL 12
+RjG0
+L 1j16kon the coarsest graph, where the channel multiplier
+kis a hyperparameter used to control the network’s size. Third,
+the subsequent residual blocks perform super-resolution. A feature
+map is ﬁrst upsampled in a residual block and then fed into two
+graph convolution layers. Finally, we add an upsampled original
+input feature map to the output and send it to the next residual
+block. Note that we use Instance Normalization [30] to speed up the
+network convergence because Instance Normalization can improve
+generative models since it can maintain independence between
+each data instance. The rectiﬁed linear unit (ReLU) [31] is used as
+the activation function in all layers except the last layer. The tanh
+activation function is applied in the last layer to normalize output
+signals into [ 1;1].
+6.2 Graph Convolution
+A convolution operation convolves the input feature map using a
+convolution layer and passes the result to the next layer. Figure 6
+provides an example of the deﬁned graph convolution. We deﬁne
+a graph convolution on the constructed graphs as follows. On
+graph G0
+l, the convolution operation transforms input feature map
+Wl2RjV0
+ljcinto an output feature map ¡l2RjV0
+ljcout, where cin
+andcoutare input and output feature maps’ channel numbers. An
+output feature ¡l;i2Rcoutis computed from a weighted sum of
+input features on node vl;iand all of its neighboring nodes.
+We use an edge-conditioned convolution operation formalized
+as below:
+¡l;i=1
+jh(l;i)j+1(USel fWl;i+å
+(vl;j;vl;i;d)2h(l;i)GGG000
+lll(vl;j;vl;i;d)UdWl;j);
+(3)
+where h(l;i) =f(vl;j;vl;i;d)jGGG000
+lll(vl;j;vl;i;d)>0gis an edge set
+containing all the edges pointing to node vl;i,cinand coutare
+channel numbers of the input and output features maps, and Ud2Rcoutcin(d2D)andUsel f2Rcoutcinare weighted basis matrices
+in a convolution layer. In each convolution layer, we use different
+weighted basis matrices conditioned on neighbors at different
+directions in Equation 3. In our experiments, we ﬁnd that our
+model’s learning ability increases by exploiting the geographical
+directional relationship between two edge-connected nodes.
+In our implementation, we ﬁrst perform linear transformation
+for the input feature map by dense matrix-vector multiplication,
+which costs O(jV0
+ljcincout)operations. Then we perform the
+weighted sum by sparse matrix-vector multiplication, which has a
+cost of O(jE0
+ljcout)operations. We perform matrix multiplication
+operations in parallel for efﬁcient computations by the support of
+PyTorch Sparse [32] library.
+6.3 Graph Upsampling
+This section deﬁnes graph upsampling to transform feature maps
+between graphs of different resolution levels.
+We upsample a graph of level mto a graph of level l, where
+m>l. The value of a node at level lequals the ancestor at level
+m. Given a feature map Wm2RjV0mjcon graph G0
+m, the graph
+upsampling outputs ¡l2RjV0
+ljcon graph G0
+l, such that
+¡l;i=Wm;j:vm;j2V0
+mis the ancestor of vl;i2V0
+lin the GHT ;(4)
+where cis the channel number of the feature map.
+Our graph upsampling operations can be implemented by
+multiplying an input feature map by a sparse matrix that with
+jV0
+ljcitems. Upsampling operations on the whole input feature
+map costs O(jV0
+ljc)operations. The same as Section 6.2, we
+perform matrix multiplication operations in parallel for efﬁcient
+computations by the support of PyTorch Sparse [32] library.
+6.4 Training Process
+In the training process, we update the network parameters in
+GNN-Surrogate using gradient descent. We also explain other used
+methods during training as follows.
+Loss Function During training, we iteratively update pa-
+rameters in GNN-Surrogate to minimize a loss function. Our loss
+function is a L1loss:
+L1=1
+bb 1
+å
+i=0jjˆSar;i Sar;ijj1; (5)
+where bis the batch size, Sar;0:b 1and ˆSar;0:b 1are ground truth
+and generated adaptive resolution residual. The loss can guide Rto
+produce results with high accuracy.
+Training Techniques We improve the training stability
+and efﬁciency using two additional techniques. First, We apply
+spectral normalization [33] to stabilize our GNN-Surrogate training.
+Second, training a deep generative model for large-scale data is
+memory costly and slow. Thus, we train GNN-Surrogate with mixed
+precision [34], which can reduce the memory cost of training and
+the time it takes to train with minimal impact. The details of our
+training techniques can be found in the supplementary material.
+6.5 Inference Process and Sensitivity Analysis
+In the inference stage, a new simulation input parameter setting
+is fed into GNN-Surrogate. After a forward pass, we obtain an
+adaptive resolution residual. We convert the adaptive resolution
+residual to a residual with the full resolution by nearest neighbor
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 8
+sampling. Finally, we get the predicted simulation output by adding
+the reference onto the residual.
+Inspired by previous works [3], [35], we exploit GNN-
+Surrogate’s differentiability to perform sensitivity analysis on
+simulation parameters. We aggregate the predicted ﬁeld (e.g., L1
+norm of the data values) to obtain a scalar value and compute
+the derivative of that scalar value with respect to one selected
+parameter. The absolute value of the derivative can be used as
+an indicator for one parameter’s sensitivity since it reﬂects how
+the ﬁeld changes as the input simulation parameter change. While
+analyzing one selected parameter, we ﬁx the other parameters
+and perform uniform sampling in the selected parameter’s value
+range. For each sample point, forward propagation and backward
+propagation are conducted to obtain a sensitivity value. We use a
+line chart to visualize the list of sensitivity values.
+7 R ESULTS
+The evaluation for our proposed GNN-Surrogate is broken up
+into three sections: (1) implementation details and performance
+(Section 7.2); (2) quantitative and qualitative analyses comparing
+our approach with baseline approaches (Section 7.3); (3) parameter
+space exploration case studies and further analysis (Section 7.4).
+7.1 Ensemble Simulation Running Settings
+MPAS-Ocean is designed for the simulation of the global ocean
+system. Based on the scientist’s suggestion, we studied four
+parameters: the amplitude of the ocean surface wind stress
+(BwsA2[0:0;5:0]), the magnitude of the Gent McWilliams
+mesoscale eddy parameterization ( GM2[600:0;1500:0]), the
+critical bulk Richardson number (used to determine the strength
+of vertical mixing) ( CbrN2[0:25;1:00]), and horizontal viscos-
+ity (HV2[100:0;300:0]). We randomly sampled 100 parameter
+settings from the parameter space and randomly picked 70 for
+training and 30 for testing. 15-model-day ocean simulations were
+conducted with each parameter setting, and unstructured grids
+with EC60to30 resolution representing the ocean temperature were
+generated. An MPAS-Ocean mesh structure contains 60 horizontal
+layers, and each horizontal layer consists of 235,160 V oronoi
+cells. One generated ensemble member takes 1.00 GB space
+with a temperature ﬁeld of size 107.65 MB within it. Among
+the 70 ensemble members in the training dataset, 16 were used for
+generating the hierarchy cutting policy described in Section 5.3.
+7.2 Implementation and Performance
+Graph preparation, including graph hierarchy generation and
+graph transformation The graph preparation was implemented
+in C++, and the graph is represented with Eigen SparseMatrix.
+Our graph preparation was computed on an Intel Xeon E5-
+2680 CPU. The graph construction and graph coarsening took 25.9
+minutes. The graph transformation took 6.18 minutes. The graph
+preparation is only related to the mesh structure and independent of
+simulation outputs, so only one graph preparation was performed.
+Simulation runs and data collection The simulations were
+conducted on a supercomputer with 648 computation nodes. Each
+node contains an Intel Xeon E5-2680 CPU with 28 cores and 128
+GB memory. We used 128 processes for our simulation, and it took
+49.6 minutes per simulation. After the simulation, the size of an
+output adaptive resolution temperature ﬁeld varies given different
+GHT cut thresholds and is reported in the supplementary material.GNN-Surrogate training and inference GNN-Surrogate
+was implemented in PyTorch [36]. The training and testing of
+GNN-Surrogate were on one NVIDIA V olta V100 GPU 16GB. We
+ﬁxed the GNN-Surrogate training time to 36hours. After training,
+a single forward pass through the trained GNN-Surrogate takes less
+than 2 seconds, instead of the roughly 50 minutes it would take to
+directly compute the simulation output on a large cluster of CPUs.
+7.3 Comparison with Baseline Approaches
+7.3.1 Evaluation Metrics
+Data-level metrics GNN-Surrogate allows scientists to use
+any visual mapping parameters of interest to the reconstructed
+simulation output, so it is necessary to evaluate the predicted
+simulation output’s quality at the data level. We used peak signal-
+to-noise ratio (PSNR) to measure the grid-level difference, and
+normalized maximum difference (MD) for the error bound.
+Geometry-level metrics The isothermal layer (ITL) depth
+reﬂects the local ocean temperature and spatial variability from
+a geometric perspective. In this work, we compute speciﬁc ITL
+depths and calculated measures of overlap (Jaccard coefﬁcient, JC)
+and the mean surface distance of intersection regions to evaluate
+the quality of ITL depths.
+Image-level metrics At the image level, horizontal and
+vertical cross-section images were rendered. We ﬁxed the depth,
+latitude, or longitude and used the Kindlmann colormap [37]
+to establish a correspondence between the color and the ocean
+temperature. Structural similarity index measure (SSIM) and earth
+mover’s distance (EMD) between color histograms [3], [35] were
+used to quantify the structural and distributional similarity between
+two rendered images.
+We evaluated both global and speciﬁc regions of interest (ROI).
+For ROI evaluation, we extracted a region within 160Wto80E,
+26Sto26N, and sea level to a depth of 200 meters, which is the
+location of the eastern equatorial Paciﬁc cold tongue. At the image
+level evaluation, the resolution of images depends on its target
+region, 1024512for images of a global region, and 420180
+for images of an ROI.
+7.3.2 Baselines
+The baseline methods we chose to compare with are inverse
+distance weighting (IDW) interpolation for comparison on all
+analyses, radial basis function (RBF) interpolation for comparison
+of data-based analyses, and the image-based method InSituNet [3]
+for comparison of image-based analyses. The reasons we selected
+IDW interpolation as the baseline method are twofold. First, IDW
+is one of the most commonly used interpolation methods for
+scientiﬁc data analysis [38]. Second, IDW interpolation has a
+low computation cost and is straightforward to interpret [39].
+Radial basis function (RBF) interpolation is a more complicated
+interpolation method and is also widely used for scientiﬁc data [40].
+We used Gaussian distribution as the radial basis function and used
+backward propagation for the optimization. We selected InSituNet
+for comparison of image-based analyses because it is the state-of-
+the-art image-based method. For the IDW interpolation method,
+we searched the training dataset, sampled gdata instances whose
+parameter settings have the minimum Manhattan distance to the test
+data, and applied the weighted sum. Values of gfrom 1 to 5 were
+evaluated, and we present the results for g=3since it balances
+the metrics in three levels (more results are in the supplementary
+material). The CPU time required to get an interpolated result is
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 9
+TABLE 1
+Quantitative comparison of the output predicted with GNN-Surrogate,
+radial basis function (RBF) interpolation, and inverse distance weighting
+(IDW) interpolation.
+GNN-Surrogate IDW Interp RBF Interp
+PSNR (global, dB) 50.7, 2.52 47.7, 5.72 32.43, 8.91
+MD (global) 0.1965, 0.0415 0.1721, 0.0562 0.1397, 0.0398
+PSNR (ROI, dB) 39.5, 3.06 33.6, 6.03 27.43, 7.27
+MD (ROI) 0.1774, 0.0332 0.1673, 0.0672 0.1573 , 0.0605
+params (GB) 2.18 7.18 10.27
+Fig. 8. The box plot showing the PSNR deviation on global and ROI
+temperature maps from 30 different testing ensemble members.
+around 1.3 seconds, which is a little smaller than a single forward
+pass time through the trained GNN-Surrogate. For InSituNet, since
+it is an image-based method, it does not support data level or
+geometric level comparison, nor does it support multiple visual
+mappings. Thus, we only rendered the horizontal cross-sections
+with a ﬁxed color mapping as the target output of InSituNet. The
+corresponding simulation parameters and depth were incorporated
+as the input parameters.
+7.3.3 Quantitative and Qualitative Analysis Results
+The evaluation results are presented from three perspectives: (1)
+data-level analysis using Table 1 and Figure 8, (2) geometry-level
+analysis using Figure 10(d) and Figure 9(e, f), and (3) image-level
+analysis using Figure 10(a-c) and Figure 9(a-d).
+Data-level analysis In Table 1, we quantitatively compared
+GNN-Surrogate results against interpolations at the data level
+(PSNR and MD) both globally and in the ROI. We found
+that globally, the GNN-Surrogate produces higher PSNR than
+interpolations. GNN-Surrogate has a worse normalized maximum
+difference than interpolations, which is explainable because our loss
+function does not constrain the error bound. Both interpolations and
+GNN-Surrogate have lower PSNR in the ROI than global PSNR
+because the ROI contains complex phenomena. GNN-Surrogate
+achieves a relatively higher PSNR than interpolation methods for
+the ROI compared to the entire domain. GNN-Surrogate is more
+stable than interpolations since it usually has a smaller standard
+variance. To illustrate that, we give PSNR box plots in Figure 8.
+Although sometimes interpolations may give better prediction
+results than GNN-Surrogate, they have worse lower quartiles and
+medians, making them less trustworthy.
+Geometry-Level analysis We sampled temperature isoval-
+ues from 25Cto5Cand computed the ITL depth. In Figure 9
+(e, f) the quantitative results are shown. We arrange temperature
+from large to small in the ﬁgure because ocean temperature
+usually monotonically decreases as the depth increases, so a larger
+temperature isovalue leads to a smaller depth. GNN-Surrogate has
+a smaller mean surface distance than IDW interpolation when the
+temperature is higher than 15C. The distance is always smaller
+than ten meters, which is good considering that the ocean’s mean
+depth is 5.5km. Note that as temperature decreases, there is a
+rapid upward trend for the GNN-Surrogate’s mean surface distance,
+while for IDW interpolation, the mean surface distance graduallydecreases. We believe the rapid upward trend is because of the
+lower vertical resolution in the deeper ocean. Meanwhile, the
+temperature is not sensitive to any input parameters in this region,
+so IDW interpolation can still do a good job. For the surface overlap,
+evaluated by Jaccard Coefﬁcient, GNN-Surrogate is slightly better
+than IDW interpolation until they both become almost perfect when
+the temperature goes below 19C.
+In Figure 10(d), we compared rendering results of the 25CITL
+depth generated by IDW interpolation and GNN-Surrogate using
+the Extended Kindlmann colormap [41]. GNN-Surrogate generates
+a depth map close to the ground truth. In the depth map generated
+by IDW interpolation, there is a large gap across the equator in
+the eastern Paciﬁc. The depth map rendering does not always give
+enough information. For example, we do not know why there is a
+strange gap.
+Image-Level analysis Apart from the rendering using the
+Kindlmann colormap, inspired by some previous work [42],
+[43], difference images are given to display the noticeable pixel
+differences (with4 6:0 in the CIELUV color space).
+We rendered different horizontal cross-sections from the sea
+surface to the seabed. First, in Figure 9(a), GNN-Surrogate
+outperforms InSituNet, reﬂected from higher SSIM and lower EMD.
+Second, although GNN-Surrogate performs well, it is slightly worse
+than IDW interpolation for the global region at some depths. We
+think this is because the temperature is not sensitive to any input
+parameters not only in the deep ocean but also at many locations
+close to the sea level. To illustrate that, we calculate SSIM and EMD
+for ocean maps in the ROI and ﬁnd that GNN-Surrogate achieves
+higher SSIM at most depths and always has lower EMD, as seen
+in 9(b). Figure 10(a) shows the sea level rendering results. GNN-
+Surrogate accurately reﬂects the ocean temperature, while IDW
+interpolation incorrectly predicts temperatures of the equatorial
+cold tongue (i.e., predicted temperatures are much lower than the
+ground truth), which explains why we ﬁnd a large gap in the
+25CITL depth. InSituNet has two major limitations. First, since
+it directly predicts the image, we cannot easily add isotherms to
+aid visualization. Moreover, it cannot preserve interesting features,
+such as the equatorial cold tongue, well.
+We give the vertical cross-sections of the temperature ﬁeld as
+well. In ﬁgure 9(c, d), we observe that IDW interpolation generates
+images with higher SSIM and lower EMD. We claim that ocean
+temperature usually monotonically decreases as depth increases,
+which makes the vertical cross-sections featureless. Despite that, in
+some particular regions, GNN-Surrogate can be more trustworthy.
+For example, in Figure 10(b), the vertical cross-section from the
+equator, we can see IDW interpolation predicts the temperature
+to be lower than the ground truth in the Paciﬁc near the sea level.
+In Figure 10(c), a vertical cross-section from 75E, we ﬁnd that
+IDW interpolation predicts the temperature to be lower near the
+continent at around 10N. GNN-Surrogate performs better on these
+two examples.
+7.4 Case Study: Parameter Space Exploration
+In this section, a scientist (one of our coauthors) who has 15
+years of ocean science experience exploited GNN-Surrogate to
+do a parameter space exploration on an MPAS-Ocean simulation
+forced by an annual averaged wind stress and restoring of surface
+temperature and salinity to climatology.
+First, he probed the sensitivity to different parameters. Un-
+der the parameter setting BwsA =2:5;GM=900:0;CbrN =
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 10
+* The higher SSIM , the better quality . The lower EMD , the better quality .
+* The smaller distance , the better quality . The higher JC , the better quality .
+(a) Global Horizontal Cross -section
+ (b) ROI Horizontal Cross -section
+(c) Global Latitude Cross -section
+ (d) Global Longitude Cross -section
+(e) Global Isothermal Layer (ITL) Depth
+ (f) ROI Isothermal Layer (ITL) Depth
+Fig. 9. (a-b) SSIM and EMD for temperature horizontal cross-sections at different depths. (c) SSIM and EMD for vertical cross-sections at different
+latitudes. (d) SSIM and EMD for vertical cross-sections at different longitudes. (e-f) Average distance and Jaccard Coefﬁcient (JC) for the isothermal
+layer (ITL) depth maps with different temperature isovalues.
+GNNSurro
+GNNSurro
+GNNSurro
+Ground 
+Truth
+GNNSurro
+IDW Interp
+InSituNetdifference image map
+IDW Interp
+ Ground Truth
+IDW Interp
+ Ground Truth
+(b)
+(c)
+Kindlmann
+(a)
+IDW Interp
+ Ground Truth
+(d)extend Kindlmann
+Fig. 10. (a) Comparison of the sea level temperature maps generated using GNN-Surrogate, IDW interpolation, and InSituNet with the ground truth
+maps. Comparison of the vertical cross-sections at (b) the equator (c) 75Egenerated using GNN-Surrogate and IDW interpolation with the ground
+truth cross-sections. (d) Comparison of the isothermal layer (ITL) depth maps with temperature isovalue 25Cgenerated using GNN-Surrogate and
+IDW interpolation with the ground truth maps.
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 11
+Fig. 11. The sensitivity line graph visualization of different simulation
+parameters.
+0:625;HV=200:0, he computed the sensitivity of each variable
+in turn, as suggested in Section 6.5. The results are shown in
+Figure 11. Considering the scale of the four plots, he ranked
+variable sensitivity: BwsA>CrbN >GM>HV.
+Next, he examined how BwsA , the most sensitive parameter,
+affects the ocean temperature. He ﬁxed GM=900:0;CbrN =
+0:625;HV=200:0, and sampled BwsA fromf0:0;1:0;3:0;5:0g. As
+shown in Figure 12, he ﬁrst visualized the sea surface temperature
+map. Based on the observation, as he scaled up the amplitude
+wind stress, the equatorial cold tongue in the eastern Paciﬁc is
+signiﬁcantly enhanced. This phenomenon is physically expected
+as the trade winds, which blow from east to west, push the warm
+ocean surface water toward the western Paciﬁc, exposing the cooler
+surface waters below. Further, the increased wind leads to the
+upwelling of colder subsurface water along the equator due to the
+Coriolis force. These two processes lead to a stronger equatorial
+cold tongue. To verify this point, he rendered the east Paciﬁc
+equatorial cross-section from the sea level to a depth of 200 meters,
+as shown in Figure 12. As the wind stress becomes strong, more
+cold water in the deeper ocean is upwelled to the surface.
+8 D ISCUSSION AND LIMITATIONS
+We compare our method with an image-based surrogate model
+InSituNet [3] and list two limitations of our method in this section.
+We addressed all the three limitations reported in InSituNet:
+(1) insufﬁcient ﬂexibility when exploring arbitrary visual mapping
+parameters; (2) low accuracy of predicted images; (3) low reso-
+lution of predicted images. For the ﬁrst limitation of InSituNet,
+instead of considering the huge joint space of all the simulation and
+visualization parameters, GNN-Surrogate predicts the simulation
+output ﬁrst. Using adaptive resolutions for MPAS-Ocean data, our
+training dataset size is 3.13GB, smaller than InSituNet’s training
+data requirement (3.46GB). After simulation outputs are predicted,
+various existing visualization algorithms can be used for rendering.
+For the second and third limitations of InSituNet, we exploit the fact
+that all the ensemble members share the same mesh structure, which
+does not need to be learned. Meanwhile, GNN-Surrogate builds
+adaptive resolutions for simulation outputs, which signiﬁcantly
+reduces the training difﬁculty. For the training dataset generation,
+compared with InSituNet, GNN-Surrogate requires fewer ensemble
+runs (70 versus 270) and learns more input parameters (4 versus 1).
+With the high quality of the predicted simulation output, accuracy
+and resolution of rendered images are improved signiﬁcantly, which
+were validated by our experiments.
+GNN-Surrogate has two limitations that we want to research
+for the solution in the future: (1) long ofﬂine training time and
+(2) limited sensitivity estimation before the model is trained. First,
+the ofﬂine training time of GNN-Surrogate takes 36hours. Thanks
+to the advancement of high-performance machine learning, we
+Fig. 12. Comparison of the sea level temperature map and equator
+vertical cross-sections using different BwsA values to see the effect of
+the amplitude wind stress. As the wind stress becomes strong ( BwsA
+value becomes high), the equatorial cold tongue in the eastern Paciﬁc
+is signiﬁcantly enhanced, and more cold water in the deeper ocean is
+upwelled to the surface.
+plan to train our GNN-Surrogate with multiple GPUs using the
+data-parallel technique provided by PyTorch [36] to speed up the
+training in the future. Second, to estimate the sensitivity of regions
+for building adaptive resolutions, we only select one reference by
+selecting the medoid of the ﬁrst N1simulation outputs. Considering
+the complexity of the simulation parameter space, one reference
+may not always be representative of modeling the sensitivities of
+regions against other ensemble members. In the future, we plan
+to compute region’s sensitivities from multiple simulation outputs
+as references for a more accurate sensitivity estimation to model
+adaptive resolutions.
+9 C ONCLUSIONS AND FUTURE WORK
+In this work, we propose GNN-Surrogate, a deep surrogate model
+to support analysis and visualization of ocean ensemble simulations.
+GNN-Surrogate is based on a graph neural network for learning
+on data represented with unstructured grids, and adaptive data
+resolution is applied for GPU memory efﬁciency. In the inference
+stage, GNN-Surrogate is fed with input parameters, and the
+output can be converted to the full resolution by simple post-
+processing. Scientists can apply existing visualization algorithms
+to the reconstructed data and conduct a thorough analysis. We
+render horizontal and vertical cross-sections and ITL depth maps
+and give comprehensive quantitative and qualitative evaluations to
+demonstrate the effectiveness and efﬁciency of GNN-Surrogate.
+Future work In Section 6.5, we used nearest neighbor
+sampling to convert the predicted adaptive resolution result to
+full resolution. Although it worked well in our experiments, in
+the future, we plan to research on neural network-based super-
+resolution method to further improve GNN-Surrogate’s quality. In
+Section 7.3.2, we chose a computationally cheap and straightfor-
+ward inverse distance weighting interpolation and a more advanced
+radial basis function interpolation as baseline methods. Some other
+techniques like Kriging can also be considered. However, Kriging
+is a geostatistical approach that requires calculating corresponding
+interpolation coefﬁcients from sampled temperature values for
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 12
+each spatial location. Considering that the number of spatial grid
+points in one ensemble member is very high ( 107), Kriging is not
+appropriate as the comparison baseline due to a high computation
+cost. In the future, we would like to explore interpolation techniques
+that have higher performance and competitive computational cost.
+We would also like to extend GNN-Surrogate to time-varying
+data by employing 4D convolutions, time-space graphs and trees.
+Outside ocean simulations, GNN-Surrogate can also be useful for
+other datasets. However, in that case, our adaptive data resolution
+method may not work well since different ensemble members may
+not have features at the same location. We consider using another
+model to learn the graph transformation strategy and guide our
+adaptive data resolution to overcome this challenge.
+ACKNOWLEDGMENTS
+This work is supported in part by the National Science Foundation
+Division of Information and Intelligent Systems-1955764, the Na-
+tional Science Foundation Ofﬁce of Advanced Cyberinfrastructure-
+2112606, U.S. Department of Energy Los Alamos National Labo-
+ratory contract 47145, and UT-Battelle LLC contract 4000159447
+program manager Margaret Lentz. This work is also supported
+in part by the SciDAC program funded by the U.S. Department
+of Energy, Ofﬁce of Science, Advanced Scientiﬁc Computing
+Research. This research used resources of the Argonne Leadership
+Computing Facility, which is a DOE Ofﬁce of Science User Facility
+supported under Contract DE-AC02-06CH11357.
+REFERENCES
+[1] J. Wang, S. Hazarika, C. Li, and H.-W. Shen, “Visualization and
+Visual Analysis of Ensemble Data: A Survey,” IEEE Transactions on
+Visualization and Computer Graphics , vol. 25, no. 9, pp. 2853–2872,
+2018.
+[2] J. Wang, X. Liu, H.-W. Shen, and G. Lin, “Multi-Resolution Climate
+Ensemble Parameter Analysis with Nested Parallel Coordinates Plots,”
+IEEE Transactions on Visualization and Computer Graphics , vol. 23,
+no. 1, pp. 81–90, 2016.
+[3] W. He, J. Wang, H. Guo, K.-C. Wang, H.-W. Shen, M. Raj, Y . S.
+Nashed, and T. Peterka, “InSituNet: Deep Image Synthesis for Parameter
+Space Exploration of Ensemble Simulations,” IEEE Transactions on
+Visualization and Computer Graphics , vol. 26, no. 1, pp. 23–33, 2019.
+[4] S. Hazarika, H. Li, K.-C. Wang, H.-W. Shen, and C.-S. Chou, “NNV A:
+Neural Network Assisted Visual Analysis of Yeast Cell Polarization
+Simulation,” IEEE Transactions on Visualization and Computer Graphics ,
+vol. 26, no. 1, pp. 34–44, 2019.
+[5] K. Alden, J. Cosgrove, M. Coles, and J. Timmis, “Using Emulation to
+Engineer and Understand Simulations of Biological Systems,” IEEE/ACM
+transactions on Computational Biology and Bioinformatics , vol. 17, no. 1,
+pp. 302–315, 2018.
+[6] N. Perraudin, M. Defferrard, T. Kacprzak, and R. Sgier, “DeepSphere: Ef-
+ﬁcient Spherical Convolutional Neural Network with HEALPix Sampling
+for Cosmological Applications,” Astronomy and Computing , vol. 27, pp.
+130–146, 2019.
+[7] M. Defferrard, N. Perraudin, T. Kacprzak, and R. Sgier, “DeepSphere:
+Towards an Equivariant Graph-Based Spherical CNN,” arXiv preprint
+arXiv:1904.05146 , 2019.
+[8] T. Pfaff, M. Fortunato, A. Sanchez-Gonzalez, and P. W. Battaglia,
+“Learning Mesh-Based Simulation with Graph Networks,” arXiv preprint
+arXiv:2010.03409 , 2020.
+[9] T. Ringler, M. Petersen, R. L. Higdon, D. Jacobsen, P. W. Jones, and
+M. Maltrud, “A Multi-Resolution Approach to Global Ocean Modeling,”
+Ocean Modelling , vol. 69, pp. 211–232, 2013.
+[10] Q. Wang, Z. Chen, Y . Wang, and H. Qu, “A Survey on ML4VIS: Applying
+Machine Learning Advances to Data Visualization,” IEEE Transactions
+on Visualization and Computer Graphics , 2021.
+[11] A. Bock, A. Pembroke, M. L. Mays, L. Rastaetter, T. Ropinski, and A. Yn-
+nerman, “Visual Veriﬁcation of Space Weather Ensemble Simulations,” in
+Proc. IEEE Scientiﬁc Visualization Conference (SciVis) . IEEE, 2015, pp.
+17–24.[12] J. Poco, A. Dasgupta, Y . Wei, W. Hargrove, C. R. Schwalm, D. N.
+Huntzinger, R. Cook, E. Bertini, and C. T. Silva, “Visual Reconciliation of
+Alternative Similarity Spaces in Climate Modeling,” IEEE Transactions
+on Visualization and Computer Graphics , vol. 20, no. 12, pp. 1923–1932,
+2014.
+[13] A. Biswas, G. Lin, X. Liu, and H.-W. Shen, “Visualization of Time-
+Varying Weather Ensembles across Multiple Resolutions,” IEEE Transac-
+tions on Visualization and Computer Graphics , vol. 23, no. 1, pp. 841–850,
+2016.
+[14] H. Obermaier, K. Bensema, and K. I. Joy, “Visual Trends Analysis in Time-
+Varying ensembles,” IEEE Transactions on Visualization and Computer
+Graphics , vol. 22, no. 10, pp. 2331–2342, 2015.
+[15] D. Orban, D. F. Keefe, A. Biswas, J. Ahrens, and D. Rogers, “Drag
+and Track: A Direct Manipulation Interface for Contextualizing Data
+Instances within a Continuous Parameter Space,” IEEE Transactions on
+Visualization and Computer Graphics , vol. 25, no. 1, pp. 256–266, 2018.
+[16] R. Splechtna, K. Matkovi ´c, D. Gra ˇcanin, M. Jelovi ´c, and H. Hauser,
+“Interactive Visual Steering of Hierarchical Simulation Ensembles,” in
+Proc. IEEE Conference on Visual Analytics Science and Technology
+(VAST) . IEEE, 2015, pp. 89–96.
+[17] K. Matkovic, D. Gracanin, B. Klarin, and H. Hauser, “Interactive Visual
+Analysis of Complex Scientiﬁc Data as Families of Data Surfaces,” IEEE
+Transactions on Visualization and Computer Graphics , vol. 15, no. 6, pp.
+1351–1358, 2009.
+[18] S. Bruckner and T. M ¨oller, “Result-Driven Exploration of Simulation
+Parameter Spaces for Visual Effects Design,” IEEE Transactions on
+Visualization and Computer Graphics , vol. 16, no. 6, pp. 1468–1476,
+2010.
+[19] H. Chen, S. Zhang, W. Chen, H. Mei, J. Zhang, A. Mercer, R. Liang, and
+H. Qu, “Uncertainty-Aware Multidimensional Ensemble Data Visualiza-
+tion and Exploration,” IEEE Transactions on Visualization and Computer
+Graphics , vol. 21, no. 9, pp. 1072–1086, 2015.
+[20] D. Coffey, C.-L. Lin, A. G. Erdman, and D. F. Keefe, “Design by Dragging:
+An Interface for Creative Forward and Inverse Design with Simulation
+Ensembles,” IEEE Transactions on Visualization and Computer Graphics ,
+vol. 19, no. 12, pp. 2783–2791, 2013.
+[21] N. M. Urban and T. E. Fricker, “A Comparison of Latin Hypercube and
+Grid Ensemble Designs for the Multivariate Emulation of an Earth System
+Model,” Computers & Geosciences , vol. 36, no. 6, pp. 746–755, 2010.
+[22] D. Erdal, S. Xiao, W. Nowak, and O. A. Cirpka, “Sampling Behavioral
+Model Parameters for Ensemble-Based Sensitivity Analysis Using Gaus-
+sian Process Emulation and Active Subspaces,” Stochastic Environmental
+Research and Risk Assessment , vol. 34, no. 11, pp. 1813–1830, 2020.
+[23] M. Simonovsky and N. Komodakis, “Dynamic Edge-Conditioned Filters
+in Convolutional Neural Networks on Graphs,” in Proceedings of the
+IEEE Conference on Computer Vision and Pattern Recognition , 2017, pp.
+3693–3702.
+[24] D. Valsesia, G. Fracastoro, and E. Magli, “Learning Localized Represen-
+tations of Point Clouds With Graph-Convolutional Generative Adversarial
+Networks,” IEEE Transactions on Multimedia , vol. 23, pp. 402–414, 2020.
+[25] S. Lan, R. Yu, G. Yu, and L. S. Davis, “Modeling Local Geometric
+Structure of 3D Point Clouds using Geo-CNN,” in Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition , 2019,
+pp. 998–1008.
+[26] M. Petersen, “MPAS-Ocean V6 Run Directories,” May 2018. [Online].
+Available: https://doi.org/10.5281/zenodo.1252437
+[27] J. Feld, “Plane and Spherical Trigonometry,” 1940.
+[28] I. S. Dhillon, Y . Guan, and B. Kulis, “Weighted Graph Cuts without
+Eigenvectors a Multilevel Approach,” IEEE Transactions on Pattern
+Analysis and Machine Intelligence , vol. 29, no. 11, pp. 1944–1957, 2007.
+[29] P. Isola, J.-Y . Zhu, T. Zhou, and A. A. Efros, “Image-to-image Translation
+with Conditional Adversarial Networks,” in Proceedings of the IEEE
+Conference on Computer Vision and Pattern Recognition , 2017, pp. 1125–
+1134.
+[30] D. Ulyanov, A. Vedaldi, and V . Lempitsky, “Instance Normalization: The
+Missing Ingredient for Fast Stylization,” arXiv preprint arXiv:1607.08022 ,
+2016.
+[31] V . Nair and G. E. Hinton, “Rectiﬁed Linear Units Improve Restricted
+Boltzmann Machines,” in Proceedings of the 27th International Con-
+ference on International Conference on Machine Learning , 2010, pp.
+807–814.
+[32] M. Fey, “PyTorch Sparse,” https://github.com/rusty1s/pytorch sparse,
+2021.
+[33] T. Miyato, T. Kataoka, M. Koyama, and Y . Yoshida, “Spectral Normal-
+ization for Generative Adversarial Networks,” in Proc. International
+Conference on Learning Representations , 2018.
+JOURNAL OF L ATEX CLASS FILES, VOL. 14, NO. 8, AUGUST 2015 13
+[34] P. Micikevicius, S. Narang, J. Alben, G. Diamos, E. Elsen, D. Garcia,
+B. Ginsburg, M. Houston, O. Kuchaiev, G. Venkatesh et al. , “Mixed
+Precision Training,” in Proc. International Conference on Learning
+Representations , 2018.
+[35] M. Berger, J. Li, and J. A. Levine, “A Generative Model for V olume
+Rendering,” IEEE Transactions on Visualization and Computer Graphics ,
+vol. 25, no. 4, pp. 1636–1650, 2018.
+[36] A. Paszke, S. Gross, F. Massa, A. Lerer, J. Bradbury, G. Chanan, T. Killeen,
+Z. Lin, N. Gimelshein, L. Antiga et al. , “PyTorch: An Imperative
+Style, High-Performance Deep Learning Library,” in Advances in Neural
+Information Processing Systems , 2019, pp. 8024–8035.
+[37] G. Kindlmann, E. Reinhard, and S. Creem, “Face-Based Luminance
+Matching for Perceptual Colormap Generation,” in Proc. IEEE Visualiza-
+tion. IEEE, 2002, pp. 299–306.
+[38] F.-W. Chen and C.-W. Liu, “Estimation of the Spatial Rainfall Distribution
+Using Inverse Distance Weighting (IDW) in the Middle of Taiwan,” Paddy
+and Water Environment , vol. 10, no. 3, pp. 209–222, 2012.
+[39] G. Y . Lu and D. W. Wong, “An Adaptive Inverse-Distance Weighting
+Spatial Interpolation Technique,” Computers & geosciences , vol. 34, no. 9,
+pp. 1044–1055, 2008.
+[40] S. M. Wild, R. G. Regis, and C. A. Shoemaker, “ORBIT: Optimization by
+Radial Basis Function Interpolation in Trust-Regions,” SIAM Journal on
+Scientiﬁc Computing , vol. 30, no. 6, pp. 3197–3219, 2008.
+[41] K. Moreland, “Why We Use Bad Color Maps and What You Can Do
+about It,” Electronic Imaging , vol. 2016, no. 16, pp. 1–6, 2016.
+[42] J. Han and C. Wang, “TSR-TVD: Temporal Super-Resolution for
+Time-Varying Data Analysis and Visualization,” IEEE Transactions on
+Visualization and Computer Graphics , vol. 26, no. 1, pp. 205–215, 2019.
+[43] J. Han, H. Zheng, Y . Xing, D. Z. Chen, and C. Wang, “V2V: A Deep
+Learning Approach to Variable-to-Variable Selection and Translation for
+Multivariate Time-Varying Data,” IEEE Transactions on Visualization and
+Computer Graphics , vol. 27, no. 2, pp. 1290–1300, 2020.
+Neng Shi is a Ph.D. student in the Department of
+Computer Science and Engineering at the Ohio
+State University. He received his B.S. degree in
+Geographic Information Science from Zhejiang
+University in 2018. His research interest include
+large-scale scientiﬁc data visualization, ensem-
+ble simulation data visualization, and machine
+learning for scientiﬁc visualization.
+Jiayi Xu is a research scientist at Meta AI. His
+research interests include high-performance data
+analysis, visualization, and machine learning. He
+is the recipient of the best paper award in the
+14th IEEE Paciﬁc Visualization Symposium. He
+received his Ph.D. degree in computer science
+and engineering from The Ohio State University
+in 2021 and his B.E. degree in computer science
+and technology from Chu Kochen Honors College
+of Zhejiang University in 2014.
+Skylar W. Wurster is a 3rd year Ph.D. student
+studying under Professor Han-Wei Shen as part
+of his GRAVITY research group at The Ohio
+State University in Columbus, Ohio. He also
+collaborates with mentors Hanqi Guo and Tom
+Peterka at Argonne National Lab in Lemont,
+Illinois. His research interests span deep learn-
+ing, scientiﬁc data visualization, and computer
+games/graphics.
+Hanqi Guo is a computer scientist at Argonne
+National Laboratory, scientist at the University
+of Chicago Consortium for Advanced Science
+and Engineering (CASE), and fellow of the North-
+western Argonne Institute for Science and Engi-
+neering (NAISE). His research interests include
+data analysis, visualization, and machine learning
+for scientiﬁc data. He is the recipient of multiple
+best paper awards in IEEE VIS, IEEE PaciﬁcVis,
+and ChinaVis. He received his Ph.D. degree in
+computer science from Peking University in 2014
+and his B.S. degree in mathematics and applied mathematics from Beijing
+University of Posts and Telecommunications in 2009.
+Jonathan Woodring received the PhD degree
+in computer science from Ohio State University
+in 2009, his specialization in computer graphics
+and scientiﬁc visualization. He is a research
+scientist at the Los Alamos National Laboratory.
+His research areas focus on data science at
+scale, scientiﬁc supercomputing, the intersection
+of high-performance and cloud computing, future
+power grids, and ocean climate modeling.
+Luke P. Van Roekel is currently a research sci-
+entist in the climate, ocean, and sea-ice modeling
+group at LANL and is the co-lead developer of
+the MPAS-Ocean model, the ocean component
+of the DOE’s new Exascale EnergyEarth System
+Model (E3SM) and is a science focus group co-
+lead on the E3SM project. Some of his research
+interests include ocean surface boundary layer
+turbulence, large scale earth system dynamics,
+ocean-atmosphere coupling phenomena, and
+parameterization of these processes for earth
+system models. Before joining LANL he was an assistant professor of
+atmospheric science at a liberal arts college in Wisconsin.
+Han-Wei Shen is a full professor at the Ohio
+State University. He received his B.S. degree from
+the Department of Computer Science and Infor-
+mation Engineering at National Taiwan University
+in 1988, his M.S. degree in computer science
+from the State University of New York at Stony
+Brook in 1992, and his Ph.D. degree in computer
+science from the University of Utah in 1998. From
+1996 to 1999, he was a research scientist at
+NASA Ames Research Center in Mountain View
+California. His primary research interests are
+scientiﬁc visualization and computer graphics. He is a winner of the
+National Science Foundation’s CAREER award and U.S. Department
+of Energy’s Early Career Principal Investigator Award. He also won
+the Outstanding Teaching award twice in the Department of Computer
+Science and Engineering at the Ohio State University.

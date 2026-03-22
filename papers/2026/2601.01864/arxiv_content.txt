@@ -1,0 +1,820 @@
+Extending SST Anomaly Forecasts Through
+Simultaneous Decomposition of Seasonal and PDO
+Modes
+Rameshan Kallummal
+CSIR Fourth Paradigm Institute, NAL Belur campus, Wind Tunnel Road
+Bangalore - 560 037, Karnataka, INDIA, E-mail: kallummal@gmail.com
+January 6, 2026
+Abstract
+We present a new approach to forecasting North Pacific Sea Surface Temperatures
+(SST) by recognizing that interannual variability primarily reflects amplitude changes
+in four dominant seasonal cycles. Our multivariate linear model simultaneously cap-
+tures these amplitude-modulated seasonal cycles along with the Pacific Decadal Oscil-
+lation (PDO), which naturally emerges as an intrinsic feature of the system rather than
+a separate phenomenon. Using sixteen-dimensional regression based on four spatially
+distributed time series per variable, the model delivers unprecedented forecast accu-
+racy for both interannual amplitude modulations and PDO evolution, maintaining skill
+beyond 36 months—a substantial improvement over current operational and research
+forecasts, including machine learning methods. Predictions initialized in 2024 project
+that the PDO will remain in its negative phase through late 2026, implying reduced
+1arXiv:2601.01864v1  [physics.ao-ph]  5 Jan 2026
+likelihood of severe marine heatwaves in the eastern North Pacific during this period.
+These findings have direct implications for regional climate impacts, including storm
+tracks, precipitation patterns, and marine ecosystem health. By treating seasonal and
+interannual variability as coupled rather than independent processes, this framework
+advances our understanding of North Pacific climate dynamics and provides a power-
+ful tool for stakeholders managing climate-sensitive resources and planning adaptation
+strategies in regions strongly influenced by North Pacific conditions.
+1 Introduction
+Interannual variations in North Pacific SST significantly influence local and global climate,
+profoundly affecting weather patterns, natural resources, and ecosystems (Mantua et al. 1997,
+Deser et al. 2004). Regionally, these fluctuations alter atmospheric circulation, modulating
+the Aleutian Low’s intensity and position, which drives changes in coastal upwelling along
+western North America and shapes temperature and precipitation across East Asia and the
+United States (Miller and Schneider 2000, Fan and Fan 2017, Wu et al. 2021). Globally, they
+impact ocean-atmosphere teleconnections, affecting rainfall patterns across the pan-North
+Pacific and extending to eastern North America (Zou et al. 2020, Zhang et al. 2024), tropical
+cyclone activity (Lee et al. 2012, Yu et al. 2016, Wang and Wang 2023, Wang et al. 2023,
+Huang et al. 2024, Dai et al. 2025), and marine heatwaves (Joh and Di Lorenzo 2017, Ren
+et al. 2023). These dynamics underscore the critical role of North Pacific SST in regulating
+ecological and climatic processes, making robust seasonal and interannual forecasting an
+essential goal in climate research.
+The North Pacific’s primary interannual SST modes - the PDO and Victoria Mode (VM)
+- emerge from Empirical Orthogonal Function (EOF) analysis of its traditional monthly
+anomaly, with the PDO as the leading mode and the VM as a secondary dipole (Mantua
+2
+et al. 1997, Chiang and Vimont 2004). The PDO is shaped by local drivers like Aleutian
+Low variability and Kuroshio-Oyashio Extension dynamics, amplified by midlatitude ocean
+processes such as wind-driven gyre circulation and Rossby wave propagation (Latif and
+Barnett 1994, Newman et al. 2016). Remote forcing from the El Ni˜ no-Southern Oscillation
+(ENSO) via the ”atmospheric bridge” further integrates seasonal-to-interannual signals into
+PDO, while anthropogenic greenhouse gases contribute to long-term trends (Alexander 1992,
+Zhang et al. 1997, Alexander et al. 2002). The VM, influenced by ENSO and the Pacific
+Meridional Mode, is modulated by stochastic atmospheric forcing (Gershunov and Barnett
+1998, Wang et al. 2012, Ding et al. 2015). Accurate long-term forecasts of these climate
+modes are critical for an effective adaptation and resource management, underscoring the
+urgency of advancing our predictive tools.
+The current status of North Pacific SST climate prediction, particularly for PDO, reveals
+a mix of progress and persistent challenges as outlined here. The constrained predictive skill
+may stem from the PDO’s nature as a complex phenomenon, not a single physical mode, but
+rather an amalgamation of diverse mechanisms (Newman et al. 2016). Traditional climate
+models, such as those from Coupled Model Intercomparison Project phases 5 and 6, exhibit
+low predictive skill for North Pacific SST beyond 12 months (Wen et al. 2012), largely due
+to biases in capturing tropical-extratropical teleconnections and ocean dynamics like Rossby
+wave propagation, leading to uncertainties in long-term forecasts (Guemas et al. 2012, Wills
+et al. 2018, 2019, Zhao et al. 2021, Qin et al. 2023). Linear empirical models, including Linear
+Inverse Models (LIMs), achieve robust short-term predictions (6-12 months) with correlation
+scores above 0.5, but their skill diminishes for longer horizons due to nonlinear dynamics and
+stochastic noise (Schneider and Cornuelle 2005, Alexander et al. 2008). Nevertheless, the
+PDO indices employed in some studies (Alexander et al. 2008, Park et al. 2013, Huang and
+Wang 2020) consist of annual data with restricted temporal coverage. The Machine Learning
+3
+(ML) and Deep Learning (DL) approaches extend PDO forecast lead times up to 12 months
+by leveraging nonlinear spatiotemporal patterns, outperforming dynamical models (Gordon
+et al. 2021, Qin et al. 2023). However, ML/DL methods face limitations from scarce training
+data and poor interpretability, while predictions of the VM suffer from inadequate resolution
+of its dipole structure and high-frequency variability (Bond et al. 2003). Overall, while these
+innovations show promise, systematic biases and incomplete mechanistic representations
+continue to hinder accurate long-term North Pacific SST predictions (Guemas et al. 2012,
+Wang and Miao 2018)
+Disentangling the combined impacts of external forcings - such as anthropogenic climate
+change, solar variability, and volcanic eruptions - from the effects of internal drivers, in-
+cluding ocean-atmosphere interactions, stochastic variability, and oceanic gyre dynamics, on
+SST anomalies presents significant challenges (An et al. 2007, Nidheesh et al. 2017). Such
+predictors are challenging to estimate accurately due to the intricate nature of climate inter-
+actions, overlapping scales of variability, and constraints imposed by limited observational
+data (Zhao et al. 2021). Furthermore, biases in capturing teleconnections introduce addi-
+tional uncertainty, while non-stationary relationships under a changing climate exacerbate
+the difficulties in assessment (Ault et al. 2018).
+We introduce a suite of multivariate linear models built on predictors derived solely
+from reanalysis data, bypassing explicit dependence on remote or internal forcing predictors.
+Our findings show that these reanalysis-based predictors markedly improve statistical model
+performance in forecasting interannual variability, despite not directly tackling inherent pre-
+dictive challenges.
+2 Methods and Data
+Observational Data
+4
+We analyze monthly data from 1948 to 2025, including SST from NOAA Extended Re-
+constructed SST version 5 (Huang et al. 2017) and surface winds (zonal and meridional
+components) plus surface pressure from NCEP/NCAR Reanalysis (Kalnay et al. 2018). For
+brevity, we denote SST as ‘S’, zonal wind as ‘U’, meridional wind as ‘V’, and surface pressure
+as ‘P’. We deliberately selected observational products with minimal model-based gap-filling
+to avoid uncertainties from model-generated estimates. Variables like ocean heat content
+and thermocline depth, which rely heavily on model simulations, were excluded to maintain
+an empirically grounded prediction framework based solely on observed data.
+Extraction of Seasonal Cycles
+Following the framework established in Kallummal (2021, 2023, 2024), we extract four
+dominant seasonal modes from each variable across the North Pacific (20oN to 60oN; 100oE to
+90oW) using Singular Value Decomposition (SVD) applied directly to raw, uncentered data.
+This approach identifies statistically significant patterns without imposing predetermined
+assumptions about seasonal structure.
+SVD factorizes the data matrixΨ(withTtime samples in columns andGspatial samples
+in rows) into three components:
+Ψ=LΣRτ,
+whereLandRare orthogonal matrices andΣcontains singular values in descending or-
+der. The superscriptτdenotes matrix transpose. Because we apply SVD to the complete
+dataset without monthly stratification, the first four columns ofRrepresent spatial patterns
+for seasonal modes 1 through 4, while corresponding columns ofLcapture their temporal
+evolution.
+Each SVD mode’s contribution at timetand grid pointgis reconstructed as:
+ψit,g=lt,i×σ i×r g,i,where i = 1,2,3,4.
+We denote the four leading modes for SST as S1, S2, S3, and S4, with analogous notation
+5
+for other variables. The suffix 1, 2, 3, and 4 indicate the four leading SVD modes. Thus,
+the first SVD modes of the four variables are S1, U1, V1, and P1, with subsequent modes
+denoted by replacing 1 with 2, 3, or 4. Supplementary figures S2 through S5 demonstrate
+the dynamically coupled evolution of these long-term mean seasonal cycles.
+By extracting seasonal modes independently for each variable, we avoid spurious rela-
+tionships that can arise from multivariate statistical methods. The dynamic coupling among
+variables (Figs. S2 to S5) emerges naturally, reflecting physically meaningful co-variations.
+Additionally, analyzing uncentered data ensures we capture spatio-temporal variations with-
+out reference to an arbitrary time-invariant background state. The singular valuesσfrom raw
+data correspond to root mean square values rather than variances, meaning our “seasonal
+cycles” and “modes” represent structures capturing substantial portions of mean squared
+values. This methodology provides robust analysis and clearer insight into coupled seasonal
+evolution across all four variables.
+Interannual Amplitude Modulations
+We calculate interannual amplitude modulations (Figures S1 and 1G), referred to as
+anomalies, by removing each mode’s long-term seasonal cycle (black lines in Figures. S1
+and 1G). This procedure applies uniformly across all modes and variables. We denote these
+anomalies by prefixing ‘a’ to variable names: aS1, aS2, aS3, and aS4 for SST anomalies,
+with consistent notation for other variables.
+Previous investigations of low-frequency variability in tropical Pacific SST (Kallummal
+2023, 2024) identified aS1 as representing secular warming, while the third and fourth modes
+correspond to central and eastern Pacific ENSO, respectively. The second coupled seasonal
+cycle (S2, U2, V2, P2) was found to stabilize the climate system by moderating external
+forcings (Kallummal 2024), as evidenced by its relatively small interannual variations. This
+stabilizing characteristic, manifested through small interannual variations, is similarly evi-
+6
+dent in the NP basin seasonal modes examined here (second column, Fig. S1).
+Regional Indices
+Given that North Pacific SST anomalies—particularly the PDO—can influence regional
+seasonal predictability, we target high-variance regions within each variable’s four seasonal
+mode anomalies (seeInterannual Amplitude Modulationsin section 2 and Fig. 2A
+and Table 1). Four area-averaged indices per variable are derived from maximum-variance
+locations distributed across the North Pacific basin (Fig. 2A). For SST (i.e., S) , these indices
+span: IaS1 (152°E–156°E, 28°N–32°N), IaS2 (146°E–150°E, 48°N–52°N), IaS3 (126°E–130°E,
+28°N–32°N), and IaS4 (140°W–144°W, 48°N–52°N), with corresponding time series presented
+in Figure 2B (top panel).
+To suppress subseasonal noise, we smooth each index with a 3-month running window—a
+standard technique for enhancing climate forecast skill by emphasizing low-frequency vari-
+ability (Choudhury et al. 2015, Newman et al. 2016). Since PDO dynamics operate on
+timescales exceeding three months, this smoothing isolates persistent interannual signals
+that dominate NP variability, thereby improving forecast performance. To maintain causal-
+ity, smoothed values are assigned to the final date in each 3-month window, consistent with
+operational practices at institutions like the International Research Institute for Climate and
+Society.
+The four leading SVD modes of each variable are mutually orthogonal, ensuring statis-
+tical independence. However, their anomalies (i.e., aS, aU, aV, and aP) exhibit temporal
+correlations even at zero lag, indicating underlying physical processes connecting these vari-
+ables in interannual climate variability. The effectiveness of our regression-based prediction
+thus depends on cross-correlations among all 16 precursors: IaS1–IaS4 (SST), IaU1–IaU4
+(zonal wind), IaV1–IaV4 (meridional wind), and IaP1–IaP4 (SLP).
+Linear Regression Model
+7
+Following Halide and Ridd (2008), who demonstrated advantages of simple linear regres-
+sion for climate forecasting over complex climate models and machine learning approaches
+(Jin et al. 2008, Ham et al. 2019, Zhou and Zhang 2023, L’Heureux et al. 2020, Barnston
+et al. 2012, Gonzalez and Goddard 2016), we employ a multivariate linear model. Linear
+approaches offer several benefits: computationally efficient long-term forecasts, transparent
+and interpretable results showing individual variables’ influences, and minimal training data
+requirements—particularly valuable when data is limited.
+Our model estimates future precursor values based on past values of all 16 precursors:
+xj(t) =16X
+i=1pi(l)x i(t−l) +e j(t) (1)
+wherep i(l) represents the regression coefficient at time lagl,x ibelongs to the ordered
+set{IaS1, IaS2, IaS3, IaS4, IaU1, IaU2, IaU3, IaU4, IaV1, IaV2, IaV3, IaV4, IaP1, IaP2,
+IaP3, IaP4},x jrepresents one of the ordered set{IaS1, IaS2, IaS3, IaS4}, ande j(t) is the
+error term.
+We estimate regression coefficientsp i(l) by minimizing error using Python’s least-squares
+fitting routine (e.g.,numpy.linalg.lstsq), focusing predictive skill evaluation on the four lead-
+ing SST modes:j=1 to 4.
+The training period spans 53 years (1948 to 2000), providing robust temporal sampling for
+accurate coefficient estimation. Verification covers January 2001 to December 2023, with the
+final year (January 2024 to November 2025) reserved for out-of-sample forecast evaluation
+(Fig. 5).
+Forecast Generation and Verification
+Spatially remote and temporally lagged anomalies both influence PDO evolution and
+other interannual signals (Newman et al. 2003, 2016). Our multivariate regression model
+explicitly accounts for remote influences by incorporating precursors distributed across the
+8
+North Pacific (Figure 2A and Table 1), which are derived from multiple SVD modes of all
+four variables.
+We generate predictions using 36 regression equations, each corresponding to a specific
+time laglbetween predictors and predictands, capturing lagged influences. The predicted
+valueyl
+j(k) for thejthSST index at future timekderives from past predictor valuesx iat
+time (k−l):
+yl
+j(k) =16X
+i=1pi(l)x i(k−l),(2)
+wherek=l,l+ 1,l+ 2, ...,N t+ 36,j=1 to 4 (i.e.,only S), andl= 1, 2, ..., 36.N t
+indicates the time-index of the final verification date (i.e.,December 2023). This enables
+out-of-sample predictions extending 36 months beyond the final verification date.
+To account for lagged influences robustly, we average predictions across multiple lead
+times (l). For greater statistical robustness, only median values of these predictions are
+used, as this approach reduces outlier impacts and yields more reliable forecasts.
+Skill Metrics
+This study evaluates forecast skills using the Pearson Correlation Coefficient (PCC) and
+Root Mean Square Error (RMSE). Estimations of PCC and RMSE are performed over values
+of linear regression hindcast indices (y) and precursor indices (x) during the verification
+period using the following formulae:
+PCC=cov(y,x)
+sxsywherecov() indicates the covariance estimation procedure;s yands xdenote
+standard deviations ofyandx, respectively.
+RMSE=q
+1
+NtPNt
+t=1(xt−yt)(xt−yt). For out-sample forecasts (Fig. 5),t= 1 corresponds
+to January 2023 andt=N tto December 2023.
+Spatial Field Reconstruction
+The 16 precursors (Fig. 2B) capture temporal evolution in high-variance regions dis-
+9
+tributed across the North Pacific (Figure 2A and Table 1), providing a comprehensive rep-
+resentation of PDO complexity. To assess the model’s ability to reproduce total interannual
+SST variability, we compare observed spatiotemporal anomalies (aS1 + aS2 + aS3 + aS4)
+with the corresponding regression-based predictions.
+Spatial field reconstruction from predicted indices proceeds as follows:
+1. For each grid point in the aS1 field, we estimate regression coefficients relating the
+local aS1 time series to the IaS1 index.
+2. We multiply spatial regression coefficient patterns by the IaS1 index to generate re-
+gressed spatio-temporal anomalies.
+3. This procedure repeats for aS2, aS3, and aS4 using their respective indices IaS2, IaS3,
+and IaS4.
+For both verification and out-of-sample periods, we multiply spatial regression patterns
+by hindcast precursors (verification period) or forecast precursors (out-of-sample period) to
+generate complete spatio-temporal anomaly fields.
+Statistical Significance
+Calculated t-values for both regression and correlation coefficients exceed critical t-values
+at a 98.5% confidence level, confirming statistical significance of all relationships.
+3 Results
+Four Amplitude Modulated SCs and SC4 alias PDO
+The canonical PDO and VM indices are derived from eigen modes of monthly Pacific
+SST anomalies north of 20o, calculated as deviations from the mean seasonal cycle at each
+spatial location. This method hinges on a critical assumption that the primary responses
+of the ocean-atmosphere system can be effectively represented by a single seasonal cycle
+10
+with constant amplitude. However, this assumption lacks dynamical grounding, as it fails to
+account for the possibility of multiple seasonal cycles, each characterized by distinct, non-
+sinusoidal spatiotemporal patterns and amplitudes that fluctuate interannually (Kallummal
+2021, 2022b,a, 2023, 2024). Comparable to the externally forced fundamental modes of
+a complex dynamical system, these seasonal cycles emerge predominantly from interactions
+among land, ocean, and atmosphere, driven by periodic solar radiation and amplified through
+nonlinear processes.
+Traditionally, seasonal cycles (SCs) of North Pacific SST and the dominant low-frequency
+modes (PDO and VM) have been regarded as distinct phenomena that interact with one
+another. Consequently, low-frequency modes are typically derived from anomalies relative to
+a mean seasonal cycle (Newman 2007). However, this conventional approach assumes their
+independence a priori, rather than allowing them to emerge naturally from spatiotemporal
+decomposition, as demonstrated for ENSO by Kallummal (2021, 2024) and for PDO by
+Kallummal (2022b). Moreover, EOF analyses of traditional anomalies often suffer from
+mode mixing, where signals from ENSO, PDO, and global warming become conflated (Wills
+et al. 2018). To address this issue, researchers commonly subtract the time-dependent basin-
+mean anomaly from the traditional SST anomaly prior to EOF analysis (Newman et al. 2016,
+Deser 2000), or employ additional techniques to disentangle the overlapping signals (Xu et al.
+2022).
+Strikingly, a low-frequency mode with minimal seasonality (Fig. 1G) emerged as the
+fourth SVD mode of S, mirroring the canonical PDO in spatiotemporal patterns (Figs. 1A-
+F). Thus, we interchangeably denote the fourth SVD mode as S4 or PDO. This concurrent
+extraction of seasonal (i.e., S1, S2, and S3) and low-frequency (i.e., S4 alias PDO) modes
+from SST is unprecedented. Notably, S4 exhibits no evident secular warming trend. The
+latter is captured by S1 and S2, thereby eliminating the need for additional techniques to
+11
+disentangle PDO and secular warming signals. However, the secular trend is not evident in
+the S1 and S2 precursors shown in Fig. 2B (top panel), as all precursors exhibiting secular
+trends have been detrended prior to linear regression. Conversely, in the tropical Pacific
+(Kallummal 2021, 2024) and Indian Ocean (Kallummal 2022b), such trends are confined to
+S1 only.
+Empirical Model Verifications
+The all-season Pearson Correlation Coefficients (PCC) for IaS1, IaS2, IaS3, and PDO
+indices (black line, Fig. 3A) exceeds 0.5 even when the lead times are beyond 36 months, with
+corresponding Root Mean Square Error (RMSE) values (red-dash line, Fig. 3A) consistently
+below 0.5. Predicted time series (colored lines, Fig. 3B) closely replicate key features of
+observed time series (black lines, Fig. 3B) across all lead times. Our linear regression models
+exhibit superior skill in capturing NP variability compared to operational forecast models
+(Hu et al. 2014, Wen et al. 2012). Notably, prior studies could assessed only PDO mode’s
+performance skills, as the three seasonal modes’ low-frequency amplitude modulations were
+not resolvable from the traditional anomalies. Furthermore, our model outperforms ML/DL
+approaches (Qin et al. 2022, Gordon et al. 2021) in PCC values and sustains RMSE below
+0.5 across all four IaS and PDO indices. This precision is striking, as earlier studies typically
+yielded RMSE values exceeding 0.5 for lead times beyond 9 months.
+Although improved all-season forecasting skill, demonstrated by PCC and RMSE across
+all time samples, indicates enhanced predictive capacity, it does not guarantee accurate
+prediction of significant interannual events’ spatio-temporal evolution. To investigate this,
+we compared the observed spatial evolution of total interannual variability (i.e.,aS1 + aS2
++ aS3 + aS4; Fig. 4B) with the summed forecasts (Fig. 4A) from April 2017 to July
+2024. Both observed and predicted patterns for warm and cold events showed strong spatio-
+temporal alignment. This sustained congruence over seven years bolsters confidence in our
+12
+forecasting approach. Previous studies, as pointed out earlier, have failed to resolve the
+spatial distribution of year-to-year variations in S1, S2, S3, S4 modes.
+These findings significantly enhance our ability to forecast NP’s low-frequency dynamics,
+overcoming limitations of prior models that struggled to capture seasonal mode interactions
+alongside PDO evolution (Schneider and Cornuelle 2005, Wills et al. 2019). Earlier efforts,
+such as those using operational forecasts, achieved modest skill at shorter lead times but
+faltered beyond 6 months (Hu et al. 2014), while ML/DL approaches, though innovative,
+often missed fine-scale spatial patterns (Qin et al. 2023). By integrating three interannual
+amplitude modulations exhibited by three seasonal cycles (i.e.,aS1, aS2, and aS3) with
+PDO (i.e.,aS4 ), our model accurately tracks anomaly progression, potentially offering vital
+insights for marine ecosystem forecasting and regional climate resilience.
+Out-of-sample Predictions
+Having validated the reliability of our 16-dimensional linear regression model, the critical
+challenge in climate prediction lies in producing accurate out-of-sample forecasts. However,
+the definitive evaluation of such forecasts requires comparing predictions with future obser-
+vations as events unfold. For this purpose, the forecasts were initiated during 2023 for the
+out-of-sample predictions from 2024 to 2027 (Fig. 5).
+The spatio-temporal evolution of the total predicted anomaly (aS1 + aS2 + aS3 +
+aS5 + PDO) from December 2024 to October 2027 indicates a persistent negative PDO
+phase throughout 2025, characterized by negative SST anomalies in the eastern NP and
+positive anomalies in the western NP (Fig. 5B). This projection is consistent with recent
+observations showing that the PDO has remained in a strongly negative phase since approx-
+imately 2020. Data from NOAA’s National Centers for Environmental Information (NCEI;
+https://www.ncei.noaa.gov/access/monitoring/pdo/) confirm that PDO values have
+remained consistently negative throughout 2024 and 2025.
+13
+Sensitivity to Training Period and Model Robustness
+To assess the robustness of our results, we conducted additional analyses using a regres-
+sion model trained on data spanning 1948 to 1979 (Fig. 5B). The predictions generated by
+this alternative model are comparable to those obtained using the original model trained on
+1948–2000 data (Fig. 5A). The comparison of Figs. 5A and 5B with the spatio-temporal evo-
+lution of corresponding SST anomalies observed from January through October 2025 (Fig.
+5C) demonstrates remarkable predictive accuracy. The qualitative agreement between pre-
+dictions from the two models further substantiates the robustness of our results. To further
+validate our approach, we evaluated the skill of ten regression models trained across distinct
+time periods, which confirms the robustness of our results and excludes chance effects (Fig.
+6). The linear regression models exhibit consistent performance, producing comparable skill
+levels regardless of the training period employed. This underscores the critical role of inter-
+actions among the twenty indices in achieving accurate interannual forecasts across different
+decades
+4 Implications of a Negative PDO State on Weather
+A negative PDO phase through 2025, driven by a stronger Aleutian Low and enhanced up-
+welling in eastern NP waters (Mantua et al. 1997, Miller and Schneider 2000), will affect: 1)
+Cyclones: Fewer intense typhoons in the western NP occur during a negative PDO phase,
+linked to cooler SSTs and a stronger subtropical high, with modulation by large-scale circu-
+lation changes (Choi et al. 2010, Qin et al. 2024). 2) Rainfall: Less precipitation in southern
+China and Japan from a weaker monsoon (Gershunov and Barnett 1998), drought risk in the
+southwestern U.S. (Zou et al. 2020), and more rain in the central NP (Mantua et al. 1997).
+3) Marine Heatwaves: Reduced frequency along the eastern NP as cooler SSTs limit warm
+anomalies (Joh and Di Lorenzo 2017). 4) Marine Life: Benefits for species like salmon (Man-
+14
+tua et al. 1997, Newman et al. 2016), with upwelling boosting fishery productivity (Miller
+and Schneider 2000). 5) Monsoons: Weaker East Asian and North American monsoons,
+reducing rainfall (Gershunov and Barnett 1998).
+The PDO modulates the impacts of ENSO through its phase. When the PDO and ENSO
+are in the same phase (e.g., negative PDO and La Ni˜ na), their climatic impacts are often
+magnified. La Ni˜ na events during a negative PDO phase result in approximately 20% more
+global land area experiencing abnormal wetness or flooding compared to warm PDO phases.
+When they are in opposite phases (e.g., negative PDO and El Ni˜ no), the PDO acts to offset
+or dampen the typical ENSO teleconnections. El Ni˜ no impacts over North America, such as
+warm surface anomalies in Alaska, are diminished during a negative PDO.
+These changes underscore the broader climatic influence of the PDO, with teleconnections
+extending to precipitation and cyclone activity across the pan-North Pacific and eastern
+North America (Park et al. 2017). Collectively, these implications - drawn from a forecast
+extending beyond 36 months with high skill (Fig. 5a) - highlight the negative PDO’s role in
+shaping weather extremes and ecological responses. This predictive insight, surpassing the
+limited lead times of prior models (Wen et al. 2012, Qin et al. 2023), enhances preparedness
+for climate-driven impacts on agriculture, water resources, and marine biodiversity through
+2025.
+5 Conclusion
+This study introduces a transformative approach to NP SST forecasting by integrating
+amplitude-modulated SCs with PDO in a multivariate linear regression framework. Un-
+like prior efforts that treated seasonal and low-frequency variability as distinct phenomena,
+our method simultaneously extracts four dominant SCs alongside the PDO as the fourth
+leading SVD mode, without any priori assumptions and processing of data. This decom-
+15
+position reveals the PDO as an emergent feature of NP dynamics, distinct from traditional
+EOF-based anomaly analyses that often conflate signals (Wills et al. 2018, Newman et al.
+2016). The resulting sixteen-dimensional model achieves unprecedented predictive skill, with
+all-season PCC exceeding 0.5 and RMSE below 0.4 for lead times beyond 36 months (Fig.
+3a), far surpassing the capabilities of earlier models, for PDO.
+Previous attempts at PDO forecasting faced significant limitations. In contrast, our
+model not only outperforms these benchmarks - evidenced by superior PCC and RMSE
+across all IaS and PDO indices - but also resolves the spatio-temporal evolution of total
+anomalies (aS1 + aS2 + aS3 + aS5 + PDO) with high fidelity over seven years (Fig. 4).
+Out-of-sample forecasts from 2024 to 2027 further predict a sustained negative PDO phase
+through 2025 (Fig. 5B), a capability unattainable in prior studies that focused solely on
+PDO without seasonal mode interactions (Hu et al. 2014, Wills et al. 2019).
+The extraction of amplitude-modulated SCs is pivotal to this advance. By accounting for
+time-varying amplitudes within the seasonal framework, our approach (Kallummal 2022b,
+2021, 2022a) captures critical interannual signals overlooked by traditional methods, which
+assume a static seasonal cycle. This innovation enables the model to disentangle overlapping
+variability - such as ENSO, PDO, and global trends - offering a clearer mechanistic picture
+of NP SST dynamics. The robustness of our test-forecasts, validated across training periods
+(Figs. 5 and 6), underscores the stability of these interactions across decades, enhancing
+confidence in long-term predictions.
+Knowing the importance of sixteen key predictors, we suggest starting a regular mon-
+itoring program in the high-variance areas our study identified (Fig. 2a). This enhanced
+data collection will facilitate a more detailed understanding of the links between atmospheric
+variability and oceanic processes, paving the way for improved seasonal climate prediction.
+Such a targeted, data-driven approach underscores the potential for significant advancements
+16
+in this field.
+In conclusion, this study redefines North Pacific SST forecasting by bridging seasonal
+and decadal scales with exceptional accuracy and detail. Its ability to predict anomaly
+evolution over 36 months, coupled with insights into negative PDO persistence, provides a
+powerful tool for climate resilience, resource management, and ecosystem planning. These
+advancements address longstanding challenges in climate prediction (Newman et al. 2016),
+setting a new standard for statistical modeling in atmospheric and oceanic sciences.
+Acknowledgements:Author acknowledges the computational facilities at CSIR-4PI.
+The visualization tools used are GrADS (http://cola.gmu.edu/grads/grads.php) and Mat-
+plotlib (https://matplotlib.org/). This study and author have received no funding.
+Data AvailabilityData used is available fromhttps://psl.noaa.gov/data/gridded/
+data.noaa.ersst.v4.htmlHuang et al. (2017) andhttps://psl.noaa.gov/data/gridded/
+data.ncep.reanalysis.surface.htmlKalnay et al. (2018).
+References
+Alexander MA (1992) Midlatitude atmosphere–ocean interaction during el ni˜ no. part i: the
+north pacific ocean. Journal of Climate 5(9):944–958
+Alexander MA, Blad´ e I, Newman M, Lanzante JR, Lau NC, Scott JD (2002) The atmospheric
+bridge: The influence of enso teleconnections on air–sea interaction over the global oceans.
+Journal of climate 15(16):2205–2231
+Alexander MA, Matrosova L, Penland C, Scott JD, Chang P (2008) Forecasting pacific ssts:
+Linear inverse model predictions of the pdo. Journal of Climate 21(2):385–402
+17
+An SI, Kug JS, Timmermann A, Kang IS, Timm O (2007) The influence of enso on the
+generation of decadal variability in the north pacific. Journal of Climate 20(4):667–680
+Ault TR, St George S, Smerdon JE, Coats S, Mankin JS, Carrillo CM, Cook BI, Stevenson S
+(2018) A robust null hypothesis for the potential causes of megadrought in western north
+america. Journal of Climate 31(1):3–24
+Barnston AG, Tippett MK, L’Heureux ML, Li S, DeWitt DG (2012) Skill of real-time
+seasonal enso model predictions during 2002–11: Is our capability increasing? Bulletin of
+the American Meteorological Society 93(5):631–651
+Bond N, Overland J, Spillane M, Stabeno P (2003) Recent shifts in the state of the north
+pacific. Geophysical research letters 30(23)
+Chiang JC, Vimont DJ (2004) Analogous pacific and atlantic meridional modes of tropical
+atmosphere–ocean variability. Journal of Climate 17(21):4143–4158
+Choi KS, Wu CC, Cha EJ (2010) Change of tropical cyclone activity by pacific-japan tele-
+connection pattern in the western north pacific. Journal of Geophysical Research: Atmo-
+spheres 115(D19)
+Choudhury D, Sharma A, Sivakumar B, Gupta AS, Mehrotra R (2015) On the predictabil-
+ity of ssta indices from cmip5 decadal experiments. Environmental Research Letters
+10(7):074013
+Dai Y, Wang B, Wei N, Song J, Duan Y (2025) Impact of victoria mode on late-season
+tropical cyclone genesis over the western north pacific. Journal of Geophysical Research:
+Atmospheres 130(3):e2024JD041154
+Deser C (2000) On the teleconnectivity of the “arctic oscillation”. Geophysical Research
+Letters 27(6):779–782
+18
+Deser C, Phillips AS, Hurrell JW (2004) Pacific interdecadal climate variability: Linkages
+between the tropics and the north pacific during boreal winter since 1900. Journal of
+Climate 17(16):3109–3124
+Ding R, Li J, Tseng Yh, Ruan C (2015) Influence of the north pacific victoria mode on
+the pacific itcz summer precipitation. Journal of Geophysical Research: Atmospheres
+120(3):964–979
+Fan Y, Fan K (2017) Pacific decadal oscillation and the decadal change in the intensity of the
+interannual variability of the south china sea summer monsoon. Atmospheric and Oceanic
+Science Letters 10(2):162–167
+Gershunov A, Barnett TP (1998) Interdecadal modulation of enso teleconnections. Bulletin
+of the American Meteorological Society 79(12):2715–2726
+Gonzalez PL, Goddard L (2016) Long-lead enso predictability from cmip5 decadal hindcasts.
+Climate Dynamics 46:3127–3147
+Gordon EM, Barnes EA, Hurrell JW (2021) Oceanic harbingers of pacific decadal oscilla-
+tion predictability in cesm2 detected by neural networks. Geophysical Research Letters
+48(21):e2021GL095392
+Guemas V, Doblas-Reyes F, Lienert F, Soufflet Y, Du H (2012) Identifying the causes of
+the poor decadal climate prediction skill over the north pacific. Journal of Geophysical
+Research: Atmospheres 117(D20)
+Halide H, Ridd P (2008) Complicated enso models do not significantly outperform very
+simple enso models. International Journal of Climatology: A Journal of the Royal Mete-
+orological Society 28(2):219–233
+19
+Ham YG, Kim JH, Luo JJ (2019) Deep learning for multi-year enso forecasts. Nature
+573(7775):568–572
+Hu ZZ, Kumar A, Huang B, Zhu J, Guan Y (2014) Prediction skill of north pacific variability
+in ncep climate forecast system version 2: Impact of enso and beyond. Journal of climate
+27(11):4263–4272
+Huang B, Thorne PW, Banzon VF, Boyer T, Chepurin G, Lawrimore JH, Menne MJ, Smith
+TM, Vose RS, Zhang HM (2017) Extended reconstructed sea surface temperature, version
+5 (ersstv5): upgrades, validations, and intercomparisons. Journal of Climate 30(20):8179–
+8205
+Huang C, Liu H, Li H, Zuo J, Wang R (2024) Combined effects of enso and pdo on activity
+of major hurricanes in the eastern north pacific. Climate Dynamics 62(2):1467–1486
+Huang Y, Wang H (2020) A possible approach for decadal prediction of the pdo. Journal of
+Meteorological Research 34(1):63–72
+Jin EK, Kinter JL, Wang B, Park CK, Kang IS, Kirtman B, Kug JS, Kumar A, Luo
+JJ, Schemm J, et al. (2008) Current status of enso prediction skill in coupled ocean–
+atmosphere models. Climate Dynamics 31:647–664
+Joh Y, Di Lorenzo E (2017) Increasing coupling between npgo and pdo leads to prolonged
+marine heatwaves in the northeast pacific. Geophysical Research Letters 44(22):11–663
+Kallummal R (2021) Deciphering characteristics of central and eastern pacific ensos from
+the amplitude-modulated seasonal cycles. In: AGU Fall Meeting Abstracts, vol 2021, pp
+A23E–02
+Kallummal R (2022a) Drivers of indo-asian monsoons: A merger of traditional and contem-
+porary explanations. In: AGU Fall Meeting Abstracts, vol 2022, pp A51G–03
+20
+Kallummal R (2022b) Seasonal cycles, interannual variability, and secular trends in the
+tropical atlantic region. In: AGU Fall Meeting Abstracts, vol 2022, pp A51G–04
+Kallummal R (2023) Sea surface temperature variations partitioned through multiple sea-
+sonal cycles. Climate Dynamics 60(3):623–641
+Kallummal R (2024) Decoding low-frequency climate variations: A case study on enso and
+ocean surface warming. Dynamics of Atmospheres and Oceans 106:101453
+Kalnay E, Kanamitsu M, Kistler R, Collins W, Deaven D, Gandin L, Iredell M, Saha S,
+White G, Woollen J, et al. (2018) The ncep/ncar 40-year reanalysis project. In: Renewable
+energy, Routledge, pp Vol1 146–Vol1 194
+Latif M, Barnett TP (1994) Causes of decadal climate variability over the north pacific and
+north america. Science 266(5185):634–637
+Lee HS, Yamashita T, Mishima T (2012) Multi-decadal variations of enso, the pacific decadal
+oscillation and tropical cyclones in the western north pacific. Progress in Oceanography
+105:67–80
+L’Heureux ML, Levine AF, Newman M, Ganter C, Luo JJ, Tippett MK, Stockdale TN
+(2020) Enso prediction. El Ni˜ no Southern Oscillation in a changing climate pp 227–246
+Mantua NJ, Hare SR, Zhang Y, Wallace JM, Francis RC (1997) A pacific interdecadal climate
+oscillation with impacts on salmon production. Bulletin of the american Meteorological
+Society 78(6):1069–1080
+Miller AJ, Schneider N (2000) Interdecadal climate regime dynamics in the north pacific
+ocean: Theories, observations and ecosystem impacts. Progress in Oceanography 47(2-
+4):355–379
+21
+Newman M (2007) Interannual to decadal predictability of tropical and north pacific sea
+surface temperatures. Journal of climate 20(11):2333–2356
+Newman M, Compo GP, Alexander MA (2003) Enso-forced variability of the pacific decadal
+oscillation. Journal of Climate 16(23):3853–3857
+Newman M, Alexander MA, Ault TR, Cobb KM, Deser C, Di Lorenzo E, Mantua NJ, Miller
+AJ, Minobe S, Nakamura H, et al. (2016) The pacific decadal oscillation, revisited. Journal
+of Climate 29(12):4399–4427
+Nidheesh A, Lengaigne M, Vialard J, Izumo T, Unnikrishnan A, Cassou C (2017) Influence
+of enso on the pacific decadal oscillation in cmip models. Climate Dynamics 49:3309–3326
+Park JH, An SI, Yeh SW, Schneider N (2013) Quantitative assessment of the climate com-
+ponents driving the pacific decadal oscillation in climate models. Theoretical and applied
+climatology 112:431–445
+Park JH, An SI, Kug JS (2017) Interannual variability of western north pacific sst anomalies
+and its impact on north pacific and north america. Climate Dynamics 49:3787–3798
+Qin M, Du Z, Hu L, Cao W, Fu Z, Qin L, Wu S, Zhang F (2022) Deep learning
+for multi-timescales pacific decadal oscillation forecasting. Geophysical Research Letters
+49(6):e2021GL096479
+Qin M, Hu L, Qin Z, Wan L, Qin L, Cao W, Wu S, Du Z (2023) Pacific decadal oscilla-
+tion forecasting with spatiotemporal embedding network. Geophysical Research Letters
+50(16):e2023GL103170
+Qin W, Cai Y, He L (2024) The relationship between the typhoons affecting south china
+and the pacific decadal oscillation. Atmosphere 15(3):285
+22
+Ren X, Liu W, Capotondi A, Amaya DJ, Holbrook NJ (2023) The pacific decadal oscillation
+modulated marine heatwaves in the northeast pacific during past decades. Communications
+Earth & Environment 4(1):218
+Schneider N, Cornuelle BD (2005) The forcing of the pacific decadal oscillation. Journal of
+Climate 18(21):4355–4373
+Wang C, Fu M, Wang B, Wu L, Luo JJ (2023) Pacific decadal oscillation modulates the
+relationship between pacific meridional mode and tropical cyclone genesis in the western
+north pacific. Geophysical Research Letters 50(5):e2022GL101710
+Wang H, Wang C (2023) What caused the increase of tropical cyclones in the western north
+pacific during the period of 2011–2020? Climate Dynamics 60(1):165–177
+Wang H, Kumar A, Wang W, Xue Y (2012) Seasonality of the pacific decadal oscillation.
+Journal of climate 25(1):25–38
+Wang T, Miao JP (2018) Twentieth-century pacific decadal oscillation simulated by cmip5
+coupled models. Atmospheric and Oceanic Science Letters 11(1):94–101
+Wen C, Xue Y, Kumar A (2012) Seasonal prediction of north pacific ssts and pdo in the
+ncep cfs hindcasts. Journal of Climate 25(17):5689–5710
+Wills RC, Schneider T, Wallace JM, Battisti DS, Hartmann DL (2018) Disentangling global
+warming, multidecadal variability, and el ni˜ no in pacific temperatures. Geophysical Re-
+search Letters 45(5):2487–2496
+Wills RC, Battisti DS, Proistosescu C, Thompson L, Hartmann DL, Armour KC (2019)
+Ocean circulation signatures of north pacific decadal variability. Geophysical Research
+Letters 46(3):1690–1701
+23
+Wu B, Lin X, Yu L (2021) Poleward shift of the kuroshio extension front and its impact
+on the north pacific subtropical mode water in the recent decades. Journal of Physical
+Oceanography 51(2):457–474
+Xu T, Newman M, Capotondi A, Stevenson S, Di Lorenzo E, Alexander MA (2022) An
+increase in marine heatwaves without significant changes in surface ocean temperature
+variability. Nature Communications 13(1):7396
+Yu J, Li T, Tan Z, Zhu Z (2016) Effects of tropical north atlantic sst on tropical cyclone
+genesis in the western north pacific. Climate Dynamics 46:865–877
+Zhang S, Qu X, Huang G (2024) Enhanced impacts of the north pacific victoria mode on
+the indian summer monsoon onset in recent decades. Geoscience Letters 11(1):6
+Zhang Y, Wallace JM, Battisti DS (1997) Enso-like interdecadal variability: 1900–93. Journal
+of climate 10(5):1004–1020
+Zhao Y, Newman M, Capotondi A, Di Lorenzo E, Sun D (2021) Removing the effects of
+tropical dynamics from north pacific climate variability. Journal of Climate 34(23):9249–
+9265
+Zhou L, Zhang RH (2023) A self-attention–based neural network for three-dimensional mul-
+tivariate modeling and its skillful enso predictions. Science Advances 9(10):eadf2827
+Zou Q, Ding R, Li J, Tseng Yh, Hou Z, Wen T, Ji K (2020) Is the north pacific victoria
+mode a predictor of winter rainfall over south china? Journal of Climate 33(20):8833–8847
+24
+1980 1990 2000 2010 2020
+Time2
+02PC1PDO (Traditional Anomaly)
+no filter 2-year filter 6-year filterA
+1980 1990 2000 2010 2020
+Time2
+02PC1PDO (SVD Mode-4)
+no filter 2-year filter 6-year filter D
+20°N35°N50°N
+101°E 136°E 171°E 154°W 119°WEOF-1 (Traditional Anomaly)
+0.10.20.30.4
+B
+20°N35°N50°N
+101°E 136°E 171°E 154°W 119°WEOF-1 (SVD Mode-4)
+0.10.20.30.4 E
+0.00 0.02 0.04 0.06 0.08 0.10
+Freq. (month1)
+-20.0-17.5-15.0-12.5-10.0-7.5-5.0-2.50.0PSD(dB)(Traditional Anomaly)MTM-Spectrum
+PC1 Red-noise
+C
+0.00 0.02 0.04 0.06 0.08 0.10
+Freq. (month1)
+-20.0-17.5-15.0-12.5-10.0-7.5-5.0-2.50.0PSD(dB)(SVD Mode-4)MTM-Spectrum
+PC1 Red-noise F
+3 6 91220.022.525.027.5SST(oC)Lon.:154.0 Lat.:30.0SC1
+3 6 912-5.00.05.0Lon.:148.0 Lat.:50.0SC2
+3 6 912-1.00.01.0Lon.:128.0 Lat.:30.0SC3
+3 6 912
+Time(Month)-1.00.01.0SST(oC)Lon.:218.0 Lat.:50.0PDO
+3 6 912
+Time(Month)-1.00.01.0Lon.:198.0 Lat.:40.0SC4
+3 6 912
+Time(Month)-0.10.00.1Lon.:188.0 Lat.:50.0SC5GFigure 1: PDO characteristics including area-mean time series, spatial pattern, and power
+spectrum:A, B, Cfirst eigenmodes of the traditional anomaly;D, E, FaS4.GArea-
+averaged interannual amplitude modulations for leading SST SVD modes within their high-
+variance regions. Each panel displays 49 twelve-month segments spanning January to De-
+cember, with the midpoint coordinates of the high-variance region indicated. Thick black
+lines denote long-term means.
+25
+180°180°
+120°W120°W
+120°E120°E
+25°N 25°N30°N 30°N35°N 35°N40°N 40°N45°N 45°N50°N 50°N55°N 55°NMaximum Norm Locations for All Variables and Modes
+Domain: 20.0°-60.0°N, 100.0°-260.0°E )
+Variables
+pres
+sst
+uwnd
+vwnd
+Mode Size
+Mode 1
+Mode 2
+Mode 3
+Mode 4A
+5.0
+0.05.0IaS(C)
+IaSMaster Time Series
+SVD mode 1 SVD mode 2 SVD mode 3 SVD mode 4
+1.0
+0.01.0IaU(ms1)
+IaU
+2.5
+0.02.5IaV(ms1)
+IaV
+1950 1960 1970 1980 1990 2000 2010 2020
+Year2.5
+0.02.5IaP(mb)IaP
+BFigure 2: Locations of high-variance regions and their area-averaged time series.ATargeted
+observation regions (symbol sizes decrease from SVD modes 1 to 5, with four high-variance
+regions per variable; coordinates in Table 1).BArea-mean time series depict deviations
+from long-term seasonal cycles. Detrended S1 and S2 (top panel), which originally captured
+SST secular warming trends.
+26
+S Lon Lat
+S1 154.0°E 30.0°N
+S2 148.0°E 50.0°N
+S3 128.0°E 30.0°N
+S4 142.0°W 50.0°Na
+U Lon Lat
+U1 147.5°W 32.5°N
+U2 180.0°E 32.5°N
+U3 167.5°E 42.5°N
+U4 155.0°W 45.0°N b
+V Lon Lat
+V1 122.5°W 32.5°N
+V2 130.0°W 32.5°N
+V3 177.5°W 47.5°N
+V4 162.5°W 47.5°N
+c
+P Lon Lat
+P1 140.0°W 32.5°N
+P2 120.0°E 35.0°N
+P3 175.0°W 47.5°N
+P4 180.0°E 47.5°N dTable 1: Coordinates of the high-variance regions: (a) SST, (b) U, (c) V, and (d) P
+27
+0.00.51.0Corr. RMSEIaS1Validation Metrics
+corr. rmse
+0.00.5Corr. RMSEIaS2
+0.00.5Corr. RMSEIaS3
+0 510 15 20 25 30 35
+Lead month0.00.51.0Corr. RMSEIaS4A
+0.5
+0.00.5IaS1(C)
+Validation vs Predictions 
+Validation
+Lead 1Lead 3
+Lead 6Lead 9
+Lead 12Lead 24
+Lead 36
+0.5
+0.00.51.0IaS2(C)
+0.5
+0.00.5IaS3(C)
+2004 2008 2012 2016 2020 2024
+Year1.0
+0.5
+0.00.51.0IaS4(C)
+BFigure 3: All-season predictive skill and forecasted time series in the 2000–2023 verifica-
+tion period.ACorrelation (black lines) and MSE (red lines) versus lead time.BMedian
+anomalies (colored lines) across lead times, compared to the reanalysis data during validation
+period (black line).
+28
+A
+ BFigure 4: SST spatio-temporal anomalies, predictions during 2017-2024 period.AMedian
+anomaly patterns (aS1 + aS2 + aS3 + aS4 + aS5).BCorresponding reanalysis anomalies.
+29
+A
+ B
+ CFigure 5: Out-of-sample forecasts of SST anomalies initiated from the final months of 2024.
+AandBPredicted patterns of total anomaly (i.e.,aS1 + aS2 + aS3 + aS4 + aS5) from
+December 2024 to October 2027.CCorresponding anomaly estimates from observations
+available through October 2025. The linear regression models were estimated using data
+from 1948 to 2000 forAand from 1948 to 1979 forB.
+”
+30
+0.00.51.0Corr.IaS1Validation Metrics
+1948-2000
+1948-19711948-1972
+1948-19731948-1974
+1948-19751948-1976
+1948-19771948-1978
+1948-1979
+0.00.5Corr.IaS2
+0.00.5Corr.IaS3
+0 510 15 20 25 30 35
+Lead month0.00.51.0Corr.IaS4A
+0.00.5RMSEIaS1Validation Metrics
+1948-2000
+1948-19711948-1972
+1948-19731948-1974
+1948-19751948-1976
+1948-19771948-1978
+1948-1979
+0.00.5RMSEIaS2
+0.00.5RMSEIaS3
+0 510 15 20 25 30 35
+Lead month0.00.5RMSEIaS4
+B
+Figure 6: Correlation skills across all seasons during the verification period. (A) PCC and
+(B) RMSE as functions of lead time. Colored lines represent the performance of 10 additional
+regression models trained on data from the following periods: 1970-2000, 1971-2000, 1972-
+2000, 1973-2000, 1974-2000, 1975-2000, 1976-2000, 1977-2000, 1978-2000, and 1979-2000.
+31
+Supplementary figures for ”Extending SST Anomaly
+Forecasts Through Simultaneous Decomposition of
+Seasonal and PDO Modes”
+Rameshan Kallummal
+CSIR Fourth Paradigm Institute, NAL Belur campus, Wind Tunnel Road Bangalore - 560
+037, Karnataka, INDIA kallummal@gmail.com
+32
+3 6 9 1220.022.024.026.028.0sstMode 1
+Max: 29.15
+Min: 18.89
+N=77 years
+3 6 9 12-6.0-4.0-2.00.02.04.06.08.0Mode 2
+Max: 7.92
+Min: -5.75
+3 6 9 12-1.0-0.50.00.51.01.5Mode 3
+Max: 1.44
+Min: -1.11
+3 6 9 12-1.5-1.0-0.50.00.51.01.5Mode 4
+Max: 1.67
+Min: -1.38
+3 6 9 12-1.6-1.4-1.2-1.0-0.8-0.6-0.4-0.2uwndMax: -0.12
+Min: -1.61
+3 6 9 12-4.0-2.00.02.04.06.08.0Max: 8.75
+Min: -5.13
+3 6 9 12-1.5-1.0-0.50.00.51.01.5Max: 1.64
+Min: -1.52
+3 6 9 12-3.0-2.0-1.00.01.02.03.0Max: 2.79
+Min: -3.30
+3 6 9 12-7.0-6.0-5.0-4.0-3.0-2.0-1.00.0vwndMax: 0.36
+Min: -7.36
+3 6 9 12-6.0-4.0-2.00.02.04.06.0Max: 5.97
+Min: -6.41
+3 6 9 12-4.0-2.00.02.04.06.0Max: 7.10
+Min: -3.57
+3 6 9 12-4.0-2.00.02.04.0Max: 4.85
+Min: -4.80
+3 6 9 12
+Calendar Month1.01.01.01.01.0presMax: 1025.88
+Min: 1016.50
+3 6 9 12
+Calendar Month-15.0-10.0-5.00.05.010.015.020.0Max: 19.63
+Min: -14.27
+3 6 9 12
+Calendar Month-8.0-6.0-4.0-2.00.02.04.0Max: 4.95
+Min: -7.85
+3 6 9 12
+Calendar Month-6.0-4.0-2.00.02.04.06.08.0Max: 8.80
+Min: -7.18Year-to-Year Amplitude Modulation
+Area-Averaged at Max Norm LocationsFigure S1: Time series of the four leading seasonal cycles (columns) for four variables (rows).
+SC denotes the seasonal cycle. Each panel contains fifty-three seasonal cycles (from January
+to December). Mid-point of the high-variance region is indicated in each panel. Thick black
+lines represent long-term mean seasonal cycles
+33
+Figure S2: Long-term mean seasonal cycles of first SVD modes. SST (shaded; o C), wind
+(vectors; m sec -1 ) and SP (green contours, mbar)
+34
+Figure S3: Long-term mean seasonal cycles of second SVD modes. SST (shaded; o C), wind
+(vectors; m sec -1 ) and SP (green contours, mbar)
+35
+Figure S4: Long-term mean seasonal cycles of thrid SVD modes. SST (shaded; o C), wind
+(vectors; m sec -1 ) and SP (green contours, mbar)
+36
+Figure S5: Long-term mean seasonal cycles of fourth SVD modes. SST (shaded; o C), wind
+(vectors; m sec -1 ) and SP (green contours, mbar)
+37

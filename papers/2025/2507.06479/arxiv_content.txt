@@ -1,0 +1,653 @@
+Generative Lagrangian data assimilation for ocean
+dynamics under extreme sparsity
+Niloofar Asefi2, Leonard Lupin-Jimenez1, Tianning Wu3,
+Ruoying He3, and Ashesh Chattopadhyay1
+1Department of Applied Mathematics, University of California, Santa Cruz, CA
+95064, USA
+2Department of Electrical and Computer Engineering, University of California, Santa
+Cruz, CA 95064, USA
+3Department of Marine, Earth, and Atmospheric Sciences, North Carolina State
+University, Raleigh, NC 27695, USA
+E-mail: aschatto@ucsc.edu
+Abstract. Reconstructing ocean dynamics from observational data is fundamentally
+limited by the sparse, irregular, and Lagrangian nature of spatial sampling, particularly
+in subsurface and remote regions. This sparsity poses significant challenges for
+forecasting key phenomena such as eddy shedding and rogue waves. Traditional data
+assimilation methods and deep learning models often struggle to recover mesoscale
+turbulence under such constraints. We leverage a deep learning framework that
+combines neural operators with denoising diffusion probabilistic models (DDPMs)
+to reconstruct high-resolution ocean states from extremely sparse Lagrangian
+observations. By conditioning the generative model on neural operator outputs,
+the framework accurately captures small-scale, high-wavenumber dynamics even at
+99% sparsity (for synthetic data) and 99 .9% sparsity (for real satellite observations).
+We validate our method on benchmark systems, synthetic float observations, and
+real satellite data, demonstrating robust performance under severe spatial sampling
+limitations as compared to other deep learning baselines.
+Keywords : Lagrangian, sparse observations, conditional diffusion, data assimilation,
+ocean dynamics
+1. Introduction
+Forecasting multi-scale chaotic dynamical systems, e.g., the Earth’s ocean, requires
+a dynamical model of the system’s equations and accurate initial conditions. These
+initial conditions are obtained from satellite altimeters, ocean buoys, drifters, etc. [1,
+2, 3]. All of these measuring devices that observe the different variables of the ocean
+inherently provide noisy and sparse observations. On top of that, the location at which
+we observe the ocean moves with these measuring devices. Such observations are referred
+to as Lagrangian observations [4, 5, 6, 7]. The sparsity and Lagrangian nature of thesearXiv:2507.06479v1  [physics.ao-ph]  9 Jul 2025
+Generative Lagrangian Data Assimilation 2
+observations make it challenging to reconstruct the turbulent flow fields accurately,
+especially for the small-scale high-wavenumber dynamics [8, 9, 10, 11]. The accuracy of
+these initial conditions affects the quality and time horizon of the forecasts, especially
+for extreme events [12, 13, 14, 15] which have a major societal impact.
+Traditional approaches to assimilating sparse Lagrangian observations rely on
+Bayesian ensemble-based methods such as the ensemble Kalman filter (EnKF) [16]
+and ensemble optimal interpolation [17, 18, 19]. These methods generate ensembles of
+background states using a dynamical model to estimate the background error covariance.
+However, accurately capturing high-dimensional covariances typically requires a large
+number of ensemble members, which is often computationally prohibitive. In practice,
+the ensemble size is severely limited, leading to rank-deficient covariance matrices.
+To mitigate this issue, practitioners employ heuristic localization techniques [20] to
+constrain spurious long-range correlations and improve assimilation performance under
+limited ensemble sizes.
+With the rise of data-driven models for atmospheric [21, 22, 23, 24, 25] and
+oceanic dynamics [26, 27, 28, 29], trained predominantly on reanalysis datasets, the
+importance of accurate initial conditions has become increasingly critical—particularly
+as these models are being adapted for operational use with direct initialization from
+observations [30, 31, 32]. Most efforts toward operational deployment rely on sparse
+observations from satellite remote sensing and weather stations. Unlike traditional
+numerical models, data-driven models inherently lack explicit physical constraints,
+making them more sensitive to initialization errors. As a result, inaccuracies in
+initial conditions can degrade forecast skill rapidly. Although data-driven analogues
+of ensemble Kalman filtering and variational assimilation have shown promise in
+geophysical settings [33, 34, 35], these methods still depend on a capable background
+model—one that can either produce a sufficiently large and diverse ensemble of plausible
+background states (for EnKF) or enable gradient-based optimization through adjoint
+computations for variational approaches.
+In this study, we address the challenge of generating accurate and physically
+consistent initial conditions for surface ocean dynamics from extremely sparse (99%
+and 99 .9%)Lagrangian observations in the absence of a background model. To
+achieve this, we propose a neural operator-conditioned generative diffusion model. While
+related work by Scott et al. [36] has explored this problem under nominal sparsity and
+fixed observational locations in the open ocean, our contributions focus on the more
+complex setting of regional ocean dynamics, characterized by intricate bathymetry,
+coastal boundaries, and highly sparse, moving observations.
+Our approach draws inspiration from Oommen et al. [37] and combines the
+predictive capabilities of a Fourier Neural Operator (FNO) and a UNET with
+a conditional generative diffusion model, denoising diffusion probabilistic model
+(DDPM), enabling the reconstruction of high-resolution ocean states from sparse
+Lagrangian observations. This integrated FNO+DDPM or UNET+DDPM architecture
+demonstrates significantly improved reconstruction accuracy compared to conventional
+Generative Lagrangian Data Assimilation 3
+machine learning-based methods.
+Moreover, we show that under such extreme sparsity, standard statistical evaluation
+metrics such as root mean squared error (RMSE), correlation coefficient (CC), and
+structural similarity index (SSIM) tend to emphasize large-scale structures and fail
+to capture the full quality of the reconstructed turbulent ocean fields due to spectral
+bias [38], wherein deep neural networks preferentially learn low-wavenumber dynamics
+while missing critical fine-scale dynamics. In contrast, our proposed model preserves
+both large- and small-scale features of the flow field, as demonstrated through detailed
+Fourier spectral analysis and other physics-informed diagnostics.
+To validate our framework, we conduct a comprehensive evaluation on three
+systems: (a) synthetic sparse Lagrangian tracers from a canonical geophysical fluid
+dynamics benchmark: two-dimensional forced turbulence on a β-plane with multiple
+zonal jets [39], simulated at Reynolds number Re= 10 ,000; (b) synthetic sparse
+Lagrangian tracers from a high-resolution surface ocean reanalysis data over the Gulf
+of Mexico, obtained from the1
+12◦resolution GLORYS dataset [40]; and (c) real-world
+satellite altimetry observations over the Gulf of Mexico [41], which were used to generate
+a novel high-resolution (1
+25◦) reanalysis dataset, CNAPS.
+2. Methods
+2.1. Systems
+In this section, we discuss the three different oceanic systems: a canonical high-
+resolution fluid flow simulation, regional high-resolution reanalysis data, and real
+satellite observations, for which we have validated our proposed model.
+System 1: We consider the 2D forced Kolmogorov flow on a β-plane at Re=
+10,000. The governing equations for the flow are:
+∂ω
+∂t+u· ∇ω+βv=1
+Re∇2ω+ sin(4 x) + sin(4 y), (1)
+ω=∇2ψ, (2)
+u= (−∂yψ, ∂ xψ), (3)
+where β= 20 is the Coriolis parameter, ωis the vorticity, uis the velocity vector
+related to the stream function, ψthrough Eq. (3). The equations are forced with
+sinusoidal forcing with both zonal and meridional wavenumber as 4. Reis set to 10 ,000.
+We perform a direct numerical simulation (DNS) on this system from a random initial
+condition until steady-state turbulence is achieved. We utilize a doubly periodic pseudo-
+spectral solver with a ∆ tDNS= 5×10−3and 256 ×256 spatial grid. The non-zero value
+βin this case leads to the generation of zonal jets in this simulation.
+We then extract 7000 temporal samples of ω(t) at every 20∆ tDNS. To generate
+synthetic observations, we randomly remove 99% of the spatial grid points for every
+sample. Each of these 7000 sparse samples with 1% of grid points retained randomly
+over the domain are analogous to Lagrangian observations on which our proposed models
+Generative Lagrangian Data Assimilation 4
+(see section 2.2) are trained with their corresponding full-resolution ω(t) as targets. An
+independent 100 temporal ω(t) samples with 99% sparsity are used to test the models’
+performance.
+System 2: The second system that we consider is surface ocean dynamics, i.e.,
+sea-surface height (SSH), sea-surface zonal velocity (SSU), and sea-surface meridional
+velocity (SSV) over the Gulf of Mexico from the GLORYS reanalysis dataset [40] at
+1
+12◦horizontal resolution. This reanalysis data is obtained by integrating observations
+with the NEMO ocean model [42]. To simulate the synthetic Lagrangian observations,
+we utilize the same procedure outlined in System 1 . We used a total of 7000
+temporal samples of SSH, SSU, and SSV from 1993 to 2012 for training. We report the
+performance of our proposed model on 50 independent temporal samples from outside
+the training set.
+System 3: Finally, we validate our proposed framework on a third system using
+real satellite altimetry observations and a corresponding high-resolution reanalysis
+dataset, CNAPS [41], which was produced by assimilating these observations into the
+Regional Ocean Modeling System (ROMS). Unlike Systems 1 and 2, which rely on
+synthetically generated observations, this system leverages actual satellite-derived sea
+surface height (SSH) data that are inherently Lagrangian and extremely sparse, with
+approximately 99 .9% spatial sparsity. In this setting, the model is trained to reconstruct
+full-resolution SSH fields from these sparse observations using the CNAPS reanalysis as
+the supervisory target (details provided in Section 2.2). The SSH observations are
+derived from multiple satellite altimetry missions starting from January 1, 1993. Due to
+the nadir-only measurement geometry of satellite tracks, the data exhibit strong spatial
+sparsity and highly non-uniform spatio-temporal sampling. We source these SSH data
+from the Copernicus Marine and Environment Monitoring Service (CMEMS), where
+they are processed through the Data Unification and Altimeter Combination System
+(DUACS). This processing pipeline includes inter-mission homogenization to a unified
+reference frame, as well as corrections for dynamic atmospheric effects, tidal signals,
+and long-wavelength errors. To match the reanalysis grid, the daily altimetry data are
+transformed into super-observations via spatial averaging within each CNAPS grid cell.
+To train the model, we have used a total of 4017 samples from 1993 to 2003. We have
+validated the performance on 50 independent samples from outside the training set.
+2.2. Models
+2.2.1. UNET
+Our baseline method is a UNET model, which is a convolutional neural
+network (CNN) and was introduced primarily for the application of biomedical image
+segmentation by Ronneberger et al. [43]. The UNET architecture comprises two main
+parts: the encoder (contracting path) and the decoder (expanding path). In our
+UNET architecture, the encoder comprises two convolutional blocks, each containing two
+convolutional layers, followed by max-pooling layers. Each convolution layer performs
+Generative Lagrangian Data Assimilation 5
+a convolution operation utilizing k ×k filters, optionally employing padding to maintain
+spatial dimensions. The output of each convolutional block is further processed by a
+nonlinear activation function named the Rectified Linear Unit (ReLU). The bottleneck
+block connects the encoder and decoder. Our UNET has two convolutional layers
+utilizing 3 ×3 kernels, each followed by a ReLU activation function. It transforms 128
+input channels into 256 output channels while maintaining spatial resolution. In our
+UNET model, the decoder consists of upsampling operations followed by convolutional
+layers and is structurally symmetric to the encoder. In our framework, upsampling is
+performed by transposed convolutions (or deconvolutions) using a kernel size of 2 ×2
+and a stride of 2, which doubles the spatial resolution at each step. Following each
+upsampling operation, the relevant feature map from the encoder is concatenated with
+the decoder’s feature map through skip connections, thus maintaining crucial spatial
+details. Each concatenated feature map is then passed through a convolutional block of
+two convolutional layers with 3 ×3 kernels, each followed by a ReLU activation function.
+Our decoder has two convolutional blocks that progressively enhance spatial resolution
+while refining feature representations. The final layer of our UNET model is a 1 ×1
+convolution that reduces the feature map to a single output channel. We trained the
+UNET model on extremely sparse observations (e.g., partial SSH, SSU, and SSV) at
+time tto predict the full-resolution ground truth at the same time t, by minimizing the
+L2 norm, i.e., the Mean Squared Error (MSE) loss.
+2.2.2. FNO
+Neural operators are deep learning architectures designed to approximate mappings
+between infinite-dimensional function spaces. Formally, given an operator Gthat maps
+an input function Xto an output function Y(i.e.,G:X→Y), a neural operator
+seeks to learn this functional relationship and predict y∈Yfor a given x∈X.
+These models are increasingly used to learn solution operators of partial differential
+equations (PDEs) and other functional mappings that arise in dynamical systems.
+However, like conventional neural networks, they exhibit spectral bias—favoring low-
+wavenumber components during training—which can limit their ability to reconstruct
+fine-scale features [44].
+In this work, we utilize the Fourier Neural Operator (FNO), a specific class of
+neural operator introduced by Li et al. [45]. FNOs operate in the spectral domain by
+applying a Fourier transform to the input data, truncating the higher frequency modes,
+and applying learned complex-valued weights to the retained spectral coefficients. The
+modified spectrum is then transformed back into the spatial domain via an inverse
+Fourier transform and added to the result of a pointwise linear transformation of the
+original input. Unlike traditional convolutional networks, FNOs capture long-range
+spatial dependencies efficiently and are resolution-agnostic, allowing them to generalize
+across varying input grid sizes without retraining on fixed-resolution data.
+Our FNO architecture comprises four Fourier layers, each with a width of 20. The
+Generative Lagrangian Data Assimilation 6
+input to the model is upartial(x, y, t ), which are the sparse observations from either of
+System 1 ,2, or3. The model is trained using the Adam optimizer with a learning
+rate of 0.001 to minimize the L2loss between predicted and ground truth fields.
+min
+θNO∥u(x, y, t )− G θNO(upartial(x, y, t ))∥2
+2, (4)
+where u(x, y, t ) denotes the full-resolution target field, and upartial(x, y, t ) represents
+the sparse input observations. The operator GθNO, parameterized by θNO, denotes the
+FNO model that learns to approximate the functional mapping from partial observations
+to complete spatiotemporal fields.
+2.2.3. FNO-conditioned DDPM (FNO+DDPM)
+Following recent success in computer vision, we employ a Conditional Denoising
+Diffusion Probabilistic Model (DDPM) with a UNET-based denoiser conditioned on the
+output of the FNO model described in section 2.2.2, to reconstruct full-resolution ground
+truth fields from sparse observational data. The objective is to model the conditional
+distribution pθ(u|upartial), where uis the full-resolution state (e.g., sea surface height),
+andupartial is a sparsely observed input.
+The key innovation is to condition the DDPM’s denoiser, ϵθ(uτ, τ), on the output of
+the FNO model, denoted GθNO(upartial). Here, u0denotes the original ground truth field
+at time t, and uτrepresents a noised version at diffusion timestep τ∈ {1, . . . , T }. The
+model is trained on individual snapshots of the full-resolution field u0, with diffusion
+applied over T= 1000 time steps.
+(i)Conditional Input to the Network:
+Rather than learning ϵθ(uτ, τ) directly, our model learns the denoiser:
+ϵθ(uτ, τ,GθNO(upartial)),
+where the FNO output is concatenated with the noisy input uτ. The denoiser is
+trained to predict the added Gaussian noise at each diffusion step, using a UNET
+architecture.
+(ii)Training Objective:
+The training loss follows the simplified DDPM objective:
+Lsimple(θ) :=Eτ,u,ϵhϵ−ϵθ √¯ατu+√
+1−¯ατϵ, τ,GθNO(upartial)2
+2i
+,(5)
+where ϵ∼ N(0,I) is sampled Gaussian noise.
+(iii)Forward Diffusion Process:
+The forward diffusion process adds noise to the full-resolution field as follows:
+q(uτ|u0) =N 
+uτ;√¯ατu0,(1−¯ατ)I
+, (6)
+where ¯ ατ=Qτ
+s=1(1−βs) is the cumulative product of the noise schedule.
+Generative Lagrangian Data Assimilation 7
+(iv)Reverse Process:
+The FNO prediction provides both a conditioning prior and the initial guess for the
+reverse process. The initial noisy sample is generated as:
+uT=√¯αTGθNO(upartial) +√
+1−¯αT·ϵ, ϵ∼ N(0,I). (7)
+At each diffusion step τ, the sample is updated using the learned denoiser:
+uτ−1=1√ατ
+uτ−1−ατ√1−¯ατ·ϵθ(uτ, τ,GθNO(upartial))
++στz. (8)
+where στ=√βτandz∼ N(0,I) ifτ >1, otherwise z= 0.
+(v)Beta Schedule:
+The noise variance βτis defined using a linear schedule:
+βτ=βstart+τ−1
+T−1
+(βend−βstart). (9)
+where βstartandβendare the minimum and maximum noise levels used across
+T= 1000 diffusion steps.
+This setup enables the DDPM to generate physically consistent, full-resolution
+reconstructions by leveraging the coarse predictions from the FNO as a learned physics-
+informed prior. Each denoising step is guided by both the noisy input and the global
+spatial structure inferred by the FNO from sparse observations.
+3. Results
+In this section, we demonstrate the performance of our proposed DDPM+FNO and
+DDPM+UNET models as compared to traditional UNET and FNO models in terms
+of statistical metrics such as RMSE, CC, SSIM, as well as physics-based metrics such
+as the Fourier spectrum of the reconstructed variables, kinetic energy, strain rate, and
+relative vorticity. It must be noted that throughout this section, the reconstruction of
+the full-resolution fields has been generated without an explicit need for a background
+state (or generally an ensemble of background states) typically provided by a forward
+dynamical model at great computational cost.
+3.1. Performance on System 1
+Figure 2 presents three snapshots of the vorticity field at distinct time
+steps, comparing the reconstruction performance of various models under extreme
+observational sparsity (99%). In each snapshot, the spatial locations of the observations
+are different, reflecting the Lagrangian or non-stationary nature of the data. The top
+row shows the sparse input, where red dots mark the 1% available data points at
+each time step. The subsequent rows display reconstructions from the UNET, FNO,
+UNET+DDPM, and FNO+DDPM models, followed by the corresponding ground truth.
+Both UNET and FNO successfully capture the large-scale structures of the vorticity
+field and produce smooth reconstructions; however, they fail to reproduce fine-scale
+Generative Lagrangian Data Assimilation 8
+Figure 1: Schematic of the FNO-conditioned diffusion framework (FNO+DDPM). The
+Fourier Neural Operator (FNO) is first trained to predict full-resolution ocean states
+from highly sparse observational inputs. These coarse reconstructions are then used
+as conditioning inputs to a Denoising Diffusion Probabilistic Model (DDPM), which
+is trained to generate refined full-resolution fields. The DDPM leverages the FNO-
+predicted coarse field as a physics-informed prior, enabling accurate recovery of small-
+scale structures and realistic ocean dynamics. The UNET-conditioned DDPM model
+replaces the FNO with an UNET.
+features and high-wavenumber dynamics. This shortcoming is attributed to the spectral
+bias inherent in conventional convolutional networks and neural operators, which tend to
+under/over-represent high-wavenumber components [44]. As derived in Chattopadhyay
+et al. [38, 26] and further discussed in Lai et al. [46], this bias is particularly problematic
+in climate modeling, where it can lead to instabilities and degraded performance in data-
+sparse regimes. Additionally, as noted in [47], the downsampling operations in UNET
+result in the loss of fine spatial details, which skip connections cannot fully recover, thus
+compromising the reconstruction of small-scale structures.
+In contrast, the conditional DDPM models (UNET+DDPM and FNO+DDPM)
+exhibit markedly improved recovery of fine-scale vorticity patterns and sharper
+filaments. Among them, FNO+DDPM produces outputs with textures most closely
+resembling the ground truth, demonstrating a superior ability to reconstruct multi-scale
+turbulent features under conditions of extreme and time-varying sparsity.
+Generative Lagrangian Data Assimilation 9
+Figure 3 compares the reconstruction performance of all models using four
+evaluation metrics computed over more than 100 test samples. Figures 3(a), (b), and
+(c) report the RMSE, CC, and SSIM, respectively, while panel (d) presents the Fourier
+spectrum of the reconstructed vorticity fields. While RMSE, CC, and SSIM are widely
+used in image reconstruction tasks, they are often inadequate and even misleading for
+evaluating the physical fidelity of turbulent flows. These metrics primarily emphasize
+agreement at large spatial scales and pointwise similarity while systematically under-
+representing errors in small-scale structures that are crucial for capturing the true
+dynamics of turbulent systems. The error bar in each of these metrics is computed
+across 100 test samples outside the training dataset.
+For instance, the UNET model achieves the lowest average RMSE, as shown in
+Figure 3(a), due to its ability to match the broad, smooth patterns of the ground
+truth field. However, as evident in Figure 2, its outputs are overly diffused and lack
+small-scale detail. RMSE, being a pointwise error metric, is insensitive to structural
+realism and physical coherence. Similarly, while the correlation coefficient and SSIM
+(Figure 3(b) and (c) are higher for UNET and FNO, these metrics primarily reflect
+large-scale alignment and do not penalize the loss of high-wavenumber components. In
+contrast, the conditional DDPM models (UNET+DDPM and FNO+DDPM), which
+produce sharper, more filamented reconstructions, report slightly higher RMSE and
+lower SSIM—despite yielding outputs that better preserve the underlying physics.
+To address these limitations, we incorporate a spectral analysis based on the Fourier
+spectrum (Figure 3(d)), which more appropriately captures the distribution of energy
+across spatial scales. The spectra for UNET and FNO exhibit a pronounced drop
+in power at high wavenumbers, indicating a failure to reconstruct fine-scale vorticity
+features, a known manifestation of spectral bias in conventional neural networks. In
+contrast, the spectra of FNO+DDPM and UNET+DDPM closely follow those of the
+ground truth, particularly in the high-wavenumber regime, demonstrating improved
+recovery of small-scale structures. These results highlight the importance of evaluating
+reconstructed turbulent fields using physics-informed diagnostics, such as spectral
+energy content, which are sensitive to the multi-scale nature of turbulence and are
+not captured by traditional statistical metrics.
+Figure 4 presents the average kinetic energy (KE) fields computed over 3000
+samples for the ground truth and all reconstructed models, along with corresponding
+pointwise absolute difference maps. The left column displays the spatially averaged
+KE fields for each model, while the right column shows their deviation from the
+ground truth, quantified by pointwise absolute error and associated standard deviation
+values. Overall, all models exhibit similar performance in reconstructing the bulk
+kinetic energy of the vorticity field. This is expected, as spatially averaged KE is
+dominated by contributions from large-scale structures and is relatively insensitive
+to fine-scale fluctuations. The primary motivation for presenting this figure is to
+highlight that, despite the extreme observational sparsity (99%) and dynamically
+changing observation locations across time, all models—particularly the DDPM-
+Generative Lagrangian Data Assimilation 10
+enhanced variants—successfully reconstruct the vorticity field while preserving accurate
+large-scale energy content. This demonstrates that the learned models are not only
+interpolating observations but are capturing the essential bulk physics of the system, as
+reflected in their ability to reproduce the domain-averaged KE with high fidelity.
+3.2. Performance on System 2
+Figure 5 displays reconstructed fields of SSH in (a), SSU in (b), and SSV in (c) over
+the Gulf of Mexico on January 1, 2013. The top row of each panel shows the 99%-sparse
+input, where red dots indicate the 1% available observations. The base models (UNET
+and FNO) fail to reconstruct fine-scale flow structures and instead produce overly
+smooth outputs with limited spatial variability. In contrast, the conditional DDPM
+models (UNET+DDPM and FNO+DDPM) exhibit substantial improvement, capturing
+both spatial variability and fine-scale features more faithfully. This improvement is
+particularly notable in the SSU and SSV fields, which are inherently more dynamic and
+sensitive to transient flow features than SSH.
+Figure 6 summarizes the quantitative comparison of model performance over 50
+test samples. Figure 6(a) shows RMSE, (b) presents the average CC, and (c) shows the
+structural similarity index (SSIM) over 50 test samples. Figure 6(d), (e), and (f) display
+the mean Fourier spectra of SSU, SSV, and SSH, respectively. As shown in panel (f),
+the SSH spectrum is well captured by all the models (although the conditional DDPM
+models outperform the base models). This is because SSH has predominantly large-
+scale features, which are well captured by the base models. However, both the base
+models, FNO and UNET, underestimate the SSH dynamics at higher wavenumbers. In
+contrast, the spectra for SSU and SSV in panels (d) and (e) reveal that the base models
+fail to recover a broad range of spatial scales—FNO failing to capture even the lowest
+wavenumbers while UNET captures about half the wavenumbers. The performance of
+FNO+DDMP or UNET+DDPM is best seen in these panels, where the spectrum of
+both SSU and SSV is well captured by the generative models, albeit significant spectral
+bias can be seen in the highest wavenumbers.
+Figure 7 evaluates the physical consistency of the reconstructed velocity fields by
+showing derived diagnostics, e.g., strain rate ( σ) and relative vorticity ( ζ) computed
+from SSU and SSV. The diagnostic expressions follow Martin et al. [36], and are given
+by:
+σ=p
+σ2
+n+σ2
+s=s∂u
+∂x−∂v
+∂y2
++∂v
+∂x+∂u
+∂y2
+. (10)
+ζ=∂v
+∂x−∂u
+∂y. (11)
+The ground truth fields exhibit sharp mesoscale eddies and filamentary structures,
+especially near the Loop Current. FNO captures smooth patterns but lacks small-
+scale resolution. UNET introduces some artifacts but delineates eddy boundaries better
+Generative Lagrangian Data Assimilation 11
+than FNO. FNO+DDPM shows improved localization of gradients and finer structures,
+though it introduces mild noise. UNET+DDPM most closely resembles the ground
+truth in both spatial pattern and intensity, showing that DDPM correction significantly
+enhances the physical consistency of reconstructed fields across multiple scales.
+3.3. Performance on System 3
+Figure 8 shows three representative snapshots of satellite-observed sea surface
+height (SSH) over the Gulf of Mexico on distinct days. Due to the extreme sparsity
+(∼99.7%) and temporally varying observation locations, this constitutes one of the
+most challenging reconstruction settings considered. While UNET performs well
+on synthetic and reanalysis data, it fails to generalize to real-world observations,
+producing incoherent reconstructions that largely overfit to observed points while
+collapsing in unobserved regions. FNO yields better spatial continuity but suffers from
+excessive smoothing, particularly at smaller scales. In contrast, the DDPM-conditioned
+models (UNET+DDPM and FNO+DDPM) reconstruct fine-scale SSH features more
+consistently across the domain, indicating their superior capacity to model spatial
+complexity under severe data sparsity.
+Figure 9 reports the averaged reconstruction performance over 50 days. Panel (a)
+presents the RMSE, panel (b) the correlation coefficient (CC), panel (c) the SSIM, and
+panel (d) the FFT power spectrum. UNET exhibits the highest RMSE and lowest SSIM
+and CC, confirming its poor generalization to sparse observational input. Conditioning
+with DDPM markedly improves its performance in all metrics. Although FNO achieves
+the lowest RMSE, this pointwise metric alone fails to capture the physical plausibility
+of the reconstruction. The power spectra in panel (d) show that the conditional DDPM
+models closely match the ground truth across wavenumbers, particularly retaining
+energy at higher wavenumbers that represent small-scale dynamics. CC and SSIM
+results further support that these models better preserve spatiotemporal variability and
+structural integrity. This is especially critical for oceanographic applications, where
+accurately resolving fronts, eddies, and gradient structures is essential for analysis and
+forecasting.
+Generative Lagrangian Data Assimilation 12
+(a)
+ (b)
+ (c)
+Figure 2: Vorticity reconstructions under 99% sparsity. Each column shows a time
+snapshot; the top row shows 1% observed points (red). UNET and FNO capture large-
+scale flow but miss fine structures. Conditional DDPM models, especially FNO+DDPM,
+recover sharper, more realistic small-scale features.
+Generative Lagrangian Data Assimilation 13
+Figure 3: Reconstruction performance across 100 test samples using (a) RMSE, (b)
+correlation coefficient (CC), (c) SSIM, and (d) Fourier spectrum. UNET and FNO
+show favorable RMSE, CC, and SSIM due to large-scale alignment but miss fine-scale
+features. Conditional DDPM models, despite slightly higher RMSE, better preserve
+high-wavenumber energy in (d), indicating improved recovery of small-scale turbulent
+structures.
+Generative Lagrangian Data Assimilation 14
+Figure 4: Average kinetic energy (KE) fields and absolute error maps over 3000 samples.
+Left: temporally averaged KE fields for the ground truth and each model over 3000
+samples. Right: pointwise absolute differences from the ground truth with standard
+deviation. All models, especially the DDPM-enhanced ones, accurately capture large-
+scale KE despite 99% sparsity, demonstrating preservation of bulk flow physics beyond
+mere interpolation.
+Generative Lagrangian Data Assimilation 15
+(a)
+ (b)
+ (c)
+Figure 5: Reconstructed fields over the Gulf of Mexico on January 1, 2013: (a) SSH,
+(b) SSU, and (c) SSV. Top rows show 1% observed input (red dots). UNET and FNO
+produce oversmoothed outputs lacking fine structure, while conditional DDPM models
+better capture spatial variability, especially in the more dynamic SSU and SSV fields.
+Generative Lagrangian Data Assimilation 16
+Figure 6: Quantitative comparison over 50 test samples: (a) RMSE, (b) CC, (c) SSIM,
+and mean Fourier spectra of (d) SSU, (e) SSV, and (f) SSH. All models capture the
+SSH spectrum well due to its large-scale nature, though conditional DDPM models
+perform best at high wavenumbers. For SSU and SSV, FNO and UNET fail to recover
+a wide range of spatial scales, while conditional DDPM models better match the ground
+truth spectra, especially at intermediate wavenumbers, despite some bias at the highest
+wavenumbers.
+Generative Lagrangian Data Assimilation 17
+Figure 7: Derived diagnostics: (a) strain rate σand (b) relative vorticity ζ—computed
+from reconstructed SSU and SSV fields. Ground truth shows sharp eddy and filament
+structures near the Loop Current. FNO captures smooth patterns but lacks detail;
+UNET delineates eddies better but introduces artifacts. Conditional DDPM models
+improve gradient localization, with UNET+DDPM most closely matching the ground
+truth in both structure and intensity.
+Generative Lagrangian Data Assimilation 18
+(a)
+ (b)
+ (c)
+Figure 8: Three snapshots of satellite-observed sea surface height (SSH) over the Gulf
+of Mexico under extreme sparsity (99.7%). UNET fails to generalize and overfits
+observed points; FNO improves continuity but oversmooths. Conditional DDPM models
+better recover fine-scale features, showing greater robustness to sparse, non-stationary
+observations.
+Generative Lagrangian Data Assimilation 19
+Figure 9: Reconstruction performance averaged over 50 days: (a) RMSE, (b) correlation
+coefficient, (c) SSIM, and (d) FFT power spectrum. UNET performs worst across all
+metrics. FNO achieves lower RMSE but lacks physical fidelity. Conditional DDPM
+models better match the ground truth spectrum and preserve small-scale dynamics,
+spatial variability, and structural integrity—key for oceanographic accuracy.
+Generative Lagrangian Data Assimilation 20
+4. Conclusion and Discussion
+In this study, we introduced a novel generative modeling framework for
+reconstructing oceanic surface fields from highly sparse and non-stationary Lagrangian
+satellite observations. By conditioning denoising diffusion probabilistic models
+(DDPMs) on Fourier Neural Operator (FNO) predictions, we demonstrated significant
+improvements in recovering fine-scale flow structures, spectral consistency, and physical
+diagnostics such as vorticity and strain, compared to existing baselines. These advances
+are particularly important in the context of climate and ocean forecasting, where
+observations are often limited, noisy, and spatially inconsistent.
+Unlike traditional data assimilation (DA) schemes, which require access to
+computationally expensive forward dynamical models like ROMS or MOM6, our
+approach is purely data-driven and bypasses the need for explicit numerical solvers. In
+variational or ensemble-based DA systems, the assimilation step relies on tangent-linear
+and adjoint models or multiple ensemble integrations, which are costly and prone to
+numerical instability, especially under extreme data sparsity. In contrast, our generative
+model provides an efficient one-shot reconstruction pipeline that can handle high sparsity
+and time-varying observation geometries without requiring any knowledge of governing
+equations or solver access. This positions our framework as a strong alternative for rapid
+reconstruction in operational systems or in scenarios where computational resources are
+constrained.
+Future directions involve systematically validating our reconstructions by using
+them as initial conditions in forecast models. One approach is to initialize OceanNet, a
+data-driven forecasting model introduced by Chattopadhyay et al. [26] and extended by
+Jim´ enez et al. [48], with our DDPM-based reconstructions. Because OceanNet has been
+shown to successfully predict ocean dynamics over extended time horizons, its error
+growth when initialized with different reconstruction methods could serve as a proxy
+for the accuracy of our framework. Similarly, initializing a dynamical model such as
+ROMS with our reconstructions can provide physical validation through forecast skill
+metrics. A comparison of forecast horizon and energy spectra of the ROMS outputs
+across different reconstruction initializations would yield insights into which method
+best captures the true underlying dynamics.
+Furthermore, our generative framework can be extended to perform global ocean
+reconstructions. The scalability of FNOs and convolutional backbones, along with
+conditional DDPMs, makes this pipeline naturally extensible to global nadir-based
+observations such as satellite altimetry data from Jason missions, as well as newly
+available swath-based Synthetic Aperture Radar (SAR) data from the Surface Water
+and Ocean Topography (SWOT) mission. The resulting full-resolution surface state
+estimates can be used to initialize coupled climate models. One promising direction
+is to integrate our global reconstructions with LUCIE, a data-driven climate emulator
+developed by Guan et al. [23], to enable coupled atmosphere-ocean simulations that are
+both high-resolution and computationally tractable. Such modeling approaches could
+Generative Lagrangian Data Assimilation 21
+bring us closer to enabling scalable Earth system modeling that is rooted in observations,
+not just reanalysis products.
+Our methodology also opens the door to reconstructing subsurface ocean fields,
+such as thermocline depth, salinity, and deep currents. By training on multi-modal
+observations from Argo floats, deep moorings, and altimetry-derived surface fields, we
+can potentially learn inverse mappings from sparse surface data to volumetric fields.
+This could dramatically expand the observational footprint in otherwise inaccessible
+ocean layers.
+Finally, a significantly longer-term goal is to shift from using reanalysis fields as
+training labels to directly learning from raw satellite and in situ observations. Such
+a fully data-driven reconstruction pipeline would eliminate the dependency on models
+like HYCOM or CMEMS, which themselves embed strong dynamical priors. Instead,
+our generative framework would learn physical consistency directly from the data,
+unlocking the possibility of more flexible, observationally grounded ocean modeling
+across spatiotemporal scales and regimes.
+In summary, our results suggest that physics-aware generative modeling,
+conditioned on learned operators, offers a scalable, accurate, and computationally
+efficient alternative to traditional ocean data assimilation systems, particularly under
+conditions of extreme sparsity and observational noise. With proper integration into
+forecasting and coupled modeling pipelines, this approach holds significant promise for
+advancing ocean monitoring, prediction, and understanding.
+5. Acknowledgement
+AC and RH designed the research. NA and LJ conducted the research and
+developed the computational models with equal contributions. TW provided the
+satellite observations. NA and AC wrote the manuscript. All authors analyzed the
+results and edited the manuscript. AC and LJ were supported by the National Science
+Foundation (grant no. 2425667). Computational resources were provided by NSF
+ACCESS MTH240019, MTH250006 and NCAR CISL UCSC0008, and UCSC0009.
+6. Data and Code
+The computational models used in this study are publicly available in https:
+//github.com/TACS-UCSC/GenDA-Lagrangian .
+7. References
+[1] Moore A M, Martin M J, Akella S, Arango H G, Balmaseda M, Bertino L, Ciavatta S, Cornuelle
+B, Cummings J, Frolov S et al. 2019 Frontiers in Marine Science 690
+[2] Dickey T D 2003 Journal of Marine Systems 405–48
+[3] Kubota M, Iwasaka N, Kizu S, Konda M and Kutsuwada K 2002 Journal of oceanography 58
+213–225
+[4] Molcard A, Griffa A and ¨Ozg¨ okmen T M 2005 Journal of Atmospheric and Oceanic Technology
+2270–83
+Generative Lagrangian Data Assimilation 22
+[5] Salman H, Kuznetsov L, Jones C and Ide K 2006 Monthly Weather Review 1341081–1101
+[6] Kuznetsov L, Ide K and Jones C K 2003 Monthly Weather Review 1312247–2260
+[7] Apte A, Jones C K and Stuart A 2008 Tellus A: Dynamic Meteorology and Oceanography 60
+336–347
+[8] Bennett A F 2005 Inverse modeling of the ocean and atmosphere (Cambridge University Press)
+[9] Molcard A, Piterbarg L I, Griffa A, ¨Ozg¨ okmen T M and Mariano A J 2003 Journal of Geophysical
+Research: Oceans 108
+[10] Oke P R, Sakov P and Schulz E 2009 Dynamics of Atmospheres and Oceans 48121–142
+[11] Schulz-Stellenfleth J and Stanev E 2010 Ocean modelling 33270–282
+[12] Martin M, Hines A and Bell M 2007 Quarterly Journal of the Royal Meteorological Society: A
+journal of the atmospheric sciences, applied meteorology and physical oceanography 133 981–
+995
+[13] Lermusiaux P F 2006 Journal of Computational Physics 217176–199
+[14] Smith G C, Roy F, Mann P, Dupont F, Brasnett B, Lemieux J F, Laroche S and B´ elair S 2014
+Quarterly Journal of the Royal Meteorological Society 140881–894
+[15] Edwards C A, Moore A M, Hoteit I and Cornuelle B D 2015 Annual review of marine science 7
+21–42
+[16] Evensen G 2003 Ocean dynamics 53343–367
+[17] Oke P R and Sakov P 2008 Journal of Atmospheric and Oceanic Technology 251004–1017
+[18] Oke P R, Brassington G B, Griffin D A and Schiller A 2010 Australian Meteorological and
+Oceanographic Journal 5967–76
+[19] Xie J and Zhu J 2010 Ocean Modelling 33283–298
+[20] Oke P R, Sakov P and Corney S P 2007 Ocean Dynamics 5732–45
+[21] Pathak J, Subramanian S, Harrington P, Raja S, Chattopadhyay A, Mardani M, Kurth T, Hall
+D, Li Z, Azizzadenesheli K et al. 2022 arXiv preprint arXiv:2202.11214
+[22] Lam R, Sanchez-Gonzalez A, Willson M, Wirnsberger P, Fortunato M, Pritzel A, Ravuri S, Ewalds
+T, Alet F, Eaton-Rosen Z et al. 2022 arXiv preprint arXiv:2212.12794
+[23] Guan H, Arcomano T, Chattopadhyay A and Maulik R 2024 arXiv preprint arXiv:2405.16297
+[24] Watt-Meyer O, Dresdner G, McGibbon J, Clark S K, Henn B, Duncan J, Brenowitz N D, Kashinath
+K, Pritchard M S, Bonev B et al. 2023 arXiv preprint arXiv:2310.02074
+[25] Watt-Meyer O, Henn B, McGibbon J, Clark S K, Kwa A, Perkins W A, Wu E, Harris L and
+Bretherton C S 2025 npj Climate and Atmospheric Science 81–15
+[26] Chattopadhyay A, Gray M, Wu T, Lowe A B and He R 2024 Scientific Reports 1421181 URL
+https://www.nature.com/articles/s41598-024-21181-0
+[27] Lowe A B, Gray M, Chattopadhyay A, Wu T and He R 2025 Artificial Intelligence for the Earth
+Systems
+[28] Gray M, Chattopadhyay A, Wu T, Lowe A and He R 2025 Ocean Science 211065–1080
+[29] Dheeshjith S, Subel A, Adcroft A, Busecke J, Fernandez-Granda C, Gupta S and Zanna L 2025
+Geophysical Research Letters 52e2024GL114318
+[30] Chen K, Bai L, Ling F, Ye P, Chen T, Luo J J, Chen H, Xiao Y, Chen K, Han T et al. 2023 arXiv
+preprint arXiv:2312.12462
+[31] McNally A, Lessig C, Lean P, Boucher E, Alexe M, Pinnington E, Chantry M, Lang S, Burrows
+C, Chrust M et al. 2024 arXiv preprint arXiv:2407.15586
+[32] Allen A, Markou S, Tebbutt W, Requeima J, Bruinsma W P, Andersson T R, Herzog M, Lane
+N D, Chantry M, Hosking J S et al. 2025 Nature 6411172–1179
+[33] Chattopadhyay A, Nabizadeh E, Bach E and Hassanzadeh P 2022 arXiv preprint arXiv:2206.04811
+[34] Chattopadhyay A, Mustafa M, Hassanzadeh P, Bach E and Kashinath K 2022 Geoscientific Model
+Development 152221–2237
+[35] Maulik R, Rao V, Wang J, Mengaldo G, Constantinescu E, Lusch B, Balaprakash P, Foster I and
+Kotamarthi R 2022 Geoscientific Model Development 153433–3445
+[36] Martin S A, Manucharyan G E and Klein P 2024 EarthArXiv Under review at Journal of Advances
+Generative Lagrangian Data Assimilation 23
+in Modeling Earth Systems (JAMES) URL https://doi.org/10.31223/X5WD6H
+[37] Oommen V, Bora A, Zhang Z and Karniadakis G E 2024 arXiv preprint arXiv:2409.08477
+[38] Chattopadhyay A and Hassanzadeh P 2023 arXiv preprint arXiv:2304.07029
+[39] Maltrud M and Vallis G 1991 Journal of Fluid Mechanics 228321–342
+[40] Garric G, Parent L, Greiner E, Dr´ evillon M, Hamon M, Lellouche J, R´ egnier C, Desportes C,
+Le Galloudec O, Bricaud C et al. 2018 Performance and quality assessment of the global ocean
+eddy-permitting physical reanalysis glorys2v4 Proceedings of the Eight EuroGOOS International
+Conference, 3–5 October 2017, Bergen, Norway pp 215–222
+[41] He R, Wu T, Mao S, Zong H, Zambon J, Warrillow J, Dorton J and Hernandez D 2025 arXiv
+preprint arXiv:2503.06907
+[42] Storkey D, Blockley E, Furner R, Guiavarc’h C, Lea D, Martin M, Barciela R, Hines A, Hyder P
+and Siddorn J 2010 Journal of operational oceanography 33–15
+[43] Ronneberger O, Fischer P and Brox T 2015 U-net: Convolutional networks for biomedical
+image segmentation Medical Image Computing and Computer-Assisted Intervention (MICCAI)
+(Springer) pp 234–241 URL http://lmb.informatik.uni-freiburg.de/Publications/2015/
+RFB15a/
+[44] Oommen V, Bora A, Zhang Z and Karniadakis G E 2024 arXiv preprint arXiv:2409.08477 URL
+https://arxiv.org/abs/2409.08477
+[45] Li Z, Kovachki N, Azizzadenesheli K, Liu B, Stuart A and Anandkumar A 2020 arXiv preprint
+arXiv:2010.08895 URL https://arxiv.org/abs/2010.08895
+[46] Lai C Y, Hassanzadeh P, Sheshadri A, Sonnewald M, Ferrari R and Balaji V 2023 Annual Review
+of Fluid Mechanics To appear URL https://arxiv.org/abs/2301.01341
+[47] Neha F, Bhati D, Shukla D K, Dalvi S M, Mantzou N and Shubbar S 2024 arXiv preprint
+arXiv:2412.02242 URL https://arxiv.org/abs/2412.02242
+[48] Lupin-Jimenez L, Darman M, Hazarika S, Wu T, Gray M, He R, Wong A and Chattopadhyay A
+2025 arXiv preprint arXiv:2501.05058

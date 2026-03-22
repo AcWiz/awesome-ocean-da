@@ -1,0 +1,846 @@
+manuscript submitted toJGR: Machine Learning and Computation
+OceanForecastBench: A Benchmark Dataset for
+Data-Driven Global Ocean Forecasting
+Haoming Jia1∗, Yi Han1∗, Xiang Wang1, Huizan Wang1, Wei Wu2, Jianming
+Zheng3, Peikun Xiao1
+1College of Meteorology and Oceanography, National University of Defense Technology, Changsha, 410000,
+Hunan, China
+2College of Computer Science and Technology, National University of Defense Technology, Changsha,
+410000, Hunan, China
+3State Key Laboratory of Mathematical Engineering and Advanced Computing, Wuxi, 214000, Jiangsu,
+China
+Key Points:
+•We contribute to AI for Earth by introducing an open-source benchmark for data-
+driven global ocean forecasting
+•We preprocess multi-source data into a ready-to-use dataset for the development of
+data-driven forecasting models and evaluation pipelines
+•We conduct a detailed analysis of 5 typical baseline models, highlighting their
+strengths and limitations to guide future improvements
+∗These authors contributed equally to this work.
+Corresponding author: Xiang Wang,xiangwangcn@nudt.edu.cn
+–1–arXiv:2511.18732v2  [cs.LG]  18 Dec 2025
+manuscript submitted toJGR: Machine Learning and Computation
+Abstract
+Global ocean forecasting aims to predict key ocean variables such as temperature, salinity,
+and currents, which is essential for understanding and describing oceanic phenomena. In
+recent years, data-driven deep learning-based ocean forecast models, such as XiHe, WenHai,
+LangYa and AI-GOMS, have demonstrated significant potential in capturing complex ocean
+dynamics and improving forecasting efficiency. Despite these advancements, the absence of
+open-source, standardized benchmarks has led to inconsistent data usage and evaluation
+methods. This gap hinders efficient model development, impedes fair performance compar-
+ison, and constrains interdisciplinary collaboration. To address this challenge, we propose
+OceanForecastBench, a benchmark offering three core contributions: (1) A high-quality
+global ocean reanalysis data over 28 years for model training, including 4 ocean variables
+across 23 depth levels and 4 sea surface variables. (2) A high-reliability satellite and in-situ
+observations for model evaluation, covering approximately 100 million locations in the global
+ocean. (3) An evaluation pipeline and a comprehensive benchmark with 5 typical baseline
+models, leveraging observations to evaluate model performance from multiple perspectives.
+OceanForecastBench represents the most comprehensive benchmarking framework currently
+available for data-driven ocean forecasting, offering an open-source platform for model de-
+velopment, evaluation, and comparison. The dataset and code are publicly available at:
+https://github.com/Ocean-Intelligent-Forecasting/OceanForecastBench.
+Plain Language Summary
+Ocean forecasts help us understand ocean currents, temperature, salinity and climate
+impacts days ahead. Recent advances in AI-based models, such as XiHe and WenHai,
+have shown great potential in improving the accuracy and efficiency of ocean predictions.
+However, the lack of a standardized benchmark for training and evaluating these models
+poses a major barrier to fair comparison and reproducibility. Researchers currently rely
+on disparate datasets and evaluation methods, which hinders scientific progress and model
+development. To address this, we constructed OceanForecastBench, a comprehensive and
+open-source benchmark that provides: (1) High-quality training data over 28 years of global
+ocean reanalysis (temperature, currents, salinity etc.) at different depths. (2) Reliable eval-
+uation data which includes millions of real-world satellite and sensor observations to evaluate
+model accuracy. (3) Standardized evaluation of 5 baseline models across key performance,
+enabling clear comparisons.
+–2–
+manuscript submitted toJGR: Machine Learning and Computation
+1 Introduction
+Global ocean forecasting is fundamentally important for supporting ocean activities,
+such as ensuring the safety of maritime navigation, improving climate predictions, and
+enhancing the management of marine resources (Meehl et al., 2021; Payne et al., 2022).
+Conventional physics-driven methods achieve ocean forecasting by solving physical partial
+differential equations (PDEs) using numerical simulations. However, the chaotic nature
+of ocean makes solving PDEs highly complex and time-consuming. Consequently, these
+methods often demand substantial computational resources and time.
+Artificial Intelligence for Earth (AI4Earth) is revolutionizing ocean forecasting by en-
+abling the data-driven discovery of complex oceanographic patterns. Recent advancements
+in AI have demonstrated significant potential for ocean forecasting (K. Chen et al., 2023;
+L. Chen et al., 2023; Chae et al., 2024; K. Chen et al., 2024). Data-driven AI ocean forecast-
+ing models, such as XiHe (X. Wang et al., 2024), WenHai (Cui et al., 2025), LangYa (Yang
+et al., 2024), and AI-GOMS (Xiong et al., 2023) achieve faster speeds, more accurate fore-
+casts, longer-term forecasting capability, and lower computational costs (Choudhury et al.,
+2024). However, progress in this field still remains limited, with only a few studies. The
+main reason is the absence of a public benchmark that enables fair algorithm compari-
+son and improves research reproducibility, which creates professional barriers within the
+field (Kaltenborn et al., 2023; Dueben et al., 2022). Benchmarks are crucial for facilitat-
+ing algorithm comparison and model optimization, as demonstrated by ImageNet (Deng et
+al., 2009), WeatherBench (Rasp et al., 2020a), and GLUE (A. Wang, 2018). Therefore,
+establishing an open-source, unified benchmark for data-driven global ocean forecasting is
+essential to propel progress in this domain.
+However, creating such a benchmark for ocean forecasting involves several significant
+challenges: (1)Requirement for expert knowledge in ocean forecasting-specific
+benchmark.Developing a benchmark involves defining tasks, providing standardized
+datasets, and evaluating models. Domain-specific knowledge is crucial to identify key vari-
+ables and avoid task flaws. Ocean forecasting integrates data from multiple sources, so
+expert knowledge is needed for proper data processing and standardization. Additionally,
+using only the reanalysis data for model evaluation may introduce the risk of bias and re-
+duced accuracy. Observations are often used to assess model performance, highlighting the
+need for an observation-based evaluation pipeline. (2)Complexity of processing multi-
+–3–
+manuscript submitted toJGR: Machine Learning and Computation
+source data when constructing benchmark datasets.Deep learning models require
+large datasets. Ocean forecasting relies on various data types (e.g., reanalysis, in-situ obser-
+vations, and satellite observations) for accuracy. Global reanalysis data is ideal for training,
+offering consistency and comprehensive spatial coverage. Discrete observations, which record
+the ocean’s true state, are suitable for model evaluation but come with challenges like incon-
+sistent quality (e.g., noise interference) and format. Integrating these data sources requires
+careful selection and processing. (3)High time and computational resource demand
+in baseline acquisition. Identifying appropriate baseline models is challenging, as few
+AI models exist for ocean forecasting. Adapting models from other fields requires addi-
+tional efforts. Training models, especially deep learning ones, is computationally intensive.
+For instance, training a single SwinTransformer variant on an 8-GPU cluster takes around
+30 hours, and hyperparameter optimization further increases this burden. Additionally,
+comparing results is time-consuming and requires expertise in oceanography.
+This paper proposes a benchmark dataset for data-driven global ocean forecasting.
+The task of the benchmark is to forecast key ocean variables, such as sea level anomaly
+(SLA), sea surface temperature (SST), zonal and meridional components of currents (Uo
+and Vo), temperature, and salinity. Specifically,for the training dataset, we primar-
+ily use GLORYS12 (Global Ocean Physics Reanalysis) (Jean-Michel et al., 2021), one of
+the best products currently available. To account for the influence of sea surface environ-
+mental factors, we also integrate sea surface wind from ERA5 (Fifth Generation Global
+Atmospheric Reanalysis) (Bell et al., 2021) and SST data from OSTIA (Operational Sea
+Surface Temperature and Ice Analysis) (S. Good et al., 2020) into the training dataset.
+The training dataset has been standardized to a uniform spatial and temporal resolution to
+ensure usability, derived from over 13TB of raw data.For the evaluation dataset, we
+utilize a range of observations (such as satellite remote sensing, in-situ observations, etc.)
+as the ground truth for evaluating model performance. Specifically, we select the quality-
+controlled subsurface ocean temperature and salinity data from EN4 data (S. A. Good et
+al., 2013; Gouretski & Reseghetti, 2010), 6-hour interpolated SST and currents data from
+Global Drifter Program (GDP) (Lumpkin & Centurioni, 2019), and SLA data from Global
+Ocean L3 Significant Wave Height From Reprocessed Satellite Measurements provided by
+Copernicus Marine Environment Monitoring Service (CMEMS L3). The evaluation dataset
+covers approximately 100 million observation locations in the global ocean. A standard-
+ized evaluation pipeline is provided to align forecast data with discrete observations and
+–4–
+manuscript submitted toJGR: Machine Learning and Computation
+calculate evaluation metrics.For the baseline models, we conduct a detailed evaluation
+of 5 representative models, including the operational numerical forecasting systems, and
+the advanced deep learning models. A detailed analysis of the evaluation results highlights
+the strengths and weaknesses of various baseline models, offering critical insights for fu-
+ture improvements. OceanForecastBench standardizes both model training and evaluation
+processes, significantly simplifying data processing workflows. This benchmark facilitates
+participation from scholars across diverse fields in ocean forecasting.
+2 The OceanForecastBench Dataset
+Figure 1 presents the schematic of the OceanForecastBench data collection and process-
+ing pipeline. The OceanForecastBench dataset covers a wide range of ocean variables above
+643.57m, including temperature, salinity, and currents, providing comprehensive data for
+ocean forecasting. It also integrates multi-source data, including reanalysis, satellite remote
+sensing, buoy observations, and drifter observations. The detailed information about the
+datasets included in OceanForecastBench is as shown in Table 1.
+2.1 Training Dataset
+GLORYS12reanalysis is a high-quality, long-time ocean variables data provided by
+CMEMS. GLORYS12 offers continuous estimates of the global ocean from 1993 to 2021, with
+Figure 1: Schematic of the OceanForecastBench data collection and processing pipeline.
+–5–
+manuscript submitted toJGR: Machine Learning and Computation
+a horizontal resolution of 0.083°(approximately 8 kilometers at the equator). The vertical
+structure contains 50 vertical layers extending from the sea surface to a depth of 5,000
+meters, fully depicting the vertical structure of the ocean. GLORYS12 has been integrated
+into the OceanForecastBench training dataset to provide globally scaled data for ocean
+temperature, salinity, and currents, which are fundamental and essential ocean variables.
+Mean dynamic topography (MDT) is also provided to facilitate the conversion of sea surface
+height (SSH) and SLA. The total size of the GLORYS12 data used in OceanForecastBench
+is approximately 13TB.
+ERA5is a global meteorological reanalysis data provided by the European Centre for
+Medium-Range Weather Forecasts (ECMWF). ERA5 offers high-resolution sea surface wind
+data (0.25◦×0.25◦) with a temporal resolution of once per six hours. Sea surface wind data
+is a primary external force driving ocean circulation. So ERA5 has been integrated into the
+training dataset to enable models to more accurately describe the impact of sea surface wind
+and predict currents velocity. The total size of ERA5 data used is approximately 170GB.
+OSTIAis a high-resolution, global-scale data product developed to provide accurate
+and timely information on SST and sea ice concentration. OSTIA integrates satellite ob-
+servations from multiple sensors and numerical model forecasts to produce daily analyses
+Table 1: Detailed information about the data included in OceanForecastBench.
+Data Ocean Variables Abbreviations Unit Levels Source
+GLORYS12Sea surface height SSH m 1
+Numerical Model Reanalysis/AnalysisTemperature T ℃ 50
+Salinity S PSU 50
+Eastward currents velocity Uo m s−150
+Northward currents velocity Vo m s−150
+Mean dynamic topography mdt m 1
+ERA510 metre U wind component u10 m s−11
+10 metre V wind component v10 m s−11
+OSTIA Sea surface temperature SST K 1
+EN4Temperature T ℃ -
+In-situ ObservationSalinity S PSU -
+GDPSea surface temperature SST ℃ 1
+15 m eastward velocity Uo m s−11
+15 m northward velocity Vo m s−11
+CMEMS L3 Sea surface height SSH m 1 Satellite Observation
+–6–
+manuscript submitted toJGR: Machine Learning and Computation
+at a spatial resolution of approximately 1/20°(6 km). SST is a crucial indicator of the en-
+ergy exchange between the ocean and the atmosphere. OSTIA has been integrated into the
+training dataset to allow models to better simulate physical processes in the ocean surface
+layer. The total size of the OSTIA data used is approximately 160GB.
+2.2 Evaluation Dataset
+EN4observation is a high-quality controlled data of global ocean temperature and
+salinity, covering the time range from 1900 to the 2025. The data primarily originates from
+the global Argo buoy network, which consists of about 3,000 profiling buoys. These data
+undergo a rigorous quality control process, including outlier detection, consistency checks,
+and comparison with historical data, to ensure their accuracy and reliability. EN4 has been
+integrated into the evaluation dataset for comparing the performance of ocean temperature
+and salinity forecasts.
+GDPobservation is based on data from ocean surface drifters, which have undergone
+rigorous quality control and interpolation at 6-hour intervals to provide a continuous record
+of SST and currents. With high temporal resolution and global coverage, the GDP data
+serves as ground truth for evaluating model predictive capabilities of SST and currents
+velocity. GDP data has been integrated into the evaluation dataset for comparing the
+performance of SST and currents forecasts.
+CMEMS L3provides a high-precision, long-time series of SLA remote sensing data.
+It provides a long-term, high-resolution sea level anomaly (SLA) record since 1993 with
+a sampling rate of 1 Hz (approximately 7 km resolution). The data has been accurately
+corrected for the atmosphere and considers the effects of ocean tides. CMEMS L3 has been
+integrated into the evaluation dataset for comparing the performance of SLA forecasts. The
+total evaluation dataset data size is 57GB.
+2.3 Data Processing
+This benchmark provides a standardized data processing workflow that extracts spec-
+ified data from the original files according to task requirements, processes the data, and
+outputs high-dimensional arrays for model training. Figure 1c illustrates the flow of data
+processing.
+–7–
+manuscript submitted toJGR: Machine Learning and Computation
+The training data was collected from three sources (with different variables and resolu-
+tions) necessitating standardization to a uniform resolution. Since the original GLORYS12
+data was substantial, containing daily 0.083°gridded data with 50 vertical levels from 1993
+to 2020, the entire data size amounted to approximately 13TB. Considering the dataset’s
+volume, GPU memory limitations, and available computing resources of most researchers, it
+was necessary to downsample both the spatial resolutions and the number of vertical levels
+to reduce the hardware demands (Rasp et al., 2020b). However, excessive downsampling
+can result in significant information loss and the introduction of errors, which could affect
+model prediction accuracy (Bremnes et al., 2024). After careful analysis and experiments, a
+spatial resolution of 1.40625°and 23 vertical levels were chosen as a balanced trade-off be-
+tween resource limitations and the preservation of data fidelity. The chosen input variables
+and vertical levels are as described in Table 2.
+Standardize.The Climate Data Operators were used to regrid the three data sources
+to a uniform resolution of 1.40625°over the same latitude and longitude range of 80◦S−90◦N
+and 180◦W−180◦E, resulting in a grid size of 121×256. Specially ERA5 is available at 4
+time points each day: 0:00, 6:00, 12:00, and 18:00. Data from these four points is averaged
+to align the temporal resolution.
+Table 2: Ocean variables and depths modeled by OceanForecastBench. The input variables
+include 4 sea surface variables and 4 ocean variables with 23 vertical layers.
+Sea surface variables (4)SST, SLA, zonal component of sea surface 10m wind,
+meridional component of sea surface 10m wind
+Ocean variables
+(4*23)temperature, salinity, zonal component of currents velocity,
+meridional component of currents velocity
+Depths of vertical levels
+(23)0.49m 2.65m 5.08m 7.93m 11.41m
+15.81m 21.60m 29.44m 40.34m 55.76m
+77.85m 92.32m 109.73m 130.67m 155.85m
+186.13m 222.48m 266.04m 318.13m 380.21m
+453.94m 541.09m 643.57m
+–8–
+manuscript submitted toJGR: Machine Learning and Computation
+Mask.The proportion of ocean and land on earth is 70.8% and 29.2% respectively.
+So we use an ocean-land mask file extracted from GLORYS12 to distinguish between ocean
+and land areas. All land positions are filled with zero values before inputting into the model.
+Aggregate.The three data sources are combined according to the specified variable
+order to produce a standardized, deep learning-ready data format. The single-layer vari-
+ables of SLA, 10m wind field, SST, and multi-layer temperature, salinity, and currents are
+combined into a multidimensional grid array.
+Train-Validation Split.The dataset is divided into training and validation datasets.
+(a) The data from 1993 to 2017 is used to train the deep learning model, and (b) the data
+from 2018 to 2020 is used as a validation set to validate the model performance during the
+model training phase.
+2.4 Evaluation Pipeline
+Figure 1e illustrates the steps involved in calculating the metrics. In this work, we
+have adopted a standardized data processing workflow for tensor-type data output by deep
+learning models to ensure data consistency and accessibility. Specifically, through a data
+processing script, the high-dimensional data in the array is split and extracted into multiple
+independent files, each of which stores a specific ocean variable.
+A core step in model performance evaluation is accurately aligning the grid forecasts
+generated by the deep learning model with discrete observations in both the time and spatial
+dimensions. The evaluation pipeline rigorously filters daily observations based on quality
+identifiers to identify data points available for evaluation.
+3 Problem Definition
+Global ocean forecasting predicts ocean variables supporting decision-making in ocean-
+related activities. Within the OceanForecastBench framework, deep learning models are
+used to forecast global ocean states for the next 1 tokdays.
+Mathematically, the ocean forecasting task is a multivariate input-output mapping
+regression problem. The input data is represented as a three-dimensional tensorXt∈
+RCin×H×W, wheretdenotes the current time step,C in= 96 indicates the total number
+of input ocean variables: 4 sea surface variables, and 4 ocean variables with 23 layers (see
+–9–
+manuscript submitted toJGR: Machine Learning and Computation
+Table 2).H= 121 andW= 256 represent the number of grid points in the latitude
+and longitude directions, respectively. The forecasting models aim to producek-step-ahead
+predictions ˆXt+1:t+k= (ˆXt+1, ...,ˆXt+k), where ˆXt+∆t∈RCout×H×W,∆t= 1, .., k.Here,
+Cout= 94 indicates that the output variables excluding the zonal and meridional wind
+components used as the atmospheric forcing.
+To evaluate the models, the forecast results need to be mapped from the forecast space
+ˆYfct(t, pos) to the observation space ˆYobs(t, pos). The mapping operatorMinterpolates the
+forecast data from a regular grid to the discrete observation locations:
+M: ˆYfct(t, pos)→ ˆYobs(t, pos) (1)
+wherepos= [Longitude,Latitude]⊤∈R2, t= [Time]∈R+, ”→” indicates time resolution
+alignment and spatial position alignment.
+The evaluation metrics are then computed as:
+Metrics=Eval( ˆYobs(t, pos), Y obs(t, pos)) (2)
+whereEvaldenotes a series of operations used to calculate the metrics (see Section 4.2),
+Yobs(t, pos) represents the observations from the evaluation dataset.
+4 Experiments
+We conducted extensive experiments using the OceanForecastBench dataset to evaluate
+and compare the performance of various baseline models. The forecasting lead times are set
+from 1 to 10 days. We use the Operational Mercator global ocean analysis from 2022 to 2023
+as the initial conditions for the model forecast. Leveraging evaluation data from 2022 to
+2023, we performed a comprehensive and in-depth analysis of the experimental results from
+multiple perspectives. These experiments were implemented using the PyTorch framework
+and performed on 8 NVIDIA RTX 4090 GPU.
+4.1 Benchmark Models
+OceanForecastBench selected and evaluated baseline models from numerical methods
+and deep learning methods:
+The numerical forecast model chosen for this study is the French Physical System
+(PSY4), which is recognized as one of the most advanced operational forecasting systems.
+–10–
+manuscript submitted toJGR: Machine Learning and Computation
+PSY4 baseline is obtained by downsampling the high-resolution operational forecasts which
+is obtained fromhttps://doi.org/10.48670/moi-00016. The deep learning-based forecast
+models, including ResNet, SwinTransformer, ClimaX, and FourCastNet, are trained from
+scratch using the training dataset. Details of their hyperparameters are provided in Table
+3.
+PSY4is a 0.083°global operational forecast system developed by Mercator Ocean
+International. It is based on traditional numerical forecasting methods, that achieve fore-
+casting by solving the partial differential equations of the physical models using supercom-
+puters (Lellouche et al., 2018). To maintain consistency with other baseline models, the
+resolution of PSY4’s forecasts was downsampled from 0.083°to 1.40625°during evaluation.
+ResNet(Residual Network) is a deep neural network architecture that introduces
+residual connections to facilitate the training of very deep models. By allowing informa-
+tion to bypass certain layers via skip connections, ResNet enables the network to learn
+residual functions rather than direct mappings. This design mitigates vanishing gradient
+issues and reduces performance degradation, thereby improving training stability in deep
+architectures (He et al., 2016).
+SwinTransformeris a visual model utilizing shifted-window self-attention to improve
+for computational efficiency. Its hierarchical structure progressively merges patches for
+multi-resolution feature maps, enabling multi-resolution feature extraction for both local
+and global information, making it ideal for high-resolution tasks (Liu et al., 2021).
+ClimaXis a flexible and generalizable pretrained deep learning model for a wide range
+of climate and weather-related tasks. It employs a Vision Transformer (ViT) architecture
+to process spatiotemporal climate data and supports multidimensional tensor-to-tensor con-
+versions (Nguyen et al., 2023). Pretrained on global climate datasets using a self-supervised
+learning objective, ClimaX can be fine-tuned for various downstream weather tasks.
+FourCastNetis a data-driven weather forecasting model based on ViT and Adaptive
+Fourier Neural Operators (AFNO). By replacing traditional numerical solvers with a learned
+operator, it enables rapid prediction of the evolution of global atmospheric variables. Trained
+on decades of reanalysis data, FourCastNet achieves competitive accuracy with traditional
+numerical weather forecasting models while offering orders-of-magnitude faster inference,
+–11–
+manuscript submitted toJGR: Machine Learning and Computation
+making it highly suitable for real-time and large-scale forecasting applications (Kurth et al.,
+2023).
+Table 3: Summary of baselines.
+Baselines Architecture Parmas Parameter Configuration
+PSY4 Navier-Stokes equations - -
+ResNetConvolutional neural network,
+Residual block51.4Mdropout:0.1, learning rate:5e−4,
+optimizer: AdamW, weight decay:
+1e−5
+SwinTransformerHierarchical feature map, Shift
+window mechanism38.2Mdropout: 0.1, drop path: 0.2, attn
+drop: 0, learning rate:5e−5,
+optimizer: AdamW, weight decay:
+1e−5
+ClimaXVariable tokenization, Variable
+aggregation, ViT65.7Mdropout: 0.1, drop path: 0.2,
+learning rate: 5e−4, optimizer:
+AdamW, weight decay: 1e−5
+FourCastNetAdaptive fourier neural operators,
+ViT20.9Mdropout: 0, learning rate: 1e−5,
+optimizer: Adam
+4.2 Evaluation Metrics
+The evaluation metrics are calculated individually for each ocean variable of the fore-
+cast. Four metrics are employed: Root Mean Squared Error (RMSE), Bias, Anomaly Cor-
+relation Coefficient (ACC), and Climatology Skill Score (CSS). For the evaluation at timet,
+letFt
+i,Ot
+i, andCt
+irepresent the predicted value, the observed value, and the climatological
+mean value at each grid pointi, respectively. RMSE is calculated as follows:
+RMSE =vuut1
+NNX
+i=1(Ft
+i−Ot
+i)2 (3)
+Bias is calculated as follows:
+Bias =1
+NNX
+i=1(Ft
+i−Ot
+i) (4)
+ACC is calculated as follows:
+ACC =PN
+i=1(Ft
+i−Ct
+i)(Ot
+i−Ct
+i)qPN
+i=1(Ft
+i−Ct
+i)2qPN
+i=1(Ot
+i−Ct
+i)2(5)
+–12–
+manuscript submitted toJGR: Machine Learning and Computation
+In addition to the above commonly used metrics, the OceanForecastBench also utilizes the
+CSS metric (Ryan et al., 2015). CSS quantifies the relative improvement of a forecast system
+compared to the long-term climatological average. A positive CSS value indicates that the
+forecast system outperforms the climate average. In contrast, a negative CSS means the
+forecast system underperforms relative to the climate average. CSS is computed using the
+formula:
+CSS = 1−RMSE Forecast
+RMSE Climatology(6)
+4.3 Overall Forecasting Performance
+Figure 2 presents an assessment of the model’s ability to provide forecasts of six key
+ocean variables over lead times ranging from 1 to 10 days. The models were evaluated
+based on observations from 2022 to 2023. For each lead time, the RMSE, Bias, ACC,
+and CSS were averaged globally from January 1, 2022, to December 31, 2023. To enable
+unified evaluation based on OceanForecastBench, this study follows the international Ocean
+Model Intercomparison Project (OMIP) standard procedure (Griffies et al., 2016; Orr et al.,
+2017), in which raw forecast outputs of PSY4 are spatially downsampled to a standardized
+resolution of OceanForecastBench (1.40625°).
+As illustrated in Figure 2, the RMSE values for all models generally increase with lead
+time, indicating a degradation in prediction accuracy as the forecast horizon extends. The
+ACC and CSS metrics similarly exhibit a downward trend, further reinforcing this obser-
+vation. Notably, the CSS valuess remain positive for all models even at longer lead times,
+indicating that the models retain some predictive skill beyond climatological predictions.
+Another key observation is that PSY4 performs well at short lead times, but its forecast er-
+rors grow significantly as lead time increases. For example, as shown in Figure 2, the RMSE
+of the SLA forecast at a 1-day lead time reveals a significant difference for PSY4 compared
+to other baseline models. However, between the 1-day and 6-day lead times, the RMSE of
+PSY4 gradually converges with those of the other models. This is likely due to the model’s
+use of a time-stepping mechanism to progressively advance the forecast. At each step, the
+model computes the next state based on the current state, leading to the gradual accumula-
+tion of errors (Khaki & Awange, 2021). In contrast, the deep learning models in this study
+are one-step prediction strategy, directly learning the mapping from input to output data.
+This reduces the propagation and compounding of errors during forecasting (Tang et al.,
+2025).
+–13–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 2: The RMSE (lower is better), ACC (higher is better), and CSS (higher is better)
+of the temperature, salinity, SST, SLA, Uo and Vo for various baselines, over a forecast
+period ranging from 1 to 10 days. RMSE, ACC, and CSS are computed using observations
+provided by OceanForecastBench.
+–14–
+manuscript submitted toJGR: Machine Learning and Computation
+For temperature and salinity prediction, the RMSE for the ClimaX remains relatively
+low compared to other models, indicating its superior performance in forecasting subsurface
+ocean variables. In the case of SST prediction, the PSY4 demonstrates superior perfor-
+mance, maintaining lower RMSE, higher ACC and CSS values compared to other models,
+especially at longer lead times. The results can be attributed to its foundation in physi-
+cal equations, which describe the evolution of SST. Compared to ocean temperatures, the
+controlled processes of SST are relatively simpler, as they are primarily influenced by heat
+exchange with the atmosphere (C. Wang et al., 2025). Therefore, the numerical model
+structure and parameterization processes of SST are relatively easier to fit and optimize.
+For SLA prediction, the PSY4 shows the best performance before the 6-day forecast lead
+time. The evaluation of currents velocity is performed by vertically interpolating the model
+forecasts to match the observed depth. As shown in the Figure 2, all deep learning models
+outperform the numerical model in long lead time currents velocity forecast. While the
+numerical model shows the steepest increase in RMSE with increasing lead time, indicating
+its relatively poor performance at longer lead times. Furthermore, we also observed that
+during the 1-10 day forecast period, the ACC of velocity forecasts is generally below 0.6,
+which is typically considered unreliable. This indicates that the reliability of various models
+in currents velocity forecasts still needs improvement.
+4.4 Forecasting Performance in Various Aspects
+Daily forecasting performance.The performance of temperature forecasts was
+assessed using three key metrics: RMSE, Bias, and ACC across lead times of 1 to 10 days.
+Figure 3 shows the evaluation results of models by date. Figure 3a presents the RMSE and
+Bias distributions for all models across lead times. As lead time increases, RMSE values
+for all models exhibit a consistent upward trend, reflecting the inherent challenges of long
+lead time forecasting. Notably, PSY4 demonstrate lower RMSE values compared to other
+baselines, particularly at longer lead times (e.g., 10-day forecasts). Figure 3c illustrates
+the ACC values for all models across lead times. As the forecast lead time increases, the
+ACC value distribution of the PSY4 is more stable compared to other baseline models,
+highlighting its ability to maintain forecast accuracy over extended periods of temperature
+forecasting. As shown in Figure 3d, the ACC metric fluctuates markedly, with periods of
+high correlation (ACC>0.75) interspersed with phases of low correlation (ACC<0.65).
+These variations may be attributed to the dynamic nature of temperature anomalies.
+–15–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 3: Forecast accuracy against temperature observations taken by EN4. (a)
+RMSE/Bias as a function of forecast lead time. The boxes are the interquartile range
+and the 75th percentile. (b) RMSE/Bias of 10-day forecasts as a function of date. (c)
+Similar to (a) with ACC as the metric. (d) Similar to (b) with ACC as the metric.
+The performance of various models in predicting salinity are summarized in the Fig-
+ure 4. The RMSE of salinity forecasts showed a slow increasing trend with increasing lead
+time, indicating that the models showed high stability in forecasting salinity. This may be
+attributed to the generally slow changes in ocean salinity. Additionally, we observe that in
+the salinity forecast, there are instances where a high RMSE is accompanied by a high ACC,
+as well as cases where a low RMSE is associated with a low ACC. This is because in the
+case of an overall high or low salinity field, the spatial distribution of the forecast matches
+well with the observation, and the model spatial structure anomalies are highly correlated
+–16–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 4: Forecast accuracy against salinity observations taken by EN4. (a) RMSE/Bias
+as a function of forecast lead time. The boxes are the interquartile range and the 75th
+percentile. (b) RMSE/Bias of 10-day forecasts as a function of date. (c) Similar to (a) with
+ACC as the metric. (d) Similar to (b) with ACC as the metric.
+with the observation, but there is an overall systematic bias in the absolute values, resulting
+in a high RMSE while the ACC is still very high. The overall deviation of the forecast field
+is very small (mean value, amplitude, etc. are consistent with observations, and the RMSE
+is small), but the details of the spatial variations (anomaly distributions) are inconsistent
+with observations, such as the location of the high- and low-value regions is reversed or the
+phase is reversed, resulting in a small RMSE but also a small ACC.
+Figure 5a illustrates the RMSE/Bias of SST forecasts as functions of lead time. Across
+all lead times, the RMSE values of all models generally increase with longer lead times,
+–17–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 5: Forecast accuracy against SST observations taken by GDP. (a) RMSE/Bias as a
+function of forecast lead time. The boxes are the interquartile range and the 75th percentile.
+(b) RMSE/Bias of 10-day forecasts as a function of date. (c) Similar to (a) with ACC as
+the metric. (d) Similar to (b) with ACC as the metric.
+indicating the inherent challenge of maintaining forecast accuracy as the lead time extends.
+The box plots reveal that model like PSY4 exhibits relatively lower RMSE values in all lead
+time forecasts, suggesting their superior performance and consistency in SST forecasts. As
+shown in Figure 5c, the SwinTransformer and FourcastNet models exhibit relatively lower
+ACC values across the lead time, with their box plots positioned lower and showing larger
+variations, indicating poorer forecast performance compared to the other models. From the
+results of Figure 5b and Figure 5d, we can observe that after 2023, the RMSE and Bias
+curves begin to overlap as the number of available GDP buoys decreases. This overlap
+signifies significant fluctuations in both metrics, indicating uncertainty in the evaluation
+–18–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 6: Forecast accuracy against SLA observations taken by CMEMS. (a) RMSE/Bias
+as a function of forecast lead time. The boxes are the interquartile range and the 75th
+percentile. (b) RMSE/Bias of 10-day forecasts as a function of date. (c) Similar to (a) with
+ACC as the metric. (d) Similar to (b) with ACC as the metric.
+results. As a result, the model’s actual forecast performance becomes indistinguishable.
+Furthermore, after October 2023, due to a significant reduction in available observational
+data, the ACC curve exhibited severe fluctuations and showed a negative correlation trend.
+Therefore, to ensure that the available observations are sufficient to robustly assess the model
+performance, the overall performance evaluation of SST was conducted using data from only
+the year 2022. This highlights the critical role that the number of in-situ observations plays
+in effectively assessing the performance of forecasts.
+–19–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 7: Forecast accuracy against Uo (eastward currents velocity) observations taken by
+GDP. (a) RMSE/Bias as a function of forecast lead time. The boxes are the interquartile
+range and the 75th percentile. (b) RMSE/Bias of 10-day forecasts as a function of date. (c)
+Similar to (a) with ACC as the metric. (d) Similar to (b) with ACC as the metric.
+Figure 6b presents the RMSE/Bias of 10-day SLA forecasts across different dates. The
+RMSE values of all baselines remain relatively stable, but there are noticeable spikes and
+drops at specific dates, which might be associated with changing oceanic and atmospheric
+conditions or variations in the quality and quantity of input data. From the forecast results of
+SLA in Figure 6a, we observed that all models exhibit a positive bias, indicating a consistent
+tendency to underestimate SLA values. As shown in Figure 6c, the ACC values of all models
+generally decrease as the lead time increases, reflecting the diminishing correlation between
+forecasted and observed SLA over longer prediction periods.
+–20–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 8: Forecast accuracy against Vo (northward currents velocity) observations taken
+by GDP. (a) RMSE/Bias as a function of forecast lead time. The boxes are the interquartile
+range and the 75th percentile. (b) RMSE/Bias of 10-day forecasts as a function of date. (c)
+Similar to (a) with ACC as the metric. (d) Similar to (b) with ACC as the metric.
+The analysis of Uo and Vo forecast results, as depicted in Figure 7 and 8, reveals
+significant insights into the performance of various models across different lead times. It
+can be observed that the RMSE values are distributed within a relatively narrow range,
+but the ACC values for the velocity forecasts are all below 0.5, with numerous outliers
+present in all three metrics. This indicates that the performance of all models in currents
+velocity forecasts is unreliable. A possible reason is the limited and poor-quality velocity
+data, which increases the difficulty of accurate velocity forecasting. Other studies indicate
+that only 3.8% of the mid-depth ocean (including parts of the equatorial Pacific and the
+Antarctic Circumpolar Current) can be considered accurately modeled, while significant
+–21–
+manuscript submitted toJGR: Machine Learning and Computation
+underestimation of the mean currents velocity is observed in other regions (Su et al., 2023).
+The RMSE, Bias, and ACC curves exhibit significant fluctuations after October 2023, and
+the underlying reasons have been thoroughly analyzed in the SST forecast results.
+By evaluating the models’ daily forecast performance, the changes in performance over
+date can be comprehensively displayed. This helps researchers understand the models’
+generalization ability and robustness.
+Global horizontal forecasting performance.The global ocean temperature fore-
+cast results, as depicted in Figure 9, reveal the RMSE distribution for various models with
+a lead time of 10 days. We observed that all the baseline models exhibit elevated RMSE
+(>1.2) in coastal regions (e.g., western boundary currents and marginal seas) while showing
+lower errors (<0.6) in open tropical oceans (0◦−30◦N/S). The global ocean temperature
+forecast results demonstrate that the RMSE distributions of all baselines (e.g., ResNet,
+SwinTransformer, ClimaX, FourCastNet, and PSY4) closely resemble the initial tempera-
+ture condition errors. This consistency across models suggests that systematic biases inher-
+ent in the initial field data are preserved during the forecasting process, regardless of the
+algorithmic framework employed. Coastal regions exhibit significantly higher RMSE values
+compared to open ocean areas, primarily due to the influence of small- to medium-scale geo-
+graphical factors. These include nearshore seabed topographical variations, riverine inputs,
+and localized tidal dynamics, which drive rapid, spatially heterogeneous temperature fluc-
+tuations. The RMSE maps reveal concentrated error hotspots along coastlines, reflecting
+the inability of current models to fully resolve these localized processes. Although the data-
+driven approach can provide real-time offshore ocean temperature forecasts, the localized
+anomalous changes in offshore ocean temperature are significantly influenced by small- and
+medium-scale geographic factors, and the relative scarcity of observations related to these
+factors makes it difficult to adequately incorporate the observational information on these
+influences in the training of the forecast model and in the initial field data. As a result,
+such data deficiencies usually adversely affect the effectiveness of purely data-driven models
+in forecasting ocean temperature in offshore regions.
+Vertical forecasting performance.The evaluation experiment on the RMSE of
+temperature over vertical depth was conducted to analyze the accuracy of predicting ocean
+temperature profiles, which is crucial for understanding oceanic thermal structures and re-
+lated processes. The analysis of temperature profile forecast results is presented in Figure 10,
+–22–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 9: Global ocean temperature RMSE (lower is better) distribution map with lead
+time of 10 days calculated on every 1.40625°×1.40625°area. RMSE is computed against
+observations taken by EN4.
+which evaluates the performance of various models against temperature profiles taken by
+EN4. As shown in Figure 10a, the RMSE/Bias values of all models generally increase as
+the lead time extends from 1 to 10 days. PSY4 show relatively lower RMSE/Bias values
+across most lead times, implying better forecast performance. In contrast, SwinTransformer
+have relatively higher RMSE/Bias values, indicating larger errors and biases. Figure 10b
+presents the RMSE and Bias of the 10-day forecast as a function of depth. As the depth
+increases from the shallow layers to the thermocline (typically 100–200 meters below the
+surface), the performance of all models shows a gradual increase in RMSE values, indicating
+that the baseline models face significant challenges in forecasting the temperature at the
+depth of the thermocline. The thermocline is a critical region where temperature changes
+sharply with depth, and the rapid variation in temperature makes it difficult for models to
+accurately capture the temperature profile. The increase in RMSE values further suggests
+that the baseline models face significant challenges in forecasting the temperature within the
+thermocline. Among all models, PSY4 consistently demonstrates the lowest RMSE values
+across all depth levels, including within the thermocline region. In contrast, ResNet and
+SwinTransformer exhibit higher RMSE values.
+Figure 11 presents the forecast accuracy against salinity profiles taken by EN4. From
+Figure 11a, it can be observed that the RMSE curves of various models show relatively
+small differences. However, when it comes to the ACC metric depicted in Figure 11c and d,
+the differences among models become more pronounced. The ACC measures the correlation
+between forecasted and observed anomalies, which reflects the model’s ability to capture
+the spatial variations of salinity profiles. A higher ACC indicates that the model can better
+–23–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 10: Forecast accuracy against temperature profiles taken by EN4. (a) RMSE/Bias
+as a function of forecast lead time. The boxes are the interquartile range and the 75th
+percentile. (b) RMSE/Bias of 10-day forecast as a function of depth. (c) Similar to (a) with
+anomaly correlation as the metric. (d) Similar to (b) but with anomaly correlation as the
+metric.
+forecast the variations in salinity profiles. The greater differences in ACC curves at different
+depths once again highlight the varying capabilities of models in representing the vertical
+structure and variations of salinity profiles.
+Regional forecasting performance.This evaluation experiments were conducted
+to assess the models’ spatiotemporal generalization capabilities across diverse ocean basins,
+aiming to identify basin-specific performance variations and guide targeted model improve-
+ments. The global ocean forecast results were divided into distinct basins, including the
+North Atlantic, Tropical Atlantic, South Atlantic, North Pacific, Tropical Pacific, South
+–24–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 11: Forecast accuracy against salinity profiles taken by EN4. (a) RMSE/Bias as a
+function of forecast lead time. The boxes are the interquartile range and the 75th percentile.
+(b) RMSE/Bias of 10-day forecast as a function of depth. (c) Similar to (a) with anomaly
+correlation as the metric. (d) Similar to (b) but with anomaly correlation as the metric.
+Pacific, Indian Ocean (Ryan et al., 2015). The RMSE metrics for six ocean variables were
+calculated separately for each designated basin.
+The results presented in Figure 12 illustrate the RMSE distribution of six ocean vari-
+ables (temperature, salinity, SST, SLA, Uo and Vo) across different ocean basins with a lead
+time of 10 days. For temperature forecasts, the RMSE varies across different basins. The
+North Atlantic and South Atlantic generally show higher RMSE values compared to other
+regions, indicating greater challenges in temperature forecasting in these areas. In terms
+of salinity forecasting, the RMSE distribution shows that the North Atlantic and Tropical
+Atlantic have relatively higher errors. This might be associated with the complex oceanic
+–25–
+manuscript submitted toJGR: Machine Learning and Computation
+Figure 12: The RMSE (lower is better) distribution diagram of different ocean basins with
+a lead time of 10 days.
+processes and variability in these regions. The SST forecast results show a different trend
+to temperature, with the PSY4 performing best overall. The differences in RMSE values
+across different ocean basins are significant. For example, there is a notable disparity in SST
+forecast performance between the Tropical Pacific and the North Atlantic. Regarding SLA,
+the RMSE tends to be higher in the South Atlantic and North Atlantic. The performance
+of different models in SLA forecasting varies, with PSY4 achieving relatively lower RMSE
+values across several basins. In the case of Uo and Vo, the RMSE distribution indicates
+that forecasting ocean currents remains challenging, especially in the Indian Ocean. The
+ResNet shows some superiority in currents velocity forecasting, with lower RMSE values in
+multiple ocean basins.
+5 Conclusion
+We introduce OceanForecastBench, an open-source benchmark for training and evalu-
+ating data-driven models to forecast key ocean variables, including SLA, SST, temperature,
+salinity, and currents. For model training, OceanForecastBench provides a standardized
+training dataset with consistent spatial and temporal resolution, spanning the past 28 years.
+This dataset is derived from over 13 TB of raw reanalysis data, with GLORYS12 serving as
+the primary source. To improve the representation of air-sea interactions, the training set
+–26–
+manuscript submitted toJGR: Machine Learning and Computation
+also incorporates sea surface wind fields from ERA5 and SST data from OSTIA. For model
+evaluation, OceanForecastBench provides a robust evaluation dataset containing over 100
+million observations collected from satellite remote sensing and in-situ measurements. A
+standardized evaluation pipeline is developed to align forecast outputs with observational
+data in spatialtemporal dimension and to compute performance metrics in a consistent
+manner. This benchmark evaluate 5 baseline models, encompassing both operational nu-
+merical forecasting systems and advanced deep learning models, offering an in-depth com-
+parison of their capabilities. The results highlight the respective strengths and limitations
+of each model, offering guidance for future methodological improvements. OceanForecast-
+Bench standardizes both the training and evaluation processes, simplifies data processing
+workflows, and lowers the barrier for interdisciplinary engagement in data-driven ocean fore-
+casting research. This benchmark provides a foundation for future developments in ocean
+modeling and forecasting, offering a valuable resource for advancing the understanding and
+forecasting of oceanic phenomena.
+Data Availability Statement
+The GLORYS12 reanalysis can be found athttps://data.marine.copernicus.eu/
+product/GLOBAL MULTIYEAR PHY001030/services(Copernicus Marine Service,
+2025c), the sea surface wind data from the Fifth Generation Global Atmo-
+spheric Reanalysis (ERA5)19 athttps://cds.climate.copernicus.eu/cdsapp#!/
+dataset/reanalysis-era5-single-levels?tab=form(Hersbach et al., 2023)
+and SST data from the Operational Sea Surface Temperature and Ice Analy-
+sis (OSTIA) athttps://data.marine.copernicus.eu/product/SST GLOSSTL4
+REPOBSERVATIONS 010011/services(S. Good et al., 2020). We obtained
+the PSY4 global physics analysis and forecast products from January 1, 2022,
+to December 31, 2023 from the linkhttps://data.marine.copernicus.eu/
+product/GLOBAL ANALYSISFORECAST PHY001024/services(Copernicus Marine
+Service, 2025b). Furthermore, the EN4 data can be downloaded athttps://
+hadleyserver.metoffice.gov.uk/en4/download-en4-2-2.html(S. A. Good et al.,
+2013), GDP data athttps://www.aoml.noaa.gov/phod/gdp/(Lumpkin & Centuri-
+oni, 2019) , and CMEMS L3 data athttps://data.marine.copernicus.eu/product/
+GLOBAL ANALYSISFORECAST PHY001024/services(Copernicus Marine Service, 2025a)
+–27–
+manuscript submitted toJGR: Machine Learning and Computation
+Acknowledgments
+This research is partially supported by National Key R&D Program of China
+(2024YFC3109200), Hunan Provincial Natural Science Foundation of China (2024JJ4042),
+the science and technology innovation Program of Hunan Province (2024RC3134), and
+Youth Independent Innovation Science Fund of the National University of Defense Tech-
+nology (ZK24-53).
+The EN.4.2.2 data used by this work to construct evaluation dataset were obtained
+fromhttps://www.metoffice.gov.uk/hadobs/en4/and are©British Crown Copyright,
+Met Office, [2025], provided under a Non-Commercial Government Licencehttp://www
+.nationalarchives.gov.uk/doc/non-commercial-government-licence/version/2/.
+This study has been conducted using E.U.Copernicus Marine Service Informa-
+tion,https://doi.org/10.48670/moi-00021,https://doi.org/10.48670/moi-00168,
+https://doi.org/10.48670/moi-00146.
+References
+Bell, B., Hersbach, H., Simmons, A., Berrisford, P., Dahlgren, P., Hor´ anyi, A., . . . others
+(2021). The era5 global reanalysis: Preliminary extension to 1950.Quarterly Journal
+of the Royal Meteorological Society,147(741), 4186–4227.
+Bremnes, J. B., Nipen, T. N., & Seierstad, I. A. (2024). Evaluation of forecasts by a
+global data-driven weather model with and without probabilistic post-processing at
+norwegian stations.Nonlinear Processes in Geophysics,31(2), 247–257.
+Chae, J.-Y., Jin, H., Chang, I., Kim, Y. H., Park, Y.-G., Kim, Y. T., . . . Park, J.-H. (2024).
+Prediction of sea surface current around the korean peninsula using artificial neural
+networks.Journal of Geophysical Research: Machine Learning and Computation,
+1(4), e2024JH000168.
+Chen, K., Han, T., Gong, J., et al. (2023). Fengwu: Pushing the skillful global medium-range
+weather forecast beyond 10 days lead.arXiv preprint arXiv:2304.02948.
+Chen, K., Zhou, Y., Ren, T., & Li, X. (2024). Short-term sea fog area forecast: A new data
+set and deep learning approach.Journal of Geophysical Research: Machine Learning
+and Computation,1(3), e2024JH000230.
+Chen, L., Zhong, X., Zhang, F., Cheng, Y., Xu, Y., Qi, Y., & Li, H. (2023). Fuxi: A cascade
+machine learning forecasting system for 15-day global weather forecast.npj Climate
+–28–
+manuscript submitted toJGR: Machine Learning and Computation
+and Atmospheric Science,6(1), 190.
+Choudhury, A., Panda, J., & Mukherjee, A. (2024). Bharatbench: Dataset for data-driven
+weather forecasting over india.arXiv preprint arXiv:2405.07534.
+Copernicus Marine Service. (2025a). Global Ocean L3 Significant Wave Height From Repro-
+cessed Satellite Measurements [Dataset].E.U. Copernicus Marine Service Information
+(CMEMS). Marine Data Store (MDS). doi: https://doi.org/10.48670/moi-00176
+Copernicus Marine Service. (2025b). Global Ocean Physics Analysis and Forecast [Dataset].
+E.U. Copernicus Marine Service Information (CMEMS). Marine Data Store (MDS).
+doi: https://doi.org/10.48670/moi-00016
+Copernicus Marine Service. (2025c). Global Ocean Physics Reanalysis [Dataset].E.U.
+Copernicus Marine Service Information (CMEMS). Marine Data Store (MDS). doi:
+https://doi.org/10.48670/moi-00021
+Cui, Y., Wu, R., Zhang, X., Zhu, Z., Liu, B., Shi, J., . . . others (2025). Forecasting the
+eddying ocean with a deep neural network.Nature Communications,16(1), 2268.
+Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K., & Fei-Fei, L. (2009). Imagenet: A large-
+scale hierarchical image database. In2009 ieee conference on computer vision and
+pattern recognition(pp. 248–255).
+Dueben, P. D., Schultz, M. G., Chantry, M., Gagne, D. J., Hall, D. M., & McGovern,
+A. (2022, July). Challenges and benchmark datasets for machine learning in the
+atmospheric sciences: Definition, status, and outlook.Artificial Intelligence for the
+Earth Systems,1(3), e210002. doi: 10.1175/AIES-D-21-0002.1
+Good, S., Fiedler, E., Mao, C., Martin, M. J., Maycock, A., Reid, R., . . . others (2020).
+The current configuration of the ostia system for operational production of foundation
+sea surface temperature and ice concentration analyses.Remote Sensing,12(4), 720.
+Good, S. A., Martin, M. J., & Rayner, N. A. (2013). En4: Quality controlled ocean
+temperature and salinity profiles and monthly objective analyses with uncertainty
+estimates.Journal of Geophysical Research: Oceans,118(12), 6704–6716.
+Gouretski, V., & Reseghetti, F. (2010). On depth and temperature biases in bathyther-
+mograph data: Development of a new correction scheme based on analysis of a global
+ocean database.Deep Sea Research Part I: Oceanographic Research Papers,57(6),
+812–833.
+Griffies, S. M., Danabasoglu, G., Durack, P. J., Adcroft, A. J., Balaji, V., B¨ oning, C. W.,
+. . . others (2016). Omip contribution to cmip6: Experimental and diagnostic protocol
+–29–
+manuscript submitted toJGR: Machine Learning and Computation
+for the physical component of the ocean model intercomparison project.Geoscientific
+Model Development, 3231.
+He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep residual learning for image recognition.
+InProceedings of the ieee conference on computer vision and pattern recognition(pp.
+770–778).
+Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Hor´ anyi, A., Mu˜ noz Sabater, J., . . .
+Th´ epaut, J.-N. (2023). ERA5 hourly data on single levels from 1940 to present
+[Dataset].Copernicus Climate Change Service (C3S) Climate Data Store (CDS). doi:
+https://doi.org/10.24381/cds.adbb2d47
+Jean-Michel, L., Eric, G., Romain, B.-B., Gilles, G., Ang´ elique, M., Marie, D., . . . Pierre-
+Yves, L. T. (2021, July). The copernicus global 1/12◦oceanic and sea ice glorys12
+reanalysis.Frontiers in Earth Science,9, 698876. doi: 10.3389/feart.2021.698876
+Kaltenborn, J., Lange, C., Ramesh, V., Brouillard, P., Gurwicz, Y., Nagda, C., . . . Rolnick,
+D. (2023). Climateset: A large-scale climate model dataset for machine learning.
+Advances in Neural Information Processing Systems,36, 21757–21792.
+Khaki, M., & Awange, J. (2021). The 2019–2020 rise in lake victoria monitored from
+space: exploiting the state-of-the-art grace-fo and the newly released era-5 reanalysis
+products.Sensors,21(13), 4304.
+Kurth, T., Subramanian, S., Harrington, P., Pathak, J., Mardani, M., Hall, D., . . . Anand-
+kumar, A. (2023, June). Fourcastnet: Accelerating global high-resolution weather
+forecasting using adaptive fourier neural operators. InProceedings of the platform for
+advanced scientific computing conference(pp. 1–11). Davos Switzerland: ACM. doi:
+10.1145/3592979.3593412
+Lellouche, J.-M., Greiner, E., Le Galloudec, O., Regnier, C., Benkiran, M., Testut, C.-E., . . .
+Drillet, Y. (2018). Mercator ocean global high-resolution monitoring and forecasting
+system.New Frontiers in Operational Oceanography, 563–592.
+Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., . . . Guo, B. (2021, October). Swin
+transformer: Hierarchical vision transformer using shifted windows. In2021 ieee/cvf
+international conference on computer vision (iccv)(pp. 9992–10002). Montreal, QC,
+Canada: IEEE. doi: 10.1109/ICCV48922.2021.00986
+Lumpkin, R., & Centurioni, L. (2019). Global Drifter Program quality-controlled 6-hour
+interpolated data from ocean surface drifting buoys [Dataset].NOAA National Centers
+for Environmental Information. doi: https://doi.org/10.25921/7ntx-z961
+–30–
+manuscript submitted toJGR: Machine Learning and Computation
+Meehl, G. A., Richter, J. H., Teng, H., Capotondi, A., Cobb, K., Doblas-Reyes, F., . . . others
+(2021). Initialized earth system prediction from subseasonal to decadal timescales.
+Nature Reviews Earth & Environment,2(5), 340–357.
+Nguyen, T., Brandstetter, J., Kapoor, A., Gupta, J. K., & Grover, A. (2023). Climax: a25
+foundation model for weather and climate. InProceedings of the 40th international
+conference on machine learning(pp. 25904–25938).
+Orr, J. C., Najjar, R. G., Aumont, O., Bopp, L., Bullister, J. L., Danabasoglu, G., . . .
+others (2017). Biogeochemical protocols and diagnostics for the cmip6 ocean model
+intercomparison project (omip).Geoscientific Model Development,10(6), 2169–2199.
+Payne, M. R., Danabasoglu, G., Keenlyside, N., Matei, D., Miesner, A. K., Yang, S., &
+Yeager, S. G. (2022). Skilful decadal-scale prediction of fish habitat and distribution
+shifts.Nature Communications,13(1), 2660.
+Rasp, S., Dueben, P. D., Scher, S., Weyn, J. A., Mouatadid, S., & Thuerey, N. (2020a).
+Weatherbench: A benchmark data set for data-driven weather forecasting.Jour-
+nal of Advances in Modeling Earth Systems,12(11), e2020MS002203. doi: 10.1029/
+2020MS002203
+Rasp, S., Dueben, P. D., Scher, S., Weyn, J. A., Mouatadid, S., & Thuerey, N. (2020b).
+Weatherbench: a benchmark data set for data-driven weather forecasting.Journal of
+Advances in Modeling Earth Systems,12(11), e2020MS002203.
+Ryan, A., Regnier, C., Divakaran, P., Spindler, T., Mehra, A., Smith, G., . . . Liu, Y. (2015,
+April). Godae oceanview class 4 forecast verification framework: Global ocean inter-
+comparison.Journal of Operational Oceanography,8(sup1), s98-s111. doi: 10.1080/
+1755876X.2015.1022330
+Su, F., Fan, R., Yan, F., Meadows, M., Lyne, V., Hu, P., . . . others (2023). Widespread
+global disparities between modelled and observed mid-depth ocean currents.Nature
+Communications,14(1), 2089.
+Tang, W., Chen, J., & Chen, D. (2025). Predicting ev battery state of health using long
+short term degradation feature extraction and fea timemixer.Scientific Reports,15(1),
+2200.
+Wang, A. (2018). Glue: A multi-task benchmark and analysis platform for natural language
+understanding.arXiv preprint arXiv:1804.07461.
+Wang, C., Yang, N., & Li, X. (2025). Advancing forecasting capabilities: A contrastive
+learning model for forecasting tropical cyclone rapid intensification.Proceedings of the
+–31–
+manuscript submitted toJGR: Machine Learning and Computation
+National Academy of Sciences,122(4), e2415501122.
+Wang, X., Wang, R., Hu, N., Wang, P., Huo, P., Wang, G., . . . Song, J. (2024). Xihe:
+A data-driven model for global ocean eddy-resolving forecasting.arXiv preprint
+arXiv:2402.02995.
+Xiong, W., Xiang, Y., Wu, H., Zhou, S., Sun, Y., Ma, M., & Huang, X. (2023). Ai-goms:
+Large ai-driven global ocean modeling system.arXiv preprint arXiv:2308.03152.
+Yang, N., Wang, C., Zhao, M., Zhao, Z., Zheng, H., Zhang, B., . . . Li, X. (2024).
+Langya: Revolutionizing cross-spatiotemporal ocean forecasting.arXiv preprint
+arXiv:2412.18097.
+–32–

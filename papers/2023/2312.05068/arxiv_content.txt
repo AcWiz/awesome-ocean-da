@@ -1,0 +1,593 @@
+Generated using the official AMS L ATEX template v6.1
+Application of deep learning to the estimation of normalization coefficients
+in diffusion-based covariance models
+Folke Skrunesa, Mayeul Destouchesb,aAnthony T. Weavera, Guillaume Coulauda, Olivier
+Gouxa, Corentin Lapeyrea
+aCERFACS / CECI CNRS, UMR 5318 , Toulouse, France,bMet Office, Exeter, United Kingdom
+Corresponding author : Mayeul Destouches, mayeul.destouches@metoffice.gov.uk
+1arXiv:2312.05068v1  [physics.data-an]  8 Dec 2023
+ABSTRACT: Variational data assimilation in ocean models depends on the ability to model
+general correlation operators in the presence of coastlines. Grid-point filters based on diffusion
+operators are widely used for this purpose, but come with a computational bottleneck – the costly
+estimation of normalization factors for every model grid point. In this paper, we show that a simple
+convolutional neural network can effectively learn these normalization factors with better accuracy
+than the current operational methods. Our network is tested with a two-dimensional diffusion
+operator from the NEMOV AR ocean data assimilation system, applied to a global ocean grid with
+approximately one degree horizontal resolution. The network is trained on exact normalization
+factors estimated by a brute-force method. Knowing that convolutional networks can only model
+translation-equivariant functions, we ensure that the normalization estimation problem is indeed
+translation-equivariant. Specifically, we show how the number of inputs of this problem can be
+reduced while preserving translation equivariance. Adding the distance to the coastline as an
+input channel is found to improve the performance of the network around coastlines. Extensions
+to three-dimensional diffusion and to higher horizontal resolutions are discussed. Removing the
+computational bottleneck associated with normalization opens the way to using adaptive correlation
+models for operational ocean data assimilation. The code for this work is publicly available at
+https://github.com/FolkeKS/DL-normalization/tree/core-features
+2
+1. Introduction
+Error covariance matrices are essential for determining how different pieces of information
+are weighted in a data assimilation (DA) problem. For large problems, such as those typically
+encountered in atmospheric and ocean DA applications, it is impossible to represent them as
+explicit full-rank matrices. Instead, they must be modeled , either as (localized) reduced-rank
+matrices or in terms of parameterized covariance functions that have a tractable number of tunable
+parameters and that are computationally efficient when applied as the kernel of a covariance
+operator (Bannister 2008). Covariance operators are commonly used in variational DA where only
+matrix-vector products are required for the iterative algorithms used to obtain the solution. In
+this article, we consider covariance matrices belonging to this latter (operator) class. Specifically,
+we focus on covariance operators that can be formulated as a sequence of differential operators
+and interpreted as the solution of a diffusion equation (Weaver and Courtier 2001; Mirouze and
+Weaver 2010; Weaver and Mirouze 2013). When the diffusion equation is solved implicitly with an
+Euler-backward step, diffusion operators represent covariance operators whose smoothing kernels
+are from the Mat ´ern class (Guttorp and Gneiting 2006; Lindgren et al. 2011).
+Diffusion-based covariance operators are convenient in DA applications involving domains with
+complex boundary geometry and requiring inhomogeneous and anisotropic smoothing tensors.
+This is the case for background-error covariances in ocean DA (Weaver and Courtier 2001; Weaver
+et al. 2020). Specifically, and especially within the context of this article, these operators are needed
+to model correlation operators, which, by definition, correspond to covariance matrices whose
+diagonal elements (variances) are all equal to one. The symmetric property of the covariance matrix
+is maintained by pre- and post-multiplying the diffusion-based correlation matrix by the diagonal
+matrix of standard deviations. By factoring the covariance operator this way, the correlations and
+variances can be controlled independently.
+In order to isolate the correlation operator, diffusion-based covariance matrices must be
+normalized by their intrinsic variances. We refer to the diagonal matrix whose elements are
+the inverse of the intrinsic variances as the matrix of normalization factors . The normalization
+factors act to compensate the attenuation of the covariance amplitude that occurs from a diffusive
+process. As with the actual variances, the normalization factors can be applied symmetrically
+through pre- and post-multiplication by a diagonal matrix that contains the square root of the
+3
+normalization factors. The normalization factors have units of length, area or volume depending
+on whether the covariance operator is applied in one, two or three dimensions.
+Except in idealized or specific cases, for which we can resort to well-known analytical expressions
+(Guttorp and Gneiting 2006), the normalization factors are not known to high accuracy at all
+grid points. Their values depend on the diffusion model parameters, such as the smoothing
+tensor; on the boundary geometry, such as coastlines in an ocean model; on the type of boundary
+conditions (Neumann, Dirichlet or mixed); and on the details of the numerical discretization scheme
+and computational solver. Regardless of the domain and covariance model details, it is always
+possible to diagnose the exact normalization factor at any grid point using brute force, whereby
+the covariance matrix is applied to a canonical vector, which has a value of one at the grid point
+of interest and a value of zero at all other grid points. However, this method is not practical for
+model configurations involving millions of grid points, especially if normalization factors have to
+be regularly recomputed, as is required in a cycled DA system when newly available estimates of the
+diffusion model parameters are applied on each cycle. A randomization or Monte Carlo method is
+much more practical than the brute-force method as it can be used to generate sufficiently accurate
+normalization factors for any number of grid points at the cost of several thousand applications of
+the diffusion operator. Nevertheless, this is still too costly to be applied routinely ( i.e., on each DA
+cycle) to three-dimensional (3D) variables in a real-time operational environment where timeliness
+is critical.
+Using a diffusion-based covariance model for a global ocean DA system, Weaver et al. (2020)
+compared randomization with various other methods for approximating the normalization factors.
+Their work showed that none of the other methods is accurate and robust enough to provide a viable
+alternative to randomization. As a compromise between allowing for adaptive covariances on the
+one hand, and keeping computational costs acceptable on the other, Weaver et al. (2020) proposed
+a quasi-adaptive correlation model for 3D variables that relies on splitting the diffusion operator
+into a one-dimensional (1D) vertical component and a two-dimensional (2D) horizontal component
+(referred to by Weaver et al. (2020) as a 2D ×1D formulation) and only allowing the 1D component
+to be adaptive. Furthermore, they proposed a method whereby the normalization factors can be
+well approximated by a product of normalization factors computed separately for the 1D and 2D
+diffusion-model components. This way, the normalization factors for the adaptive and inexpensive
+4
+1D component can be estimated “on-the-fly” to a high accuracy using the randomization or even
+brute-force method. The normalization factors for the static and expensive 2D component applied
+in each model level need to be estimated only once, using the conventional randomization approach.
+In this article, we show how 2D normalization factors in the 2D ×1D formulation can be estimated
+accurately and cheaply using a machine-learning strategy, thus opening the way for the use of 2D
+adaptive correlations.
+The article is organized as follows. In Section 2, we show how the problem of estimating
+normalization factors for the diffusion operator can be transformed to make it suitable for a solution
+algorithm based on a Convolutional Neural Network (CNN). Specific care is taken to ensure that
+the function to regress does indeed lie in the class of functions that can be approximated with any
+accuracy by CNNs. The method has been applied to a 2D diffusion operator that forms the basis of
+a correlation model in a global ocean DA system. Results are presented and discussed in Section 3
+where they are compared to those computed with a standard randomization method. A summary
+and outlook are given in Section 4.
+2. Proposed method
+We present here the machine learning approach used to estimate normalization factors for a
+diffusion-based covariance operator. For at least two reasons, the natural choice for this problem
+is a Convolutional Neural Network (CNN). First, the data are stored on a structured grid, where
+every point has neighboring grid points in all four directions. This makes it very similar to an
+image-to-image translation exercise, where CNNs are known to perform well. The structured
+nature of the data allows us to use standard CNNs, instead of more general but less efficient Graph
+Neural Networks for instance. Second, the normalization problem is essentially local. While
+a normalization factor at a given location is, in theory, affected by the diffusion tensor at all
+points on the globe, in practice, it is mainly sensitive to the diffusion tensor at points in a small
+neighborhood. The impact of distant diffusion tensors decays roughly with the amplitude of the
+modeled correlation function. In DA applications, the modeled correlations are approximately
+Gaussian, with length scales that are short compared to the domain size. As a result, they decay to
+zero quite rapidly and the problem can effectively be considered as local. This makes CNNs with
+even relatively small receptive fields good candidates for solving the normalization problem.
+5
+a. Reducing the dimension of the problem
+We now explain how the problem can be simplified by reducing the number of inputs required to
+train the network. No accuracy is lost in the process. Our assumption is that reducing the number
+of inputs (a.k.a. channels) will make the problem easier to learn for a neural network, and will
+reduce the memory cost and execution time of both training and applying the network.
+We want to approximate a non-linear function
+𝑓:(κ11,κ22,e1𝑣,e2𝑣,e1𝑢,e2𝑢,w,m)→γ (1)
+where κ11andκ22are the diagonal elements of the horizontal diffusion tensor, with physical units
+of squared length; e1𝑣,e2𝑣,e1𝑢ande2𝑢are scale factors that define the local directional grid lengths
+at the𝑣- and𝑢-points indicated in Figure 1; w:=e1𝑇e2𝑇is the grid cell area defined at the cell
+center or𝑇-point in Figure 1; mis the land-sea mask, also defined at the 𝑇-point; and γdenotes
+the associated normalization factor. Here, we are using conventional notation from the ocean
+model NEMO (Nucleus for European Modelling of the Ocean; Madec et al. 2023). All of these
+inputs are vectors of the size of the grid, some of them being located in the centers of the cells,
+some on the edges. Note that we limit ourselves to the case of diagonal diffusion tensors here,
+which implies that the principal directions of anisotropy are assumed to be aligned with the grid
+edges. This assumption is currently used in the operational ocean DA systems at ECMWF and
+Met Office. The diagonal elements of the tensor, κ11andκ22, are hereafter called diffusivity fields
+ordiffusivities . The problem also depends on external parameters that we consider as constant
+here. These parameters include the total number of diffusion steps 𝑀and the type of boundary
+condition. In our experiments, 𝑀is set to 10 to represent an approximate Gaussian function, and
+a Neumann boundary condition is imposed where the normal derivative at coastlines is set to zero.
+In the specific context of diffusion, we can simplify the problem by performing a local re-scaling
+of the diffusivity fields κ11andκ22. This allows us to account for the land-sea mask and for the
+grid structure implicitly. More precisely, problem (1) can be transformed, without approximation,
+as:
+e𝑓:(α1,α2,w)→γ (2)
+6
+Fig. 1: The diffusivities κ11andκ22are, respectively, located at a 𝑢-point and𝑣-point on a
+staggered Arakawa C-grid. The normalization factors γare located at 𝑇-points. Here, we scale
+κ11andκ22by the ratios e2𝑢/e1𝑢ande1𝑣/e2𝑣, respectively.
+where we have introduced the scaled diffusivity fields
+α1=ϵ𝑢κ22e1𝑣
+e2𝑣and α2=ϵ𝑣κ11e2𝑢
+e1𝑢,
+ϵ𝑢andϵ𝑣being defined from the land-sea mask mand from the boundary condition type, as
+explained in Mirouze and Weaver (2010, their section 5.2). This re-formulation is made possible
+by noting that the discretized diffusion operator can be expressed in terms of α1,α2andwonly, as
+shown by Mirouze and Weaver (2010). In our case, we used (zero) Neumann boundary conditions,
+which is equivalent to setting ϵ𝑢(respectively, ϵ𝑣) equal to zero on east-west (respectively, north-
+south) coastlines and equal to one elsewhere. Other types of boundary conditions would lead to
+different values of the ϵ𝑢andϵ𝑣fields on the coastlines, as detailed in Mirouze and Weaver (2010).
+We remark that there is no loss of information through this transformation, as we have
+𝑓(κ11,κ22,e1𝑣,e2𝑣,e1𝑢,e2𝑢,w,m)=e𝑓(α1,α2,w). (3)
+The problem is thus reduced from eight input fields to three. Importantly, both formulations of the
+normalization problem are equivariant to translation, a key property that we will explore further in
+the following subsection.
+7
+b. Equivariance to translation
+A fully convolutional neural network represents functions that are equivariant to translation
+(Goodfellow et al. 2016, Chapter 9.4). A function 𝑓is equivariant to a spatial translation 𝑇if it
+satisfies the following identity:
+𝑓(𝑇(x))=𝑇(𝑓(x)), (4)
+where xdenotes the inputs of the function, which should match the inputs used by the corresponding
+network. As the CNN is itself equivariant to translation by construction, it is intrinsically limited
+on how well it can fit a function that does not satisfy this property.
+Both formulations (1) and (2) of the normalization problem are equivariant to translation. The
+equivariance to translation of formulation (2) is demonstrated in Appendix A1. For the sake
+of simplicity, the analysis is restricted to one-dimensional (1D) diffusion, although the same
+line of reasoning can be applied to 2D diffusion. The equivariance to translation property is
+illustrated numerically in Figure 2. This figure has been obtained using a 2D diffusion model in
+Python that closely reproduces the 2D diffusion on the sphere from NEMOV AR but uses a regular
+latitude/longitude grid.
+It is important to remark that the equivariance to translation property would not be verified if we
+neglected to provide the grid information to the neural network, assuming that it could learn them,
+as in
+𝑓(e1𝑣,e2𝑣,e1𝑢,e2𝑢,w):(κ11,κ22,m)→γ (5)
+or𝑓(e1𝑣,e2𝑣,e1𝑢,e2𝑢):(κ11,κ22,m,w)→γ. (6)
+In this case, a pure CNN could not fit the function with an arbitrarily small error. In formulation (1),
+the grid parameters are needed to preserve equivariance to translation but mostly represent
+redundant information, making formulation (2) the more natural choice.
+c. Generation of the data set
+There are two steps in the generation of the training, validation, and test data sets: 1) design
+realistic input diffusivity fields; and 2) compute the associated normalization fields. We use the
+8
+Fig. 2: Numerical test illustrating the equivariance relation from Equation (4). Panel (a) shows
+𝑓(x), where𝑓is defined as in Equation (1) and xcorresponds to random diffusivity fields κ11and
+κ22, and the coefficients e1𝑣,e2𝑣,e1𝑢,e2𝑢,wandmare associated with the regular grid used with
+this test problem. Panel (b) shows 𝑇(𝑓(x)), panel (c) shows 𝑓(𝑇(x)), and panel (d) shows the
+relative difference between (b) and (c) ( i.e.,|1−𝑓(𝑇(x))/𝑇(𝑓(x))|). The relative difference (d) is
+equal to zero at machine precision.
+so-called ORCA1 configuration of NEMO (Madec et al. 2023), which refers to the standard tri-
+polar global grid with approximately one-degree horizontal resolution. All fields are defined in the
+surface level of ORCA1 in our 2D diffusion experiments.
+For the first step, we generate reference diffusivity fields and add random, spatially-correlated
+perturbations to them to produce a set of distinct input samples, with complex spatial variations
+similar to those that would be obtained from ensemble methods such as the one used by Weaver
+et al. (2020). The reference field is generated following the method described in Mogensen et al.
+(2012, their Section 4.6.2 and their Table 2). The reference field is then perturbed by applying a
+multiplicative factor defined as a spatially correlated Gaussian random field centered on 1.0 and
+with standard deviation 0.15. The correlation model used to define the perturbations is the same
+correlation model associated with the reference diffusivity fields. Some additional procedures are
+then applied to the perturbed diffusivity fields. First, we reduce the value of a diffusivity field near
+coastlines when the geometric mean of the implied directional length-scales at the diffusivity grid
+point exceeds the distance to the coastline from that grid point. Second, we increase the value
+of a diffusivity when the geometric mean of the implied directional length-scales is less than the
+9
+geometric mean of the grid scale factors at the diffusivity point. We generate a total of 190 samples,
+which differ from each other by the multiplicative noise factor only.
+For the second step, we calculate the normalization factors for each of the 190 input samples
+using the brute-force method described in Section 1. This method is numerically affordable for a
+2D field in our relatively coarse global ocean configuration. However, for a 3D field or with higher
+resolution, the method would be extremely expensive and not practical for generating large data
+sets. This issue is discussed in the last section of this article.
+An example of an input sample of diffusivity fields along with their corresponding true value of
+the normalization field is illustrated in Figure 3.
+Fig. 3: An example of a sample of randomly-perturbed diffusivity fields κ11andκ22(left and
+middle panels) and the associated normalization factors (right panel).
+d. Pre-processing of the data
+As explained in Section 2a, the diffusivity fields are scaled to reduce the number of inputs
+while preserving equivariance to translation. We also observed that adding a distance-to-coast
+input channel reduces large errors near coastlines. The results we present here are all obtained
+with this additional input channel. The data are then separated into training, validation, and test
+sets containing 10, 10 and 170 samples, respectively. We deliberately limited ourselves to 10
+input/output training pairs to reflect the increased cost of data generation when considering the
+problem in higher dimensions or with higher resolution. Using statistics from the training data
+set, each of the four input channels and the output channel are centered with respect to their global
+mean and normalized by their standard deviation.
+10
+Finally, the inputs are extended by periodicity in both the longitudinal and latitudinal directions
+by a few grid points. This ensures that no assumptions need to be made by the neural network
+near the boundaries of the “image” while keeping the network output at the correct (original)
+dimensions. This extension by periodicity accounts for the fact that the input channels are defined
+on different points on the staggered grid, as illustrated in Figure 1.
+e. Model architecture and training specifications
+The final network, inspired by the ResNet of He et al. (2015), consists of Residual Blocks
+(ResBlocks) chained together as illustrated in Figure 4. A ResBlock uses skipped connections to
+add, or otherwise transfer, the output of one layer to a layer deeper in the network. Our version of
+a ResBlock is detailed in Figure 5. The network contains 4 ResBlocks along with a layer for both
+the network input and output, totaling 10 convolutional layers and approximately 3 ×105trainable
+parameters.
+11
+Fig. 4: Architecture containing four
+ResBlocks along with convolutional layers
+for the network input and output, marked
+in orange. The first layer consists of 64
+filters, each convolving over the 4 input
+channels and making the input of a ResBlock
+contain 64 feature maps. Inversely, the final
+layer consists of only one filter to obtain the
+correct output dimension of 292 ×360×1.
+Fig. 5: Our implementation of a ResBlock
+consists of two 3x3x64 convolutional layers
+with 64 filters, each followed by batch
+normalization and the application of an
+Exponential Linear Unit (ELU) activation
+function. The inputs of a block are added to
+the output of the second convolutional layer
+before applying the activation function.
+We use a relative loss function where the continent grid points are masked; i.e., the model is only
+penalized for errors on grid points in the ocean:
+ℓ=1
+𝑁𝑁∑︁
+𝑛=0ˆ𝛾2
+𝑛−𝛾2
+𝑛
+𝛾2𝑛2
+.
+12
+where𝛾2
+𝑛is the true normalization factor, ˆ 𝛾2
+𝑛is the predicted normalization factor, and 𝑁is the
+number of ocean grid points.
+The model is trained from scratch using Pytorch version 1.11.0 (Paszke et al. 2019) default
+weight initialization and the Adam optimizer with default learning rate of 10−3.
+The hardware used is an Nvidia Tesla v100 16GB GPU. The best model is selected based on
+performance on the validation data set after 3000 epochs, which corresponds to approximately
+9 hours of training. This high number of epochs is chosen because we use a small training data set
+(less than 20 MB of data), and because we observed a continued increase in accuracy both on the
+training and validation data sets as the number of epochs increases.
+3. Evaluation of the neural network
+The neural network described in the previous section has been evaluated against the randomization
+method with a large sample size of 104samples. This sample size is a typical choice for this
+application, giving estimates that are considered accurate enough for operational use (Weaver et al.
+2020).
+a. Error metrics
+We define two global error metrics to evaluate and compare different estimation methods.
+Following Weaver et al. (2020), we define the relative error 𝜀𝑛for an ocean grid point 𝑛as
+𝜀𝑛=ˆ𝛾2
+𝑛−𝛾2
+𝑛
+𝛾2𝑛,
+where𝛾2
+𝑛is the true factor computed with the brute-force method and ˆ 𝛾2
+𝑛is the estimate obtained
+using either the randomization method or the CNN.
+From this local quantity, we define two global precision measures. The first is the mean absolute
+relative error 𝜀, which is defined as
+𝜀=1
+𝑑𝑑∑︁
+𝑙=01
+𝑁𝑁∑︁
+𝑛=0|𝜀𝑛|,
+13
+where𝑁is the number of ocean grid points and 𝑑is the number of samples available. For the neural
+network evaluation, we present results on the test data set with 𝑑=170. For the randomization
+method, we only have 𝑑=1. This is enough to have an accurate estimate, as we know the
+randomization errors are “well-behaved” in the sense that the variance estimates are unbiased and
+follow a𝜒2distribution.
+While we want the estimate to be accurate on average, we also want to control large local errors.
+We therefore introduce the mean maximum absolute relative error 𝜀∞:
+𝜀∞=1
+𝑑𝑑∑︁
+𝑙=0max
+0≤𝑛≤𝑁|𝜀𝑛|.
+Although the neural network is optimized to achieve a small mean square relative error through
+the loss function ℓdefined in the previous section, the final network is chosen based on the values
+of both𝜀and𝜀∞on the validation data.
+b. Results
+All neural network results shown in this section are from the test data set. The performance
+metrics of the neural network and of a randomization method with 104samples are compared
+in Table 1. The neural network consistently beats the randomization method in terms of mean
+absolute relative error (approximately 3 times smaller). It has a similar performance in terms of
+mean maximum error.
+Method 𝜀∞𝜀
+Randomization with 104samples 5.91% 1.15%
+CNN 4.3% 0.4%
+Table 1: Relative errors of the two estimation methods.
+To have more information on the distribution of errors, we show the histogram of the relative
+errors across all grid points and all test samples in Figure 6. Similarly, Figure 7 shows the maximum
+errors of the different test samples.
+Figure 6 shows that the neural network is globally unbiased, with errors following a Gaussian-
+like distribution centered on zero. A closer look at the distribution of the maximum absolute
+14
+Fig. 6: Histogram of relative errors across all grid points and all test samples. Each bar has a
+width of approximately 0 .53%. The upper and lower bounds are set to ±5%, leaving some extreme
+values hidden. These values are highlighted in Figure 7.
+Fig. 7: Histogram of the maximum absolute relative error. Each bar has a width of approximately
+1.73%. The maximum values are taken from each test sample.
+error in Figure 7 reveals an interesting outlier for one test sample, with a maximum error of 0 .32.
+After investigation, this error was found to be caused by a single grid point with coastlines on
+several edges. In this grid cell, the corresponding input diffusivity field κ11has an abnormally
+15
+large perturbed value, even after its original value is reduced by the distance-to-the-coast control
+procedure outlined in Section 2c. The anomalous scaled diffusivity has a value of 10.2 after the
+standardization procedure explained in Section 2d. For comparison, the second largest scaled
+diffusivity in the test data set is 8.6, and the largest scaled diffusivity in the training data set is 7.5
+(using the same standardization). Importantly, this result highlights the fact that the network can
+make large errors for inputs that are too far from the range of values in the training data.
+An example of the neural network outputs on a random sample of the test data set is shown
+in Figures 8 and 9. There is no visible spatial structure in the errors, except when close to the
+Fig. 8: A sample from the test data set showing the true normalization factors and the factors
+estimated by the network, together with their relative error.
+Fig. 9: Same as Figure 8 but with a zoom over coastal European seas.
+coastline. This is evident in Figure 10, which shows the error as a function of the distance to the
+coastline. It clearly shows that the error is larger for points within 10 grid points of the coastlines
+16
+Fig. 10: Mean absolute relative error as a function of the Manhattan distance to the coastline.
+These results were obtained from a network with distance-to-coast as an additional input channel.
+than for points further away. For points adjacent to a coastline, the error is up to 10 times larger.
+This observation motivated the introduction of the distance-to-coast as a fourth input of the neural
+network, which was in fact used to produce the results in Figure 10. Although the errors are
+still relatively larger in the vicinity of the coastlines, this extra input channel helps maintain the
+amplitude of the error below that of the randomization method.
+4. Summary and outlook
+In this paper, we evaluated the potential of a convolutional neural network (CNN) to estimate
+normalization factors for a covariance model based on a diffusion operator. The normalization
+factors are required to transform the implied diffusion-based covariance matrix into a covariance
+matrix with unit diagonal (i.e., a correlation matrix). We trained a CNN on pairs of 2D diffusivity
+fields and the associated exact 2D normalization factors. The data were generated on a global grid
+of the NEMO ocean model (Madec et al. 2023) using a 2D diffusion operator from the NEMOV AR
+ocean data assimilation system (Mogensen et al. 2012), with randomly perturbed diffusivity fields.
+The trained network yields more accurate estimates than those obtained by a randomization method
+with 10000 samples, which is the current method of choice for this problem. Although it has not
+been quantified in this article, once trained, the CNN runs at a fraction of the computational cost
+of randomization.
+The use of machine learning for determining normalization factors is being explored
+independently at the UK Met Office (James While, personal communication) and at the European
+17
+Centre for Medium-Range Weather Forecasts (ECMWF; Marcin Chrust and Vincent Chabot,
+personal communication), using variations of the approach described in this article. We would
+like to highlight three aspects of our work that we believe to be important and relevant for other
+machine learning approaches to this problem.
+1. When using a CNN for this problem, the input diffusivity fields should be scaled (see
+Section 2b) to reduce the number of input channels, while ensuring the problem lies in
+the class that can be represented by the network. The appropriate scaling involves the local
+grid geometry and the land-sea mask used to account for the boundary conditions at coastlines.
+Equivariance to translation can then be obtained by using the scaled diffusivity fields together
+with the local grid-cell area elements as input channels.
+2. The normalization factors are harder to determine in the vicinity of coastlines, particularly
+where the geometry is complex. In practice, adding the distance to the nearest coastline as an
+extra input channel to the neural network helps to reduce the estimation error. The distance-
+to-coast input channel may become more important if the presence of a coastline outside the
+receptive field of the network impacts the normalization factor at a given grid point, which
+might occur, for instance, when moving to higher resolution grids.
+3. A surprisingly small training data set (10 pairs of 2D fields in our case) is enough to outperform
+the randomization method with 10000 samples.
+The network presented here is trained on a global ocean grid with coarser resolution than
+used operationally at ECMWF and the Met Office. Here, the input and output fields are defined
+at 1 degree horizontal resolution compared to the common operational resolutions of 1/4 or
+1/12 degree. However, we expect that a CNN with similar structure would perform equally well
+at higher resolutions, although the required receptive field of the neural network would possibly
+change due to larger diffusivities relative to the increased grid resolution.
+In principle, the network could be extended to account for 3D diffusion or 2D ×1D diffusion (see
+Section 1) by using 3D convolutional kernels and by taking care to apply the same scaling procedure
+to the vertical diffusivities. Within the specific 2D ×1D framework, which is the 3D diffusion
+formulation used operationally at ECMWF and the Met Office, the normalization approximation
+based on the separable assumption described in Section 1 could be used with the existing 2D
+18
+convolutional approach to reduce computational costs. While the geometry of the coastlines would
+change in each ocean model level, the analytical problem itself would not change, and the approach
+we have presented should be able to account for any coastline structure. Including data from
+different ocean model levels in the training step would likely improve the accuracy, but would not
+be essential.
+Even for the 2D diffusion problem, generating a training data set of exact normalization factors
+would be prohibitively expensive at 1/4 and 1/12 degree resolutions. Indeed, the cost of a single
+application of the diffusion operator scales at least linearly with the number of grid points, and
+the brute-force approach requires as many applications as grid points. As a result, the brute-
+force approach scales at least quadratically with the number of grid points. Conversely, the
+computational cost of the randomization method only increases as the cost of a single application
+of the diffusion operator when increasing resolution. The intersection point where the two methods
+have comparable costs is found when there are as many grid points as random samples (typically
+10000); i.e., for grids even smaller than those considered in this article. Therefore, for high-
+resolution grids, the randomization approach seems to be the only viable method to generate a
+training data set. From a training point of view, it is unclear whether it is possible to beat the
+randomization method by training on data generated by it. It might be possible if the network does
+not try to overfit the data but manages to generalize beyond the random error in the training data.
+It might also be desirable to train on a larger random sample than is typical, to reduce sampling
+error as much as possible.
+An alternative or complementary solution would be to train the network on a small selection
+of grid points only, for which the associated normalization factors could be estimated with the
+brute-force method. These points could be sampled homogeneously in the model domain, or could
+be sampled more heavily where the network performs more poorly; i.e., near the coastlines. This
+approach could be useful at least for evaluating and testing the network with an accurate data
+set. It could also be used to provide refined training of a neural network that is pre-trained with
+randomization-generated data.
+Estimating normalization factors for a diffusion-based covariance operator is a computationally
+expensive operation, but well suited for a machine learning approach. Being able to estimate
+these factors accurately and quickly opens opportunities for using adaptive covariance parameters
+19
+diffusivity fields) in operational ocean data assimilation. In particular, for centers that can
+estimate background-error correlations from an ensemble of forecasts, this would allow the use of
+correlations-of-the-day in parametric background-error covariance models based on the diffusion
+operator. Furthermore, this would enable the application of localization-of-the-day with ensemble-
+variational data assimilation (EnVar) schemes that use a diffusion operator for localizing a sample
+estimate of the background-error covariance matrix.
+Acknowledgments. The authors wish to thank Andrea Piacentini for his help in setting up and
+running the NEMOV AR experiments.
+Data availability statement. The code for this work is publicly available
+at https://github.com/FolkeKS/DL-normalization/tree/core-features
+and the associated data set at https://kaggle.com/datasets/
+e6e1e745161300b59a7ecf7695f02fedd5ab6f5853067004c127029d15fde68e
+APPENDIX
+A1. Equivariance to translation of one-dimensional diffusion
+As introduced in Section 2b, as fully convolutional networks are equivariant to translation, they
+are bound to be inaccurate if used to model a function that is not itself equivariant to translation.
+Figure 2 illustrates experimentally that, with the right choice of inputs, the function e𝑓from
+Equation (2), is equivariant yo translation. This property can also be demonstrated analytically,
+which is the purpose of this appendix.
+To lighten notation, we will only consider here the case of 1D diffusion. Consequently, there is
+only one input feature ( α) to consider instead of two ( α1andα2):
+e𝑓:(α,w)→γ. (A1)
+Our goal is to show that
+e𝑓(Sα,Sw)=Se𝑓(α,w)=Sγ, (A2)
+20
+where Sis the matrix associated with 1D translation that periodically shifts elements of a vector
+by one position ‘upwards’. For 𝑝,𝑞∈⟦0,𝑛−1⟧, the coefficient[S]𝑝,𝑞on the𝑝-th line and 𝑞-th
+column of Sis defined as
+[S]𝑝,𝑞= 
+1 if𝑝−𝑞=1;
+1 if𝑝=𝑛−1 and𝑞=0;
+0 otherwise.(A3)
+The inverse translation matrix S−1=STperiodically shifts elements of a vector by one position
+‘downwards’.
+A diffusion operator Dcan be decomposed into a symmetric sequence of sub-operators (see
+Equation (4)) from Weaver et al. 2020):
+D=
+A−1𝑀/2W−1
+(A−1)T𝑀/2, (A4)
+where Ais the self-adjoint, positive-definite matrix that must be inverted to perform one step of
+implicit diffusion, and Wis a diagonal matrix whose diagonal contains the elements of the vector
+win Equation (1). These elements correspond to the surface of each grid cell in 2D and the
+length of each grid cell in 1D. The matrix Ais self-adjoint with respect to the inner product with
+weighting matrix W(Weaver et al. 2020, p4), which implies that the matrix WAis symmetric; i.e.,
+self-adjoint with respect to the canonical inner product. In terms of WA, Equation (A4) can then
+be rewritten as
+D=
+(WA)−1W𝑀/2W−1
+W(WA)−1𝑀/2. (A5)
+We are interested in determining the matrix expression for the ‘translated’ diffusion operator,
+denoted𝑠(D), obtained by translating αandw. To do so, we first look for the translated counterparts
+ofWandWA, which we denote 𝑠(W)and𝑠(WA), respectively. For any vector vof size𝑛, we
+denote by[v]𝑝its𝑝-th element with 𝑝∈⟦0,𝑛−1⟧. We also assume periodic boundary conditions,
+which we impose by introducing cyclical indexes such that [v]−1=[v]𝑛−1and[v]𝑛=[v]0.
+For any vector x, we have
+[Wx]𝑝=[w]𝑝[x]𝑝. (A6)
+21
+Applying the translation Stowshifts periodically its elements:
+[𝑠(W)x]𝑝=[w]𝑝+1[x]𝑝. (A7)
+As this relation holds for all 𝑝, we can apply the inverse periodical shift to all indexes:
+[𝑠(W)x]𝑝−1=[w]𝑝[x]𝑝−1. (A8)
+In matrix form, this system of equations becomes
+S−1𝑠(W)x=WS−1x. (A9)
+As this equation must hold for any vector x, we have
+𝑠(W)=SWS−1. (A10)
+The same property can be derived for 𝑠(WA). A direct relation between the elements of the
+matrix WA, the scaled diffusivity vector αand the vector of weighting coefficients wcan be
+deduced from Equations (76) and (77) of Mirouze and Weaver (2010). In a 1D domain, and with
+the notation used in this article, we have
+[(WA)x]𝑝= [w]𝑝−[α]𝑝−1−[α]𝑝[x]𝑝−[α]𝑝−1[x]𝑝−1−[α]𝑝[x]𝑝+1, (A11)
+for𝑝∈⟦0,𝑛−1⟧. The scaled diffusivity [α]𝑝is equal to𝜅𝑝/𝑒𝑝where𝜅𝑝is the diffusivity on the
+edge between the 𝑝-th and(𝑝+1)-th cells, and 𝑒𝑝is the distance between the centres of the 𝑝-th
+and(𝑝+1)-th cells. With αandwtranslated by S, Equation (A11) becomes
+[𝑠(WA)x]𝑝= [w]𝑝+1−[α]𝑝−[α]𝑝+1[x]𝑝−[α]𝑝[x]𝑝−1−[α]𝑝+1[x]𝑝+1. (A12)
+As Equation (A12) holds for all values of 𝑝, we can replace 𝑝by𝑝−1:
+[𝑠(WA)x]𝑝−1= [w]𝑝−[α]𝑝−1−[α]𝑝[x]𝑝−1−[α]𝑝−1[x]𝑝−2−[α]𝑝[x]𝑝, (A13)
+22
+which is equivalent to
+[S−1𝑠(WA)x]𝑝= [w]𝑝−[α]𝑝−1−[α]𝑝[S−1x]𝑝−[α]𝑝−1[S−1x]𝑝−1−[α]𝑝[S−1x]𝑝+1.(A14)
+In matrix form, this system can be written as
+S−1𝑠(WA)x=WAS−1x, (A15)
+which leads to
+𝑠(WA)=SWAS−1. (A16)
+By inserting Equations (A10) and (A16) into Equation (A4), we obtain
+𝑠(D)=SDS−1. (A17)
+The elements on the diagonal of Dare the square of the inverse of the normalization factors 𝛾:
+([γ]𝑝)−2=eT
+𝑝De𝑝, (A18)
+where e𝑝is a vector whose elements are equal to zero except at position 𝑝where the element is
+equal to 1. We can estimate the diagonal elements of 𝑠(D)from the inner product
+eT
+𝑝𝑠(D)e𝑝=eT
+𝑝SDS−1e𝑝
+=(S−1e𝑝)TD(S−1e𝑝)
+=(e𝑝+1)TDe𝑝+1
+=([γ]𝑝+1)−2
+=([Sγ]𝑝)−2, (A19)
+where we have used the property that Sis orthogonal ( S−1=ST).
+23
+Equation (A19) shows that applying a translation Sto the input features αandwis equivalent to
+applying the same translation to γ, and thus that e𝑓is equivariant to translation:
+e𝑓(Sα,Sw)=Se𝑓(α,w)=Sγ. (A20)
+The same result can be obtained using the ‘downwards’ translation, S−1=ST, instead of the
+‘upwards’ translation, S. By applying either of these translations multiple times, this result can be
+extended to any periodic translation. Note that this property does not automatically extend to other
+choices of input features. For example, this result would not hold if the cell surfaces wwere not
+included in the input features, or if, instead of α, the diffusivity field κwas included without the
+scaling factors representing the local grid geometry ( e1𝑣,e2𝑣,e1𝑢ande2𝑢in Section 2a ).
+References
+Bannister, R. N., 2008: A review of forecast error covariance statistics in atmospheric variational
+data assimilation. II: Modelling the forecast error covariance statistics. Quarterly Journal of the
+Royal Meteorological Society ,134 (637) , 1971–1996, https://doi.org/10.1002/qj.340.
+Goodfellow, I. J., Y. Bengio, and A. Courville, 2016: Deep Learning . MIT Press, Cambridge, MA,
+USA, http://www.deeplearningbook.org.
+Guttorp, P., and T. Gneiting, 2006: Studies in the history of probability and statistics XLIX: On the
+Mat´ern correlation family. Biometrika ,93, 989–995, https://doi.org/10.1093/biomet/93.4.989.
+He, K., X. Zhang, S. Ren, and J. Sun, 2015: Deep residual learning for image recognition. arXiv,
+URL https://arxiv.org/abs/1512.03385, https://doi.org/10.48550/ARXIV.1512.03385.
+Lindgren, F., H. Rue, and J. Lindstr ¨om, 2011: An explicit link between Gaussian fields and
+Gaussian Markov random fields: the stochastic partial differential equation approach. Journal of
+the Royal Statistical Society: Series B (Statistical Methodology) ,73 (4) , 423–498, https://doi.org/
+10.1111/j.1467-9868.2011.00777.x.
+Madec, G., and Coauthors, 2023: NEMO Ocean Engine Reference Manual. Zenodo, URL https:
+//doi.org/10.5281/zenodo.8167700, https://doi.org/10.5281/zenodo.8167700.
+24
+Mirouze, I., and A. T. Weaver, 2010: Representation of correlation functions in variational
+assimilation using an implicit diffusion operator. Quarterly Journal of the Royal Meteorological
+Society ,136 (651) , 1421–1443, https://doi.org/10.1002/qj.643.
+Mogensen, K., M. A. Balmaseda, and A. T. Weaver, 2012: The NEMOV AR ocean data assimilation
+system as implemented in the ECMWF ocean analysis for System 4. (668) , 59, https://doi.org/
+10.21957/x5y9yrtm, URL https://www.ecmwf.int/node/11174.
+Paszke, A., and Coauthors, 2019: Pytorch: An imperative style, high-performance
+deep learning library. Advances in Neural Information Processing Systems
+32, Curran Associates, Inc., 8024–8035, URL http://papers.neurips.cc/paper/
+9015-pytorch-an-imperative-style-high-performance-deep-learning-library.pdf.
+Weaver, A., and P. Courtier, 2001: Correlation modelling on the sphere using a generalized
+diffusion equation. Quarterly Journal of the Royal Meteorological Society ,127 (575) , 1815–
+1846, https://doi.org/10.1002/qj.49712757518.
+Weaver, A. T., M. Chrust, B. M ´en´etrier, and A. Piacentini, 2020: An evaluation of methods
+for normalizing diffusion-based covariance operators in variational data assimilation. Quarterly
+Journal of the Royal Meteorological Society , https://doi.org/10.1002/qj.3918.
+Weaver, A. T., and I. Mirouze, 2013: On the diffusion equation and its application to isotropic
+and anisotropic correlation modelling in variational assimilation. Quarterly Journal of the Royal
+Meteorological Society ,139 (670) , 242–260, https://doi.org/10.1002/qj.1955.
+25

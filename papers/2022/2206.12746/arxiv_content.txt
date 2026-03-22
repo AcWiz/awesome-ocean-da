@@ -1,0 +1,864 @@
+Modeling Oceanic Variables with Dynamic Graph Neural Networks
+Caio F. D. Netto1,Marcel R. de Barros1,Jefferson F. Coelho1,Lucas P. de Freitas1,
+Felipe M. Moreno1;3,Marlon S. Mathias3;4,Marcelo Dottori2,
+F´abio G. Cozman1;3,Anna H. R. Costa1;3,Edson S. Gomi1;3,Eduardo A. Tannuri1;3
+1Escola Polit ´ecnica – University of Sao Paulo, Brazil
+2Instituto Oceanogr ´aﬁco – University of Sao Paulo, Brazil
+3Center for Artiﬁcial Intelligence (C4AI) – University of Sao Paulo, Brazil
+4Instituto de Estudos Avanc ¸ados (IEA) – University of Sao Paulo, Brazil
+fcaio.netto, marcel.barros, jﬁalho, lfreitasp2001, felipe.marino.moreno, marlon.mathias, mdottori,
+fgcozman, anna.reali, gomi, eduat g@usp.br
+Abstract
+Researchers typically resort to numerical methods
+to understand and predict ocean dynamics, a key
+task in mastering environmental phenomena. Such
+methods may not be suitable in scenarios where the
+topographic map is complex, knowledge about the
+underlying processes is incomplete, or the applica-
+tion is time critical. On the other hand, if ocean
+dynamics are observed, they can be exploited by
+recent machine learning methods. In this paper we
+describe a data-driven method to predict environ-
+mental variables such as current velocity and sea
+surface height in the region of Santos-Sao Vicente-
+Bertioga Estuarine System in the southeastern coast
+of Brazil. Our model exploits both temporal and
+spatial inductive biases by joining state-of-the-art
+sequence models (LSTM and Transformers) and
+relational models (Graph Neural Networks) in an
+end-to-end framework that learns both the tem-
+poral features and the spatial relationship shared
+among observation sites. We compare our results
+with the Santos Operational Forecasting System
+(SOFS). Experiments show that better results are
+attained by our model, while maintaining ﬂexibil-
+ity and little domain knowledge dependency.
+1 Introduction
+Machine Learning (ML) has shown promising results in many
+ﬁelds, not only as an applied tool but also as a main driver
+of scientiﬁc discovery [Raccuglia et al. , 2016; Cranmer et
+al., 2020; Jumper et al. , 2021 ]. If in the past environmen-
+tal models were governed by ﬁrst-principle models based on
+established science, it is now clear that this is not the ideal ap-
+proach in a handful of situations. There are domains in which
+the underlying phenomena and the governing equations are
+not well understood or the complexity of the problem is enor-
+Equal contribution by ﬁrst and second authors. All other authors
+made signiﬁcant suggestions and the last ﬁve authors oversaw the
+whole project and secured funding.mous, making it unfeasible in practice to solve them through
+ﬁrst-principle models.
+One such domain is the oceanic one. Being able to un-
+derstand and predict how the ocean dynamics works is a
+major concern for coastal countries both economically and
+socially. Techniques have been proposed so as to model
+ocean dynamics numerically [Blumberg and Mellor, 1987;
+Ribeiro et al. , 2019; Costa et al. , 2020 ]. The goal is often
+to anticipate extreme phenomena, for instance storm surges,
+which can cause transportation delays and accidents, when
+forecasting current velocity and sea surface height. However,
+as stated before, physical models are costly to design, imple-
+ment, and maintain, given that they require accurate measure-
+ments of the region of interest topology for spatial represen-
+tations and for boundaries conditions.
+Conversely, ML models have been successfully applied
+to a variety of physical problems [Xu and Valocchi, 2015;
+Sanchez-Gonzalez et al. , 2020; Lira et al. , 2022 ]and in par-
+ticular in the oceanic domain [Ibarra-Berastegi et al. , 2015;
+Xiao et al. , 2019; Netto et al. , 2020 ]. These models circum-
+vent the computational cost of physical models while attain-
+ing excellent results. As measurement tools have improved,
+both public and private interest to record oceanic data has
+risen in recent years [PIANC MarCom, 2012 ]. One can ex-
+plore ML models with such historical data. aiming to im-
+plement and deploy better ocean dynamics prediction sys-
+tems. However, as sensors and measurement tools are “in
+the wild”, the observation of hydrodynamic and meteorolog-
+ical variables are highly affected, for instance, by extreme
+or unexpected environmental conditions or technical glitches.
+So, key variables for ocean dynamics, such as current and
+wind velocity and sea surface height, tend to display noisy
+and missing data.
+In order to build a data-driven model that deals with those
+constraints, specially missing data and diverse kinds of time
+series, a variety of ML models have been proposed. Se-
+quence models like LSTM and Transformers [Hochreiter and
+Schmidhuber, 1997; Vaswani et al. , 2017 ]and Graph Neural
+Networks (GNN) [Scarselli et al. , 2009 ]are suitable for this
+task as they incorporate both temporal and spatial inductive
+biases into their architecture.arXiv:2206.12746v1  [cs.LG]  25 Jun 2022
+In this work we aim to address a time series forecast-
+ing problem in the context of ocean dynamics, proposing a
+spatio-temporal GNN architecture to predict current veloc-
+ity and sea surface height, and using multivariate time series
+data collected at the Santos-Sao Vicente-Bertioga Estuarine
+System. Forecasting oceanic variables is a major concern, in
+general, for both public actors and private port authorities,
+and it is even more in that area, which is home to the largest
+port in Latin America, the Port of Santos.
+We summarize the main contributions of this work as fol-
+lows:
+• We propose a general model capable of dealing with
+problems that have both temporal and spatial dimensions
+and signiﬁcant levels of missing data.
+• We address a real problem in the context of physical sci-
+ences, using a data-driven method rather than physical
+model-based simulations.
+• We demonstrate experimentally that the proposed model
+surpasses the physical model SOFS, our baseline, by
+27% on water current speed prediction and 14% on wa-
+ter current direction prediction, while maintaining ex-
+cellent performance in forecasting sea surface height,
+considering the Willmott index [Willmott, 1981 ], also
+known as the Index of Agreement (IoA).
+Regarding the structure of the paper, we introduce in Sec-
+tion 2 previous works related to machine learning models in
+the context of relational learning, multivariate time series pre-
+diction and ocean domain. After, in Section 3 we describe
+the basic concepts and the problem we address, while in Sec-
+tion 4 we use that theory to model our problem. In Section 5
+we detail our architecture. Sections 6 and 7 close the paper
+reporting our experimental setup, the obtained results and dis-
+cussions, conclusions and planned future work.
+2 Related Work
+In an effort to address all dimensions in which our problem
+is embedded, we quickly highlight the most recent research
+that develops new methods for forecasting multivariate time
+series in the oceanic domain, where temporal and spatial bi-
+ases matter and data-driven methods produce better results. A
+number of statistical methods have been proposed to address
+these kinds of problems. Wei (2019) presents in an intuitive
+and comprehensive way a handful of those methods, like au-
+toregressive integrated moving-average for the case of multi-
+variate time series data, applying them, for example, to real
+public health problems. Nonetheless, these statistical models
+are known to face difﬁculties in capturing long-term relations
+and seasonal components.
+Due to their ﬂexibility, ML models have shown excellent
+results in multivariate time series forecasting. For exam-
+ple, simple models like Quantile Regression Forests (QRF)
+were used in [Moreno et al. , 2022 ]to mitigate the error of a
+physics-based numerical model, built to forecast the surface
+current of an ocean region. The authors proposed a differ-
+ent and ﬂexible framework that models the problem from the
+“backdoor”: they exploit the existence of a physical modeland build one that models the residual error between the for-
+mer and the surface current true value.
+Recent works have been focused on applying deep learn-
+ing models or implementing their own, due to both the im-
+pressive performance in a variety of tasks and the capability
+of incorporating domain speciﬁc knowledge into those mod-
+els’ architecture. For instance, in [Ziat et al. , 2017 ]the au-
+thors proposed a spatio-temporal Recurrent Neural Network
+(RNN) model for time series forecasting, combining a se-
+quential model with the dependence between time series of
+locations spatially separated. In the ﬁeld of application of this
+work, others have even proposed the combination of state-of-
+the-art models like Convolutional Neural Networks (CNN)
+and RNN, building spatio-temporal time series models that
+beneﬁt from both inductive biases [Xiao et al. , 2019 ].
+In order to better model relationships between entities of a
+problem, Graph Neural Networks (GNN) showed promising
+results and well-established theory to do so. Lira et al. (2022)
+address the time series problem of frost forecasting, using
+GNNs with attention to model an experimental site spatially
+and temporally. In [Cao et al. , 2020 ], the authors compose
+both convolution and sequential learning in a relational ar-
+chitecture (GNN), extracting richer features in the frequency
+domain through Fourier Transform, aiming to model multi-
+variate time series forecasting problems. Speciﬁcally to the
+ocean domain, [Netto et al. , 2020 ]propose an application of
+GNNs to model ocean variables in the form of time series, in
+a real problem of an economically important coastal region,
+similarly to [Lira et al. , 2022 ].
+3 Background
+In this section we outline the main ideas behind modeling
+time series as a graph and GNNs (Subsection 3.1), and the
+problem we address in this work (Subsection 3.2).
+3.1 Dynamic Graph Neural Networks
+Our work adopts terminology by [Kazemi et al. , 2020 ]
+in which a continuous-time dynamic graph (CTDG)
+is a pair (G;O)whereGis a (static) initial graph
+andOis a set of observations/events of the form
+(event type;event;timestamp )that can alter graph struc-
+ture, node attributes, and edge attributes.
+Each static graph is deﬁned by a pair of sets (V;E).Vis a
+set of nodes andEis a set of edges. Following the structure
+proposed by [Satorras et al. , 2022 ], we work with a fully con-
+nected graph. A discrete-time dynamic graph (DTDG) can be
+deﬁned as a set of snapshots fG1;G2;:::;GTgsampled from
+an underlying CTDG.
+Finally, a Graph Neural Network [Scarselli et al. , 2009 ]
+can be described as message passing mechanism which iter-
+actively updates nodes’ hidden representations. This mecha-
+nism can be summarized as follows:
+x(k)
+i=(k)
+x(k 1)
+i;j2N(i)(k)
+x(k 1)
+i;x(k 1)
+j
+;(1)
+where x(k)
+iis the hidden representation (or node features) of
+a nodeiat iterationk,(k)is a differentiable message func-
+tionthat constructs a message to be propagated based on both
+sender ( xj) and receiver ( xi) nodes, denotes a differen-
+tiable, permutation invariant aggregation function that aggre-
+gates all messages from neighbour nodes and (k)is a dif-
+ferentiable update function , that updates the node’s hidden
+representation.
+Bothandare parametrized by a set of learnable param-
+eters that are iteratively updated during the training process.
+Examples of such functions would be Multi Layer Percep-
+trons (MLPs).
+3.2 The SSVBES Forecasting Problem
+The Santos-Sao Vicente-Bertioga Estuarine System
+(SSVBES) is located on the southeast coast of Brazil,
+as part of the South Brazil Bight. This estuarine system, like
+others over the world, has its hydrodynamics driven mainly
+by three forcing processes, which are the astronomical tide,
+meteorological tide and river discharge. The meteorological
+tide is dependent on the synoptic winds that blow over the
+adjacent continental shelf, associated with simple Ekman
+dynamics and, therefore, is a process that occurs off the
+Santos Bay and enters it as a gravity wave. When winds blow
+from North-Northeast, sea surface height (SSH) decreases
+and, when winds from South-Southwest are dominant, SSH
+increases. We present that region in Figure 1 as well as
+its three main channels, Sao Vicente Channel, Santos Port
+Channel, and Bertioga Channel, that constitute the estuarine
+system.
+An effort to understand the SSVBES behavior under the ac-
+tion of these forcings has been coded into the Santos Opera-
+tional Forecasting System (SOFS) [Costa et al. , 2020 ], which
+provides daily forecasts for the region. SOFS adopts a ﬁnite
+difference model that uses the Navier-Stokes equation with
+sigma vertical coordinates, is forced by the winds, tides, den-
+sity gradients and river discharge, with good results for both
+SSH and currents.
+However, data availability of river discharge limits the ac-
+curacy outputs of this model because this is not a variable
+easily obtained in a near-real time frame. This limitation is
+mainly observed in current results, as river discharge in estu-
+aries causes changes in ﬂow, directly, and in vertical density
+stratiﬁcation, which is also capable of changing currents.
+4 Modeling SSVBES with DTDGs
+We model SSVBES as a DTDG comprised of snapshots sam-
+pled from an underlying CTDG. Each node in this CTDG is
+a pair (type;location )denoting a node type and a location.
+Possible node types are oceanic variables such as SSH, wa-
+ter current, and wind. Each different type hasktypefeatures
+of whichltype are labels. Possible locations are measuring
+stations in the SSVBES system from which data is collected.
+For this region, we have access to observations in six different
+sites located as indicated in Figure 2.
+Each data point collected is an event associated with the
+node (type;location ). For example, a measurement from a
+water current velocity sensor in Praticagem station – located
+in the observation site 5 – is considered an event associated
+with the node (current;praticagem ).4.1 Sampling the CTDG
+To build a snapshot of the CTDG associated with an instant t
+we use the following procedure:
+1. Deﬁne a past window time interval ( past len) and ﬁlter
+events having timestamp2[t pastlen;t[.
+2. Deﬁne a future/prediction window time in-
+terval ( future len) and ﬁlter events having
+timestamp2[t;t+futurelen[.
+3. A nodexiassociated with the pair (type;location )is
+part of the snapshot if the past window has at least one
+event associated with that pair.
+4. Each node xiassociated with the pair (type;location )
+is built with three time-sorted sequences of events:
+•x(past)
+i2Rpsiktype: sequence with psipast
+events;
+•x(future )
+i2Rfsi(ktype ltype): sequence with fsi
+future events without label columns;
+•yi2Rfsiltype: sequence with fsifuture events
+with only label columns.
+The future features sequence x(future )
+i stores only features
+that are associated to future events but whose values are avail-
+able beforehand such as astronomical tide and timestamp en-
+coding columns.
+Note thatpsiandfsimay vary for each node xidepending
+on its data collection periodicity and eventual missing data
+points (e.g. sensor outage).
+To build the complete DTDG graph G =
+fG1;G2;:::;GNgwe sample Nuniformly spaced snapshots
+from the underlying CTDG.
+4.2 Encoder-Decoder modeling
+Following the deﬁnition from [Kazemi et al. , 2020 ], an en-
+coder receives a dynamic graph as input and outputs an em-
+bedding function, while a decoder receives an embedding
+function as input and performs a forecasting task.
+Our forecast model is comprised of
+two sets: a set of encoders Enc =
+fEnctype 1;Enctype 2;:::;EnctypeEg, and a set of de-
+codersDec =fDectype 1;Dectype 2;:::;DectypeEg,
+whereErepresents the number of oceanic variables being
+processed.
+Each encoder Enctype is comprised of two modules,
+namely, a temporal encoder and a GNN for information prop-
+agation between nodes. While the temporal encoder is dif-
+ferent for each type, the GNN module is shared amongst all
+nodes.
+The temporal encoder receivesx(past)
+i andx(future )
+i as
+input and outputs a single ﬁxed size hidden representation hi.
+The GNN updates allhibased on graph neighbourhood as
+detailed by (1), enabling information from different nodes to
+be shared.
+Santos Bay1 23
+Figure 1: The Santos-Sao Vicente-Bertioga Estuarine System. In the bottom ﬁgure, the main locations: 1 - Sao Vicente Channel; 2 - Santos
+Port Channel; 3 - Bertioga Channel.
+The decoder receiveshias input and outputs a forecast ^yi
+for a subset ofV.
+This setup enables, for example, the sea surface height and
+water current nodes to have different temporal encoders and
+decoders that may have different architectures. This ﬂexi-
+ble approach can be adapted to a vastly different set of input
+variables, as any time series can be encoded into a node rep-
+resentation and have its information propagated through the
+graph structure.
+5 Proposed Architecture
+We propose a modularized architecture, shown in Figure 3,
+that ﬁts in the encoder-decoder category, thus enabling the
+use of different sequence processing architectures for encod-
+ing and decoding of each different oceanic variable. Also,
+we separate the concept of a GNN Block from its inner GNN
+Convolution object allowing it to be replaced by newer graph
+convolution architectures while still maintaining normaliza-
+tion layers and skip connections. In this section we describe
+each one of these components.
+5.1 Encoders
+EachEnctype encoder receives two sequences of variable
+length and outputs a single hidden representation hiof ﬁxed
+lengthembedsize.Temporal Encoding
+We implement the temporal encoder described in Section 4.2
+with two different sequence models, namely a Transformer
+and an LSTM, and compare results. Both models can be de-
+scribed as:
+:RpsiktypeRfsi(ktype ltype)!Rembed size:
+In both cases, we use two instances of the same architecture to
+encode both x(past)
+i andx(future )
+i . To form the ﬁnal ﬁxed size
+embedding, we concatenate the results into a single vector
+hi= [h(past)
+i;h(future )
+i ].
+Spatial Encoding
+Given the ﬁxed sized embedding hiwe use a GNN block
+to update the embedding with information from incoming
+edges. The GNN block is described as:
+G:Rembed size!Rembed size:
+Inspired by [Heet al. , 2016 ]we establish a block with a skip
+connection and normalization layers as depicted in Figure 3.
+Each GNN block contains graph convolutions that are re-
+sponsible for aggregating neighbourhood information. Our
+implementation uses a Graph Attention Convolution, ﬁrst
+proposed by [Veliˇckovi ´cet al. , 2018 ]and then further im-
+proved by [Brody et al. , 2021 ].
+1
+2
+3
+4
+5
+6
+Figure 2: Santos-Sao Vicente-Bertioga Estuarine System, and the
+location of all six observation sites used in the experiments: 1)
+TIPLAM, 2) Alemoa, 3) Ilha Barnab ´e, 4) CPSP, 5) Praticagem, 6)
+Palmas.
+5.2 Decoders
+EachDectype decoder receives a single hidden representa-
+tionhiof ﬁxed length embedsize as input and outputs a se-
+quences of length fsi. Our implementation uses two different
+decoder architectures. A Fixed Output Size MLP is employed
+to decode water current velocity data of the form:
+Dfix:Rembed size!Rmax(fsi)ltype:
+We call this architecture a ﬁxed output size one, because
+max(fsi)is the maximum length of the output sequence and
+is deﬁned beforehand based on training data. To decode sea
+surface height related data, we employ a Dynamic Output Size
+MLP that can be viewed as:
+Ddyn:Rembed size+embed size= 2!Rltype:
+In this architecture, the decoder also receives h(future )
+i as in-
+put and concatenates it to the embedding hito form the ﬁnal
+input to the MLP. This format resulted in much better results
+for SSH forecast.We hypothesize that this is due to the fact that h(future )
+i
+fortype = \SSH "contains astronomical tide information
+which is the major factor deﬁning SSH behaviour. The model
+seems to beneﬁt from receiving this information directly in
+the decoder. We leave a more detailed study of this behaviour
+to future work.
+6 Experimental Setup
+Here we describe our datasets and its characteristics (Subsec-
+tion 6.1), the model conﬁgurations and the stack of tools used
+to implement and run our experiments (Subsection 6.3), and
+our experimental design (Subsections 6.2 and 6.4)
+6.1 Datasets
+As input to the model, we used environmental sensing
+data collected from the 6 regions of the SSVBES between
+1/1/2019 and 1/9/2021 (totaling 974 days).
+As the sensors responsible for data acquisition are directly
+affected by climate and environmental conditions, the input
+features presents the following percentage of missing data:
+Current: 24:3%, SSH: 42:1% and Wind: 84:1%, totaling ap-
+proximately 50:1% missing data from the sensing date range.
+The data are also unbalanced as to the percentage of data ob-
+tained in the different locations, as seen in Figure 4.
+The monitoring data was aggregated using a 30-minute
+step between windows, which means there are 3 graphs G
+in the ﬂow data for each hour. In addition, data inputs are
+normalized by Z-score.
+To deal with the characteristics of the available data, the
+proposed graph model does not need strict input shape or
+contiguous data. Each node of the model structure receives
+an independent data window as input after available features
+data encoding.
+6.2 Scenarios
+To assess our model performance, we designed 4 experimen-
+tal scenarios.
+Water Current and SSH Forecasting In the ﬁrst two ex-
+periments we evaluated the performance of the proposed
+model in predicting the current velocity and sea surface
+height, separately. We compared these results to SOFS. We
+used the same set of hyperparameters to train both models.
+Fully Connected vsSame-variable vsDisconnected Graph
+Next, we experimented and compared three graph topologies:
+a fully connected graph, a graph with connections only be-
+tween nodes of the same type and a fully disconnected graph.
+Analogously to the previous experiment, all hyperparameters
+were ﬁxed and we only modiﬁed our adjacency matrix.
+LSTM vsTransformers as Temporal Encoders Lastly,
+given our framework ﬂexibility, we compared different
+state-of-the-art sequence models as temporal encoders. For
+that experiment, we contrasted the results with an LSTM
+against Transformers as encoders, keeping the same set of
+hyperparameters for both cases.
+Batch
+Norm.
+T emporal
+EncoderCurrent
+GNN
+Conv.
+Batch
+Norm.Encoder
+Leaky
+ReLu
+Leaky
+ReLuSSH
+OthersGNN Block
+DecoderInputTime seriesPredictedTime seriest
+t
+t
+Encoder
+T emporal
+Encoder
+GNN
+Conv.Skip ConnectionN 
+blocks
+t forecastSSHforecast tCurrent
+Dynamic
+MLPFixed
+MLP
+T emporal
+EncoderFigure 3: Overall model architecture indicating each type associated to a temporal encoder and a decoder module, while all types share the
+same GNN structure. Internally, the GNN is a sequence of GNN blocks with normalization layers, graph convolutions and nonlinearities.
+TIPLAM Alemoa BarnabéCPSP
+PraticagemPalmas020406080100% of Missing ValuesCurrent
+SSH
+Wind
+Figure 4: Distribution of missing values for different event types
+from the SSVBES observation sites.
+We tested for each scenario a set of combinations of target
+variables, which are current velocity and SSH. In the ﬁrst and
+second experiments (respectively, predicting current velocity
+and sea surface height), we fed as input to our model (i) only
+the corresponding target variable and (ii) both, to predict the
+corresponding target variable. In the last two experiments we
+used the 4 possible combinations of input variables. Table 1
+summarizes this combination for input and target variables.
+For all experiments we optimized our models with respect
+to the IoA [Willmott, 1981 ]. Hence, our loss function is de-Scenarios Inputs Targets
+1stExperiment [Current; Current+SSH; Current+SSH+Wind] [Current]
+2ndExperiment [SSH; Current+SSH] [SSH]
+3rdExperiment [Current+SSH] [Current]
+4thExperiment [Current; SSH; Current+SSH] [Current; SSH]
+Table 1: Inputs and target variables for each experimental scenario
+we designed.
+ﬁned as:
+L( ^yi;yi) = 1 IoA= 1 PN
+n=1(yi ^yi)PN
+n=1(j^yi yij+jyi yij)2(2)
+We also present results for Root-Mean-Squared Error
+(RMSE) in meters per second, and degrees.
+6.3 Model conﬁgurations
+For experiments, we used well-known frameworks like Py-
+torch andPytorch Geometric [Paszke et al. , 2019; Fey and
+Lenssen, 2019 ]to implement the model, and Weights&Biases
+[Biewald, 2020 ]to track all experiments.
+We used an LSTM as temporal encoder with 1 layer and
+a hidden dimension ( embedsize) of size 20, and 2 GNN
+blocks with GATv2 [Brody et al. , 2021 ]as GNN convolu-
+tion. The only exception is the Transformers experiments,
+where we used 3 layers of Transformer Encoder with 5 atten-
+tion heads, the same hidden dimension size and numbers of
+GNN blocks, but with a less complex message passage GNN
+convolution in contrast to GATv2, due to overﬁtting issues
+during training.
+We ran each experiment with 10 different seeds. We here
+report the average performance of these 10 runs. Again, the
+exception is the Transformers experiments, which we ran for
+the best 5 seeds used with the LSTM as temporal encoder and
+report the average performance for these 5 runs.
+The results for the ﬁrst and the second experiments are re-
+ported in Table 2 and Table 3. The third experiment is re-
+ported in Table 4, while the last experiment is reported in
+Table 5 and Table 6.
+6.4 Discussion
+Table 2 shows that our model surpasses SOFS in all scenar-
+ios by more than 17% and 8% for water current speed and
+direction respectively. This represents a considerable leap
+in quality of prediction that can be better visualized in Fig-
+ure 5. While results for all scenarios consistently showed
+that adding graph connectivity can beneﬁt the model’s per-
+formance, most improvement is still observed with a single
+variable as input. This result indicate that the temporal en-
+coder is the major component in this gain. Further indication
+of this can be found in Table 5 in which utilizing a Trans-
+former architecture instead of an LSTM performed even bet-
+ter, surpassing SOFS by more than 27% and 14% for water
+current speed and direction, respectively.
+Nevertheless, both Tables 2 and 5 show relevant gains to
+water velocity predictions when SSH nodes are added to G.
+This shows that our model is able to aggregate information
+from SSH nodes into water current nodes’ representation.
+SSH results in Table 3 and 6 did not beneﬁt from the addi-
+tion of current velocity data, but it is important to consider
+that SSH modeling in SOFS is already highly accurate and
+may present fewer opportunities of improvement.
+Another important effect to note is that adding nodes can
+decrease the model’s performance. A small indication of this
+effect can be seen by a slight decrease in IoA when wind data
+is added. More directly, by analysing Table 4 it is possible to
+note that a fully disconnected architecture performs slightly
+better than a graph with only nodes of the same type con-
+nected in the case of water current velocity modeling. This
+indicates that aggregating current velocity data from other ob-
+servation sites did not beneﬁt our model’s accuracy.
+This effect may be related to both over-squashing [Alon
+and Yahav, 2021; Topping et al. , 2021 ]of node embeddings
+and to the fact that our model uses a homogeneous GNN
+model in which functions andfrom expression (1) are the
+same for all types . Heterogeneous GNN models [Zhang et
+al., 2019 ]have been demonstrated to perform well in scenar-
+ios with multiple node and edge types and constitute a future
+research direction for our work.
+7 Conclusion
+We presented a real problem whose structure beneﬁts from
+a Graph Neural Network modeling strategy that encodes
+spatio-temporal features and their relations. Our experiments
+show the feasibility of a data-driven model capable of han-
+dling real datasets with missing data and able to incorporate
+and share multivariate time series information between prob-
+lem entities that are spatially separated. Furthermore, ourSpeed (m/s) Direction (degrees)
+Scenarios IoA " RMSE#IoA" RMSE#
+SOFS 0:599 0:178 0:755 85:18
+Current 0:706 0:165 0:818 70:25
+Current+SSH 0:726 0:158 0:842 65:68
+Current+SSH+Wind 0:718 0:160 0:843 65:29
+Table 2: Average results for 10 random seeds using data from
+all measuring stations to forecast Praticagem station water current
+speed and direction. In bold the best ones.
+SSH (m)
+Scenarios IoA " RMSE#
+SOFS 0:935 0:133
+SSH 0:940 0:124
+Current+SSH 0:939 0:123
+Table 3: Average results for 10 random seeds using data from all
+measuring stations to forecast Praticagem SSH. In bold the best
+ones.
+model has better performance when compared with physics-
+based models for the task of forecasting oceanic variables.
+In future work, we intend to look into the following direc-
+tions:
+Latent graph inference: When learning on graphs, one
+must assume the structure (topology) of the graph a priori .
+However, any such hypothesis may be wrong; in large graph
+scenarios we end up with an enormous combinatorial prob-
+lem. So, schemes such as advanced by [Kazi et al. , 2022 ]of-
+fer a promising direction to address larger graphs that may in-
+clude data from other meteorological stations near SSVBES,
+increasing the number of nodes to hundreds or even thou-
+sands, while we learn the nodes connectivity on training.
+Heterogeneous GNNs: Our experiments suggest that dis-
+tinct oceanic variables have different levels of inﬂuence in
+forecasting the underlying target variables. Thus, we must
+search for interesting ways to handle heterogeneous graphs,
+where the nodes may be of different types, such as in
+[Schlichtkrull et al. , 2018 ]. The heterogeneous setup may al-
+low for different message functions to be learned for different
+types of relations.
+Using SOFS as input: SOFS considers other types of infor-
+mation such as local topology; using that as a targetless node
+Speed (m/s) Direction (degrees)
+Scenarios IoA " RMSE#IoA" RMSE#
+Fully disconnected 0:719 0:161 0:830 68:89
+Same type connections 0:706 0:165 0:818 70:25
+Fully connected 0:726 0:158 0:842 65:68
+Table 4: Average results for 10 random seeds comparing fully dis-
+connected, same-variable connected and fully connected graphs in
+the [Current;SSH] predicting [Current] scenario. In bold the best
+ones.
+Speed (m/s) Direction (degrees)
+IoA IoA
+Scenarios Transformer LSTM Transformer LSTM
+Current 0:734 0:706 0:841 0:818
+Current+SSH 0:762 0:726 0:860 0:842
+Table 5: Comparison of results for different time series encoders.
+In these experiments we used a Transformer, a state-of-the-art se-
+quence model, as our ﬁrst encoders, and compare its results with the
+previous ones, where we used an LSTM instead. Given the compu-
+tational cost of Transformers, we used, for each input experiment,
+the 5 random seeds that gave the best results using LSTM as en-
+coder, and averaged them. We used the same data as the previous
+experiments to forecast the speed and direction of the water current
+at Praticagem. In bold the best ones.
+SSH (m)
+IoA
+Scenarios Transformer LSTM
+SSH 0:932 0 :940
+Current+SSH 0:939 0 :939
+Table 6: Comparison of results for different time series encoders.
+Same experimental design as showed in Table 5, except that we used
+SSH as solo input in one experiment, and we forecast the SSH at
+Praticagem.
+in the DTDG model may improve the performance even fur-
+ther. Recent proposals point in that direction within Physics-
+Informed Machine Learning (PIML) [Willard et al. , 2020 ].
+Temporal Graph Networks: The proposals by [Rossi et
+al., 2020 ]may also be investigated to encode temporal re-
+lationships between nodes, thus eliminating the need for the
+sampling process to form a DTDG.
+Acknowledgements
+This work was carried out at the Center for Artiﬁcial Intelli-
+gence (C4AI-USP), with support by the Sao Paulo Research
+Foundation (FAPESP) under grant number 2019/07665-4
+and by the IBM Corporation. This work is also supported
+in part by FAPESP under grant number 2020/16746-5, the
+Brazilian National Council for Scientiﬁc and Technological
+Development (CNPq) under grant numbers 312180/2018-7,
+310127/2020-3, 310085/2020-9, the Coordination for the Im-
+provement of Higher Education Personnel (CAPES Finance
+Code 001), Brazil, and Ita´u Unibanco S.A. through the Pro-
+grama de Bolsas Ita ´u(PBI) program of the Centro de Ci ˆencia
+de Dados (C2D) of Escola Polit ´ecnica of USP. The authors
+also thank the Santos Marine Pilots for providing crucial data
+for this research.
+References
+[Alon and Yahav, 2021 ]Uri Alon and Eran Yahav. On the
+bottleneck of graph neural networks and its practical im-
+plications. In International Conference on Learning Rep-
+resentations , 2021. (cit. on p. 7)
+Figure 5: Comparison between our model and SOFS for current
+speed in meters per second for a sample t0in the test dataset. The
+full input window is 7 days long and is partially omitted for better
+visualization.
+Figure 6: Comparison between our model and SOFS for SSH in
+meters for a sample t0in the test dataset. Values can be negative due
+to local SSH measurement offset.
+[Biewald, 2020 ]Lukas Biewald. Experiment tracking with
+weights and biases, 2020. Software available from
+wandb.com. (cit. on p. 6)
+[Blumberg and Mellor, 1987 ]Alan Blumberg and George
+Mellor. A description of a three-dimensional coastal ocean
+circulation model, three-dimensional coastal ocean mod-
+els.Coastal Estuarine Sci. , 4, 01 1987. (cit. on p. 1)
+[Brody et al. , 2021 ]Shaked Brody, Uri Alon, and Eran Ya-
+hav. How attentive are graph attention networks? arXiv
+preprint arXiv:2105.14491 , 2021. (cit. on p. 4, 6)
+[Caoet al. , 2020 ]Defu Cao, Yujing Wang, Juanyong Duan,
+Ce Zhang, Xia Zhu, Congrui Huang, Yunhai Tong, Bix-
+iong Xu, Jing Bai, Jie Tong, et al. Spectral temporal
+graph neural network for multivariate time-series forecast-
+ing. Advances in Neural Information Processing Systems ,
+33:17766–17778, 2020. (cit. on p. 2)
+[Costa et al. , 2020 ]Carine GR Costa, Jos ´e Roberto B Leite,
+Belmiro M Castro, Alan F Blumberg, Nickitas Georgas,
+Marcelo Dottori, and Antoni Jordi. An operational fore-
+casting system for physical processes in the santos-sao
+vicente-bertioga estuarine system, southeast brazil. Ocean
+Dynamics , 70(2):257–271, 2020. (cit. on p. 1, 3)
+[Cranmer et al. , 2020 ]Miles Cranmer, Alvaro Sanchez Gon-
+zalez, Peter Battaglia, Rui Xu, Kyle Cranmer, David
+Spergel, and Shirley Ho. Discovering symbolic models
+from deep learning with inductive biases. Advances in
+Neural Information Processing Systems , 33:17429–17442,
+2020. (cit. on p. 1)
+[Fey and Lenssen, 2019 ]Matthias Fey and Jan E. Lenssen.
+Fast graph representation learning with PyTorch Geomet-
+ric. In ICLR Workshop on Representation Learning on
+Graphs and Manifolds , 2019. (cit. on p. 6)
+[Heet al. , 2016 ]Kaiming He, Xiangyu Zhang, Shaoqing
+Ren, and Jian Sun. Deep Residual Learning for Image
+Recognition. In 2016 IEEE Conference on Computer Vi-
+sion and Pattern Recognition (CVPR) , pages 770–778, Las
+Vegas, NV , USA, June 2016. IEEE. (cit. on p. 4)
+[Hochreiter and Schmidhuber, 1997 ]Sepp Hochreiter and
+J¨urgen Schmidhuber. Long short-term memory. Neural
+computation , 9:1735–80, 12 1997. (cit. on p. 1)
+[Ibarra-Berastegi et al. , 2015 ]Gabriel Ibarra-Berastegi, Jon
+Sa´enz, Ganix Esnaola, Agustin Ezcurra, and Alain Ulazia.
+Short-term forecasting of the wave energy ﬂux: Ana-
+logues, random forests, and physics-based models. Ocean
+Engineering , 104:530–539, 2015. (cit. on p. 1)
+[Jumper et al. , 2021 ]John Jumper, Richard Evans, Alexan-
+der Pritzel, Tim Green, Michael Figurnov, Olaf Ron-
+neberger, Kathryn Tunyasuvunakool, Russ Bates, Au-
+gustin ˇZ´ıdek, Anna Potapenko, Alex Bridgland, Clemens
+Meyer, Simon A. A. Kohl, Andrew J. Ballard, Andrew
+Cowie, Bernardino Romera-Paredes, Stanislav Nikolov,
+Rishub Jain, Jonas Adler, Trevor Back, Stig Petersen,
+David Reiman, Ellen Clancy, Michal Zielinski, Martin
+Steinegger, Michalina Pacholska, Tamas Berghammer,
+Sebastian Bodenstein, David Silver, Oriol Vinyals, An-
+drew W. Senior, Koray Kavukcuoglu, Pushmeet Kohli, and
+Demis Hassabis. Highly accurate protein structure pre-
+diction with alphafold. Nature , 596(7873):583–589, Aug
+2021. (cit. on p. 1)
+[Kazemi et al. , 2020 ]Seyed Mehran Kazemi, Rishab Goel,
+Kshitij Jain, Ivan Kobyzev, Akshay Sethi, Peter Forsyth,
+and Pascal Poupart. Representation Learning for Dynamic
+Graphs: A Survey. Journal of Machine Learning Re-
+search , 21(70):1–73, 2020. (cit. on p. 2, 3)
+[Kazi et al. , 2022 ]Anees Kazi, Luca Cosmo, Seyed-Ahmad
+Ahmadi, Nassir Navab, and Michael Bronstein. Differ-
+entiable graph module (dgm) for graph convolutional net-
+works. IEEE Transactions on Pattern Analysis and Ma-
+chine Intelligence , 2022. (cit. on p. 7)
+[Lira et al. , 2022 ]Hernan Lira, Luis Mart ´ı, and Nayat
+Sanchez-Pi. A graph neural network with spatio-temporalattention for multi-sources time series data: An applica-
+tion to frost forecast. Sensors , 22(4), 2022. (cit. on p. 1,
+2)
+[Moreno et al. , 2022 ]Felipe M. Moreno, Luiz A. Schi-
+aveto Neto, Fabio G. Cozman, Marcelo Dottori, and Ed-
+uardo A. Tannuri. Enhancing the forecast of ocean phys-
+ical variables through physics informed machine learning
+in the santos estuary, brazil. In OCEANS 2022 - Chennai ,
+pages 1–7, 2022. (cit. on p. 2)
+[Netto et al. , 2020 ]Caio Netto, Eduardo Tannuri, Denis
+Mau ´a, and F ´abio Cozman. Prediction of environmental
+conditions for maritime navigation using a network of sen-
+sors: A practical application of graph neural networks.
+InAnais do VIII Symposium on Knowledge Discovery,
+Mining and Learning , pages 233–240, Porto Alegre, RS,
+Brasil, 2020. SBC. (cit. on p. 1, 2)
+[Paszke et al. , 2019 ]Adam Paszke, Sam Gross, Francisco
+Massa, Adam Lerer, James Bradbury, Gregory Chanan,
+Trevor Killeen, Zeming Lin, Natalia Gimelshein, Luca
+Antiga, et al. Pytorch: An imperative style, high-
+performance deep learning library. Advances in neural in-
+formation processing systems , 32, 2019. (cit. on p. 6)
+[PIANC MarCom, 2012 ]PIANC MarCom. Use of hy-
+dro/meteo information for port access and operations.
+Technical report, WG 117 Report 117, 2012. (cit. on p.
+1)
+[Raccuglia et al. , 2016 ]Paul Raccuglia, Katherine C. Elbert,
+Philip D. F. Adler, Casey Falk, Malia B. Wenny, Aure-
+lio Mollo, Matthias Zeller, Sorelle A. Friedler, Joshua
+Schrier, and Alexander J. Norquist. Machine-learning-
+assisted materials discovery using failed experiments. Na-
+ture, 533(7601):73–76, May 2016. (cit. on p. 1)
+[Ribeiro et al. , 2019 ]Renan Braga Ribeiro, Alexandra
+Franciscatto Penteado Sampaio, Matheus Souza Ruiz,
+Jos´e Chambel Leit ˜ao, and Paulo Chambel Leit ˜ao. First
+Approach of a Storm Surge Early Warning System for
+Santos Region , pages 135–157. Springer International
+Publishing, Cham, 2019. (cit. on p. 1)
+[Rossi et al. , 2020 ]Emanuele Rossi, Ben Chamberlain, Fab-
+rizio Frasca, Davide Eynard, Federico Monti, and Michael
+Bronstein. Temporal Graph Networks for Deep Learning
+on Dynamic Graphs. arXiv:2006.10637 [cs, stat] , October
+2020. (cit. on p. 8)
+[Sanchez-Gonzalez et al. , 2020 ]Alvaro Sanchez-Gonzalez,
+Jonathan Godwin, Tobias Pfaff, Rex Ying, Jure Leskovec,
+and Peter Battaglia. Learning to simulate complex physics
+with graph networks. In International Conference on Ma-
+chine Learning , pages 8459–8468. PMLR, 2020. (cit. on
+p. 1)
+[Satorras et al. , 2022 ]Victor Garcia Satorras, Syama Sundar
+Rangapuram, and Tim Januschowski. Multivariate Time
+Series Forecasting with Latent Graph Inference, March
+2022. (cit. on p. 2)
+[Scarselli et al. , 2009 ]F. Scarselli, M. Gori, Ah Chung Tsoi,
+M. Hagenbuchner, and G. Monfardini. The Graph Neural
+Network Model. IEEE Transactions on Neural Networks ,
+20(1):61–80, January 2009. (cit. on p. 1, 2)
+[Schlichtkrull et al. , 2018 ]Michael Schlichtkrull,
+Thomas N. Kipf, Peter Bloem, Rianne van den Berg,
+Ivan Titov, and Max Welling. Modeling Relational
+Data with Graph Convolutional Networks. In Aldo
+Gangemi, Roberto Navigli, Maria-Esther Vidal, Pascal
+Hitzler, Rapha ¨el Troncy, Laura Hollink, Anna Tordai,
+and Mehwish Alam, editors, The Semantic Web , Lecture
+Notes in Computer Science, pages 593–607, Cham, 2018.
+Springer International Publishing. (cit. on p. 7)
+[Topping et al. , 2021 ]Jake Topping, Francesco Di Gio-
+vanni, Benjamin Paul Chamberlain, Xiaowen Dong, and
+Michael M. Bronstein. Understanding over-squashing and
+bottlenecks on graphs via curvature. In International Con-
+ference on Learning Representations , September 2021.
+(cit. on p. 7)
+[Vaswani et al. , 2017 ]Ashish Vaswani, Noam Shazeer, Niki
+Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez,
+Łukasz Kaiser, and Illia Polosukhin. Attention is all you
+need. In I. Guyon, U. V on Luxburg, S. Bengio, H. Wal-
+lach, R. Fergus, S. Vishwanathan, and R. Garnett, editors,
+Advances in Neural Information Processing Systems , vol-
+ume 30. Curran Associates, Inc., 2017. (cit. on p. 1)
+[Veliˇckovi ´cet al. , 2018 ]Petar Veli ˇckovi ´c, Guillem Cucu-
+rull, Arantxa Casanova, Adriana Romero, Pietro Li `o,
+and Yoshua Bengio. Graph Attention Networks.
+arXiv:1710.10903 [cs, stat] , February 2018. (cit. on p.
+4)
+[Wei, 2019 ]William W S Wei. Multivariate Time Series
+Analysis and Applications. Wiley , page 528, 2019. (cit.
+on p. 2)
+[Willard et al. , 2020 ]Jared Willard, Xiaowei Jia, Shaom-
+ing Xu, Michael Steinbach, and Vipin Kumar. Inte-
+grating scientiﬁc knowledge with machine learning for
+engineering and environmental systems. arXiv preprint
+arXiv:2003.04919 , 2020. (cit. on p. 8)
+[Willmott, 1981 ]Cort J. Willmott. On the validation of mod-
+els.Physical Geography , 2(2):184–194, 1981. (cit. on p.
+2, 6)
+[Xiao et al. , 2019 ]Changjiang Xiao, Nengcheng Chen,
+Chuli Hu, Ke Wang, Zewei Xu, Yaping Cai, Lei Xu, Ze-
+qiang Chen, and Jianya Gong. A spatiotemporal deep
+learning model for sea surface temperature ﬁeld prediction
+using time-series satellite data. Environmental Modelling
+& Software , 120:104502, October 2019. (cit. on p. 1, 2)
+[Xu and Valocchi, 2015 ]Tianfang Xu and Albert J. Valoc-
+chi. Data-driven methods to improve baseﬂow predic-
+tion of a regional groundwater model. Computers & Geo-
+sciences , 85:124–136, 2015. Statistical learning in geo-
+science modelling: Novel algorithms and challenging case
+studies. (cit. on p. 1)
+[Zhang et al. , 2019 ]Chuxu Zhang, Dongjin Song, Chao
+Huang, Ananthram Swami, and Nitesh V . Chawla. Het-
+erogeneous Graph Neural Network. In Proceedings of the25th ACM SIGKDD International Conference on Knowl-
+edge Discovery & Data Mining , KDD ’19, pages 793–803,
+New York, NY , USA, July 2019. Association for Comput-
+ing Machinery. (cit. on p. 7)
+[Ziatet al. , 2017 ]Ali Ziat, Edouard Delasalles, Ludovic De-
+noyer, and Patrick Gallinari. Spatio-Temporal Neural Net-
+works for Space-Time Series Forecasting and Relations
+Discovery. In 2017 IEEE International Conference on
+Data Mining (ICDM) , pages 705–714, November 2017.
+(cit. on p. 2)

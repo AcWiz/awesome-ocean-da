@@ -1,0 +1,658 @@
+CAS-C ANGLONG : A SKILLFUL 3D T RANSFORMER MODEL
+FOR SUB -SEASONAL TO SEASONAL GLOBAL SEA SURFACE
+TEMPERATURE PREDICTION
+Longhao Wang†
+IGSNRR
+Chinese Academy of Sciences
+Beijing, China
+wanglonghao0857@isgnrr.ac.cnXuanze Zhang†
+IGSNRR
+Chinese Academy of Sciences
+Beijing, China
+xuanzezhang@igsnrr.ac.cnL. Ruby Leung
+Pacific Northwest National Laboratory
+Richland, Washington 99352, USA
+ruby.leung@pnnl.gov
+Francis H.S. Chiew
+CSIRO Environment
+Black Mountain, Canberra, ACT 2601, Australia
+francis.chiew@csiro.auAmir AghaKouchak
+Center for Hydrometeorology and Remote Sensing
+University of California, Irvine
+California, USA
+amir.a@uci.edu
+Kairan Ying
+National Institute of Natural Hazards
+Ministry of Emergency Management of China
+Beijing, China
+yingkr@tea.ac.cnYongqiang Zhang*
+IGSNRR
+Chinese Academy of Sciences
+Beijing, China
+zhangyq@igsnrr.ac.cn
+September 10, 2024
+ABSTRACT
+Accurate prediction of global sea surface temperature at sub-seasonal to seasonal (S2S) timescale is
+critical for drought and flood forecasting, as well as for improving disaster preparedness in human
+society[1, 2, 3]. Government departments or academic studies normally use physics-based numerical
+models to predict S2S sea surface temperature and corresponding climate indices, such as El Niño-
+Southern Oscillation. However, these models are hampered by computational inefficiencies, limited
+retention of ocean-atmosphere initial conditions, and significant uncertainty and biases[4, 5]. Here,
+we introduce a novel three-dimensional deep learning neural network to model the nonlinear and
+complex coupled atmosphere-ocean weather systems. This model incorporates climatic and temporal
+features and employs a self-attention mechanism to enhance the prediction of global S2S sea surface
+temperature pattern. Compared to the physics-based models, it shows significant computational
+efficiency and predictive capability, improving one to three months sea surface temperature predictive
+skill by 13.7 ±3.0% to 77.1 ±0.6% in seven ocean regions with dominant influence on S2S
+variability over land. This achievement underscores the significant potential of deep learning for
+largely improving forecasting skills at the S2S scale over land.
+1 Introduction
+At timescales ranging from two weeks to a few months, S2S prediction is a major challenge at the weather-climate
+nexus[6, 7]. Despite steady progress in the last two decades, prediction skill at the S2S scale remains very low[8, 9, 10, 11].
+Accurate S2S prediction of global sea surface temperature (SST), as one of the key initial and boundary conditions
+†These authors contributed equally to this work.arXiv:2409.05369v1  [physics.ao-ph]  9 Sep 2024
+APREPRINT - SEPTEMBER 10, 2024
+of numerical weather and climate prediction models, is crucial for improving the predictive skill of S2S weather and
+climate events, due to the strong teleconnections of global SST anomaly and associated modes of climate variability
+to extreme events through modulation of atmospheric circulations[12]. For example, it is well-known that the El
+Niño-Southern Oscillation (ENSO) featuring tropical SST anomaly in the tropical Pacific Ocean plays a central role
+in seasonal to annual regional climate prediction[13, 14, 15]. Consequently, S2S prediction of ENSO events can provide
+early warning of extreme events over ENSO-influenced regions with lead times ranging from several weeks to a few
+months[16, 17]. With anthropogenic warming, extreme weather and climate events, such as record-breaking heat waves,
+flash or years-long droughts, torrential rains, severe floods, and coastal inundation from tropical cyclones are becoming
+more frequent and more severe[1, 18, 19], causing significant loss of life and economic damage. Therefore, developing
+robust S2S prediction methods is critical to meet the increasing demand for extreme events forecasting, early warning,
+and disaster preparedness.
+Numerical modelling has been widely used by international major forecasting centres for predicting S2S variations of
+global SST[20, 21]. However, accurately predicting the S2S SST variability using general circulation models (GCMs)
+remains a great challenge, particularly for extratropical SST because GCMs exhibit large biases owing to inadequate
+representation of sea-air interactions and atmospheric processes connected to large-scale atmospheric circulations[22].
+Utilizing partial differential equations and physics parameterizations to represent the coupled ocean-atmosphere system,
+the large computational requirements of GCMs have limited their spatial resolution and ensemble size, contributing to
+their relatively low S2S SST prediction skill[5, 23]. As the predictability of the atmosphere diminishes rapidly after one
+month, uncertainty in predicting the global SST pattern plays an important role in limiting predictability at the S2S
+timescale[4, 24, 25].
+Unlike physics-based modelling methods, data-driven deep learning (DL) models leverage high-dimensional and
+long-time-scale multivariate data can be used to predict SST by learning patterns and intrinsic physical relationships
+from historical observations. Previous studies have used the Long Short-Term Memory (LSTM) network in SST
+prediction[6, 26, 27, 28]. Different variants of the LSTM methods have become the de facto standard due to their ability
+to capture contextual information and suitability for time-series SST modelling. However, LSTMs primarily focus
+on local pixel data, effectiveness their application in high-dimensional multivariate modelling and failing to capture
+the complex dynamics of ocean-atmosphere interactions[29]. This limitation renders them reduces their efficacy for
+sub-seasonal weather prediction and detecting extreme weather anomalies.
+Recent advances in DL-based artificial intelligence (AI) models have spurred their applications in the Earth science
+community, particularly in short to medium-range global weather forecasting[30, 31, 32, 33], and seasonal-to-annual ENSO
+prediction[34, 35]. However, to date, there has been no reported use of DL models specifically S2S global SST prediction.
+Here we develop an AI-based model using a self-attention-based Transformer architecture, named as CAS-Canglong
+for predicting SST at S2S timescale. Our implementation of the three-dimensional (3D) Transformer establishes
+multivariate relationships across space and time[35]. Specifically, we use 51 years (1959-2009) of reanalyses data for
+eight key oceanic and atmospheric variables to train the CAS-Canglong, while validating and testing the model in
+2009-2015 and 2016-2022, respectively. Results show that CAS-Canglong demonstrates superior and robust capabilities
+in predicting SST seasonal cycles, anomalies, and SST-based climate indices in both hindcast and near-real-time
+forecasting modes, as detailed in the Result Section.
+2 Result
+2.1 Hindcast comparison
+To quantitatively assess the performance of our AI-model’s SST predictions, we compared CAS-Canglong with the
+numerical models based predictions obtained from ECMWF S2S model ensemble[36]and NMME North American
+multi-model ensemble[37]for the overlapping period 2015-2020. The CAS-Canglong model has a spatial resolution of
+0.25°×0.25°, which is the finest available and comparable to that of the physics-based models. The spatial resolution
+of our model remapped to match the resolution of the physics-based models, most of which have a spatial resolution
+of 1°×1°. The prediction lead time is set to 3 months for the assessment, and we compare the correlation (R) and
+Root Mean Square Error (RMSE) of SST predictions in several key regions and associated climate indices. The
+predictive skill for SST across different regions are summarised in Fig 1, indicating that the CAS-Canglong model
+gives better SST predictions for one, two and three months lead time compared to the numerical models. From Fig. 1,
+CAS-Canglong shows more accurate and reliable predictions than the dynamical models from one- to three-month
+scales (see also Fig. S1). The CAS-Canglong model performs best for both the correlation skill in six of the seven
+regions (except for the Pacific Decadal Oscillation). Comparing the prediction error with all the GCMs, CAS-Canglong
+achieves the lowest error, surpassing all the numerical models. The improvement (reduction of RMSE) at the S2S
+scale (i.e., one to three months mean) is 34.9 ±3.3%, 77.1 ±0.6%, 28.5 ±3.7%, 39.6 ±1.0%, 31.2 ±2.7%, 30.3
+2
+APREPRINT - SEPTEMBER 10, 2024
+±2.1%, and 13.7 ±3.0%, for the regions of Niño 3.4, Artic Oscillation, Pacific Decadal Oscillation, Warm Pool,
+Southern Atlantic Ocean, Southern India Ocean, and Southern Pacific Ocean, respectively. For a robust comparison,
+we also evaluated our SST predictions against the Hadley Centre Sea Surface Temperature data set. Using the same
+evaluation method, CAS-Canglong again achieved outstanding performance for all the regions investigated (Fig. S2).
+The spatial distribution and correlations for the global SST and SST anomalies forecasts are illustrated in Fig. S3 and
+Fig. S4. Notably, our model generates SST predictions for lead times ranging from 1 to 24 months, with remarkably
+low prediction errors. Additionally, CAS-Canglong model nearly matches the current state-of-the-art SST prediction
+models, producing predictions highly consistent with those of the ECMWF (Fig. S5). Based on the outstanding overall
+performance of CAS-Canglong, we focus on its results in key SST regions compared with the multi-models in the
+following sections.
+Figure 1: Predictive skill assessment for the deep learning-based S2S model (CAS-Canglong) and the state-of-the
+art GCM S2S models. The one to three-month lead predictions of SST from CAS-Canglong are compared to those
+from 22 state-of-the-art NWP models. The correlation skill (line plot) and latitude-weighted RMSE (point and box
+plot) are summarized, by key SST regions and associated SST climate indices. For a robust comparison, the calculated
+correlation skill and RMSE (in °C) are based on the mean values from 2015 to 2020, which represents an overlap
+between CAS-Canglong’s testing period and availability of the physical-based data. The boxplot shows the RMSE
+distribution of different models. Each sub-boxplot shows the lower whisker (Q1-1.5IQR), lower quartile (Q1), median,
+upper quartile (Q3), and upper whisker (Q3+1.5IQR), where the IQR = Q3-Q1. The regions or climate indices are
+as follows: ( a) Niño 3.4 region (170 °W-120 °W, 5 °S-5°N). (b) Arctic Oscillation region (75 °N-90 °N). (c) Pacific
+Decadal Oscillation (PDO) region, defined by the leading pattern (EOF) of SSTA in the North Pacific (110 °E-100 °W,
+20°N-75 °N). (d) tropical Warming Pool (WP) region (35 °E-75 °W, 15 °S-15 °N). (e) Southern Atlantic Ocean (SAO)
+region (20 °E-160 °E, 40 °S-60°S). (f) Southern Indian Ocean (SIO) region (160 °E-110 °W, 40 °S-60°S), and ( g) Southern
+Pacific Ocean (SPO) region (20 °E-160 °E, 40 °S-60 °S). (h) Mean error (in °C) of the CAS-Canglong and the numerical
+S2S models compared with the ERA5 ground truth. In h, all predictions are for one-month lead of global SST from
+2015 to 2020. The shaded areas denote the 5thto 95thpercentile of ensemble model prediction. The error bars represent
+the mean error ±one standard deviation. Model colors in ( a)-(g) correspond to those in ( h), where the model names are
+shown.
+3
+APREPRINT - SEPTEMBER 10, 2024
+2.2 Hindcast in major regions
+Here, we focus on the seven SST regions and associated indices (see Methods), including the regions of Niño 3.4,
+Artic Oscillation (AO), Pacific Decadal Oscillation (PDO), warm pool (WP), Indian Ocean Dipole (IOD), Southern
+Atlantic Ocean (SAO), Southern Indian Ocean (SIO), and Southern Pacific Ocean (SPO). Fig. 2 shows the 3-month
+hindcast SST or SST-based climatic indices for these regions versus the ERA5 ground truth. The CAS-Canglong model
+shows strong forecast skill in all the regions. In tropical regions, specifically the Indo-Pacific warm pool area with SSTs
+exceeding 28 °C, the model’s performance is shown during the single-month of March 2012 with a weak La Niña event
+(Fig. 2) and across the multi-year mean warm pool area (Fig. S6). The predicted warm pool area is 5.93 ×107km2,
+compared to the ERA5 of 6.17 ×107km2, resulting in a low error of 3.8% (Fig. 2d). Fig. S7 further shows the predicted
+Indian Ocean Dipole (IOD) compared with the ERA5 ground truth, exhibiting a high correlation skill (R = 0.63). For
+the temperate Southern Oceans, including the SIO, SPO, and SAO (Figs. 2e-g and 3e-g), the spatial distribution of
+predicted SSTs is highly consistent with the ERA5. For the three-month lead predictions, the model shows superior
+performance for the SIO, SPO, and SAO with a correlation value greater than 0.8 for all Southern Ocean regions (Fig.
+3e-g). In boreal high latitudes, our model successfully captures the spatial distribution of Arctic SSTs (Fig. S8). These
+results indicate our model’s strong performance not only in tropical but also in temperate and high latitude regions.
+Figure 2: Prediction of SST and related climate indices in key global regions. An example of spatial map in March
+2012 with a weak La Niña event. For each panel of a specific SST region, the spatial maps at the top or on the left show
+the three-month lead predictions of CAS-Canglong, with the corresponding spatial maps at the bottom or on the right
+showing the ERA5 ground truth. Corresponding with Fig. 1 , the regions are for ( a) Niño 3.4 ( b) AO, ( c) PDO, ( d)
+WP, ( e) SIO, ( f) SPO, and ( g) SAO. In d, the warm pool boundary contour lines are rendered smoothly to highlight the
+model’s accuracy in capturing the extent of the warm pool.
+We now focus on the entire test period from 2009 to 2022 for the SST regions and related climate indices. The
+CAS-Canglong time series and the ground truth for the SST and related climate indices are presented in Fig. 3, with
+predictions categorized by lead times of 1 to 3 months. We select the most important SST index at S2S timescale, the
+ENSO-related Niño index, to elucidate the model’s predictive capabilities. Our analysis emphasizes the accuracy in
+forecasting El Niño and La Niña events across the entire test dataset. The temporal evolution of the predicted Niño
+3.4 index closely aligns with the ERA5 for one- to three-month lead predictions, achieving correlation values of 0.91,
+0.89, and 0.57, respectively (Fig. 3a). The CAS-Canglong surpasses the current state-of-the-art model ECMWF, with
+higher correlation and prediction skill (Fig. S9). The model accurately captures all the ENSO events during 2009-2022,
+achieving an overall hit rate of 85% for three months in advance. In the tropical region, our model demonstrates
+outstanding performance not only in simulating the Niño 3.4 index but also the Warm Pool area. As shown in Fig.
+3d, the model accurately captures the variations of the dynamic Warm Pool area, with correlation skill > 0.7 for three
+4
+APREPRINT - SEPTEMBER 10, 2024
+months in advance. In the temperate regions, our model successfully tracks the phase transitions in the PDO index (Fig.
+3c). In the Southern Ocean, the model shows its superior performance, with prediction correlations reaching 0.9 and 0.7
+for one-month and three-month lead time, respectively. The model well captures the seasonal variations in SST of the
+Southern Ocean. For the AO in polar regions, where traditional NWP models often struggle to simulate and predict, our
+model also exhibits remarkable performance, with SST prediction correlations reaching 0.9 and 0.6 for one-month and
+three-month lead times, respectively (Fig. 3b).
+Figure 3: Time series of SST predictions and climate indices in seven major regions for the period 2009-2022. The
+red line represents the ERA5 ground truth, while the blue lines show the model predictions for one to three months
+lead time, with colors ranging from dark to light blue corresponding to one, two, and three months, respectively. The
+background shading of the time series is overlaid with ±one standard deviation. The regions correspond with Fig. 1
+& Fig. 1: ( a) Niño 3.4. ( b) AO. ( c) PDO. ( d) WP. ( e) SIO. ( f) SPO, and ( g) SAO. The warm pool boundary contour
+lines are rendered smoothly to highlight the model’s accuracy in capturing the extent of the warm pool. The Niño index
+(shaded) is marked along the x-axis in ( a).
+2.3 Near real-time forecasting
+To evaluate our model’s real-time forecasting performance, Fig. 4 presents the predicted SST anomalies for the Niño 3.4
+region in 2024, compared against data for March to June 2024 obtained from the latest ERA5 observations. Availability
+of the latter allows us to forecast the subsequent months (July-December). The ensemble models’ predictions from
+the International Research Institute (IRI) are also shown in Fig. 4 In the first three months of the year 2024, a typical
+El Niño event with positive SST anomaly is observed, with a potential shift towards a La Niña event with negative
+SST anomaly in the latter half of the year. The CAS-Canglong model successfully predicts this transition, with higher
+predictive accuracy than the ECMWF S2S model. Fig. 4 also demonstrates that during the El Niño months, our
+model achieves robust results, nearly matching the ensemble mean of the current state-of-the-art dynamical models or
+statistical models. The CAS-Canglong model captures the observed earlier transition time point (during AMJ) than both
+the ensemble predictions of dynamical and statistical models These results validate our model’s capability to effectively
+perform S2S scale predictions in near real time, offering both faster inference speeds and enhanced accuracy.
+5
+APREPRINT - SEPTEMBER 10, 2024
+Figure 4: Near real-time predictions for the Niño 3.4 SST anomalies since January 2024. These ensemble model
+datasets were obtained in January 2024 from the International Research Institute (IRI), with the ERA5 ground truth
+updated in real-time. ( a) The magnified section of the graph shows the data from January to May 2024. The blue
+boxes indicate the 95th percentile of the ensemble predictions from all dynamical and statistical models, yellow crosses
+represent CAS-Canglong’s predictions, and red dots mark the ERA5 ground truth, highlighting CAS-Canglong’s
+prediction within the ensemble predictions of all other models and, its proximity to the true values. ( b) Multi-model
+predictions for the Niño 3.4 SST anomalies are displayed, including our model’s predictions alongside the ERA5
+ground truth (red dot). ( c) Other model lines are faded out and, summarized as IRI statistical ensemble-averaged
+predictions (dark blue) and dynamical ensemble-averaged forecasts (blue). Lines for the ECMWF S2S model and the
+CAS-Canglong are highlighted for comparison.
+3 Discussion
+Forecasting at the S2S scale across global land is critical for early warning and emergency preparedness of major
+extreme weather and climate events such as heatwave and droughts. The seasonal variability of SST on the S2S scale has
+profound impacts on atmospheric variability over land so accurate prediction of SST is necessary for predicting extreme
+events that affect terrestrial ecosystems and human societies[38]. However, traditional physics-based dynamical models
+still have low predictability on the S2S scale[39]. The major challenge is that the S2S time range is much longer than
+the memory of atmospheric processed but is too short for the sea surface variability to have a strong influence relative
+to the variability of atmospheric circilations[4, 7]. Global sea surface temperatures (SSTs), particularly the tropical
+SSTs over the Indo-Pacific Warm Pool region and the eastern tropical Pacific Ocean (e.g., the Niño 3.4 region), exert
+the dominant roles in global subseasonal-to-seasonal variability of hydroclimate extremes by releasing huge amounts
+of water vapour and latent heat to the atmosphere which modulate atmospheric circulations and the spatiotemporal
+distributions of global land precipitation[40]. SST is a crucial factor in predicting precipitation and extreme weather
+6
+APREPRINT - SEPTEMBER 10, 2024
+events and assessing extreme weather risks[40]. Furthermore, ENSO events on the S2S scale strongly impact extreme
+precipitation and droughts, with outsized impacts in densely populated regions[41]. Therefore, enhancing the accuracy of
+SST predictions on the S2S timescales could substantially improve forecasting of extreme events which are increasingly
+affecting humans and societies due to anthropogenic warming.
+Recent advances in data-driven, attention mechanism-based deep learning models offer a promising approach for
+weather forecasting and seasonal-to-annual ENSO predictions[35, 42]. Inspired by the recent successes of the Transformer
+model in computer vision??, such as the Sora model’s ability to predict video sequences up to one minute long[45], we
+recognized the potential for similar applications in weather forecasting and climate prediction for enhancing long-term
+predictive capabilities in Earth sciences[46]. Consequently, we developed the CAS-Canglong model utilizing the
+Swin-Transformer architecture and unique self-attention mechanisms to advance long-term modeling and prediction
+capabilities. Our model demonstrates strong performance in sub-seasonal SST predictions, exhibiting high correlation
+skills, with the potential to improve S2S predictions of weather and climate anomalies. The CAS-Canglong model
+represents a breakthrough, successfully simulating and predicting global SST on sub-seasonal to seasonal scales for the
+first time using deep learning.
+CAS-Canglong may enable early warning of extreme events by effectively predicting SST on sub-seasonal to seasonal
+scales, capturing both the seasonal cycles and anomalies in sea surface temperatures. The predictive prowess of our
+model has been demonstrated, not only for ENSO events but also for other modes of variability such as the Tropical
+Warm Pool area, AO, PDO, and the Southern Ocean SST anomalies, demonstrating a profound ability to model the
+air-sea interactions processes. This understanding enables our model to accurately forecast extreme sea temperature
+anomalies of global key SST regions such as ENSO. Additionally, our model may have the ability to further predict
+ENSO-affected land regions across such as western North America and the Amazon. Our model achieves an 85%
+accuracy hit rate in predicting ENSO events three months in advance. Our model has noticeably better skills than most
+ECMWF S2S models and the ensemble-averaged dynamics model, showing great potential.
+In summary, we developed a novel deep learning model, CAS-Canglong, for predicting global sea surface temperature
+at each 0.25 °×0.25°grid cell. Our validations and predictions demonstrate CAS-Canglong’s outstanding capability for
+predicting S2S SST changes. This model can be directly applied to other sub-seasonal Earth system weather prediction
+tasks, positioning it potentially to become potentially a generalizable standard deep learning model in geoscience.As
+SST serves as the foundation for S2S weather forecasts over land, this work lays the groundwork for land-based S2S
+weather predictions, such as precipitation, and has important implications for achieving skillful S2S forecasting in the
+future.
+4 Method
+4.1 Data
+We use the monthly aggregated ERA5 reanalysis data for atmospheric and oceanic variables for this study. The ERA5
+dataset[47]represents the fifth-generation ECMWF atmospheric reanalysis of the global weather and climate, providing
+hourly reanalysis data spanning the past 60 years. As a cutting-edge generation of reanalysis data, ERA5 is recognized
+for its high quality by blending numerical models with reanalysis data using numerical assimilation methods. This
+approach has been used for numerous applications including global earth surface predictions[48, 49, 50].
+We retained the highest resolution available from the ERA5 dataset, specifically 0.25 °×0.25°at the Earth’s surface,
+comprising a total of 1,440 ×721 grids for each variable at each time step. For predicting SST, we followed widely
+accepted practices with dynamical underpinning[34,?], selecting single-level variables including sea level pressure, zonal
+and meridional wind speed and geopotential heights at 850-hPa and 500-hPa, surface latent heat flux, and net solar
+radiation as predictors. We adhered to a training-to-testing dataset division of 8:2. Our model was trained using monthly
+data from 1959 to 2009, while the testing phase utilized data from 2009 to 2022.
+Additionally, we also obtained SST data from another observations and modelled. In addition to the ERA5 SST data,
+the Hadley Centre Sea-Surface Temperature (HadSST) dataset is also used for model comparison as the observations.
+The HadSST dataset provides gridded monthly SST data from 1850 to the present. It fully incorporates in situ
+measurements from ships and drifting buoys and is considered a high-quality, standard SST dataset[52]. Additionally,
+we utilized the European Centre for Medium-Range Weather Forecasts (ECMWF) S2S dataset and the North American
+Multi-Model Ensemble (NMME) S2S SST for comparison with CAS-Canglong. The NMME encompasses both
+real-time, initialized predictions and a comprehensive research database, archiving both retrospective and real-time
+forecasts[53, 54]. For comparison, we employed NMME ensemble models that provide SST forecasts, including CanCM4i,
+Cansips, CanSIPS-IC3, CanSIPS-IC4, CanSIPSv2, CMC1-CanCM3, CMC2-CanCM4, COLA-RSMAS-CCSM3,
+COLA-RSMAS-CCSM4, COLA-RSMAS-CESM1, ECMWF, GEM-NEMO, GFDL-CM2p1-aer04, GFDL-CM2p5-
+7
+APREPRINT - SEPTEMBER 10, 2024
+FLOR-A06, GFDL-CM2p5-FLOR-B01, NASA-GEOSS2S, NASA-GMAO-062012, and NCAR-CESM1. The ECMWF
+S2S project and database include forecasts and reforecasts from both operational and research centers. We selected
+datasets with prediction lead times exceeding one month for comparison, including those from ECMWF, UKMO,
+HCMR, BoM, and CMA.
+4.2 CAS-Canglong model development
+Inspired by the successful applications of Transformer models[30, 42, 55]in spatiotemporal predictions and the unique
+challenges posed by SST-related ocean-atmosphere coupling and time-series modeling, we developed a computationally
+efficient Transformer-based model for SST predictions, named as ‘CAS-Canglong’. The acronym of CAS stands for the
+Chinese Academy of Sciences; Canglong is a figure from ancient Chinese mythology, believed to control rainfall.
+This model is truly three-dimensional, designed to meet the complexities of sub-seasonal to seasonal scale forecasting.
+We incorporated time as the third dimension to consider predictors over multiple time steps. The model operates on an
+encoder-decoder framework utilizing the Transformer strategy. By employing the Swin-Transformer[56]architecture, it
+deeply extracts correlation information embedded in the predictors that is pertinent to land-atmosphere interactions. The
+data are processed through multi-head self-attention (MSA) and window multi-head self-attention modules (W-MSA),
+which upscale and restore the information to the output layer, enhancing prediction accuracy and detail[57].
+Specifically, this model is designed to handle normalized multivariable data in the format Tin×C×Nlat×Nlon, where
+Tinrepresents the number of consecutive months used as input predictors (set to 16 months), Cis the number of features
+(set to 8 corresponding to the predictor variables), and Nlat×Nlonare the latitude and longitude grid points (721 ×1440,
+respectively). Therefore, the total input dimension is 16 ×8×721×1440. The model outputs predictions for the
+subsequent months, with adjustments for various forecasting needs. Typically, predictions are made for the following
+three months with dimensions Tout×Nlat×Nlon= 3×721×1440, which is a standard setup for sub-seasonal scale
+predictions. The Toutparameter can be adjusted according to different prediction objectives, ranging from one to three,
+and up to a maximum of twelve months.
+As shown in Fig. 5, the data undergo normalization and preprocessing before being passed through the W-MSA and
+SW-MSA processes, during which they are downscaled to extract features, inspired by the successful applications of
+Pangu-Weather and Fuxi-Weather models[30, 32]. We employed a patch embedding layer with dimensions of 2 ×4×4,
+which is similar to that of the Vision Transformer. After this block embedding layer, the data are fed into the Swin
+Transformer, which utilizes an encoder-decoder architecture. To further tailor the model for Earth system applications,
+we implemented an Earth-specific positional bias strategy, which adapts techniques from computer vision tasks to
+Earth system imagery. This adaptation helps enhance the model’s relevance and effectiveness in interpreting complex
+geographical and atmospheric data[30].
+4.3 Training approach
+The CAS-Canglong model processes batches of data (batch size B = 4), each containing a 16-month consecutive
+sequence and 8 features as multi-dimensional input. It predicts SSTs for several subsequent months as targeted outputs
+to train the model. Unlike other models that may use a rolling prediction strategy, this model focuses exclusively
+on high-precision SST simulations, intentionally disregarding other variables. Furthermore, it has the capability to
+dynamically adjust and output forecasts for up to 12 months in advance, accommodating a range of forecasting needs
+while maintaining a focus on accuracy. The period from January 1959 to August 2009 was used for training, from
+September 2009 to April 2016 for validation, and from May 2016 to December 2022 for testing. The ratio of the
+training, validation, and testing sets is approximately 8:1:1.
+The temporal period selection was carefully considered. Most of the validation and evaluation were conducted using
+dataset of validation and test period (September 2009 to December 2022). When comparing with other models, we
+selected the overlapping period for comparison. For instance, we selected the data starting from 2010 for NEMM
+comparison, and the data from 2015 for ECMWF S2S comparison.
+To train the model efficiently and enhance prediction accuracy, we employed a combination of several loss functions.
+The primary metric utilized is the Mean Squared Error (MSE), which evaluates the model’s ability to accurately interpret
+SST data across a three-month observational period. This approach is critical in accelerating the model’s convergence,
+as it facilitates a rapid and effective comprehension of the SST data, thereby enhancing the overall performance of the
+forecasting system:
+Lfmse =1
+ToutToutX
+t=1
+Xt,l−ˆXt,l2
+(1)
+8
+APREPRINT - SEPTEMBER 10, 2024
+Figure 5: Architecture of our deep learning model, CAS-Canglong. (a) The architecture features a deep learning
+neural network which includes a data preprocessing and output recovery module. The core of the model is the Swin-
+Transformer, depicted in the center of the figure. The downscaled data enter the Swin-Transformer module, where
+features and relationships from the ocean-atmosphere system data are extracted through the MSA and W-MSA modules.
+(b) The schematic diagram illustrates the Swin-Transformer adapted for Earth surface tasks, with a progressively
+expanding receptive field to extract relationships within and between adjacent Earth pixels. ( c) The Transformer module
+based on the encoder-decoder structure, highlighting the specific roles of MSA, followed by a linear output layer at the
+end of the decoder to finalize the prediction output.
+In this context, Xt,landˆXt,lrepresent the actual and predicted values of the SST for the month t + l, respectively. The
+loss function Lfmsequantifies the model’s capability to forecast up to Toutmonths lead time, and is a commonly utilized
+metric for temperature prediction. While MSE is effective in enhancing convergence by focusing on the model’s ability
+to interpret SST data during the observation period, it may lead to a prioritization of short-term forecast accuracy over
+long-term precision. To address this potential imbalance, we further introduced a second loss function designed to
+distribute penalization more evenly across the entire forecast period. This strategic approach ensures a balanced focus
+on both immediate and extended forecast accuracy:
+Lcorr=1
+ToutToutX
+l=2argmax {0,0.5−PT
+t=1(xt,l−¯Xl)(ˆxt,l−¯ˆXl)qPT
+t=1(xt,l−¯Xl)2qPT
+t=1(ˆxt,l−¯ˆXl)2} (2)
+where ¯Xland¯ˆXlrepresent the mean observed and predicted values of sea surface temperature for the l-th month
+following the observation period, respectively. The loss function Lcorrspecifically penalizes instances where the Pearson
+correlation coefficient between the actual and predicted SST values falls below 0.5 in long-term forecasts. This design
+underscores the critical importance of maintaining accuracy in long-term predictions, ensuring that the model not only
+predicts accurately in the short term but also retains reliability over extended periods. The combined loss function,
+9
+APREPRINT - SEPTEMBER 10, 2024
+defined as the sum of LfmseandLcorr, provides a comprehensive approach to model training, balancing the focus between
+immediate accuracy and long-term predictive reliability.
+The Adam optimization algorithm is employed to optimize the model[58], starting with an initial lr= 0.0001 and using a
+cosine decay strategy for learning rate adjustment. This strategy gradually reduces the learning rate, aiding in fine-tuning
+the model’s weights as training progresses. The model is initially trained on four A100 GPUs, each with 80GB of
+memory, which provides substantial computational power for handling the intensive calculations required for SST
+predictions. Additionally, the model is designed to support transfer learning, allowing for its adaptation to different SST
+regions. This flexibility enhances its utility across various geographic settings by fine-tuning the pre-trained model with
+data specific to each region. To further reduce prediction uncertainty, several identical models are trained using the
+same methodology but with different initialization parameters. This diversity in initial conditions enables ensemble
+predictions, where the outputs of multiple models are aggregated to produce a single forecast. This ensemble approach
+strongly enhances the reliability and accuracy of the forecasts by averaging out individual model biases and variances,
+providing a more robust prediction.
+4.4 SST regions and related climate indices
+Several observed SST and related indices across different regions of the world were used for model assessment: El Niño
+Southern Oscillation, Pacific Decadal Oscillation, Arctic Oscillation, Southern Oscillation and Indian Ocean Dipole.
+These regions are important for S2S forecasting. For instance, the SSTs in the South Atlantic, South Pacific, and Arctic
+play a crucial role in forecasting east Asian summer monsoon rainfall. These SSTs not only serve as key predictors but
+also enhance the timeliness of these forecasts, enabling predictions to be made up to three months in advance[59].
+The Niño 3.4 index is widely used to define the ENSO, a naturally occurring oceanic phenomenon involving atmospheric
+coupling in the tropical Pacific Ocean[60, 61]. This index is based on the five-month rolling mean of the gridded SST in
+the Niño 3.4 region (170 °W-120 °W, 5°S-5°N). The two extreme phases of ENSO are determined by the SST anomaly
+persisting above or below 0.5 °C for more than five months. El Niño is identified when the SST anomaly is above 0.5 °C
+for more than five months, and La Niña is identified when the SST anomaly is below0.5°C for more than five months.
+The Pacific Decadal Oscillation (PDO) is defined as the leading pattern of the mean SST anomaly in the Pacific Ocean
+(110°E-100 °W, 20 °N-75 °N). To calculate the leading pattern, the global mean SST anomaly for each month is first
+removed to minimize the influence of long-term trends in the data. A warm PDO phase corresponds to positive values,
+while a cold PDO phase corresponds to negative values[62, 63].
+The Artic Oscillation (AO) is a large-scale mode of climate variability. It is used to measure the 1000 mb height pressure
+poleward of 20°N. We assess the SST in this region[64].
+The Southern Ocean (SO) is a dominant part of the global thermohaline circulation, playing a key role in climate
+variability and change[65, 66]. We adopted the SO definition according to Luo et al[67], which are divided into three
+regions: SAO (20 °E-160 °E, 40 °S-60 °S), SIO (160 °E-110 °W, 40 °S-60 °S), and SPO (20 °E-160 °E, 40 °S-60 °S). The
+Indo-Pacific Warm Pool (35°E-75°W, 15°S-15°N) is characterized by its SST consistently exceeding 28°C[68].
+The Indian Ocean Dipole (IOD) is a climate phenomenon occurring in the Indian Ocean, defined by the SST difference
+between the eastern (90°E-110°E,10°S ˜0°) and western regions (50°E-70°E,10°S-10°N) of the ocean[69, 70].
+4.5 Evaluation metrics
+We assessed two metrics, RMSE and correlation skill (R), defined as follows:
+RMSE =vuutPNlon
+i=1PNlat
+j=1W(i)
+ˆXi,j,l−Xi,j,l2
+Nlon×Nlat(3)
+R=vuuutPNlon
+i=1PNlat
+j=1W(i)ˆXi,j,lXi,j,lqPNlon
+i=1PNlat
+j=1W(i)ˆX2
+i,j,l×qPNlon
+i=1PNlat
+j=1W(i)X2
+i,j,l(4)
+where Xi,j,landˆXi,j,lrepresent the ERA5 ground truth and predicted values of SST for the ltime month, respectively.
+W(i) represents the area weighted formula of Earth, defined as follows:
+W(i) =Nlat×cosϕiPNlat
+i=1cosϕi(5)
+10
+APREPRINT - SEPTEMBER 10, 2024
+where ϕirepresents the latitude angle. The RMSE and R values were averaged over all times and weighted pixels.
+These two metrics are used to make comparison and evaluating prediction skills from different models in specific
+regions. For evaluating the CAS-Canglong model performance, we define the improvement as the RMSE reduction
+percentage from multi-model ensemble average to CAS-Canglong prediction.
+Acknowledgements
+This study was supported by the National Key R&D Program of China (Grant No. 2022YFC3002804), the National
+Natural Science Foundation of China (Grant No. 42330506), and the Second Tibetan Plateau Scientific Expedition
+and Research Program (Grant nos. 2019QZKK0206 and 2019QZKK0208). X.Z. thanks the support from the Youth
+Innovation Promotion Association CAS (2022053) and the “Kezhen-Bingwei” Youth Talents Project from IGSNRR
+CAS (2021RC003). We extend our gratitude to the European Centre for Medium-Range Weather Forecasts (ECMWF)
+for providing the ERA5 dataset; the International Research Institute for Climate and Society (IRI) for the Niño 3.4
+index ensemble prediction models; North American Multi-Model Ensemble (NMME) for the globally available S2S
+SST forecasts; Hadley Centre Sea Surface Temperature data set (HadSST) for the globally monthly SST for comparison.
+We appreciate the technical support from the National Supercomputer Center in Tianjin (NSCT). The work was also
+carried out at National Supercomputer Center in Tianjin.
+Data availability
+For training and testing, we downloaded a subset of the ERA5 dataset of 63 years from
+https://cds.climate.copernicus.eu/. Data used and produced in this research can be download from Figshare
+repository: doi.org/10.6084/m9.figshare.26779969. Supplementary figures could be downloaded from
+https://github.com/GISWLH/CAS-Canglong.
+Code availability
+The code established based on Python PyTorch. We made use of the code base of Swin-transformer, available at
+https://github.com/microsoft/Swin-Transformer. We released the trained models, inference code and the model details
+at a GitHub repository: https://github.com/GISWLH/CAS-Canglong.
+References
+[1]K. R. Patil, T. Doi, and S. K. Behera, “Predicting extreme floods and droughts in East Africa using a deep learning
+approach,” Npj Climate and Atmospheric Science , vol. 6, 2023, https://doi.org/10.1038/s41612-023-00435-x.
+[2]W. J. Cai, M. J. McPhaden, A. M. Grimm, et al., “Climate impacts of the El Nino-Southern Oscillation on South
+America,” Nature Reviews Earth & Environment , vol. 1, pp. 215-231, 2020, https://doi.org/10.1038/s43017-020-
+0040-3.
+[3]W. J. Cai, A. Santoso, G. J. Wang, et al., “ENSO and greenhouse warming,” Nature Climate Change , vol. 5, pp.
+849-859, 2015, https://doi.org/10.1038/nclimate2743.
+[4]F. Vitart, and A. W. Robertson, “The sub-seasonal to seasonal prediction project (S2S) and the prediction of extreme
+events,” Npj Climate and Atmospheric Science , vol. 1, 2018, https://doi.org/10.1038/s41612-018-0013-0.
+[5]H. Ritchie, et al., “Implementation of the semi-Lagrangian method in a high-resolution version of the
+ECMWF forecast model,” Monthly Weather Review , vol. 123, pp. 489-514, 1995, https://doi.org/10.1175/1520-
+0493(1995)123<0489:Iotslm>2.0.Co;2.
+[6]C. J. Xiao, N. C. Chen, C. L. Hu, K. Wang, J. Y . Gong, and Z. Q. Chen, “Short and mid-term sea surface
+temperature prediction using time-series satellite data and LSTM-AdaBoost combination approach,” Remote
+Sensing of Environment , vol. 233, 2019, doi: 10.1016/j.rse.2019.111358.
+[7]A. Mariotti, P. M. Ruti, and M. Rixen, “Progress in subseasonal to seasonal prediction through a joint weather and
+climate community effort,” npj Climate and Atmospheric Science , vol. 1, no. 1, 2018, doi: 10.1038/s41612-018-
+0014-z.
+[8]C. J. White, D. I. V . Domeisen, N. Acharya, E. A. Adefisan, M. L. Anderson, et al., “Advances in the Application
+and Utility of Subseasonal-to-Seasonal Predictions,” Bulletin of the American Meteorological Society , vol. 103, no.
+6, 2022, doi: 10.1175/BAMS-D-20-0224.1.
+11
+APREPRINT - SEPTEMBER 10, 2024
+[9]M. Luo, Y . Leung, Y . Zhou, and W. Zhang, “Scaling Behaviors of Global Sea Surface Temperature,” Journal of
+Climate , vol. 28, no. 8, pp. 3122-3132, 2015, doi: 10.1175/jcli-d-13-00743.1.
+[10] F. H. Lambert, G. R. Harris, M. Collins, J. M. Murphy, D. M. H. Sexton, and B. B. B. Booth, “Interactions
+between perturbations to different Earth system components simulated by a fully-coupled climate model,” Climate
+Dynamics , vol. 41, no. 11-12, pp. 3055-3072, 2013, doi: 10.1007/s00382-012-1618-3.
+[11] R. M. Varney, S. E. Chadburn, P. Friedlingstein, E. J. Burke, C. D. Koven, G. Hugelius, and P. M. Cox, “A spatial
+emergent constraint on the sensitivity of soil carbon turnover to global warming,” Nature Communications , vol. 11,
+no. 1, 2020, doi: 10.1038/s41467-020-19208-8.
+[12] M. Messié and F. Chavez, “Global Modes of Sea Surface Temperature Variability in Relation to Regional Climate
+Indices,” Journal of Climate , vol. 24, no. 16, 2011, doi: 10.1175/2011JCLI3941.1.
+[13] M. A. Cane, A. C. Clement, A. Kaplan, Y . Kushnir, D. Pozdnyakov, R. Seager, S. E. Zebiak, and R. Mur-
+tugudde, “Twentieth-century sea surface temperature trends,” Science , vol. 275, no. 5302, pp. 957-960, 1997, doi:
+10.1126/science.275.5302.957.
+[14] C. Deser, M. A. Alexander, S.-P. Xie, and A. S. Phillips, “Sea Surface Temperature Variability: Patterns and
+Mechanisms,” Annual Review of Marine Science , vol. 2, 2010, doi: 10.1146/annurev-marine-120408-151453.
+[15] M. J. McPhaden, S. E. Zebiak, and M. H. Glantz, “ENSO as an Integrating Concept in Earth Science,” Science ,
+vol. 314, no. 5806, 2006, doi: 10.1126/science.1132588.
+[16] C. F. Ropelewski and M. S. Halpert, “Global and Regional Scale Precipitation Patterns Associated with the El
+Niño/Southern Oscillation,” Monthly Weather Review , vol. 115, no. 8, 1987, doi: 10.1175/1520-0493(1987)115.
+[17] M. L. L’Heureux, K. Takahashi, A. B. Watkins, A. G. Barnston, E. J. Becker, T. E. Di Liberto, F. Gamble, J.
+Gottschalck, M. S. Halpert, B. Huang, K. Mosquera-Vásquez, and A. T. Wittenberg, “Observing and Predicting the
+2015/16 El Niño,” Bulletin of the American Meteorological Society , vol. 98, no. 7, 2017, doi: 10.1175/BAMS-D-
+16-0009.1.
+[18] Intergovernmental Panel on Climate Change (IPCC), “Climate Change 2022 – Impacts, Adaptation and Vulnera-
+bility,” 2023, doi: 10.1017/9781009325844.
+[19] X. Yuan, Y . Wang, P. Ji, P. Wu, J. Sheffield, and J. A. Otkin, “A global transition to flash droughts under climate
+change,” Science , vol. 380, no. 6641, 2023, doi: 10.1126/science.abn6301.
+[20] F. Vitart, “Evolution of ECMWF sub-seasonal forecast skill scores,” Quarterly Journal of the Royal Meteorological
+Society , vol. 140, no. 683, 2014, doi: 10.1002/qj.2256.
+[21] S. Saha, S. Moorthi, X. Wu, J. Wang, S. Nadiga, P. Tripp, D. Behringer, Y .-T. Hou, H.-y. Chuang, M. Iredell, M.
+Ek, J. Meng, R. Yang, M. P. Mendez, H. van den Dool, Q. Zhang, W. Wang, M. Chen, and E. Becker, “The NCEP
+Climate Forecast System Version 2,” Journal of Climate , vol. 27, no. 6, 2014, doi: 10.1175/JCLI-D-12-00823.1.
+[22] K. Ito, “Bias in Near-Real-Time Global Sea Surface Temperature Analysis of Japan Meteorological Agency
+Associated with Tropical Cyclone Passages in Western North Pacific,” Journal of the Meteorological Society of
+Japan , vol. 100, no. 2, pp. 321-341, 2022, doi: 10.2151/jmsj.2022-016.
+[23] F. Molteni, R. Buizza, T. N. Palmer, and T. Petroliagis, “The ECMWF ensemble prediction system: Methodology
+and validation,” Quarterly Journal of the Royal Meteorological Society , vol. 122, no. 529, pp. 73-119, 1996, doi:
+10.1002/qj.49712252905.
+[24] Y . Li, Z. Y . Wu, H. He, Q. J. Wang, H. T. Xu, and G. H. Lu, “Post-processing sub-seasonal precipitation forecasts
+at various spatiotemporal scales across China during boreal summer monsoon,” Journal of Hydrology , vol. 598,
+2021, doi: 10.1016/j.jhydrol.2020.125742.
+[25] W. J. Merryfield, J. Baehr, L. Batté, E. J. Becker, A. H. Butler, C. A. S. Coelho, G. Danabasoglu, P. A. Dirmeyer,
+F. J. Doblas-Reyes, D. I. Domeisen, L. Ferranti, T. Ilynia, A. Kumar, W. A. Müller, M. Rixen, A. W. Robertson, D.
+M. Smith, Y . Takaya, M. Tuma, F. Vitart, C. J. White, M. S. Alvarez, C. Ardilouze, H. Attard, C. Baggett, M. A.
+Balmaseda, A. F. Beraki, P. S. Bhattacharjee, R. Bilbao, F. M. de Andrade, M. J. DeFlorio, L. B. Díaz, M. A. Ehsan,
+G. Fragkoulidis, S. Grainger, B. W. Green, M. C. Hell, J. M. Infanti, K. Isensee, T. Kataoka, B. P. Kirtman, N. P.
+Klingaman, J. Y . Lee, K. Mayer, R. McKay, J. Mecking, D. E. Miller, N. Neddermann, C. H. J. Ng, A. Ossó, K.
+Pankatz, S. Peatman, K. Pegion, J. Perlwitz, G. C. Recalde-Coronel, A. Reintges, C. Renkl, B. Solaraju-Murali,
+A. Spring, C. Stan, Y . Q. Sun, C. R. Tozer, N. Vigaud, S. Woolnough, and S. Yeager, “Current and Emerging
+Developments in Subseasonal to Decadal Prediction,” Bulletin of the American Meteorological Society , vol. 101,
+no. 6, pp. E869-E896, 2020, doi: 10.1175/bams-d-19-0037.1.
+[26] Y . T. Yang, J. Y . Dong, X. Sun, E. Lima, Q. Q. Mu, and X. H. Wang, “A CFCC-LSTM Model for Sea Surface
+Temperature Prediction,” IEEE Geoscience and Remote Sensing Letters , vol. 15, no. 2, pp. 207-211, 2018, doi:
+10.1109/lgrs.2017.2780843.
+12
+APREPRINT - SEPTEMBER 10, 2024
+[27] X. Yu, S. X. Shi, L. Y . Xu, Y . Y . Liu, Q. S. Miao, and M. Sun, “A Novel Method for Sea Surface Tem-
+perature Prediction Based on Deep Learning,” Mathematical Problems in Engineering , vol. 2020, 2020, doi:
+10.1155/2020/6387173.
+[28] Q. Zhang, H. Wang, J. Y . Dong, G. Q. Zhong, and X. Sun, “Prediction of Sea Surface Temperature Using Long
+Short-Term Memory,” IEEE Geoscience and Remote Sensing Letters , vol. 14, no. 10, pp. 1745-1749, 2017, doi:
+10.1109/lgrs.2017.2733548.
+[29] H. Abbasimehr and R. Paki, “Improving time series forecasting using LSTM and attention models,” Journal
+of Ambient Intelligence and Humanized Computing , vol. 13, no. 1, pp. 673-691, 2022, doi: 10.1007/s12652-020-
+02761-x.
+[30] K. F. Bi, L. X. Xie, H. H. Zhang, X. Chen, X. T. Gu, and Q. Tian, “Accurate medium-range global weather
+forecasting with 3D neural networks,” Nature , vol. 619, no. 7970, pp. 533-+, 2023, doi: 10.1038/s41586-023-
+06185-3.
+[31] R. Lam, A. Sanchez-Gonzalez, M. Willson, P. Wirnsberger, M. Fortunato, F. Alet, S. Ravuri, T. Ewalds, Z.
+Eaton-Rosen, W. Hu, A. Merose, S. Hoyer, G. Holland, O. Vinyals, J. Stott, A. Pritzel, S. Mohamed, and P.
+Battaglia, “Learning skillful medium-range global weather forecasting,” Science , vol. 382, no. 6677, 2023, doi:
+10.1126/science.adi2336.
+[32] L. Chen, X. Zhong, F. Zhang, Y . Cheng, Y . Xu, Y . Qi, and H. Li, “FuXi: a cascade machine learning forecasting
+system for 15-day global weather forecast,” npj Climate and Atmospheric Science , vol. 6, no. 1, 2023, doi:
+10.1038/s41612-023-00512-1.
+[33] L. Chen, X. Zhong, H. Li, J. Wu, B. Lu, D. Chen, S.-P. Xie, L. Wu, Q. Chao, C. Lin, Z. Hu, and Y . Qi, “A machine
+learning model that outperforms conventional global subseasonal forecast models,” Nature Communications , vol.
+15, no. 1, 2024, doi: 10.1038/s41467-024-50714-1.
+[34] Y . G. Ham, J. H. Kim, and J. J. Luo, “Deep learning for multi-year ENSO forecasts,” Nature , vol. 573, no. 7775,
+pp. 568-+, 2019, doi: 10.1038/s41586-019-1559-7.
+[35] L. Zhou and R. H. Zhang, “A self-attention-based neural network for three-dimensional multivariate modeling
+and its skillful ENSO predictions,” Science Advances , vol. 9, no. 10, 2023, doi: 10.1126/sciadv.adf2827.
+[36] F. Vitart, C. Ardilouze, A. Bonet, A. Brookshaw, M. Chen, C. Codorean, M. Déqué, L. Ferranti, E. Fucile,
+M. Fuentes, H. Hendon, J. Hodgson, H.-S. Kang, A. Kumar, H. Lin, G. Liu, X. Liu, P. Malguzzi, I. Mallas, M.
+Manoussakis, D. Mastrangelo, C. MacLachlan, P. McLean, A. Minami, R. Mladek, T. Nakazawa, S. Najm, Y . Nie,
+M. Rixen, A. W. Robertson, P. Ruti, C. Sun, Y . Takaya, M. Tolstykh, F. Venuti, D. Waliser, S. Woolnough, T. Wu,
+D.-J. Won, H. Xiao, R. Zaripov, and L. Zhang, “The Subseasonal to Seasonal (S2S) Prediction Project Database,”
+Bulletin of the American Meteorological Society , vol. 98, no. 1, 2017, doi: 10.1175/BAMS-D-16-0017.1.
+[37] B. P. Kirtman, D. Min, J. M. Infanti, J. L. Kinter III, D. A. Paolino, Q. Zhang, H. van den Dool, S. Saha, M. P.
+Mendez, E. Becker, P. Peng, P. Tripp, J. Huang, D. G. DeWitt, M. K. Tippett, A. G. Barnston, S. Li, A. Rosati, S. D.
+Schubert, M. Rienecker, M. Suarez, Z. E. Li, J. Marshak, Y .-K. Lim, J. Tribbia, K. Pegion, W. J. Merryfield, B.
+Denis, and E. F. Wood, “The North American Multimodel Ensemble: Phase-1 Seasonal-to-Interannual Prediction;
+Phase-2 toward Developing Intraseasonal Prediction,” Bulletin of the American Meteorological Society , vol. 95, no.
+4, 2014, doi: 10.1175/BAMS-D-12-00050.1.
+[38] F. Liu, F. Song, and Y . Luo, “Human-induced intensified seasonal cycle of sea surface temperature,” Nature
+Communications , vol. 15, no. 1, 2024, doi: 10.1038/s41467-024-48381-3.
+[39] A. AghaKouchak, B. Pan, O. Mazdiyasni, M. Sadegh, S. Jiwa, W. Zhang, C. A. Love, S. Madadgar, S. M.
+Papalexiou, S. J. Davis, K. Hsu, and S. Sorooshian, “Status and prospects for drought forecasting: opportunities in
+artificial intelligence and hybrid physical-statistical forecasting,” Philosophical Transactions of the Royal Society
+A, vol. 380, no. 2238, 2022, doi: 10.1098/rsta.2021.0288.
+[40] T.-Y . Hsu, M. R. Mazloff, S. T. Gille, M. A. Freilich, R. Sun, and B. D. Cornuelle, “Response of sea surface
+temperature to atmospheric rivers,” Nature Communications , vol. 15, no. 1, 2024, doi: 10.1038/s41467-024-48486-
+9.
+[41] Y .-M. Yang, J.-H. Park, S.-I. An, B. Wang, and X. Luo, “Mean sea surface temperature changes influence
+ENSO-related precipitation changes in the mid-latitudes,” Nature Communications , vol. 12, no. 1, 2021, doi:
+10.1038/s41467-021-21787-z.
+[42] C. Gao, L. Zhou, and R.-H. Zhang, “A Transformer-Based Deep Learning Model for Successful Predictions of the
+2021 Second-Year La Niña Condition,” Geophysical Research Letters , vol. 50, no. 12, pp. e2023GL104034, 2023,
+doi: 10.1029/2023GL104034.
+13
+APREPRINT - SEPTEMBER 10, 2024
+[43] B. Rouet-Leduc and C. Hulbert, “Automatic detection of methane emissions in multispectral satellite imagery
+using a vision transformer,” Nature Communications , vol. 15, no. 1, 2024, doi: 10.1038/s41467-024-47754-y.
+[44] K. Han, Y . H. Wang, H. T. Chen, X. H. Chen, J. Y . Guo, Z. H. Liu, Y . H. Tang, A. Xiao, C. J. Xu, Y . X. Xu, Z. H.
+Yang, Y . M. Zhang, and D. C. Tao, “A Survey on Vision Transformer,” IEEE Transactions on Pattern Analysis and
+Machine Intelligence , vol. 45, no. 1, pp. 87-110, 2023, doi: 10.1109/tpami.2022.3152247.
+[45] H. K. Yu, X. Y . Liu, Y . L. Tian, Y . T. Wang, C. Gou, and F. Y . Wang, “Sora-Based Parallel Vision for Smart
+Sensing of Intelligent Vehicles: From Foundation Models to Foundation Intelligence,” IEEE Transactions on
+Intelligent Vehicles , vol. 9, no. 2, pp. 3123-3126, 2024, doi: 10.1109/tiv.2024.3376575.
+[46] M. Reichstein, G. Camps-Valls, B. Stevens, M. Jung, J. Denzler, N. Carvalhais, and Prabhat, “Deep learning and
+process understanding for data-driven Earth system science,” Nature , vol. 566, no. 7743, 2019, doi: 10.1038/s41586-
+019-0912-1.
+[47] H. Hersbach, B. Bell, P. Berrisford, S. Hirahara, A. Horanyi, J. Munoz-Sabater, J. Nicolas, C. Peubey, R. Radu, D.
+Schepers, A. Simmons, C. Soci, S. Abdalla, X. Abellan, G. Balsamo, P. Bechtold, G. Biavati, J. Bidlot, M. Bonavita,
+G. De Chiara, P. Dahlgren, D. Dee, M. Diamantakis, R. Dragani, J. Flemming, R. Forbes, M. Fuentes, A. Geer, L.
+Haimberger, S. Healy, R. J. Hogan, E. Holm, M. Janiskova, S. Keeley, P. Laloyaux, P. Lopez, C. Lupu, G. Radnoti,
+P. de Rosnay, I. Rozum, F. Vamborg, S. Villaume, and J.-N. Thepaut, “The ERA5 global reanalysis,” Quarterly
+Journal of the Royal Meteorological Society , vol. 146, no. 730, pp. 1999-2049, 2020, doi: 10.1002/qj.3803.
+[48] M. Cavaiola, F. Cassola, D. Sacchetti, F. Ferrari, and A. Mazzino, “Hybrid AI-enhanced lightning flash prediction
+in the medium-range forecast horizon,” Nature Communications , vol. 15, no. 1, 2024, doi: 10.1038/s41467-024-
+44697-2.
+[49] L. Chen, X. H. Zhong, F. Zhang, Y . Cheng, Y . H. Xu, Y . Qi, and H. Li, “FuXi: a cascade machine learning
+forecasting system for 15-day global weather forecast,” npj Climate and Atmospheric Science , vol. 6, no. 1, 2023,
+doi: 10.1038/s41612-023-00512-1.
+[50] H. X. Wu, H. Zhou, M. S. Long, and J. M. Wang, “Interpretable weather forecasting for worldwide stations with a
+unified deep model,” Nature Machine Intelligence , vol. 5, no. 6, pp. 602-+, 2023, doi: 10.1038/s42256-023-00667-9.
+[51] S. M. Larson and B. P. Kirtman, “An alternate approach to ensemble ENSO forecast spread: Application to the
+2014 forecast,” Geophysical Research Letters , vol. 42, no. 21, pp. 9411-9415, 2015, doi: 10.1002/2015gl066173.
+[52] J. J. Kennedy, N. A. Rayner, C. P. Atkinson, and R. E. Killick, “An Ensemble Data Set of Sea Surface Temperature
+Change From 1850: The Met Office Hadley Centre HadSST.4.0.0.0 Data Set,” Journal of Geophysical Research-
+Atmospheres , vol. 124, no. 14, pp. 7719-7763, 2019, doi: 10.1029/2018jd029867.
+[53] W. Zhang, G. Villarini, L. Slater, G. A. Vecchi, and A. A. Bradley, “Improved ENSO Forecasting Using Bayesian
+Updating and the North American Multimodel Ensemble (NMME),” Journal of Climate , vol. 30, no. 22, pp.
+9007-9025, 2017, doi: 10.1175/jcli-d-17-0073.1.
+[54] E. J. Becker, B. P. Kirtman, M. L’Heureux, A. G. Muñoz, and K. Pegion, “A Decade of the North American Multi-
+model Ensemble (NMME) Research, Application, and Future Directions,” Bulletin of the American Meteorological
+Society , vol. 103, no. 3, pp. E973-E995, 2022, doi: 10.1175/bams-d-20-0327.1.
+[55] A. Vaswani, N. Shazeer, N. Parmar, J. Uszkoreit, L. Jones, A. N. Gomez, L. Kaiser, and I. Polosukhin, “Attention
+Is All You Need,” in 31st Annual Conference on Neural Information Processing Systems (NIPS) , 2017.
+[56] Z. Liu, Y . Lin, Y . Cao, H. Hu, Y . Wei, Z. Zhang, S. Lin, and B. Guo, “Swin Transformer: Hierarchical Vision
+Transformer using Shifted Windows,” in 18th IEEE/CVF International Conference on Computer Vision (ICCV) ,
+2021, pp. 9992-10002, doi: 10.1109/iccv48922.2021.00986.
+[57] E. V oita, D. Talbot, F. Moiseev, R. Sennrich, and I. Titov, “Analyzing Multi-Head Self-Attention: Specialized
+Heads Do the Heavy Lifting, the Rest Can Be Pruned,” in 57th Annual Meeting of the Association for Computational
+Linguistics (ACL) , 2019, pp. 5797-5808.
+[58] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,” arXiv preprint arXiv:1412.6980 , 2014.
+[59] K. Ying, D. Jiang, X. Zheng, C. S. Frederiksen, and D. Deng, “Seasonal predictable signals of east Asian summer
+monsoon rainfall in existing monsoon indices,” Climate Dynamics , vol. 61, no. 11, 2023, doi: 10.1007/s00382-023-
+06827-2.
+[60] L. Bunge and A. J. Clarke, “A Verified Estimation of the El Nino Index Nino-3.4 since 1877,” Journal of Climate ,
+vol. 22, no. 14, pp. 3979-3992, 2009, doi: 10.1175/2009jcli2724.1.
+[61] S. Nigam and A. Sengupta, “The Full Extent of El Nino’s Precipitation Influence on the United States and the
+Americas: The Suboptimality of the Nino 3.4 SST Index,” Geophysical Research Letters , vol. 48, no. 3, 2021, doi:
+10.1029/2020gl091447.
+14
+APREPRINT - SEPTEMBER 10, 2024
+[62] X. Ren, W. Liu, A. Capotondi, D. J. Amaya, and N. J. Holbrook, “The Pacific Decadal Oscillation modulated
+marine heatwaves in the Northeast Pacific during past decades,” Communications Earth & Environment , vol. 4, no.
+1, 2023, doi: 10.1038/s43247-023-00863-w.
+[63] S. Li, L. Wu, Y . Yang, T. Geng, W. Cai, B. Gan, Z. Chen, Z. Jing, G. Wang, X. Ma, et al., “The Pacific Decadal
+Oscillation less predictable under greenhouse warming,” Nature Climate Change , vol. 10, no. 1, 2019, doi:
+10.1038/s41558-019-0663-x.
+[64] M. E. Hamouda, C. Pasquero, and E. Tziperman, “Decoupling of the Arctic Oscillation and North Atlantic
+Oscillation in a warmer climate,” Nature Climate Change , vol. 11, no. 2, 2021, doi: 10.1038/s41558-020-00966-8.
+[65] S. R. Rintoul, “The global influence of localized dynamics in the Southern Ocean,” Nature , vol. 558, no. 7709, pp.
+209-218, 2018, doi: 10.1038/s41586-018-0182-3.
+[66] J. Marshall and K. Speer, “Closure of the meridional overturning circulation through Southern Ocean upwelling,”
+Nature Geoscience , vol. 5, no. 3, pp. 171-180, 2012, doi: 10.1038/ngeo1391.
+[67] F. Luo, J. Ying, T. Liu, and D. Chen, “Origins of Southern Ocean warm sea surface temperature bias in CMIP6
+models,” npj Climate and Atmospheric Science , vol. 6, no. 1, 2023, doi: 10.1038/s41612-023-00456-6.
+[68] M. K. Roxy, P. Dasgupta, M. J. McPhaden, T. Suematsu, C. Zhang, and D. Kim, “Twofold expansion of the Indo-
+Pacific warm pool warps the MJO life cycle,” Nature , vol. 575, no. 7784, 2019, doi: 10.1038/s41586-019-1764-4.
+[69] G. Wang, W. Cai, A. Santoso, N. Abram, B. Ng, K. Yang, T. Geng, T. Doi, Y . Du, T. Izumo, et al., “The
+Indian Ocean Dipole in a warming world,” Nature Reviews Earth & Environment , vol. 5, no. 8, 2024, doi:
+10.1038/s43017-024-00573-7.
+[70] F. Ling, J.-J. Luo, Y . Li, T. Tang, L. Bai, W. Ouyang, and T. Yamagata, “Multi-task machine learning improves
+multi-seasonal prediction of the Indian Ocean Dipole,” Nature Communications , vol. 13, no. 1, 2022, doi:
+10.1038/s41467-022-35412-0.
+15

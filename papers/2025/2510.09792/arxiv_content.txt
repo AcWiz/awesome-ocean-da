@@ -1,0 +1,393 @@
+Principled Operator Learning in Ocean Dynamics:
+The Role of Temporal Structure
+Vahidreza Jahanmard∗Ali Ramezani-Kebrya†Robinson Hordoir‡
+∗vahidreza.jahanmard@taltech.ee
+Abstract
+Neural operators are becoming the default tools to learn solutions to governing
+partial differential equations (PDEs) in weather and ocean forecasting applications.
+Despite early promising achievements, significant challenges remain, including
+long-term prediction stability and adherence to physical laws, particularly for
+high-frequency processes. In this paper, we take a step toward addressing these
+challenges in high-resolution ocean prediction by incorporating temporal Fourier
+modes, demonstrating how this modification enhances physical fidelity. This study
+compares the standard Fourier Neural Operator (FNO) with its variant, FNOtD,
+which has been modified to internalize the dispersion relation while learning the
+solution operator for ocean PDEs. The results demonstrate that entangling space
+and time in training of integral kernels enables the model to capture multiscale
+wave propagation and effectively learn ocean dynamics. FNOtD substantially
+improves long-term prediction stability and consistency with underlying physical
+dynamics in challenging high-frequency settings compared to the standard FNO. It
+also provides competitive predictive skill relative to a state-of-the-art numerical
+ocean model, while requiring significantly lower computational cost.
+1 Introduction
+Accurate and timely ocean forecasting is essential for climate resilience, maritime safety, and sustain-
+able marine resource management. Operational systems primarily rely on physics-based numerical
+models, which face limitations such as high computational costs, discretization requirements, and
+dependence on parameterized subgrid processes [ 1]. These factors constrain model scalability,
+adaptability across geographic domains and evolving physical regimes, and the ability to perform
+efficient and skillful ensemble forecasting. With climate change amplifying extreme ocean events,
+the demand for fast, accurate, reliable forecasts to support early warning and decision-making has
+become more critical than ever [ 2]. Neural operators are increasingly explored in Earth science,
+particularly in ocean and weather forecasting, as scalable alternatives to computationally expensive
+numerical simulations, capable of learning surrogate models for complex physical systems [3–6].
+Neural operators are designed to learn nonlinear mappings between infinite-dimensional function
+spaces, making them particularly well-suited for approximating solutions to complex systems gov-
+erned by partial differential equations (PDEs) [ 7–9]. However, as noted by Bartolucci et al. [10], an
+important concern arises: beyond defining the operator at the continuous level, establishing a form of
+continuous–discrete equivalence is essential for a neural architecture to faithfully learn the underlying
+operator.
+∗Tallinn University of Technology, Department of Civil Engineering and Architecture
+†Integreat - Norwegian Centre for knowledge-driven machine learning; University of Oslo
+‡Institute of Marine Research; Bjerknes Centre for Climate Research
+Machine Learning and the Physical Sciences Workshop, NeurIPS 2025.arXiv:2510.09792v1  [cs.LG]  10 Oct 2025
+This paper takes a step toward addressing the operator learning challenge in high-resolution ocean
+dynamics through the lens of ocean wave propagation. To bridge the gap between the continuous
+operator and the discrete ocean model, we must adhere to the principles of wave solutions. To this
+end, we argue that integral kernels should be parametrized jointly over space and time, rather than
+solely mapping the current state to the next time step at a fixed interval. This allows the operator to
+internalize dispersion relations, a crucial step toward capturing the underlying physics in a principled
+manner. As a result, the model not only enables principled zero-shot super-resolution in operator
+learning by leveraging the fact that information propagates through the medium via waves, but also
+facilitates effective training on limited datasets, even beyond regular gridded dataset [ 11]. In our
+experiments, we conduct a comparative analysis of the standard Fourier Neural Operator (FNO)
+architecture and our modified version (FNOtD), with a particular focus on evaluating their physical
+fidelity. To do so, we train both models under the same conditions to predict hourly sea level at a
+regional scale and evaluate their sensitivity to perturbations in the initial conditions.
+2 Method
+Problem definitionLet Gθ:a7→u be a parametric mapping based on the FNO framework to
+approximate the true solution operator G†of the PDEs defined, where (a, u)∈ A × U [7]. Here, the
+underlying PDEs are the shallow water equations, and we modified the mapping from a sequence of
+input variables ¯X(x, y, t−(τ+1)∆t:t) to a sequence of output variables X(x, y, t+∆t:t+τ∆t)
+where τ∆t represents the time window used to capture the temporal structure ( τ= 1 in the standard
+FNOs). Input variables ¯Xinclude initial states along with forcing inputs derived from known dynamic
+factors relevant to the forecasting problem.
+Operator architecturesWe consider two variants of the FNO architecture: the standard model,
+which applies Fourier transforms solely in the spatial domain ( τ= 1 ), and a modified version
+(FNOtD), where the integral kernels Kare parameterized jointly over space and time. The architec-
+tures are defined as follows, with the number of Fourier layers set toL= 4:
+Gθ:=Q◦σ L(WL−1+M L−1(KL−1+bL−1))◦. . .◦σ 1(W0+M 0(K0+b0))◦P(1)
+where Mis a point-wise multilayer perceptron enhancing local nonlinear representation [ 12]. The
+integral kernel operators are defined as K(x) =F−1(R· F(v j)) (x) , where FandF−1denote the
+Fourier and inverse Fourier transforms, respectively, and Ris a complex-valued weight tensor in the
+Fourier domain. The key difference between the models lies in the dimensionality R: for standard
+FNO, Ris defined over spatial frequency modes only, while in FNOtD, it is extended to include
+the temporal frequency dimension, resulting in a higher-dimensional weight tensor. In both cases,
+the Fourier modes are truncated to kmax
+x,kmax
+y, and, additionally for FNOtD, ωmax in the temporal
+domain. To ensure a fair comparison, we adjusted the truncation thresholds such that both models
+have approximately the same number of learnable parameters. Architectural details are provided in
+Appendix A.
+Training objectiveThe models are trained to minimize the relative L2 error between predictions
+ˆyand target values y, a commonly used loss function in operator learning [ 8]. The FNOtD model
+enables distributing the loss computation across the predicted lead time window ti+ (∆t:τ∆t) ,
+which can facilitate learning high-frequency events from datasets with low signal-to-noise ratio.
+However, in this study, we compute the loss using only the first lead time step l= 1 to ensure both
+models are optimized under identical supervision targets. The loss function ℓis defined as the sum of
+individual losses for each output variablev, withℓ vexpressed in its general form as:
+ℓv(l) =1
+NsNsX
+k=1∥ˆyv(l)[m, n, k]−y v(l)[m, n, k]∥ 2
+∥yv(l)[m, n, k]∥ 2,∀(x m, yn)/∈M land (2)
+where Nsdenotes the number of samples and ∥.∥2represents the L2-norm computed over the
+spatial dimensions [m, n] . A land mask Mland is applied to exclude land grid points from the loss
+computation. The scope of this study is limited to predicting sea level as the only output variable.
+ExperimentWe evaluate both variants of the FNO architecture in a regional ocean setting, using
+the Baltic Sea as a case study. This shallow, non-tidal, stratified, semi-enclosed basin in Northern
+2
+Europe features complex morphology and bathymetry. Its multiscale dynamics driven by atmospheric
+forcing, thermal stratification, and salinity gradients make it a challenging testbed for modeling
+multiscale ocean dynamics [ 13,14]. Both models are trained on the same dataset for 50 epochs
+using the Adam optimizer with a cosine annealing learning rate schedule, starting from an initial
+rate of 1×10−3, on a single NVIDIA A100-80GB GPU, with a training time of approximately six
+hours per model. Training is performed on a low-resolution version of the data, while evaluation is
+carried out on a high-resolution grid to generate hourly sea level predictions. The low-resolution
+training data is obtained by resampling the high-resolution grid using bilinear interpolation. To
+improve generalization and reduce dependence on specific grid alignments, we introduce randomness
+in the resampling step by selecting varied starting points, effectively sliding the coarse grid over
+the fine-resolution domain. This approach preserves the spatial extent and uniform grid spacing,
+enabling the learned operator to better approximate the underlying continuous dynamics independent
+of specific discretizations.
+DatasetWe train and evaluate the models using high-resolution ocean simulations from the Baltic
+Sea Physics Analysis and Forecast product, hereafter referred to as the Nemo model. This model
+provides hourly three-dimensional outputs with a horizontal resolution of one nautical mile. It
+incorporates data assimilation from in situ temperature and salinity profiles, satellite-derived sea
+surface temperature (SST), and sea ice concentration. The input variables for both FNO variants
+include sea level, sea surface temperature, sea surface salinity, reference water depth, and atmospheric
+forcing fields (refer to Appendix A). The atmospheric forcing consists of sea level pressure and
+10-meter zonal and meridional wind components, sourced from the ERA5 reanalysis dataset. The
+FNO models are trained to forecast sea level, using the corresponding Nemo outputs as the target. The
+dataset spans from November 2021 to December 2024. The training period covers November 2021 to
+September 2024, and the test period spans September to December 2024, with a ten-day temporal gap
+in between. Although the training duration is relatively short, it suffices to assess the performance of
+the proposed FNOtD architecture, particularly in terms of physical fidelity and long-term stability,
+compared to the standard FNO model.
+InferenceThe trained models are evaluated in an autoregressive inference setting, where sea level
+is predicted iteratively under prescribed atmospheric forcing and sea surface salinity and temperature.
+Each forecast is initialized with the initial condition at a specified origin time, and predictions are then
+rolled forward over the desired lead time horizon. Similar to numerical models, FNO models are also
+expected to exhibit a spin-up period to mitigate the influence of initial condition perturbations. We
+assess the performance of FNO models on the out-of-sample test dataset using iterative predictions.
+Note that since the forcing inputs are derived from a reanalysis dataset and we aim to assess physical
+accuracy rather than forecasting skill in this study, we hereafter refer to the task as a prediction instead
+of forecasting.
+3 Results
+Sensitivity to initial conditionsWhile perturbations in initial conditions can significantly affect
+the early phases of ocean simulations, their influence diminishes over time, especially in surface
+layers. In ocean-only models without ocean–atmosphere feedback, surface fields are primarily driven
+by atmospheric forcing [ 15]. Therefore, we leveraged this known physics of ocean simulation to
+illustrate the physical realism of the trained models. Note that although the FNO models are trained
+on outputs from the Nemo model, the sea level fields produced by Nemo itself exhibit RMSE of
+0.08 m relative to a network of geoid-referenced tide gauge observations along the Baltic coast [ 14].
+Therefore, this inherent level of random noise in the Nemo model enables the sensitivity experiment
+by applying iterative predictions from varying origin times. Figure 1 illustrates this experiment for
+both FNO variants by rolling the initial conditions and performing iterative predictions on the test
+dataset. We observe that the standard FNO displays notable instability, with predictions diverging
+rather than converging after a few iterative steps, contrary to expectations. In contrast, FNOtD
+exhibits stable convergence of the predictions after approximately three weeks (Figure 1d). This
+period is analogous to the spin-up phase in ocean modeling, during which the model adjusts to
+reach a statistically steady state under applied external forcing. A similar three week period for
+reconstructing ocean circulation under atmospheric forcing with a deep learning model was also
+observed by Hordoir et al. [16]. Therefore, a more robust model evaluation is conducted after the
+3
+Oct Nov Dec
+2024   00.20.40.60.81Sea level (m)Nemo model
+FNO: initialized on 10 Sep
+FNO: initialized on 25 Octa.
+Oct Nov Dec
+2024   00.20.40.60.81Sea level (m)Nemo model
+FNOtD: init. on 10 Sep
+FNOtD: init. on 25 Octc.
+Figure 1: Iterative predictions with different initial conditions. Time series of outputs at a represen-
+tative location are shown for (a) the standard FNO and (c) FNOtD. The right panels illustrate the
+convergence of the predictions under identical forcing by displaying the difference between each
+prediction and a reference prediction initialized on September 10. Their time axis is relative to
+each prediction’s origin time, while differences are computed at corresponding calendar timestamps.
+Repeating the model training with different random initializations yields consistent results.
+spin-up period has elapsed, during which the standard FNO exhibits divergence and lacks long-term
+stability. For November and December 2024, FNOtD yields an RMSE of 0.09 m (relative RMSE of
+0.18) against Nemo model, evaluated 30 days after initial condition.
+Spectral biasIn Fig. 2, the spectral bias of the models is evaluated against high-resolution Nemo
+outputs by calculating radially averaged power spectra. The standard FNO exhibits error propagation
+from high to low frequencies upon encountering the first out-of-distribution event, whereas the
+FNOtD demonstrates robust stability in iterative predictions. In terms of relative RMSE in the
+spectral domain, FNOtD outperforms the standard FNO and exhibits superior spectral stability in
+long-term predictions. Iterative predictions, compared with Nemo outputs and observations, are
+presented in Appendix B for multiple measurement stations.
+Figure 2: Radially averaged power spectra of iterative hourly predictions at (a) 7 days and (b) 30
+days after prediction initialization. (c) Relative RMSE of the predictions in the spectral domain (see
+Appendix C). All panels correspond to forecasts initialized on October 1.
+4 Limitations and Future Work
+Although the results demonstrate a promising direction for high-resolution ocean forecasting, the
+proposed approach has thus far been evaluated only in a single representative region. Further
+4
+validation across diverse geographical settings and oceanic conditions is warranted. Future work
+could explore extended training data, additional predictive variables, and further model fine-tuning.
+Applying this framework to other marine environments or incorporating different oceanographic
+parameters also presents a promising research direction. One limitation of the proposed architecture,
+compared to the standard FNO, is the increased memory demand associated with incorporating
+temporal modes during training. However, the FNOtD architecture demonstrates the ability to
+learn and generalize from limited training data, whereas the standard FNO typically requires a
+larger dataset to achieve comparable generalization. Furthermore, our observations indicate that the
+FNOtD architecture demonstrates potential for application in training and/or fine-tuning on irregular
+and sparse observational datasets. In such settings, the integration of a spatiotemporal training
+objective with Fourier-domain parameterization of the integral kernels offers a robust framework for
+constraining operator learning, thereby enabling the model to effectively capture evolving underlying
+dynamics within limited and irregular training data.
+5 Conclusion
+We introduced a variant of the Fourier Neural Operator (FNO) framework tailored for ocean modeling,
+where the model is guided by the principles of ocean wave propagation. Our results show that
+integrating temporal Fourier modes enhances operator learning, leading to improved physical accuracy
+and long-term emulation stability. These findings point to a promising direction for AI-enabled ocean
+digital twins. The proposed architecture demonstrates both physical fidelity and robustness, making
+it suitable for operational ocean applications. By enabling rapid, computationally efficient ensemble
+forecasting, it supports climate adaptation and resource management. FNO-based models can generate
+large ensemble forecasts at computational costs several orders of magnitude lower than state-of-the-
+art numerical models. Future work will extend this framework to three-dimensional emulation and
+incorporate additional predictive variables to further improve robustness and applicability.
+Acknowledgments
+This research has been supported by the Estonian Research Council grant no. PRG1785 and the
+Tallinn University of Technology grant no. GFEA VJ24. Ali Ramezani-Kebrya was supported by the
+Research Council of Norway through FRIPRO Grant under project number 356103 and its Centres
+of Excellence scheme, Integreat - Norwegian Centre for knowledge-driven machine learning under
+project number 332645.
+References
+[1]Baylor Fox-Kemper, Alistair Adcroft, Claus W Böning, Eric P Chassignet, Enrique Curchitser,
+Gokhan Danabasoglu, Carsten Eden, Matthew H England, Rüdiger Gerdes, Richard J Great-
+batch, et al. Challenges and prospects in ocean circulation models.Frontiers in Marine Science,
+6:65, 2019.
+[2]IPCC. Special report on the ocean and cryosphere in a changing climate. https://www.ipcc.
+ch/srocc/, 2019. Available at:https://www.ipcc.ch/srocc/.
+[3]Jaideep Pathak, Shashank Subramanian, Peter Harrington, Sanjeev Raja, Ashesh Chattopadhyay,
+Morteza Mardani, Thorsten Kurth, David Hall, Zongyi Li, Kamyar Azizzadenesheli, et al.
+Fourcastnet: A global data-driven high-resolution weather model using adaptive fourier neural
+operators.arXiv preprint arXiv:2202.11214, 2022.
+[4]Boris Bonev, Thorsten Kurth, Christian Hundt, Jaideep Pathak, Maximilian Baust, Karthik
+Kashinath, and Anima Anandkumar. Spherical fourier neural operators: Learning stable
+dynamics on the sphere. InInternational conference on machine learning, pages 2806–2823.
+PMLR, 2023.
+[5]Ashesh Chattopadhyay, Michael Gray, Tianning Wu, Anna B Lowe, and Ruoying He. Oceannet:
+A principled neural operator-based digital twin for regional oceans.Scientific Reports, 14(1):
+21181, 2024.
+5
+[6]Wei Xiong, Yanfei Xiang, Hao Wu, Shuyi Zhou, Yuze Sun, Muyuan Ma, and Xiaomeng Huang.
+Ai-goms: Large ai-driven global ocean modeling system.arXiv preprint arXiv:2308.03152,
+2023.
+[7]Zongyi Li, Nikola Kovachki, Kamyar Azizzadenesheli, Burigede Liu, Kaushik Bhattacharya,
+Andrew Stuart, and Anima Anandkumar. Fourier neural operator for parametric partial differen-
+tial equations.arXiv preprint arXiv:2010.08895, 2020.
+[8]Nikola Kovachki, Zongyi Li, Burigede Liu, Kamyar Azizzadenesheli, Kaushik Bhattacharya,
+Andrew Stuart, and Anima Anandkumar. Neural operator: Learning maps between function
+spaces with applications to pdes.Journal of Machine Learning Research, 24(89):1–97, 2023.
+[9]Kamyar Azizzadenesheli, Nikola Kovachki, Zongyi Li, Miguel Liu-Schiaffini, Jean Kossaifi,
+and Anima Anandkumar. Neural operators for accelerating scientific simulations and design.
+Nature Reviews Physics, 6(5):320–328, 2024.
+[10] Francesca Bartolucci, Emmanuel de Bézenac, Bogdan Raonic, Roberto Molinaro, Siddhartha
+Mishra, and Rima Alaifari. Are neural operators really neural operators? frame theory meets
+operator learning.arXiv preprint arXiv:2305.19913, 2023.
+[11] Levi Lingsch, Mike Y Michelis, Emmanuel De Bézenac, Sirani M Perera, Robert K
+Katzschmann, and Siddhartha Mishra. Beyond regular grids: Fourier-based neural opera-
+tors on arbitrary domains.arXiv preprint arXiv:2305.19663, 2023.
+[12] Shaoxiang Qin, Fuyuan Lyu, Wenhui Peng, Dingyang Geng, Ju Wang, Naiping Gao, Xue Liu,
+and Liangzhu Leon Wang. Toward a better understanding of fourier neural operators: Analysis
+and improvement from a spectral perspective.arXiv e-prints, pages arXiv–2404, 2024.
+[13] Ralf Weisse and Birgit Hünicke. Baltic sea level: past, present, and future. InOxford Research
+Encyclopedia of Climate Science. 2019.
+[14] Vahidreza Jahanmard, Robinson Hordoir, Nicole Delpeche-Ellmann, and Artu Ellmann. Quan-
+tification of hydrodynamic model sea level bias utilizing deep learning and synergistic integra-
+tion of data sources.Ocean Modelling, 186:102286, 2023.
+[15] Robin Tokmakian and Peter Challenor. Influence of initial ocean conditions on temperature
+and precipitation in a coupled climate model’s solution.Advances in Statistical Climatology,
+Meteorology and Oceanography, 5(1):17–35, 2019.
+[16] Robinson Hordoir, Vahidreza Jahanmard, Pål Erik Isachsen, Ulrike Loeptien, Heiner Dietze,
+Anne Britt Sandø, and Vidar Lien. Barents sea atlantification driven by a shift in atmospheric
+synoptic timescale.PREPRINT (Version 1) available at Research Square, 2025. doi: https:
+//doi.org/10.21203/rs.3.rs-6046335/v1.
+6
+A Model architecture and training dataset
+In this work, we compare the performance of two variants of FNO architectures: standard FNO
+and FNOtD (where ’tD’ refers to the incorporation of temporal Fourier modes). The standad FNO
+learns the mapping from ¯X(x, y, t) toX(x, y, t+ 1∆t) , where ¯X(x, y, t) comprises the output
+variables X(x, y, t) alongside other predictive variables listed in Table 1 at time t. Input and output
+variables are obtained form Nemo model4, ERA5 reanalysis dataset5, and GEBCO_2024 dataset6.
+A fixed time step of ∆t= 6 hours is used consistently throughout this study; for brevity, we omit
+the explicit notation where appropriate. Therefore, the integral kernel acts exclusively on the spatial
+dimensions via a 2D FFT with truncated modes (kmax
+x, kmax
+y), consistent with previous works [ 3,5].
+FNOtD extends the parameterization of the integral kernels to learn from the time dimension as
+well, with mode truncation at ( kmax
+x, kmax
+y, ωmax). Therefore, the operator learns mapping from
+¯X(x, y, t−τ+ 1 :t) toX(x, y, t+ 1 :t+τ) , where τis a fixed temporal window. Our findings
+indicate that a temporal window of two days is suitable for learning wave propagation patterns at the
+regional scale. However, tuning the window size and the number of Fourier modes enables the model
+development to be adapted for longer-term forecasting tasks.
+Table 1: Input and output variables. For the standard FNO, the parameterτis set to 1. All variables
+are projected from the original Gaussian grid onto a uniform Cartesian grid. Additionally, datasets not
+originating from the Nemo model are interpolated onto the Nemo grid using bilinear interpolation.
+Input ¯X(x, y, t−τ+ 1 :t)OutputX(x, y, t+ 1 :t+τ)
+Sea level (SL) – Nemo Sea level (SL) – Nemo
+Sea surface temperature (SST) – Nemo
+Sea surface salinity (SSS) – Nemo
+Sea level pressure – ERA5
+U wind – ERA5
+V wind – ERA5
+Reference water depth – GEBCO
+This modification enables the operator to treat the time axis as grid-independent, allowing the model
+to capture multiscale variations by learning the dispersion relation. In the standard FNO, the time
+step is fixed during training, which makes it difficult for the model to learn the mapping multiscale
+processes and extrapolate to unseen frequencies. Figure 3 shows the FNOtD architecture used in
+this study, with four Fourier layers. The standard FNO architecture will be obtained from this figure
+by setting τ= 1 . In the standard FNO, the truncated Fourier modes are set as kmax
+x=kmax
+y= 16 ,
+whereas in FNOtD, the modes are set to kmax
+x=kmax
+y= 8 andωmax= 4. This setup ensures a
+roughly equivalent number of learnable parameters in both models (FNO: 16.71 M; FNOtD: 16.19 M).
+However, in our experiments, the standard FNO with 8 modes demonstrates comparable performance
+to that with 16 modes.
+Note that in FNOtD, the first lead time ( l= 1 , as defined in Equation 2) is used for loss computation
+to ensure consistency with the standard FNO. However, this architecture allows for loss computation
+across multiple lead times, thereby facilitating efficient constraint of operator learning in chaotic
+dynamical systems with measurement uncertainty. Designing principled neural operators enable
+effective learning from physical laws, even in the absence of extensive or regularly sampled datasets.
+The results from the FNOtD architecture show promising direction for training or fine-tuning models
+directly on sparse (in time and space) observational data, such as in-situ or satellite observations.
+In this paper, we demonstrate that FNOtD can efficiently capture multiscale processes, enable
+principled extrapolation to unseen frequencies, and generalize effectively beyond the training dataset.
+These capabilities address key challenges associated with the standard FNO, which mostly improved
+by extensive training in previous studies. The spatiotemporal dependencies in FNOtD also allow
+for efficient fine-tuning, even in cases with limited data or when loss functions include masked
+4Obtained from Copernicus Marine Service, Baltic Sea Physics Analysis and Forecast product (version
+202311),doi:10.48670/moi-000103-7086abc0ea0
+5Obtained from Copernicus climate data store,https://doi.org/10.24381/cds.adbb2d47
+6Obtained from GEBCO Compilation Group (2024) GEBCO 2024 Grid, doi:10.5285/1c44ce990a0d5f4f-
+e0637086abc0ea0f
+7
+Figure 3: (a) Architecture of the Fourier Neural Operator FNOtD, with input and output dimensions
+of h×w×t×c, where h and w correspond to the latitude and longitude grid dimensions, t denotes
+time steps, and c is the number of physical variables. Eliminating the temporal dimension yields
+the standard FNO model architecture. The input is first projected into a higher-dimensional channel
+space by a point-wise encoder P. After passing through four Fourier layers, the feature representations
+are mapped to the output variables via a point-wise decoder Q. (b) Schematic of a single Fourier layer.
+Mis a point-wise multilayer perceptron layer to enhance local nonlinear representation learning.
+or missing observations. Nevertheless, incorporating the time dimension in FNOtD increases the
+data load during training, leading to higher GPU memory requirements and requiring additional
+effort to optimize the training setup relative to the standard FNO. Furthermore, FNOtD is more
+prone to training plateaus, particularly when the dataset contains high levels of noise that obscure
+underlying physical relationships, such as dispersion relations or when the input variables fail to
+adequately represent the governing dynamics. While FNOtD offers a promising principled framework
+for operator learning in ocean dynamics, it has so far been evaluated in a single representative region.
+Therefore, its generalizability across different regions and scenarios remains to be validated across
+diverse geographical settings and under varying conditions in future work.
+B Iterative predictions against Nemo output and observations
+Figure 4 presents the iterative predictions of the standard FNO and FNOtD, with initial conditions
+set on October 1, for multiple measurement stations along the Baltic coastline. The predictions are
+compared with Nemo outputs and geoid-referenced tide gauge records [ 14]. In this figure, it is evident
+that the standard FNO model (represented by the orange lines) exhibits significant instability across
+all stations when encountering the first out-of-distribution event, leading to a dramatic degradation
+in performance. As shown in Figure 1, this instability increases as the model moves further from
+the training period and encounters additional out-of-distribution samples. The instability arises from
+error propagation across high to low frequencies, highlighting the difficulty of the standard FNO in
+learning the underlying operator that maps multiscale processes.
+In contrast, FNOtD (represented by the magenta lines) demonstrates stable predictions, which are
+comparable to the Nemo outputs, the state-of-the-art numerical high-resolution 3D ocean model
+for the Baltic Sea (green lines). The RMSE of FNOtD and Nemo outputs relative to tide gauge
+observations are 0.12 m and 0.08 m, respectively. Note that the FNOtD was trained on a limited
+dataset, allowing for a comparison with the equivalent standard FNO. Hence, a larger model trained on
+a more extensive reanalysis dataset and involving more predictive variables, potentially incorporating
+variables from multiple depths, could improve prediction accuracy and enhance the model’s ability
+to capture extreme events with better uncertainty quantification. This accuracy can be further
+improved through fine-tuning on observational data. Such capabilities pave the way for data-driven
+ocean forecasting with predictive skill comparable to, and potentially surpassing, that of state-of-
+the-art numerical models, while also enabling ensemble predictions at orders of magnitude lower
+computational cost.
+C Evaluation metrics
+The root mean squared error (RMSE) in its general form is defined as:
+RMSE =s
+1
+MNQX
+m,n,q(ˆy[m, n, q]−y[m, n, q])2,∀(x m, yn)/∈M land (3)
+8
+Figure 4: Time series of iterative sea level (in meter) predictions by the standard FNO and FNOtD are
+shown, alongside Nemo outputs at the nearest grid point to the corresponding tide gauge observation.
+The data corresponds to the period of the out-of-sample test dataset.
+where ˆyandyare predicted and reference values at the location ( xm, yn) and prediction time tq, and
+M,N, and Qdenote the total number of samples in the x and y directions, and time, respectively.
+The land mask ( Mland) is applied to exclude land grid points. In the RMSE computation with respect
+to observations,x mandy nrepresent the spatial coordinates of the observation stations.
+The Relative RMSE (RRMSE) of the radially averaged power spectrum shown in Figure 2c is
+determined at wavenumberk(or equivalently, wavelengthλ, or Fourier modes), as follows:
+RRMSE(k) =vuutP
+q(Pˆy(k)[q]−P y(k)[q])2
+P
+q(Py(k)[q])2(4)
+whereP ˆyandP ydenote the radially averaged power spectra of the predicted and referenced values,
+respectively. The radially averaged power spectrum at wavenumber kis the average of a 2D power
+spectrumPSDwhose radial frequencyq
+(k2x+k2y)falls within a small interval aroundk:
+Pv(k) =⟨PSD(k x, ky)⟩k2x+k2y≈k (5)
+where⟨.⟩denotes the average operator.
+9

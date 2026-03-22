@@ -1,0 +1,620 @@
+arXiv:2105.12903v1  [cs.LG]  27 May 2021Neural Enhanced Belief Propagation for Cooperative Locali zation
+Mingchao Liang and Florian Meyer
+University of California, San Diego, La Jolla, CA
+Email:{m3liang, ﬂmeyer }@ucsd.edu
+ABSTRACT
+Location-aware networks will introduce innovative servic es and ap-
+plications for modern convenience, applied ocean sciences , and pub-
+lic safety. In this paper, we establish a hybrid method for mo del-
+based and data-driven inference. We consider a cooperative local-
+ization (CL) scenario where the mobile agents in a wireless n etwork
+aim to localize themselves by performing pairwise observat ions with
+other agents and by exchanging location information. A trad itional
+method for distributed CL in large agent networks is belief p ropaga-
+tion (BP) which is completely model-based and is known to suf fer
+from providing inconsistent (overconﬁdent) estimates. Th e proposed
+approach addresses these limitations by complementing BP w ith
+learned information provided by a graph neural network (GNN ). We
+demonstrate numerically that our method can improve estima tion ac-
+curacy and avoid overconﬁdent beliefs, while its computati onal com-
+plexity remains comparable to BP. Notably, more consistent beliefs
+are obtained by not explicitly addressing overconﬁdence in the loss
+function used for training of the GNN.
+Index Terms —Belief propagation, graph neural networks, co-
+operative localization, factor graph, agent networks
+1. INTRODUCTION
+Location awareness [1–8] is an important aspect in a variety of
+applications including autonomous navigation, applied oc ean sci-
+ences, and public safety. Of particular interest are algori thmic so-
+lutions based on the framework of factor graphs and belief pr opa-
+gation (BP) [5–8] due to their ability to provide accurate re sults in
+high-dimensional nonlinear Bayesian estimation problems .
+BP [9–11] is a message passing algorithm. It operates on the f ac-
+tor graph that represents the statistical model of an estima tion prob-
+lem. Given that the underlying factor graph is tree-structu red, BP is
+guaranteed to provide the exact marginal posterior distrib utions or
+“beliefs” needed for optimal estimation. However, in cases where
+the factor graph has cycles or the statistical model represe nted by
+the factor graph does not accurately model the true data gene rating
+process, BP can only provide approximations of the marginal poste-
+rior distributions. In factor graphs with cycles, BP is typi cally faced
+by a lack of convergence guarantees. BP is also known to provi de
+beliefs that are overconﬁdent [10], i.e., the spread of the p rovided be-
+liefs downplays the uncertainty of the estimates. This is pa rticularly
+problematic in autonomous navigation applications where o vercon-
+ﬁdence can lead to catastrophic events [3]. We aim to improve the
+accuracy and reliability of BP-based localization and trac king algo-
+rithms by learning a reﬁned model from data.
+A graph neural network (GNN) [12, 13] is a type of neural net-
+work that implements a message passing mechanism similar to BP.
+It has been demonstrated that a learned GNN can outperform lo opy
+BP for Bayesian estimation if sufﬁcient data is available [1 4]. Re-
+cently, [15] introduced neural enhanced belief propagatio n (NEBP)
+which pairs a factor graph with a GNN. The learned GNN message scomplement the corresponding BP messages to correct errors intro-
+duced by cycles and model mismatch. The resulting method com -
+bines the beneﬁts of model-based and data-driven inference . NEBP
+can provide satisfactory estimation results when little da ta is avail-
+able and leverages the performance advantages of GNNs in the large
+data regime. So far NEBP has only been considered for estimat ion
+problems with discrete random variables.
+In this paper, we extend NEBP to estimation problems with con -
+tinuous random variables and apply it to the cooperative loc aliza-
+tion (CL) problem [5–7, 16]. In particular, we represent the beliefs
+and messages related to continuous random variables by rand om
+samples or “particles” and update their weights by combinin g the
+BP message provided by the factor graph with the correspondi ng
+message provided by the GNN. Compared to BP-based CL, the pro -
+posed NEBP method has an improved estimation accuracy and ca n
+avoid overconﬁdent beliefs.
+The main contributions of this paper are as follows.
+• We extend NEBP to continuous random variables and apply
+it to the CL problem.
+• We demonstrate performance advantages compare to BP-
+based CL with a relative small amount of training data.
+Our method preserves the advantages of BP-based methods for CL
+in wireless networks [5–7], i.e., it is fully distributed an d requires
+little communication overhead, while its computational co mplexity
+only differs by a constant factor.
+2. REVIEW OF PARTICLE-BASED BP FOR CL
+We brieﬂy review particle-based BP for CL which will be the ba sis
+for the development of the proposed NEBP method.
+2.1. System Model and Problem Formulation
+We consider a wireless network that consists of Imobile agents with
+indexesi∈ I/defines{1,...,I}. The topology of the agent network is
+described by the sets of neighbors Ni⊆ I\{i}. In particular, agent
+iis able to communicate and perform measurements with agents
+j∈ Ni. The state xi,n= [pT
+i,nvT
+i,n]Tof agent i∈ I at time
+n∈ {0,1,...}comprises the current position pi,n∈Rdand other
+motion-related parameters vi,n. Agent motion is modeled by the
+mobility model
+xi,n=f(xi,n−1,qi,n) (1)
+whereqi,nis the driving noise with known probability density func-
+tion (PDF) p(qi,n)that is assumed to be statistically independent
+acrossiandn. From the state transition function (1) we can directly
+obtain the state-transition PDF p(xi,n|xi,n−1).
+At timen, agentiexchanges information with neighboring
+agentsj∈ Niand performs a pairwise measurements that are mod-
+eled as
+zj→i,n=h(xj,n,xi,n,rj→i,n) (2)
+whererj→i,nis the measurement noise with known PDF p(rj→i,n)
+that is assumed to be statistically independent across edge s(j,i),
+i∈ I,j∈ Niand time n. From the measurement model (2), we
+can directly obtain the likelihood function p(zj→i,n|xj,n,xi,n).
+Letxn= [xi,n]i∈Iandzn= [zj→i,n]i∈I,j∈Nibe the
+joint state and measurement vectors at time n. Furthermore,
+we introduce x0:n= [xT
+0···xT
+n]Tandz1:n= [zT
+1···zT
+n]T.
+The goal of CL is to estimate the states of the agents xi,n,
+i∈ I from the joint measurement vector z1:nby using, e.g.,
+the minimum mean square error (MMSE) estimator ˆxMMSE
+i,n=/integraltext
+xi,np(xi,n|z1:n)dxi,n. Estimation relies on the marginal pos-
+terior distributions p(xi,n|z1:n) =/integraltext
+p(x0:n|z1:n)x∼i. However,
+direct marginalization from p(x0:n|z1:n)is infeasible as its compu-
+tation complexity grows exponentially with the number of ti me steps
+and the number of agents.
+2.2. BP for CL
+BP [9] aims to calculate marginal posteriors p(xi,n|z1:n)efﬁciently
+by passing messages on the edges of the factor graph that repr esents
+the joint PDF of an estimation problem. In tree-structured g raphs,
+the beliefs provided by BP are guaranteed to converge to the t rue
+marginal posterior distributions p(xi,n|z1:n). In graphs with cycles,
+(i) there are typically no convergence guarantees but BP can nev-
+ertheless often provide an accurate approximation of p(xi,n|z1:n)
+[9, 10]; and (ii) there are many possible orders in which mess ages
+are computed (also known as the message schedules), and diff erent
+orders may lead to different beliefs.
+BP for CL can provide accurate approximations of marginal di s-
+tributions at a computational complexity that scales linea rly with the
+number of time steps and the agent network size. In particula r, by
+assuming that at time n= 0 the agent states xi,0,i∈ I are sta-
+tistically independent and by using Bayes rule, the joint po sterior
+distribution p(x0:n|z1:n)factorizes according to
+p(x0:n|z1:n)∝I/productdisplay
+i=1p(xi,0)n/productdisplay
+n′=1p(xi,n′|xi,n′−1)
+×/productdisplay
+j∈Nip(zj→i,n′|xj,n′,xi,n′).
+A single time step of the corresponding cyclic factor graph i s
+shown in Fig. 1(a).
+This factor graph provides the basis for BP for CL where a spe-
+ciﬁc message schedule makes it possible to perform message p assing
+in real time and facilitates a distributed implementation. In particu-
+lar, messages are sent only forward in time and t∈ {1,...,T}
+message passing iterations are performed at each time step nindi-
+vidually. At each message passing iteration t, messages are passed
+only in one direction over every edge [6, 7]. The resulting BP algo-
+rithm consists of prediction and update steps that are execu ted for
+each agent i∈ Iin parallel.
+•Prediction Step : Based on the belief b(T)
+i(xi,n−1)calculated
+at the previous time step n−1and the state transition PDF
+p(xi,n|xi,n−1), the “prediction message” µi,→n(xi,n)is ob-
+tained as
+µi,→n(xi,n)∝/integraldisplay
+p(xi,n|xi,n−1)b(T)
+i(xi,n−1)dxi,n−1.(3)
+At time step n= 0, message passing is initialized by setting
+b(T)
+i(xi,0)/definesp(xi,0).
+•Update Step : At message passing iteration t∈ {1,...,T}, be-
+liefsb(t−1)
+j(xj,n)are received from neighboring agents j∈ Ni.Next, corresponding “measurement messages” µ(t)
+j→i,n(xi,n)are
+calculated based on the likelihood function p(zj→i,n|xj,n,xi,n),
+i.e.,
+µ(t)
+j→i,n(xi,n)∝/integraldisplay
+p(zj→i,n|xj,n,xi,n)b(t−1)
+j(xj,n)dxj,n.
+(4)
+Finally, the belief at message passing iteration tis obtained as
+b(t)
+i(xi,n)∝µi,→n(xi,n)/productdisplay
+j∈Niµ(t)
+j→i,n(xi,n). (5)
+At message passing iteration t= 1, beliefs are initialized as
+b(0)
+j(xj,n) =µi,→n(xj,n)(cf. (4)).
+2.3. Particle-Based Processing
+Often, the mobility and measurement models in (1) and (2) are non-
+linear and non-Gaussian and it is impossible to obtain a clos ed-form
+solution for the message passing and belief calculation equ ations in
+(3)–(5). This problem can be addressed by representing mess ages
+and beliefs by Kweighted random samples or “particles” and ap-
+proximating (3)–(5) by means of Monte Carlo techniques [17, 18].
+The solution of the resulting particle-based processing ca n be arbi-
+trary close to the corresponding true solution of (3)–(5) by choosing
+Ksufﬁciently large.
+•Prediction Step : Let/braceleftbig
+x(k)
+i,n−1,w(T,k)
+i,n−1/bracerightbigK
+k=1be a particle rep-
+resentation of b(T)
+i(xi,n−1). Then, a particle representation
+{x(k)
+i,n,w(k)
+i,n}K
+k=1ofµi,→n(xi,n)in (3), can be obtained by
+drawing, for each k∈ {1,...,K}, one particle x(k)
+i,nfrom
+p(xi,n|x(k)
+i,n−1), i.e.,
+x(k)
+i,n∼p(xi,n|x(k)
+i,n−1), w(k)
+i,n=w(T,k)
+i,n−1.
+Atn= 0, we draw particles from the prior, i.e. x(k)
+i,0∼p(xi,0),
+and set corresponding weights according to w(T,k)
+i,0=1
+K.
+•Update Step : Following the message multiplication scheme in
+[17] a particle-based representation of b(t)
+i(xi,n)in (5) is calcu-
+lated for each message passing iteration t∈ {1,...T}. In partic-
+ular, particle-based messages
+φ(t,k)
+j→i=p(zj→i,n|x(k)
+j,n,x(k)
+i,n) ˜w(t−1,k)
+j,n (6)
+are computed for each neighbor j∈ Niand weight update is
+performed according to
+˜w(t,k)
+i,n=w(k)
+i,n/productdisplay
+j∈Niφ(t,k)
+j→i. (7)
+At message passing iteration t= 1, (6) is initialized as φ(1,k)
+j→i=
+p(zj→i,n|x(k)
+j,n,x(k)
+i,n)w(k)
+j,n. Finally, particles and unnormalized
+weights/braceleftbig
+x(k)
+i,n,˜w(t,k)
+i,n/bracerightbigK
+k=1are exchanged among neighboring
+agents.
+After the last iteration ( t=T), the weights are normalized,
+i.e.,w(T,k)
+i,n= ˜w(T,k)
+i,n//summationtextK
+k′=1˜w(T,k′)
+i,n ,k∈ {1,...,K}, and an
+approximation of the MMSE estimate can be obtained as ˆxi,n=/summationtextK
+k=1w(T,k)
+i,nx(k)
+i,n. The particle representation/braceleftbig
+x(k)
+i,n,w(T,k)
+i,n/bracerightbigK
+k=1
+is also needed for the prediction step at the next time step n+1.
+For future reference, we introduce the weight vector wi=
+[w(1)
+i···w(K)
+i]Tof agent iafter the prediction step and the joint
+weight vector w= [wi]i∈I. Similarly, we introduce the vectors
+of particle-based BP messages φ(t)
+j→i=/bracketleftbig
+φ(t,1)
+j→i···φ(t,K)
+j→i/bracketrightbigTand
+φ(t)=/bracketleftbig
+φ(t)
+j→i/bracketrightbig
+i∈I,j∈Ni.
+2
+PSfrag replacements
+p1 p2
+p3x1x2
+x3p1→2p2→1
+p1→3
+p3→1p2→3
+p3→2
+µ3→1
+(a) Factor GraphPSfrag replacementsh1h2
+h3m3→1
+(b) GNN
+Fig. 1 : Factor graph for CL (a) and corresponding graph neural net-
+work (GNN) (b) for a single time slot n. The BP and GNN mes-
+sages related to the messages 3→1are also shown. The time index
+nis omitted and the short notations pj→i∆=p(zj→i,n|xj,n,xi,n),
+pi∆=p(xi,n|xi,n−1),µj→i=µ(t)
+j→i,n(xi,n), andmj→i=m(t)
+j→i
+are used.
+3. NEBP FOR CL
+In this section, we will review GNNs and present the proposed
+particle-based NEBP framework for CL. In particular, at eac h time
+stepnwe complement iterative particle-based BP (6)–(7) by a GNN.
+Since we limit our discussion to a single time step, we will om it the
+time index nin what follows.
+3.1. Graph Neural Networks (GNNs)
+GNNs [12] extend neural networks to graph-structured data. We
+consider the message passing neural network (MPNN) [19] whi ch
+is a variant of GNNs that generalizes graph convolutional ne tworks
+[20] and implements a message passing mechanism similar to B P. A
+MPNN is deﬁned on a graph G= (V,E)whereEinduces the sets of
+neighbors Ni=/braceleftbig
+j∈ V/vextendsingle/vextendsingle(i,j)∈ E/bracerightbig
+. There is one neural network
+for each node and each edge in the graph. In many applications
+all node networks and all edge networks share sets of paramet ers,
+respectively.
+Each node i∈ V is associated with a vector hicalled node
+embedding. At message passing iteration t∈ {1,...,T}, the fol-
+lowing operations are performed for each node i∈ V in parallel.
+First, messages are exchanged with neighboring nodes j∈ Ni. In
+particular, the GNN message sent from node i∈ V to its neighbor
+j∈ Niis given by
+m(t)
+i→j=ge(h(t)
+i,h(t)
+j,ai→j) (8)
+wherege(·)is a neural network with trainable parameters and ai→j
+is the edge attribute. Next, the node embedding h(t)
+iis updated by
+incorporating the sum of received messages m(t)
+j→i,j∈ Ni, i.e.,
+h(t)
+i=gn/parenleftBig
+h(t−1)
+i,/summationdisplay
+j∈Nim(t−1)
+j→i/parenrightBig
+. (9)
+Here,gn(·)is again a neural network with trainable parameters.
+Sincege(·)andgn(·)share the same parameters across edges
+and nodes, respectively, they can be trained on small graphs even if
+then used in large scale inference problems. For future refe rence, we
+introduce the joint vector of node embeddings h= [hi]i∈Iand the
+joint vector of messages m=[mj→i]i∈I,j∈Ni.3.2. Particle-based NEBP
+The main idea of particle-based NEBP is to use the particle re presen-
+tation/braceleftbig
+x(k)
+i,n,˜w(t,k)
+i,n/bracerightbigK
+k=1of a continuous state xi,nas if it would be
+the probability mass function (PMF) of a discrete random var iable,
+i.e., the particles x(k)
+i,n,k∈ {1,...,K}are the possible outcomes
+and the particle weights w(k)
+i,nare the probabilities of these outcomes.
+The GNN that is complementary to one time step of the CL fac-
+tor graph is shown in Fig. 1(b). Since the CL factor graph only con-
+sists of pairwise interactions, we can use a simpler GNN comp ared
+to the one originally proposed for NEBP [15], i.e. a GNN that o nly
+models variables nodes in the factor graph by a correspondin g GNN
+node. In what follows, we denote the NEBP messages and their j oint
+vector by φ(t)andφ(t)
+j→i, respectively.
+NEBP for CL consists of the following three steps:
+1. First, classical BP runs for one iteration, i.e.,
+φ(t)=BP/parenleftbig
+φ(t−1),w/parenrightbig
+. (10)
+Here BP(·)is the function that takes NEBP messages φ(t−1)and
+was inputs and returns the BP messages φ(t)by ﬁrst computing
+(7) (with treplaced by t−1andφ(t,k)
+j→ireplaced by φ(t−1,k)
+j→i)
+followed by (6) for all edges (j,i),i∈I,j∈ Niin the network.
+At iteration t= 1,φ(t−1)in (10) is replaced by the all-ones
+vector with dimension K/summationtextI
+i=1|Ni|.
+2. Next, the output of the GNN is computed, i.e.,
+/bracketleftbig
+h(t+1) Tm(t)T/bracketrightbigT=GNN/parenleftbig
+h(t),φ(t)/parenrightbig
+where GNN (·)is the function that calculates GNN messages
+m(t)and updated node embeddings h(t+1)from the current node
+embeddings h(t)and the classical BP messages φ(t)using (8)–
+(9). In particular, the classical BP messages φ(t)
+j→i,i∈I,j∈ Ni
+are used as the edge attributes aj→iin (8).
+Att=1,h(1)is initialized by setting h(1)
+i=/bracketleftbigˆxT
+ivec(ˆCi)T/bracketrightbigTfor
+alli∈ I, whereˆxi=/summationtextK
+k=1w(k)
+ix(k)
+iis the sample mean, ˆCi=/summationtextK
+k=1w(k)
+i(x(k)
+i−ˆxi)(x(k)
+i−ˆxi)Tis the sample covariance, and
+vec(·)creates a vector from the input matrix by taken elements
+columnwise.
+3. Finally, for all edges (j,i),i∈I,j∈ Ni, GNN messages m(t)
+j→i
+and BP messages φ(t)
+j→iare combined according to
+φ(t)
+j→i=gs(m(t)
+j→i)φ(t)
+j→i+gv(m(t)
+j→i).
+The functions gs(·)andgv(·)are neural networks with learnable
+parameters and output a positive scalar and a positive vecto r, re-
+spectively.
+AfterTiterations, the particle representation {x(k)
+i,w(T,k)
+i}K
+k=1
+of the NEBP belief b(T)
+i(xi)is obtained by calculating weights
+w(T,k)
+i based on (7) with BP messages φ(T,k)
+j→ireplaced by NEBP
+messages φ(T,k)
+j→i. The particle representation {x(k)
+i,w(T,k)
+i}K
+k=1can
+then be used to calculate an approximate MMSE estimate ˆxiand
+the corresponding approximate covariance matrix. Since we aim to
+reduce the MSE of the position estimate ˆpi, the neural networks
+ge(·),gn(·),gs(·), andgv(·)are trained based on the loss function/summationtextI
+i=1∝bardblˆpi−pi∝bardbl2.
+3
+020 40 60 80100
+x-coordinate [m]020406080100y-coordinate [m]True track
+Estimated track
+Anchor position
+(a)0 1 2 3 4
+eth[m]0.00.20.40.60.81.0ˆPoutBP
+NEBP (proposed)
+(b)0.00.20.40.60.81.0
+Conﬁdence level 1−α0.00.20.40.60.81.0P(acceptH0)
+1−α
+= 95%NEBP (proposed)
+BP
+(c)
+Fig. 2 : Numerical evaluation of the proposed NEBP method in a CL sce nario with 13static anchors and 100mobile agents. (a) One realization
+of true and estimated mobile agent tracks with dots indicati ng the ﬁnal positions. (b) Outage probability versus thresh oldeth. (c) Probability
+that an estimate is consistent versus conﬁdence levels. (Th e gray dotted-line indicates a conﬁdence level of 95%.)
+4. EXPERIMENTS
+In this section, we compare the performance the proposed NEB P
+method with BP. The neural networks ge(·),gs(·),gv(·)are multi-
+layer perceptrons (MLPs) with a single hidden layer and leak y rec-
+tiﬁed linear units (ReLUs) [21], with exception that the out put lay-
+ers ofgs(·)andgv(·)use sigmoid and ReLU activations, respec-
+tively. We set the number of message passing iterations to T=1, in
+which case the node function gn(·)is not needed. During training,
+the parameters of ge(·),gs(·), andgv(·)are updated through back-
+propagation. The dimension of node embeddings hiis20and the
+dimension of GNN messages mj→iis32.
+4.1. Dataset and Training Procedure
+We consider agent networks in two dimensional (2-D) space. T he
+state of each agent at time nis deﬁned as xi,n= [pT
+i,nvT
+i,n]T∈R4
+wherepi,n∈R2andvi,n∈R2are the 2-D position and velocity,
+respectively. We use a constant-velocity motion model with drag
+force and Gaussian driving noise with standard deviation σa= 0.05
+(see [22] for details). Furthermore, we consider measureme nts of
+the distance zj→i,n=∝bardblpj,n−pi,n∝bardbl+rj→i,n, whererj→i,nis
+zero-mean Gaussian noise with standard deviation σr= 1.
+We consider I= 25 agents on the area of interest [0,60]m×
+[0,60]m. There are ﬁve static anchors at perfectly known loca-
+tions, i.e., their state transition model and prior distrib ution are
+given byp(xi,n|xi,n−1)=δ(xi,n−xi,n−1)andp/parenleftbig
+xi,0)=δ(xi,0
+−[pT
+i0 0]T/parenrightbig
+wherepiis the true anchor position. In each re-
+alization, the mobile agents are uniformly placed over the a rea
+[15,45]m×[15,45]m and their velocity is randomly drawn from
+N(0,σ2
+pI2)withσp= 0.1. For each agent, a track that consists
+of 50 time steps is generated and range measurements are obta ined
+by assuming a connectivity of 20m, i.e.j∈ Niif and only if
+∝bardblpj,n−pi,n∝bardbl ≤20m. For inference, the initial prior distribution
+isp(xi,0) =N(µi,0,Σi,0). HereΣi,0=diag{10,10,0.01,0.01}
+andµi,0is randomly drawn from N(xi,0,Σi,0), wherexi,0is the
+true initial state of agent i.
+For training, an Adam optimizer [23] with learning rate 10−4
+and batch size of 2is used. Furthermore, 100realizations of agent
+tracks and 10passes of the entire training dataset are considered.
+A larger agent network is employed for performance evaluati on to
+show the generalization ability of our NEBP method. In parti cular,
+we consider a network that consists of 13static anchors and 100mo-
+bile agents, i.e., I= 100 in the area [0,100]m×[0,100]m (see [6])and generate another 400realizations of agents tracks. The agents
+are uniformly placed over [10,90]m×[10,90]m at time n= 0. All
+the other parameters are set as during training. Anchor posi tions and
+a realization of mobile agent tracks are shown in Fig 2a.
+4.2. Performance Evaluation
+To evaluate the performance of different localization algo rithms, we
+use the outage probability Pout=P/parenleftbig
+∝bardblˆpi,n−pi,n∝bardbl> e th/parenrightbig
+, where
+pi,nis the true position, ˆpi,nis the estimate, and eth>0is the er-
+ror threshold. Fig. 2b shows the outage probability versus t hreshold
+eth. It can be seen that our proposed NEBP algorithm yields signi f-
+icantly reduced outage probability compared to BP. Fig. 2a s hows
+one realization of true and estimated agent tracks.
+To assess the consistency of BP and NEBP estimates, we
+conduct two-sided chi-square tests. We ﬁrst calculate the n or-
+malized estimation error squared (NEES) [1] , ei,n= (ˆpi,n−
+pi,n)TˆΣ−1
+p,i,n(ˆpi,n−pi,n), whereˆΣ−1
+p,i,n∈R2×2is the estimated
+position covariance. Assuming that the true posterior dist ribution is
+Gaussian, the NEES follows a chi-square distribution with d egree of
+freedom2. LetH0be the hypothesis that the belief of agent iis
+consistent, i.e., ˆpi,nandˆΣp,i,nare the true mean and covariance
+matrix.H0is accepted if ei,n∈[r1,r2], wherer1,r2is determined
+such that P(ei,n≤r1|H0) =P(ei,n≥r2|H0) =α
+2and1−αis
+the conﬁdence level. Ideally, as indicated by the black dash ed line
+in Fig. 2c, at conﬁdence level 1−α, the probability that H0is ac-
+cepted should be 1−α. However, the BP solution has P(acceptH0)
+signiﬁcantly smaller than 1−α. At95% conﬁdence level, 40% of
+the NEES values ei,nfall outside the conﬁdence interval, indicat-
+ing that BP provides inconsistent estimates. On the other ha nd, the
+proposed NEBP method is close to the ideal line, where only 5%
+of NEES values ei,nfall outside the 95% conﬁdence interval [1]. It
+can thus be concluded that NEBP signiﬁcantly improves the co nsis-
+tency of estimates. Notably, more consistent estimates are obtained
+by not explicitly addressing overconﬁdence in the loss func tion used
+for training of the GNN.
+5. CONCLUSION
+In this paper, we propose a particle-based NEBP method for CL
+that combines the beneﬁts of model-based and data-driven in ference.
+The proposed approach complements BP with learned informat ion
+provided by a GNN. Simulation results show that NEBP outper-
+forms traditional BP in terms of localization error and cons istency
+of estimates as well as generalizes to larger agent networks .
+4
+6. REFERENCES
+[1] Y . Bar-Shalom, X. R. Li, and T. Kirubarajan, Estimation with
+Applications to Tracking and Navigation . New York, NY:
+Wiley, 2001.
+[2] N. Patwari, J. N. Ash, S. Kyperountas, A. O. Hero, R. L.
+Moses, and N. S. Correal, “Locating the nodes: Cooperative l o-
+calization in wireless sensor networks,” IEEE Signal Process.
+Mag. , vol. 22, no. 4, pp. 54–69, Jul. 2005.
+[3] A. Bahr, M. R. Walter, and J. J. Leonard, “Consistent coop era-
+tive localization,” in Proc. IEEE ICRA-09 , Kobe, Japan, 2009,
+pp. 3415–3422.
+[4] R. D. Taranto, S. Muppirisetty, R. Raulefs, D. T. Slock,
+T. Svensson, and H. Wymeersch, “Location-aware communi-
+cations for 5G networks: How location information can im-
+prove scalability, latency, and robustness of 5G,” IEEE Signal
+Process. Mag. , vol. 31, no. 6, pp. 102–112, Nov. 2014.
+[5] A. T. Ihler, J. W. Fisher III, R. L. Moses, and A. S. Willsky ,
+“Nonparametric belief propagation for self-localization of sen-
+sor networks,” IEEE J. Sel. Areas Commun. , vol. 23, no. 4, pp.
+809–819, Apr. 2005.
+[6] H. Wymeersch, J. Lien, and M. Z. Win, “Cooperative local-
+ization in wireless networks,” Proc. IEEE , vol. 97, no. 2, pp.
+427–450, 2009.
+[7] M. Z. Win, F. Meyer, Z. Liu, W. Dai, S. Bartoletti, and
+A. Conti, “Efﬁcient multi-sensor localization for the Inte rnet-
+of-Things,” IEEE Signal Process. Mag. , vol. 35, no. 5, pp. 153–
+167, Sep. 2018.
+[8] F. Meyer, T. Kropfreiter, J. L. Williams, R. A. Lau,
+F. Hlawatsch, P. Braca, and M. Z. Win, “Message passing algo-
+rithms for scalable multitarget tracking,” Proc. IEEE , vol. 106,
+no. 2, pp. 221–259, Feb. 2018.
+[9] F. R. Kschischang, B. J. Frey, and H.-A. Loeliger, “Facto r
+graphs and the sum-product algorithm,” IEEE Trans. Inf. The-
+ory, vol. 47, no. 2, pp. 498–519, Feb. 2001.
+[10] Y . Weiss and W. T. Freeman, “Correctness of belief propa ga-
+tion in Gaussian graphical models of arbitrary topology,” Neu-
+ral Comput. , vol. 13, no. 10, pp. 2173–2200, 2001.
+[11] B. Li and Y .-C. Wu, “Convergence of Gaussian belief prop -
+agation under general pairwise factorization: Connecting
+Gaussian MRF with pairwise linear Gaussian model.” JMLR ,
+vol. 20, no. 144, pp. 1–30, 2019.
+[12] M. Gori, G. Monfardini, and F. Scarselli, “A new model fo r
+learning in graph domains,” in Proc. INNS/IEEE IJCNN-05 ,
+vol. 2, Montreal, Canada, 2005, pp. 729–734.
+[13] F. Scarselli, M. Gori, A. C. Tsoi, M. Hagenbuchner, and
+G. Monfardini, “The graph neural network model,” IEEE
+Trans. Neural Netw. , vol. 20, no. 1, pp. 61–80, 2009.
+[14] K. Yoon, R. Liao, Y . Xiong, L. Zhang, E. Fetaya, R. Urtasu n,
+R. Zemel, and X. Pitkow, “Inference in probabilistic graphi cal
+models by graph neural networks,” in Proc. IEEE Asilomar-19 ,
+Paciﬁc Grove, CA, 2019, pp. 868–875.
+[15] V . G. Satorras and M. Welling, “Neural enhanced belief p ropa-
+gation on factor graphs,” in Proc. AISTATS-21 , Apr. 2021, pp.
+685–693.[16] F. Meyer, O. Hlinka, and F. Hlawatsch, “Sigma point beli ef
+propagation,” IEEE Signal Process. Lett. , vol. 21, no. 2, pp.
+145–149, Feb. 2014.
+[17] F. Meyer, O. Hlinka, H. Wymeersch, E. Riegler, and
+F. Hlawatsch, “Distributed localization and tracking of mo bile
+networks including noncooperative objects,” IEEE Trans. Sig-
+nal and Inf. Process. over Networks , vol. 2, no. 1, pp. 57–71,
+2016.
+[18] F. Meyer, H. Wymeersch, M. Fr¨ ohle, and F. Hlawatsch, “D is-
+tributed estimation with information-seeking control in a gent
+networks,” IEEE J. Sel. Areas Commun. , vol. 33, no. 11, Nov.
+2015.
+[19] J. Gilmer, S. S. Schoenholz, P. F. Riley, O. Vinyals, and G. E.
+Dahl, “Neural message passing for quantum chemistry,” in
+Proc. ICML-17 , Sydney, Australia, Aug. 2017, pp. 1263–1272.
+[20] T. N. Kipf and M. Welling, “Semi-supervised classiﬁcat ion
+with graph convolutional networks,” in Proc. ICLR-17 , Toulon,
+France, Apr. 2017.
+[21] I. Goodfellow, Y . Bengio, and A. Courville, Deep Learning .
+Cambridge, MA: MIT Press, 2016.
+[22] S. Van de Velde, G. T. de Abreu, and H. Steendam, “Improve d
+censoring and NLOS avoidance for wireless localization in
+dense networks,” IEEE J. Sel. Areas Commun. , vol. 33, no. 11,
+pp. 2302–2312, 2015.
+[23] D. P. Kingma and J. Ba, “Adam: A method for stochastic opt i-
+mization,” arXiv preprint arXiv:1412.6980 , 2014.
+5
