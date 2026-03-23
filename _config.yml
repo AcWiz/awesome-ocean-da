@@ -49,3 +49,4 @@ exclude:
   - papers/
   - ".gitignore"
   - "*.pdf"
+  - vendor/bundle/
