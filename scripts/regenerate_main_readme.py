@@ -110,9 +110,9 @@ def format_tags_display(tags):
 
 
 def generate_paper_row(paper):
-    """生成论文表格行（主页格式，6列无总结列）
+    """生成论文表格行（主页格式）
 
-    主页格式: | 年份 | 论文 | arXiv | Venue | 方法 | 应用 |
+    主页格式: | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
     """
     arxiv = normalize_arxiv(paper.get('arxiv', ''))
     year = paper.get('year', '')
@@ -122,19 +122,20 @@ def generate_paper_row(paper):
     method_tags = format_tags_display(paper.get('method_tags', []))
     app_tags = format_tags_display(paper.get('application_tags', []))
 
-    # 构建论文链接
+    # 构建论文链接（指向 arXiv）
     if arxiv:
         title_link = f"[{title}](https://arxiv.org/abs/{arxiv})"
     else:
         title_link = title
 
-    # 构建 arXiv 链接
+    # 构建总结链接（指向 summary.md）
     if arxiv:
-        arxiv_link = f"[{arxiv}](https://arxiv.org/abs/{arxiv})"
+        summary_link = f"[总结](./papers/{folder}/summary.md)"
     else:
-        arxiv_link = "-"
+        summary_link = "-"
 
-    row = f"| {year} | {title_link} | {arxiv_link} | {venue} | {method_tags} | {app_tags} |"
+    # 移除 arXiv 列（论文列已链接到 arXiv），添加总结列
+    row = f"| {year} | {title_link} | {venue} | {method_tags} | {app_tags} | {summary_link} |"
 
     return row
 
@@ -160,8 +161,8 @@ def generate_category_section(category_name, category_file, papers, normalized_t
     if method_desc:
         lines.append(f"> {method_desc}")
     lines.append("")
-    lines.append(f"| 年份 | 论文 | arXiv | Venue | 方法 | 应用 |")
-    lines.append("|------|------|-------|-------|------|------|")
+    lines.append(f"| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |")
+    lines.append("|------|------|-------|------|------|------|")
 
     # 只显示前几篇（主页只显示摘要）
     count = 0

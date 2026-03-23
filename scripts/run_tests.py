@@ -371,13 +371,15 @@ def T7_readme_validity(runner):
         "发现占位符文本"
     )
 
-    # 检查无指向年份文件夹的链接（应该指向 index.md，不是直接指向年份文件夹）
-    # 正确: ./papers/2026/index.md, 错误: ./papers/2026/ 或 ./papers/2026/some-file
-    year_folder_links = re.findall(r'\./papers/\d{4}/(?!index\.md)', content)
+    # 检查无直接指向年份文件夹的链接（不带文件名）
+    # 正确: ./papers/2026/index.md, ./papers/2025/2510.17756/summary.md
+    # 错误: ./papers/2026/ (直接指向年份文件夹，无文件名)
+    # 匹配 ./papers/YEAR/ 后面不跟任何有效文件路径的
+    year_folder_links = re.findall(r'\./papers/\d{4}/(?![0-9a-zA-Z])', content)
     runner.test(
-        "README 无指向年份文件夹的链接（除index.md外）",
+        "README 无直接指向年份文件夹的链接（需跟文件名）",
         len(year_folder_links) == 0,
-        f"发现 {len(year_folder_links)} 处年份文件夹链接"
+        f"发现 {len(year_folder_links)} 处无效年份文件夹链接"
     )
 
     # 验证"更多"链接存在
@@ -388,13 +390,13 @@ def T7_readme_validity(runner):
         f"找到 {len(more_links)} 个'更多'链接"
     )
 
-    # 验证 arXiv 链接格式
-    arxiv_links = re.findall(r'arxiv\.org/abs/\d{2,4}\.\d{4,5}', content)
-    all_valid = all(re.match(r'arxiv\.org/abs/\d{2,4}\.\d{4,5}$', l) for l in arxiv_links)
+    # 验证 arXiv 链接格式（在论文标题链接中）
+    arxiv_links = re.findall(r'\[.+\]\(https://arxiv\.org/abs/\d{2,4}\.\d{4,5}\)', content)
+    all_valid = all(re.match(r'\[.+\]\(https://arxiv\.org/abs/\d{2,4}\.\d{4,5}\)$', l) for l in arxiv_links)
     runner.test(
-        "README arXiv链接格式正确",
+        "README 论文链接到arXiv正确",
         all_valid and len(arxiv_links) > 0,
-        f"找到 {len(arxiv_links)} 个arXiv链接"
+        f"找到 {len(arxiv_links)} 个论文arXiv链接"
     )
 
     return not has_placeholder and len(year_folder_links) == 0 and len(more_links) >= 5
