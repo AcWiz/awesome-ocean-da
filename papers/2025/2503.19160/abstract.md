@@ -1,6 +1,6 @@
 ---
 title: "Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation"
-arXiv: "2503_19160"
+arXiv: "2503.19160"
 authors: ['Vadim Limousin', 'Nelly Pustelnik', 'Bruno Deremble', 'Antoine Venaille']
 year: 2025
 source: "arXiv"

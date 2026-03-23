@@ -1,6 +1,6 @@
 ---
 title: "Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction"
-arXiv: "2510.18133v1"
+arXiv: "2510.18133"
 authors: ["Laura Thapa", "Marybeth Arcodia", "Elizabeth A. Barnes"]
 year: 2025
 source: "arXiv"

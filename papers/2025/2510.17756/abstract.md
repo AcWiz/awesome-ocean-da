@@ -1,6 +1,6 @@
 ---
 title: "Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network"
-arXiv: "2510_17756"
+arXiv: "2510.17756"
 authors: ['Younghyun Koo', 'Maryam Rahnemoonfar']
 year: 2025
 source: "arXiv"

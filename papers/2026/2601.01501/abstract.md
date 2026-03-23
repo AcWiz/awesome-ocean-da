@@ -1,6 +1,6 @@
 ---
 title: "Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE"
-arXiv: "2601.01501v1"
+arXiv: "2601.01501"
 authors: ["Fan Xu", "Wei Gong", "Hao Wu", "Lilan Peng", "Nan Wang", "Qingsong Wen", "Xian Wu", "Kun Wang", "Xibin Zhao"]
 year: 2026
 source: "arXiv"

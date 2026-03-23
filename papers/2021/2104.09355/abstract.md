@@ -1,6 +1,6 @@
 ---
 title: "Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling"
-arXiv: "2104.09355v1"
+arXiv: "2104.09355"
 authors: ["Sam Partee", "Matthew Ellis", "Alessandro Rigazzi", "Scott Bachman", "Gustavo Marques", "Andrew Shao", "Benjamin Robbins"]
 year: 2021
 source: "arXiv"

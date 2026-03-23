@@ -1,6 +1,6 @@
 ---
 title: "Regional Ocean Forecasting with Hierarchical Graph Neural Networks"
-arXiv: "2410_11807"
+arXiv: "2410.11807"
 authors: ['Daniel Holmberg', 'University of Helsinki', 'Emanuela Clementi', 'CMCC Foundation', 'Teemu Roos', 'University of Helsinki']
 year: 2024
 source: "arXiv"

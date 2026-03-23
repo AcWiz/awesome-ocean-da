@@ -1,6 +1,6 @@
 ---
 title: "CGKN: Conditional Gaussian Koopman Network"
-arXiv: "2410.20072v1"
+arXiv: "2410.20072"
 authors: ["Chuanqi Chen", "et al."]
 year: 2024
 source: "arXiv"

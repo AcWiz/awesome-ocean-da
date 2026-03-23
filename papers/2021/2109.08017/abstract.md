@@ -1,6 +1,6 @@
 ---
 title: "Super-resolution data assimilation"
-arXiv: "2109.08017v1"
+arXiv: "2109.08017"
 authors: "Sébastien Barthélémy; Julien Brajard; Laurent Bertino; François Counillon"
 year: "2021"
 source: "arXiv"

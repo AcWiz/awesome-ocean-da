@@ -1,15 +1,19 @@
-由于未提供论文的具体内容（摘要、arXiv ID、作者信息等），且内容样本显示为"No content available"，我无法生成准确的学术论文摘要。
+---
+title: "Enhanced State Estimation for turbulent flows combining Ensemble Data Assimilation and Machine Learning"
+arXiv: "2501.18262"
+authors: ['Miguel M. Valero', 'Marcello Meldi']
+year: 2025
+source: "arXiv"
+venue: "arXiv"
+method_tags: []
+application_tags: []
+---
 
-为了帮助您完成此任务，请提供以下至少一项：
+# Enhanced State Estimation for turbulent flows combining Ensemble Data Assimilation and Machine Learning
 
-1. **论文的arXiv ID**（如 2501.12345）
-2. **作者姓名列表**
-3. **论文摘要内容**
-4. **PDF或arXiv链接**
+## 基本信息
+- **论文链接**: https://arxiv.org/abs/2501.18262
+- **作者**: Miguel M. Valero, Marcello Meldi
 
-或者，如果您希望我生成一个**模板占位符**，我可以按照您提供的格式生成一个带有占位符的summary.md文件，待您获取完整信息后进行填充。
-
-请告知您希望如何继续：
-
-- **A)** 提供上述缺失信息，我基于实际内容重新生成
-- **B)** 生成带占位符的模板文件（需要您手动填充具体内容）
+## 摘要
+fidelity models and sparse data from sensors. This strategy combines ensemble Data Assimilation (DA) and Machine Learning (ML) tools, exploiting their complementary features. ML techniques rely on the data produced by DA methods during analysis phases to train physics-informed corrective algorithms, which are then coupled with the low-fidelity models when data from sensors is unavailable. The methodology is validated via the analysis of the turbulent plane channel flow test case for $Re_\tau \approx 550$. Here, the low-fidelity model consists of coarse-grained simulations coupled with the Immersed Boundary Method (IBM), while observation is sampled by a highly refined body-fitted calculation. The analysis demonstrates the capabilities of the algorithm based on DA and ML to accurately predict the flow features with significantly reduced computational costs. This approach exhibits potential for future synergistic applications of DA and ML, leveraging the robustness and efficiency of ML models alongside the physical interpretability ensured by DA algorithms.

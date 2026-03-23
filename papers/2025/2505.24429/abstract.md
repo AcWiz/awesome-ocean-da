@@ -1,6 +1,6 @@
 ---
 title: "Deep Learning for Canary Current Upwelling: A Case Study"
-arXiv: "2505_24429"
+arXiv: "2505.24429"
 authors: ['Giovanny A. Cuervo']
 year: 2025
 source: "arXiv"

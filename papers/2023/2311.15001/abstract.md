@@ -1,6 +1,6 @@
 ---
 title: "A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific"
-arXiv: "2311.15001v1"
+arXiv: "2311.15001"
 authors: ["Wei Zhang", "Yu Sun", "Yapeng Wu", "Junyu Dong", "Xiaojiang Song", "Zhiyi Gao", "Renbo Pang", "Boyu Guoan"]
 year: 2023
 source: "arXiv"

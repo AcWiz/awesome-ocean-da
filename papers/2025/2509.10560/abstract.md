@@ -1,6 +1,6 @@
 ---
 title: "GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python"
-arXiv: "2509.10560v1"
+arXiv: "2509.10560"
 authors: ["Xuechen Liang", "Xiaoxing He", "Shengdao Wang", "Jean-Philippe Montillet", "Zhengkai Huang", "Gaël Kermarrec", "Shunqiang Hu", "Yu Zhou", "Jiahui Huang"]
 year: 2025
 source: "arXiv"

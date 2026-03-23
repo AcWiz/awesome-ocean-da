@@ -1,6 +1,6 @@
 ---
 title: "GNN-Surrogate: A Hierarchical and Adaptive Graph Neural Network for Parameter Space Exploration of Unstructured-Mesh Ocean Simulations"
-arXiv: "2202.08956v2"
+arXiv: "2202.08956"
 authors: ["Neng Shi", "Jiayi Xu", "Skylar W. Wurster", "Hanqi Guo", "Jonathan Woodring", "Luke P. Van Roekel", "Han-Wei Shen"]
 year: 2022
 source: "arXiv"

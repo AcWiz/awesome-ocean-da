@@ -1,6 +1,6 @@
 ---
 title: "Deep Learning for Sea Surface Temperature Reconstruction under Cloud Occlusion"
-arXiv: "2412_03413"
+arXiv: "2412.03413"
 authors: ['Andrea Aspertia', 'Ali Aydogdub', 'Angelo Grecoa', 'Fabio Merizzia', 'Pietro Miragliob', 'Beniamino Tartufolici', 'Alessandro Testaa', 'Nadia Pinardic', 'Paolo Oddob']
 year: 2024
 source: "arXiv"

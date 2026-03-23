@@ -1,6 +1,6 @@
 ---
 title: "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting"
-arXiv: "2510_25563"
+arXiv: "2510.25563"
 authors: ['Víctor Medina', 'Giovanny A. Cuervo-Londoño', 'Javier Sánchez']
 year: 2025
 source: "arXiv"

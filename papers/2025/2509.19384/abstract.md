@@ -1,6 +1,6 @@
 ---
 title: "Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations"
-arXiv: "2509.19384v1"
+arXiv: "2509.19384"
 authors: ["Hongyuan Shi", "Yilin Zhai", "Ping Dong", "Zaijin You", "Chao Zhan", "Qing Wang"]
 year: 2025
 source: "arXiv"

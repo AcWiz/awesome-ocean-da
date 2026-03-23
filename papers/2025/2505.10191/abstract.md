@@ -1,6 +1,6 @@
 ---
 title: "LanTu: Dynamics-Enhanced Deep Learning for Eddy-Resolving Ocean Forecasting"
-arXiv: "2505_10191"
+arXiv: "2505.10191"
 authors: ['Qingyu Zheng', 'Qi Shao', 'Guijun Han', 'Wei Li', 'Hong Li', 'Xuan Wang']
 year: 2025
 source: "arXiv"

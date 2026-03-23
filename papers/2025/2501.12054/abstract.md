@@ -1,6 +1,6 @@
 ---
 title: "ORCAst: Operational High-Resolution Current Forecasts"
-arXiv: "2501.12054v1"
+arXiv: "2501.12054"
 authors: ["Garcia", "et al."]
 year: 2025
 source: "arXiv"

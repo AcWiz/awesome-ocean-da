@@ -1,6 +1,6 @@
 ---
 title: "Koopman-based Deep Learning for Nonlinear System Estimation"
-arXiv: "2405.00627v1"
+arXiv: "2405.00627"
 authors: ["Authors not specified in content"]
 year: 2024
 source: "arXiv"

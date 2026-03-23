@@ -1,6 +1,6 @@
 ---
 title: "Filtering Internal Tides from Wide-Swath Altimeter Data Using Convolutional Neural Networks"
-arXiv: "2005.01090v1"
+arXiv: "2005.01090"
 authors: ["Redouane Lguensat", "Ronan Fablet", "Julien Le Sommer", "Sammy Metref", "Emmanuel Cosme", "Kaouther Ouenniche", "Lucas Drumetz", "Jonathan Gula"]
 year: 2020
 source: "arXiv"

@@ -1,6 +1,6 @@
 ---
 title: "Explore the Ideology of Deep Learning in ENSO Forecasts"
-arXiv: "2601.02050v1"
+arXiv: "2601.02050"
 authors: ["Yanhai Gan", "Yipeng Chen", "Ning Li", "Xingguo Liu", "Junyu Dong", "Xianyao Chen"]
 year: 2026
 source: "arXiv"

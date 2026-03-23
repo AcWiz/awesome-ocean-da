@@ -1,6 +1,6 @@
 ---
 title: "Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon Capture and Storage"
-arXiv: "2602.12274v2"
+arXiv: "2602.12274"
 authors: ["Xin Ju", "Jiachen Yao", "Anima Anandkumar", "Sally M. Benson", "Gege Wen"]
 year: 2026
 source: "arXiv"

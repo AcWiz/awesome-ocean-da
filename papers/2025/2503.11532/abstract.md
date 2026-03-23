@@ -1,6 +1,6 @@
 ---
 title: "Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters"
-arXiv: "2503.11532v1"
+arXiv: "2503.11532"
 authors: ["Clément Dorffer", "Frédéric Jourdin", "Thi Thuy Nga Nguyen", "Rodolphe Devillers", "David Mouillot", "Ronan Fablet"]
 year: 2025
 source: "arXiv"

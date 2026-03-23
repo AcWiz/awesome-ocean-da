@@ -1,6 +1,6 @@
 ---
 title: "Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation"
-arXiv: "2509.22949v1"
+arXiv: "2509.22949"
 authors: ["Hamidreza Moazzami", "Asma Jamali", "Nicholas Kevlahan", "Rodrigo A. Vargas-Hernández"]
 year: 2025
 source: "arXiv"

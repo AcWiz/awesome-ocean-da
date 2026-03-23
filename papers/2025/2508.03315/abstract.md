@@ -1,6 +1,6 @@
 ---
 title: "Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time"
-arXiv: "2508_03315"
+arXiv: "2508.03315"
 authors: ['Svenja Ehlers', 'Merten Stender', 'Norbert Hoffmann']
 year: 2025
 source: "arXiv"

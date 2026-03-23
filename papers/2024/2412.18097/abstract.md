@@ -1,6 +1,6 @@
 ---
 title: "LangYa: Cross-Spatiotemporal Ocean Forecasting"
-arXiv: "2401.00000v1"
+arXiv: "2401.00000"
 authors: ["待补充", "待补充", "待补充"]
 year: 2024
 source: "arXiv"

@@ -1,6 +1,6 @@
 ---
 title: "PCE-PINNs: Physics-Informed Neural Networks for Uncertainty Propagation in Ocean Modeling"
-arXiv: "2105.02939v1"
+arXiv: "2105.02939"
 authors: "Björn Lütjens; Catherine H. Crawford; Mark Veillette; Dava Newman"
 year: "2021"
 source: "arXiv"

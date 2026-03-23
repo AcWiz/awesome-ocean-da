@@ -1,6 +1,6 @@
 ---
 title: "Optimal boundary conditions at the staircase-shaped coastlines"
-arXiv: "1402.7201v1"
+arXiv: "1402.7201"
 authors: ["Eugene Kazantsev"]
 year: 2014
 source: "ArXiv"

@@ -1,6 +1,6 @@
 ---
 title: "SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction"
-arXiv: "2511_05629"
+arXiv: "2511.05629"
 authors: ['Zheng Jiang', 'Wei Wang', 'Gaowei Zhang', 'Yi Wang']
 year: 2025
 source: "arXiv"

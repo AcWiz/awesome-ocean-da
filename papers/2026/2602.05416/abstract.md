@@ -1,6 +1,6 @@
 ---
 title: "Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models"
-arXiv: "2602.05416v1"
+arXiv: "2602.05416"
 authors: ["Freja Høgholm Petersen", "Jesper Sandvig Mariegaard", "Rocco Palmitessa", "Allan P. Engsig-Karup"]
 year: 2026
 source: "arXiv"

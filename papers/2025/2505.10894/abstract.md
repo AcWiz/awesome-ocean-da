@@ -1,6 +1,6 @@
 ---
 title: "CTP: A hybrid CNN-Transformer-PINN model for ocean front"
-arXiv: "2505_10894"
+arXiv: "2505.10894"
 authors: ['Yishuo Wanga', 'Feng Zhoub', 'Muping Zhoub', 'Qicheng Mengb', 'Zhijun Huc', 'Yi Wangc', 'Shanghai Jiao', 'Satellite Ocean']
 year: 2025
 source: "arXiv"

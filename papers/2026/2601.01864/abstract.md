@@ -1,6 +1,6 @@
 ---
 title: "Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes"
-arXiv: "2601_01864"
+arXiv: "2601.01864"
 authors: ['Rameshan Kallummal']
 year: 2026
 source: "arXiv"

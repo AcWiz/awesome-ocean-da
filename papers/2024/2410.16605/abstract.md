@@ -1,6 +1,6 @@
 ---
 title: "EnKode: Active Learning of Unknown Flows with Koopman Operators"
-arXiv: "2410_16605"
+arXiv: "2410.16605"
 authors: ['Alice K. Li', 'Thales C. Silva', 'M. Ani Hsieh']
 year: 2024
 source: "arXiv"

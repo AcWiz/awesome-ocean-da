@@ -1,6 +1,6 @@
 ---
 title: "Validating Deep Learning Weather Forecast Models"
-arXiv: "2404.17652v1"
+arXiv: "2404.17652"
 authors: ["Not specified in provided content"]
 year: 2024
 source: "arXiv"

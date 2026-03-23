@@ -1,6 +1,6 @@
 ---
 title: "Spatio-temporal modeling and forecasting with Fourier neural operators"
-arXiv: "2601_01813"
+arXiv: "2601.01813"
 authors: ['Pratik Nag', 'Andrew Zammit-Mangion', 'Sumeetpal Singh', 'Noel Cressie']
 year: 2026
 source: "arXiv"

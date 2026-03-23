@@ -1,6 +1,6 @@
 ---
 title: "Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size"
-arXiv: "2510_15284"
+arXiv: "2510.15284"
 authors: ['Zhilin Li', 'Yao Zhou', 'Xianglong Li', 'Zeng Liu', 'Zhaokuan Lu', 'Shanlin Xu', 'Seungnam Kim', 'Guangyao Wang']
 year: 2025
 source: "arXiv"

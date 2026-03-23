@@ -1,6 +1,6 @@
 ---
 title: "Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport"
-arXiv: "2507_08834"
+arXiv: "2507.08834"
 authors: ['Karishma Battina', 'Prathamesh Dinesh Joshi', 'Raj Abhijit Dandekar', 'Rajat Dandekar', 'Sreedath Panat']
 year: 2025
 source: "arXiv"

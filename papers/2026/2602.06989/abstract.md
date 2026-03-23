@@ -1,6 +1,6 @@
 ---
 title: "Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization"
-arXiv: "2602.06989v1"
+arXiv: "2602.06989"
 authors: ["Zhenkai Bo", "Ahmed H. Elsheikh", "Hannah P. Menke", "Julien Maes", "Sebastian Geiger", "Muhammad Z. Kashim", "Zainol A. A. Bakar", "Kamaljit Singh"]
 year: 2026
 source: "arXiv"

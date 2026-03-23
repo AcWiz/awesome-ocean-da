@@ -1,6 +1,6 @@
 ---
 title: "Tropical Pacific Ocean Data Assimilation"
-arXiv: "2406.07063v1"
+arXiv: "2406.07063"
 authors: ["Meng", "et al."]
 year: 2024
 source: "arXiv"

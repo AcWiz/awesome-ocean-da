@@ -1,6 +1,6 @@
 ---
 title: "HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling"
-arXiv: "2602.00598v1"
+arXiv: "2602.00598"
 authors: ["Ruiqi Shu", "Xiaohui Zhong", "Qiusheng Huang", "Ruijian Gou", "Tianrun Gao", "Hao Li", "Xiaomeng Huang"]
 year: 2026
 source: "arXiv"

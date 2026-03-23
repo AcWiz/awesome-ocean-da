@@ -1,6 +1,6 @@
 ---
 title: "Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure"
-arXiv: "2510_09792"
+arXiv: "2510.09792"
 authors: ['Vahidreza Jahanmard', 'Ali Ramezani-Kebrya', 'Robinson Hordoir']
 year: 2025
 source: "arXiv"

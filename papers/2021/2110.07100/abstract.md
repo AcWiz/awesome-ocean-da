@@ -1,6 +1,6 @@
 ---
 title: "Digital Twin Earth - Coasts: Developing a Fast and Physics-Informed Surrogate Model for Coastal Floods via Neural Operators"
-arXiv: "2110.07100v1"
+arXiv: "2110.07100"
 authors: ["Peishi Jiang", "Nis Meinert", "Helga Jordão", "Constantin Weisser", "Simon Holgate", "Alexander Lavin", "Björn Lütjens", "Dava Newman", "Haruko Wainwright", "Catherine Walker", "Patrick Barnard"]
 year: 2021
 source: "arXiv"

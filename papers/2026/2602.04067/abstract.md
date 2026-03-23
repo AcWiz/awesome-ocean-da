@@ -1,6 +1,6 @@
 ---
 title: "Data Driven Air Entrainment Velocity Parameterization by Breaking Waves"
-arXiv: "2602.04067v1"
+arXiv: "2602.04067"
 authors: ["Xiaohui Zhou", "Anton S. Darmenov", "Kianoosh Yousefi"]
 year: 2026
 source: "arXiv"

@@ -1,6 +1,6 @@
 ---
 title: "Efficient Data Assimilation with Time Conditional Gaussian Koopman Network for Partially Observed Nonlinear Dynamical Systems"
-arXiv: "2507_08749"
+arXiv: "2507.08749"
 authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Long Wu', 'Nan Chen']
 year: 2025
 source: "arXiv"

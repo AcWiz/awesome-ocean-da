@@ -1,6 +1,6 @@
 ---
 title: "Turning Time Series into Algebraic Equations: Symbolic Machine Learning for Interpretable Modeling of Chaotic Time Series"
-arXiv: "2603.07261v1"
+arXiv: "2603.07261"
 authors: ["Madhurima Panja", "Grace Younes", "Tanujit Chakraborty"]
 year: 2026
 source: "arXiv"

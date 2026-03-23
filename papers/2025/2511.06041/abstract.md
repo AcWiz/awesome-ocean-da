@@ -1,6 +1,6 @@
 ---
 title: "Advancing Ocean State Estimation with efficient and scalable AI"
-arXiv: "2511_06041"
+arXiv: "2511.06041"
 authors: ['Yanfei Xiang', 'Yuan Gao', 'Hao Wu', 'Quan Zhang', 'Ruiqi Shu', 'Xiao Zhou', 'Xiaomeng Huang']
 year: 2025
 source: "arXiv"

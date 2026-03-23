@@ -1,6 +1,6 @@
 ---
 title: "CNN-based forecasting of early winter NAO using sea surface temperature"
-arXiv: "2603.16312v1"
+arXiv: "2603.16312"
 authors: ["Elena Provenzano", "Guillaume Gastineau", "Carlos Mejia", "Didier Swingedouw", "Sylvie Thiria"]
 year: 2026
 source: "arXiv"

@@ -1,6 +1,6 @@
 ---
 title: "Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks"
-arXiv: "2601_12775"
+arXiv: "2601.12775"
 authors: ['Yuta Hirabayashi', 'Daisuke Matsuoka', 'Konobu Kimura']
 year: 2026
 source: "arXiv"

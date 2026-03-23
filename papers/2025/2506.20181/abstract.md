@@ -1,6 +1,6 @@
 ---
 title: "Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks"
-arXiv: "2506.20181v1"
+arXiv: "2506.20181"
 authors: ["Ronald Katende"]
 year: 2025
 source: "arXiv"

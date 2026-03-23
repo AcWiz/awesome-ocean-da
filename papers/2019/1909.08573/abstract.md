@@ -1,6 +1,6 @@
 ---
 title: "Statistical and Machine Learning Ensemble Modelling to Forecast Sea Surface Temperature"
-arXiv: "1909.08573v2"
+arXiv: "1909.08573"
 authors: ["Stefan W ola", "Fearghal O'Donncha", "Bei Chen"]
 year: 2019
 source: "arXiv"

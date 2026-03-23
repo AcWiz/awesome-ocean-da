@@ -1,6 +1,6 @@
 ---
 title: "Physics-informed neural networks for phase-resolved data assimilation and prediction of nonlinear ocean waves"
-arXiv: "2501_08430"
+arXiv: "2501.08430"
 authors: ['Svenja Ehlers', 'Norbert Hoffmann', 'Tianning Tang', 'Adrian H. Callaghan', 'Rui Cao', 'Enrique M. Padilla', 'Yuxin Fang', 'Merten Stender']
 year: 2025
 source: "arXiv"

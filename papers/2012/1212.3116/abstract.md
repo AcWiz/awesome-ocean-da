@@ -1,6 +1,6 @@
 ---
 title: "Optimal Boundary Conditions for ORCA-2 Model"
-arXiv: "1212.3116v1"
+arXiv: "1212.3116"
 authors: ["Eugene Kazantsev"]
 year: 2012
 source: "arXiv"

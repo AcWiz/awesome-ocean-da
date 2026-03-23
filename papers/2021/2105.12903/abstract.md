@@ -1,6 +1,6 @@
 ---
 title: "Neural Enhanced Belief Propagation for Cooperative Localization"
-arXiv: "2105.12903v1"
+arXiv: "2105.12903"
 authors: ["Mingchao Liang", "Florian Meyer"]
 year: 2021
 source: "arXiv"

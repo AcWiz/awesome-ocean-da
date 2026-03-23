@@ -1,6 +1,6 @@
 ---
 title: "Towards fully differentiable neural ocean model with Veros"
-arXiv: "2511_17427"
+arXiv: "2511.17427"
 authors: ['Etienne Meunier', 'Said Ouala', 'Hugo Frezat', 'Julien Le Sommer', 'Ronan Fablet']
 year: 2025
 source: "arXiv"

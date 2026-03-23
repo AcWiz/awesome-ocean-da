@@ -1,6 +1,6 @@
 ---
 title: "Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles"
-arXiv: "2408.11429v1"
+arXiv: "2408.11429"
 authors: ["Waseem Akram", "Siyuan Yang", "Hailiang Kuang", "Xiaoyu He", "Muhayy Ud Din", "Yihao Dong", "Defu Lin", "Lakmal Seneviratne", "Shaoming He", "Irfan Hussain"]
 year: 2024
 source: "arXiv"

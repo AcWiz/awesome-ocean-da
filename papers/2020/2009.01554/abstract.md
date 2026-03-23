@@ -1,6 +1,6 @@
 ---
 title: "Automated Identification of Metamorphic Test Scenarios for an Ocean-Modeling Application"
-arXiv: "2009.01554v1"
+arXiv: "2009.01554"
 authors: ["Dilip J. Hiremath", "Martin Claus", "Wilhelm Hasselbring", "Willi Rath"]
 year: 2020
 source: "arXiv"

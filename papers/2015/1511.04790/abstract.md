@@ -1,6 +1,6 @@
 ---
 title: "A framework for interpreting regularized state estimation"
-arXiv: "1511.04790v1"
+arXiv: "1511.04790"
 authors: ["Nozomi Sugiura", "Shuhei Masuda", "Yosuke Fujii", "Masafumi Kamachi", "Yoichi Ishikawa", "Toshiyuki Awaji"]
 year: 2015
 source: "arXiv"

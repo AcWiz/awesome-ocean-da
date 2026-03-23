@@ -1,6 +1,6 @@
 ---
 title: "A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction"
-arXiv: "2603_14115"
+arXiv: "2603.14115"
 authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Nan Chen']
 year: 2026
 source: "arXiv"

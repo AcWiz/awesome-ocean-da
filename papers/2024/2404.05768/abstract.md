@@ -1,6 +1,6 @@
 ---
 title: "STREAMLINING OCEAN DYNAMICS MODELING WITH FOURIER NEURAL OPERATORS: A MULTIOBJECTIVE HYPERPARAMETER AND ARCHITECTURE OPTIMIZATION APPROACH"
-arXiv: "2404_05768"
+arXiv: "2404.05768"
 authors: ['Yixuan Sun', 'Argonne National Laboratory', 'Ololade Sowunmi', 'Florida State University', 'Romain Egele', 'Université Paris-Saclay', 'Sri Hari Krishna Narayanan', 'Argonne National Laboratory', 'Luke Van Roekel', 'Los Alamos National Laboratory', 'Prasanna Balaprakash', 'Oak Ridge National Laboratory']
 year: 2024
 source: "arXiv"

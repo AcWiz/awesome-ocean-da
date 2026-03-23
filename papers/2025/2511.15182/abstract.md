@@ -1,6 +1,6 @@
 ---
 title: "SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing"
-arXiv: "2511.15182v1"
+arXiv: "2511.15182"
 authors: ["Subhashis Hazarika", "Leonard Lupin-Jimenez", "Rohit Vuppala", "Ashesh Chattopadhyay", "Hon Yung Wong"]
 year: 2025
 source: "arXiv"

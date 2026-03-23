@@ -1,6 +1,6 @@
 ---
 title: "Probabilistic reconstruction of global sea surface temperature using generative diffusion models"
-arXiv: "2603.16272v1"
+arXiv: "2603.16272"
 authors: ["Haijie Li", "Ya Wang", "Kai Yang", "Gang Huang", "Xiangao Xia", "Ziming Chen", "Weichen Tao", "Chenglin Lu", "Lin Chen", "Miao Zhang", "Kaiming Hu", "Hainan Gong", "Disong Fu", "Lin Wang"]
 year: 2026
 source: "arXiv"

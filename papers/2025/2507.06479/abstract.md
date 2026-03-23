@@ -1,6 +1,6 @@
 ---
 title: "Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity"
-arXiv: "2507_06479"
+arXiv: "2507.06479"
 authors: ['Niloofar Asefi', 'Leonard Lupin-Jimenez', 'Tianning Wu', 'Ruoying He', 'Ashesh Chattopadhyay']
 year: 2025
 source: "arXiv"

@@ -1,6 +1,6 @@
 ---
 title: "Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations"
-arXiv: "2603_06153"
+arXiv: "2603.06153"
 authors: ['Alejandro J. González-Santana', 'Giovanny A. Cuervo-Londoño', 'Javier Sánchez']
 year: 2026
 source: "arXiv"

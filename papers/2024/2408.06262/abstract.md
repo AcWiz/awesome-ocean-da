@@ -1,6 +1,6 @@
 ---
 title: "DUNE: A MACHINE LEARNING DEEPUNET++BASED ENSEMBLE APPROACH TO MONTHLY, SEASONAL AND ANNUAL CLIMATE FORECASTING"
-arXiv: "2408_06262"
+arXiv: "2408.06262"
 authors: ['Pratik Shukla', 'University of Maryland Baltimore County', 'Milton Halem', 'University of Maryland Baltimore County']
 year: 2024
 source: "arXiv"

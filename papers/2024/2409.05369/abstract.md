@@ -1,6 +1,6 @@
 ---
 title: "CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION"
-arXiv: "2409_05369"
+arXiv: "2409.05369"
 authors: ['Longhao Wang', 'Chinese Academy of Sciences', 'Xuanze Zhang', 'Chinese Academy of Sciences', 'L. Ruby Leung', 'Pacific Northwest National Laboratory', 'Francis H.S. Chiew', 'CSIRO Environment', 'Amir AghaKouchak', 'University of California, Irvine', 'Kairan Ying', 'National Institute of Natural Hazards', 'Yongqiang Zhang', 'Chinese Academy of Sciences']
 year: 2024
 source: "arXiv"

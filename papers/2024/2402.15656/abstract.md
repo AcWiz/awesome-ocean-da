@@ -1,6 +1,6 @@
 ---
 title: "Semilinear Neural Operators for Ocean Forecasting"
-arXiv: "2402.15656v1"
+arXiv: "2402.15656"
 authors: ["Singh", "et al."]
 year: 2024
 source: "arXiv"

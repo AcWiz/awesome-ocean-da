@@ -1,6 +1,6 @@
 ---
 title: "SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning"
-arXiv: "2506_23900"
+arXiv: "2506.23900"
 authors: ['Daniel Holmberg', 'Emanuela Clementi', 'Italo Epicoco', 'Teemu Roos']
 year: 2025
 source: "arXiv"
