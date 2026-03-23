@@ -44,7 +44,7 @@
 | 2023 | [Physics-Informed Deep Learning](./papers/2023/) | 230X.XXXXX | - | PINN | Ocean-DA | - |
 | 2022 | [PINN for Ocean Data Assimilation](./papers/2022/) | 220X.XXXXX | - | PINN | Ocean-DA | - |
 
-[更多 PINN 论文 →](./papers/?tag=PINN)
+[更多 PINN 论文 →](./papers/pinn.md)
 
 ---
 
@@ -60,7 +60,7 @@
 | 2024 | [Koopman-based Deep Learning](./papers/2024/) | 2405.00627 | - | Koopman | Nonlinear-Estimation | - |
 | 2023 | [Koopman Operator Learning](./papers/2023/) | 2307.XXXXX | - | Koopman | Ocean-Dynamics | - |
 
-[更多 Koopman 论文 →](./papers/?tag=Koopman)
+[更多 Koopman 论文 →](./papers/koopman.md)
 
 ---
 
@@ -76,7 +76,7 @@
 | 2024 | [Meta-Learning FNO](./papers/2025/) | 2506.XXXXX | - | FNO, Meta-Learning | Ocean-DA | - |
 | 2023 | [Neural Operators for Ocean](./papers/2023/) | 2307.XXXXX | - | Neural-Operator | Ocean-Forecast | - |
 
-[更多神经算子论文 →](./papers/?tag=Neural-Operator)
+[更多神经算子论文 →](./papers/neural-operator.md)
 
 ---
 
@@ -92,7 +92,7 @@
 | 2023 | [Graph Neural Networks for Ocean](./papers/2023/) | 2308.XXXXX | - | GNN | Ocean-DA | - |
 | 2022 | [GNN for Ocean Forecasting](./papers/2022/) | 220X.XXXXX | - | GNN | Ocean-Forecast | - |
 
-[更多 GNN 论文 →](./papers/?tag=GNN)
+[更多 GNN 论文 →](./papers/gnn.md)
 
 ---
 
@@ -109,7 +109,7 @@
 | 2023 | [Deep Learning Enhanced DA](./papers/2023/) | 2304.XXXXX | - | EnKF, Deep-Learning | Ocean-DA | - |
 | 2022 | [Deep Learning EnKF](./papers/2022/deep-learning-enhanced-ensemble-based-data-assimilation/) | 2206.04811 | - | EnKF, Deep-Learning | Ocean-DA | - |
 
-[更多变分方法论文 →](./papers/?tag=4D-Var)
+[更多变分方法论文 →](./papers/4d-var.md)
 
 ---
 
@@ -123,7 +123,7 @@
 | 2024 | [Attention for Ocean](./papers/2024/) | 240X.XXXXX | - | Transformer | Ocean-Forecast | - |
 | 2023 | [Transformer for ENSO](./papers/2023/) | 230X.XXXXX | - | Transformer | ENSO | - |
 
-[更多 Transformer 论文 →](./papers/?tag=Transformer)
+[更多 Transformer 论文 →](./papers/transformer.md)
 
 ---
 
@@ -138,7 +138,7 @@
 | 2024 | [PhyGeoNet](./papers/2024/) | 2402.XXXXX | - | PINN, FNO | - |
 | 2023 | [Graph SST Forecast](./papers/2023/Graph_SST_Forecast/) | 2309.XXXXX | - | GNN | - |
 
-[更多 SST 论文 →](./papers/?tag=SST)
+[更多 SST 论文 →](./papers/sst.md)
 
 ---
 
@@ -150,7 +150,7 @@
 | 2024 | [SSH Prediction](./papers/2024/) | 240X.XXXXX | - | Deep-Learning | - |
 | 2023 | [SSH Forecasting](./papers/2023/) | 230X.XXXXX | - | Neural-Operator | - |
 
-[更多 SSH 论文 →](./papers/?tag=SSH)
+[更多 SSH 论文 →](./papers/ssh.md)
 
 ---
 
@@ -163,7 +163,7 @@
 | 2024 | [Deep Learning ENSO Forecast](./papers/2024/Deep_Learning_ENSO_Forecast/) | 2404.15419 | - | Deep-Learning | - |
 | 2023 | [ENSO Prediction](./papers/2023/) | 230X.XXXXX | - | GNN, Deep-Learning | - |
 
-[更多 ENSO 论文 →](./papers/?tag=ENSO)
+[更多 ENSO 论文 →](./papers/enso.md)
 
 ---
 
@@ -175,7 +175,7 @@
 | 2024 | [LangYa Ocean Forecasting](./papers/2024/) | 2412.XXXXX | - | PINN | - |
 | 2023 | [Wave Forecasting](./papers/2023/) | 230X.XXXXX | - | Deep-Learning | - |
 
-[更多海浪预报论文 →](./papers/?tag=Wave)
+[更多海浪预报论文 →](./papers/wave.md)
 
 ---
 
@@ -188,7 +188,7 @@
 | 2024 | [DUNE Climate Forecasting](./papers/2024/) | 2408.06262 | - | Climate-Forecast | - |
 | 2024 | [Validating DL Weather](./papers/2024/validating-deep-learning-weather-forecast-models/) | 2404.17652 | - | Deep-Learning | - |
 
-[更多全球预报论文 →](./papers/?tag=Global-Forecast)
+[更多全球预报论文 →](./papers/global-forecast.md)
 
 ---
 
@@ -240,7 +240,7 @@
 
 ---
 
-### 2024 (26 篇)
+### 2024 (25 篇)
 
 | 论文 | arXiv | Venue | 方法标签 | 应用 | 总结 |
 |------|-------|-------|----------|------|------|
@@ -255,7 +255,6 @@
 | [Deep Learning Model Correction](https://arxiv.org/abs/2410.17913) | 2410.17913 | - | Deep-Learning | Model-Correction | [总结](./papers/2024/2410.17913/summary.md) |
 | [DUNE Climate](https://arxiv.org/abs/2408.06262) | 2408.06262 | - | Climate-Forecast | Global | [总结](./papers/2024/2408.06262/summary.md) |
 | [LangYa Ocean](https://arxiv.org/abs/2412.18097) | 2412.18097 | - | PINN | Ocean-Forecast | [总结](./papers/2024/2412.18097/summary.md) |
-| [ML4PS NeurIPS](https://arxiv.org/abs/2406.06144) | 2406.06144 | NeurIPS | Various | Ocean | [总结](./papers/2024/2406.06144/summary.md) |
 
 [→ 2024 年全部论文](./papers/2024/)
 

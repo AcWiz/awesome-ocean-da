@@ -38,7 +38,7 @@
 | [Deep Learning Subregional](https://arxiv.org/abs/2505.24429) | 2505.24429 | Nature | GNN | Regional | [总结](./2025/2505.24429/summary.md) |
 | [Generalizable NN](https://arxiv.org/abs/2505.08900) | 2505.08900 | arXiv preprint | Physics-Informed | Parameterization | [总结](./2025/2505.08900/summary.md) |
 
-## 2024 (26 篇)
+## 2024 (25 篇)
 
 | 论文 | arXiv | Venue | 方法 | 应用 | 总结 |
 |------|-------|-------|------|------|------|
@@ -53,28 +53,46 @@
 | [Deep Learning Model Correction](https://arxiv.org/abs/2410.17913) | 2410.17913 | - | Deep-Learning | Model-Correction | [总结](./2024/2410.17913/summary.md) |
 | [DUNE Climate](https://arxiv.org/abs/2408.06262) | 2408.06262 | - | Climate-Forecast | Global | [总结](./2024/2408.06262/summary.md) |
 | [LangYa Ocean](https://arxiv.org/abs/2412.18097) | 2412.18097 | - | PINN | Ocean-Forecast | [总结](./2024/2412.18097/summary.md) |
-| [ML4PS NeurIPS](https://arxiv.org/abs/2406.06144) | 2406.06144 | NeurIPS | Various | Ocean | [总结](./2024/2406.06144/summary.md) |
 
 ## 2023 (17 篇)
 
 | 论文 | arXiv | Venue | 方法 | 应用 | 总结 |
 |------|-------|-------|------|------|------|
-| [Graph SST Forecast](./2023/Graph_SST_Forecast/) | 2309.XXXXX | - | GNN | SST | - |
-| [Echo-State DA](./2023/Echo_State_DA/) | 2305.XXXXX | - | ESN | Ocean-DA | - |
-| [4DVarNet-SSH](./2023/4DVarNet-SSH/) | 2306.XXXXX | - | 4D-Var | SSH | - |
-| [Deep Learning Enhanced DA](./2023/) | 2304.XXXXX | - | EnKF, Deep-Learning | Ocean-DA | - |
-| [Neural Operators](./2023/) | 2307.XXXXX | - | Neural-Operator | Ocean | - |
-| [GNN for Ocean](./2023/) | 2308.XXXXX | - | GNN | Ocean-Forecast | -
+| [Graph-Based Deep Learning for Sea Surface Temperature Forecasts](https://arxiv.org/abs/2305.09468) | 2305.09468 | ICLR Workshop | GNN | SST | [总结](./2023/2305.09468/summary.md) |
+| [Echo State Network for Data Assimilation](https://arxiv.org/abs/2304.00198) | 2304.00198 | - | ESN | Ocean-DA | [总结](./2023/2304.00198/summary.md) |
+| [Learning to Communicate and Collaborate in a Competitive Multi-Agent Setup to Clean the Ocean from Macroplastics](https://arxiv.org/abs/2304.05872) | 2304.05872 | - | Multi-Agent-RL | Ocean | [总结](./2023/2304.05872/summary.md) |
+| [On the Choice of Training Data for Machine Learning of Geostrophic Mesoscale Turbulence](https://arxiv.org/abs/2307.00734) | 2307.00734 | JAMES | Neural-Operator | Ocean | [总结](./2023/2307.00734/summary.md) |
+| [Evaluation of Deep Neural Operator Models toward Ocean Forecasting](https://arxiv.org/abs/2308.11814) | 2308.11814 | arXiv | Neural-Operator | Ocean-Forecast | [总结](./2023/2308.11814/summary.md) |
+| [Neural Koopman Prior for Data Assimilation](https://arxiv.org/abs/2309.05317) | 2309.05317 | IEEE TSP | Koopman | Data-Assimilation | [总结](./2023/2309.05317/summary.md) |
+| [AI-GOMS: Large AI-Driven Global Ocean Modeling System](https://arxiv.org/abs/2308.03152) | 2308.03152 | - | Deep-Learning | Ocean | [总结](./2023/2308.03152/summary.md) |
+| [OceanNet: A Principled Neural Operator-Based Digital Twin for Regional Ocean Modeling](https://arxiv.org/abs/2310.00813) | 2310.00813 | - | Neural-Operator | Ocean | [总结](./2023/2310.00813/summary.md) |
+| [Robust Ocean Subgrid-Scale Parameterizations Using Fourier Neural Operators](https://arxiv.org/abs/2310.02691) | 2310.02691 | - | Neural-Operator | Ocean | [总结](./2023/2310.02691/summary.md) |
+| [Multi-decadal Sea Level Prediction using Neural Networks and Spectral Analysis](https://arxiv.org/abs/2310.04540) | 2310.04540 | - | Deep-Learning | Sea-Level | [总结](./2023/2310.04540/summary.md) |
+| [Deep Learning of Systematic Sea Ice Model Errors from Data Assimilation](https://arxiv.org/abs/2304.03832) | 2304.03832 | - | Deep-Learning | Sea-Ice | [总结](./2023/2304.03832/summary.md) |
+| [On the Relative Role of East and West Pacific Sea Surface Temperature](https://arxiv.org/abs/2302.11357) | 2302.11357 | - | Deep-Learning | SST | [总结](./2023/2302.11357/summary.md) |
+| [A Deep-learning Real-time Bias Correction Method for Significant Wave Height](https://arxiv.org/abs/2311.15001) | 2311.15001 | - | Deep-Learning | Wave | [总结](./2023/2311.15001/summary.md) |
+| [Machine Learning for Phase-Resolved Reconstruction of Nonlinear Ocean Waves](https://arxiv.org/abs/2305.11913) | 2305.11913 | - | Deep-Learning | Wave | [总结](./2023/2305.11913/summary.md) |
+| [Enhancing Solutions for Complex PDEs: Introducing Complementary Neural Networks](https://arxiv.org/abs/2311.12902) | 2311.12902 | - | Neural-Network | PDE | [总结](./2023/2311.12902/summary.md) |
+| [Application of Deep Learning to the Estimation of Normalization Coefficients](https://arxiv.org/abs/2312.05068) | 2312.05068 | - | Deep-Learning | Ocean | [总结](./2023/2312.05068/summary.md) |
+| [FEM-PIKFNNs for Underwater Acoustic Propagation Induced by Structural Health Monitoring](https://arxiv.org/abs/2308.09956) | 2308.09956 | - | Neural-Network | Underwater-Acoustics | [总结](./2023/2308.09956/summary.md) |
 
 ## 2022 (13 篇)
 
 | 论文 | arXiv | Venue | 方法 | 应用 | 总结 |
 |------|-------|-------|------|------|------|
-| [Deep Learning EnKF](https://arxiv.org/abs/2206.04811) | 2206.04811 | - | EnKF, Deep-Learning | Ocean-DA | [总结](./2022/deep-learning-enhanced-ensemble-based-data-assimilation/summary.md) |
-| [4D-SRDA](./2022/4D-SRDA/) | 2203.XXXXX | - | 4D-Var | Spatio-Temporal | - |
-| [Ocean Observations Expansion](./2022/Ocean_Observations_Expansion/) | 2201.XXXXX | - | Deep-Learning | Ocean-Observations | - |
-| [Ocean State Estimation](./2022/) | 2205.XXXXX | - | Hybrid | Ocean-DA | - |
-| [Neural Network Parameterization](./2022/) | 2204.XXXXX | - | NN | Parameterization | -
+| [Deep Learning Enhanced Ensemble-based Data Assimilation](https://arxiv.org/abs/2206.04811) | 2206.04811 | - | EnKF, Deep-Learning | Ocean-DA | [总结](./2022/2206.04811/summary.md) |
+| [Spatio-Temporal Super-Resolution Data Assimilation (SRDA)](https://arxiv.org/abs/2212.03656) | 2212.03656 | - | 4D-Var | Spatio-Temporal | [总结](./2022/2212.03656/summary.md) |
+| [A Deep-Learning Usability Expansion Model of Ocean Observations](https://arxiv.org/abs/2206.01599) | 2206.01599 | - | Deep-Learning | Ocean-Observations | [总结](./2022/2206.01599/summary.md) |
+| [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | 2206.12746 | - | GNN | Ocean-DA | [总结](./2022/2206.12746/summary.md) |
+| [GNN-Surrogate: A Hierarchical and Adaptive Graph Neural Network for Parameterization](https://arxiv.org/abs/2202.08956) | 2202.08956 | - | GNN | Parameterization | [总结](./2022/2202.08956/summary.md) |
+| [Data Assimilation in Operator Algebras](https://arxiv.org/abs/2206.13659) | 2206.13659 | - | Data-Assimilation | Ocean | [总结](./2022/2206.13659/summary.md) |
+| [Physics-Informed Deep Neural Operator Networks](./2022/2207.05748/) | 待补充 | arXiv | PINN, Neural-Operator | Ocean | - |
+| [Ensemble Kalman Methods: A Mean Field Perspective](https://arxiv.org/abs/2209.11371) | 2209.11371 | - | EnKF | Ocean-DA | [总结](./2022/2209.11371/summary.md) |
+| [4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes](https://arxiv.org/abs/2211.05904) | 2211.05904 | - | 4D-Var | SSH | [总结](./2022/2211.05904/summary.md) |
+| [Eigenvalue Initialisation and Regularisation for Koopman Autoencoders](https://arxiv.org/abs/2212.12086) | 2212.12086 | - | Koopman | Dynamical-Systems | [总结](./2022/2212.12086/summary.md) |
+| [A Deep Learning Model for Forecasting Global Monthly Mean Sea Surface Temperature](https://arxiv.org/abs/2202.09967) | 2202.09967 | - | Deep-Learning | SST | [总结](./2022/2202.09967/summary.md) |
+| [Equation-Free Surrogate Modeling of Geophysical Flows at the Intersection of Machine Learning and Physics](https://arxiv.org/abs/2205.13410) | 2205.13410 | - | Deep-Learning | Ocean | [总结](./2022/2205.13410/summary.md) |
+| [Scientific Machine Learning and PINN](./2022/2201.05624/) | arXiv preprint | - | PINN | Ocean | -
 
 ## 2021 (9 篇)
 
