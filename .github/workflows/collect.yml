@@ -47,10 +47,10 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "Auto-collect papers $(date +'%Y-%m-%d %H:%M')"
-          branch: auto-collect/$(date +'%Y%m%d%H%M%S')
+          title: "Auto-collect papers ${{ github.run_id }}"
+          branch: auto-collect/${{ github.run_id }}
           delete-branch: true
-          commit-message: "chore: auto-collect papers $(date +'%Y-%m-%d')"
+          commit-message: "chore: auto-collect papers ${{ github.run_id }}"
           add-paths: |
             papers/**/*
             .collected_ids
@@ -60,7 +60,7 @@ jobs:
 
             本 PR 由 GitHub Actions 自动创建。
 
-            - 触发时间: $(date +'%Y-%m-%d %H:%M:%S')
+            - 触发时间: ${{ github.event.created_at }}
             - 运行ID: ${{ github.run_id }}
 
             请审核新增的论文，确认无误后合并。
