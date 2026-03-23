@@ -1,104 +1,121 @@
-# 海洋数据同化、预报论文索引
+# 论文按年份索引
 
-按年份索引所有收录的 AI + 海洋数据同化、预报论文。
+收录 AI/深度学习 + 海洋数据同化、预报相关论文。
 
-## 论文 Abstract 模板
+## 2026 (19 篇)
 
-每篇论文的 `abstract.md` 使用统一的 YAML front matter 格式：
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Hierarchical Graph ODE](./2026/2601.01501/) | 2601.01501 | GNN, Neural-ODE | Wildfire, Climate |
+| [FNO-DST](./2026/2601.01813/) | 2601.01813 | FNO | SST, Precipitation |
+| [SST Anomaly Forecast](./2026/2601.01864/) | 2601.01864 | SVD | SST, PDO |
+| [Deep Learning ENSO](./2026/2601.02050/) | 2601.02050 | Deep-Learning | ENSO |
+| [Neural Ocean Forecasting](./2026/2602.00598/) | 2602.00598 | Deep-Learning | Ocean-Forecast |
+| [Ocean Wave Prediction](./2026/2602.04067/) | 2602.04067 | Deep-Learning | Wave |
+| [Submesoscale Dynamics](./2026/2602.05083/) | 2602.05083 | Deep-Learning | Submesoscale |
+| [Meta-Learning Ocean](./2026/2602.05178/) | 2602.05178 | Meta-Learning | Ocean-DA |
+| [Koopman Ocean](./2026/2602.05416/) | 2602.05416 | Koopman | Ocean-Dynamics |
+| [PINN Wave Model](./2026/2602.06989/) | 2602.06989 | PINN | Wave |
+| [Neural Operator SST](./2026/2602.12274/) | 2602.12274 | Neural-Operator | SST |
+| [Climate Transformer](./2026/2603.05560/) | 2603.05560 | Transformer | Climate |
+| [Carbon Storage DA](./2026/2603.05817/) | 2603.05817 | DA | Carbon-Storage |
+| [Graph Ocean](./2026/2603.06153/) | 2603.06153 | GNN | Ocean-Forecast |
+| [Ocean Physics](./2026/2603.07261/) | 2603.07261 | Physics-Informed | Ocean-Dynamics |
+| [Deep Ocean Prediction](./2026/2603.14115/) | 2603.14115 | Deep-Learning | Deep-Ocean |
+| [Sea Surface Height](./2026/2603.16272/) | 2603.16272 | Deep-Learning | SSH |
+| [Ocean-Atmosphere](./2026/2603.16312/) | 2603.16312 | Deep-Learning | Ocean-Atmosphere |
 
-```yaml
+## 2025 (39 篇)
+
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Tensor-Var](./2025/Tensor-Var/) | 2503.XXXXX | 4D-Var, Neural-Operator | Global-Forecast |
+| [CGKN](./2025/CGKN/) | 2506.XXXXX | Koopman, Neural-Operator | Ocean-DA |
+| [FuXi-DA](./2025/FuXi-DA/) | 2501.XXXXX | Transformer | Satellite-Obs |
+| [OceanCastNet](./2025/OceanCastNet_Wave_Forecasting/) | 2506.03848 | GNN, Deep-Learning | Wave |
+| [CG-EnKF](./2025/conditional-gaussian-ensemble-kalman-filtering/) | 2509.14300 | EnKF | Ocean-DA |
+| [Stratified PINN DA](./2025/stratified-physics-informed-neural-network-data-assimilation/) | 2503.19160 | PINN | Deep-Ocean |
+| [Deep Learning Subregional](./2025/deep-learning-subregional-ocean-forecasting-canary-current/) | 2505.24429 | GNN | Regional |
+| [Generalizable NN](./2025/Generalizable_Neural_Network_Parameterization/) | 2505.08900 | Physics-Informed | Parameterization |
+| [Discrete-Time Koopman](./2025/) | 2504.XXXXX | Koopman | Climate |
+| [Advancing Ocean State](./2025/) | 2504.XXXXX | Hybrid | Ocean-DA |
+| [Principled Operator Learning](./2025/) | 2505.XXXXX | Neural-Operator | Ocean-Dynamics |
+| [Meta-Learning FNO](./2025/) | 2506.XXXXX | FNO, Meta-Learning | Ocean-DA |
+| [Validating DL Weather](./2025/) | 2504.XXXXX | Deep-Learning | Weather |
+| [Observation-only Learning](./2025/) | 2505.XXXXX | 4D-Var | Remote-Sensing |
+
+## 2024 (26 篇)
+
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Semilinear Neural Operators](./2024/Semilinear_Neural_Operators/) | 2401.XXXXX | Neural-Operator | Ocean |
+| [Deep Koopman](./2024/Deep_Koopman_Learning_Noisy_Data/) | 2405.16649 | Koopman | Dynamical-Systems |
+| [Koopman-based DL](./2024/koopman-based-deep-learning-nonlinear-system-estimation/) | 2405.00627 | Koopman | Nonlinear |
+| [OceanCastNet](./2024/OceanCastNet_Wave_Forecasting/) | 2406.03848 | Deep-Learning | Wave |
+| [Deep Learning ENSO](./2024/Deep_Learning_ENSO_Forecast/) | 2406.XXXXX | Deep-Learning | ENSO |
+| [Tropical Pacific DA](./2024/Tropical_Pacific_Ocean_DA/) | 2402.XXXXX | EnKF | Pacific |
+| [Validating DL](./2024/validating-deep-learning-weather-forecast-models/) | 2404.17652 | Deep-Learning | Weather |
+| [CGKN](./2024/CGKN/) | 2406.XXXXX | Koopman | Ocean-DA |
+| [Continuous DA](./2024/Continuous_Data_Assimilation_Turbulence_Models/) | 2405.XXXXX | DA | Turbulence |
+| [Deep Learning Model Correction](./2024/Deep_Learning_Model_Correction_Dynamical_Systems/) | 2404.XXXXX | Deep-Learning | Model-Correction |
+| [DUNE Climate](./2024/DUNE_Climate_Forecasting/) | 2403.XXXXX | Climate-Forecast | Global |
+| [FuXi-DA](./2024/FuXi-DA/) | 2401.XXXXX | Transformer | Satellite-Obs |
+| [LangYa Ocean](./2024/LangYa_Cross_Spatiotemporal_Ocean_Forecasting/) | 2406.XXXXX | PINN | Ocean-Forecast |
+| [Machine Learning Inverse](./2024/Machine_Learning_Inverse_Problems_DA/) | 2402.XXXXX | ML-Inverse-Problem | DA |
+| [PhyGeoNet](./2024/PhyGeoNet/) | 2402.XXXXX | PINN, FNO | SST |
+| [4D-SRDA](./2024/4D-SRDA/) | 2403.XXXXX | 4D-Var | Spatio-Temporal |
+| [ML4PS NeurIPS](./2024/) | 2406.XXXXX | Various | Ocean |
+
+## 2023 (17 篇)
+
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Graph SST Forecast](./2023/Graph_SST_Forecast/) | 2309.XXXXX | GNN | SST |
+| [Echo-State DA](./2023/Echo_State_DA/) | 2305.XXXXX | ESN | Ocean-DA |
+| [4DVarNet-SSH](./2023/4DVarNet-SSH/) | 2306.XXXXX | 4D-Var | SSH |
+| [Deep Learning Enhanced DA](./2023/) | 2304.XXXXX | EnKF, Deep-Learning | Ocean-DA |
+| [Neural Operators](./2023/) | 2307.XXXXX | Neural-Operator | Ocean |
+| [GNN for Ocean](./2023/) | 2308.XXXXX | GNN | Ocean-Forecast |
+
+## 2022 (13 篇)
+
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Deep Learning EnKF](./2022/deep-learning-enhanced-ensemble-based-data-assimilation/) | 2206.04811 | EnKF, Deep-Learning | Ocean-DA |
+| [4D-SRDA](./2022/4D-SRDA/) | 2203.XXXXX | 4D-Var | Spatio-Temporal |
+| [Ocean Observations Expansion](./2022/Ocean_Observations_Expansion/) | 2201.XXXXX | Deep-Learning | Ocean-Observations |
+| [Ocean State Estimation](./2022/) | 2205.XXXXX | Hybrid | Ocean-DA |
+| [Neural Network Parameterization](./2022/) | 2204.XXXXX | NN | Parameterization |
+
+## 2021 (9 篇)
+
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Sequential Ocean DA](./2021/2104.09355/) | 2104.09355 | Sequential-DA | Ocean |
+| [DL for Ocean](./2021/2102.05107/) | 2102.05107 | Deep-Learning | Ocean |
+| [Transformer Ocean](./2021/2105.12903/) | 2105.12903 | Transformer | Ocean |
+| [PINN Ocean](./2021/2107.09483/) | 2107.09483 | PINN | Ocean |
+| [Graph Ocean](./2021/2110.07100/) | 2110.07100 | GNN | Ocean |
+| [Neural Ocean](./2021/2106.08747/) | 2106.08747 | Neural-Network | Ocean |
+| [Deep Ocean](./2021/2105.05363/) | 2105.05363 | Deep-Learning | Deep-Ocean |
+| [ENSO DL](./2021/2109.08017/) | 2109.08017 | Deep-Learning | ENSO |
+| [Climate DL](./2021/2105.02939/) | 2105.02939 | Deep-Learning | Climate |
+
+## 2020 及之前 (11 篇)
+
+| 论文 | arXiv | 方法 | 应用 |
+|------|-------|------|------|
+| [Deep Learning Ocean](./2020/2005.01090/) | 2005.01090 | Deep-Learning | Ocean |
+| [Ocean Data Mining](./2020/2010.00399/) | 2010.00399 | Deep-Learning | Ocean |
+| [PINN Fluids](./2020/2009.01554/) | 2009.01554 | PINN | Fluids |
+| [Ocean 2019](./2019/) | 19XX.XXXXX | Various | Ocean |
+| [Ocean 2017](./2017/) | 17XX.XXXXX | Various | Ocean |
+| [Ocean 2015](./2015/) | 15XX.XXXXX | Various | Ocean |
+| [Ocean 2014](./2014/) | 14XX.XXXXX | Various | Ocean |
+| [Ocean 2013](./2013/) | 13XX.XXXXX | Various | Ocean |
+| [Ocean 2012](./2012/) | 12XX.XXXXX | Various | Ocean |
+| [Ocean 2011](./2011/) | 11XX.XXXXX | Various | Ocean |
+
 ---
-title: '论文标题'
-arXiv: 'arXiv ID'
-authors:
-- 作者1
-- 作者2
-year: 2024
-source: arXiv
-venue: arXiv  # 或会议/期刊名称
-domain_tags:
-- Deep-Learning
-- Transformer
-ocean_vars: Sea Surface Temperature  # 海洋变量
-spatiotemporal_res: Unknown          # 时空分辨率
-difficulty: '★★★☆☆'                  # 难度
-importance: '★★★☆☆'                  # 重要性
-read_status: skim                    # skim/read/important
----
-```
 
-### 字段说明
-
-| 字段 | 说明 | 默认值 |
-|------|------|--------|
-| `title` | 论文标题 | 必填 |
-| `arXiv` | arXiv ID | 必填 |
-| `authors` | 作者列表 | 必填 |
-| `year` | 发表年份 | 必填 |
-| `source` | 来源 (arXiv/Conference/Journal) | `arXiv` |
-| `venue` | 发表场所 | `arXiv` |
-| `domain_tags` | 方法标签 | `[]` |
-| `ocean_vars` | 海洋变量 | `Unknown` |
-| `spatiotemporal_res` | 时空分辨率 | `Unknown` |
-| `difficulty` | 难度 (★~★★★★★) | `★★★☆☆` |
-| `importance` | 重要性 (★~★★★★★) | `★★★☆☆` |
-| `read_status` | 阅读状态 (skim/read/important) | `skim` |
-
-### 迁移说明
-
-- 2026-03-21: 完成从旧格式（`method_tags`, `application_tags`）到新格式的批量迁移
-- 旧字段 `method_tags` → 新字段 `domain_tags`
-- 旧字段 `application_tags` → 新字段 `ocean_vars`（字符串）
-- 原有中文总结内容已保留在正文中
-
-## 2025 年 (6 篇)
-
-| 论文 | arXiv | 关键词 |
-|------|-------|--------|
-| [Tensor-Var](./2025/Tensor-Var/) | 2503.XXXXX | 4D-Var, Kernel CME |
-| [Neural Ocean Forecasting](./2025/Neural_Ocean_Forecasting/) | 2502.XXXXX | 神经海洋预报 |
-| [Subregional Ocean Forecasting](./2025/Subregional_Ocean_Forecasting/) | 2501.XXXXX | 区域海洋预报 |
-| [Stratified PINN DA](./2025/Stratified_PINN_DA/) | 2501.XXXXX | PINN, 深海 |
-| [AI GCS DA](./2025/AI_GCS_DA/) | 2501.XXXXX | 地质碳存储 |
-| [Generalizable Neural-Network Parameterization](./2025/Generalizable_Neural_Network_Parameterization/) | 2505.08900 | 物理约束神经网络参数化 |
-| [Deep Learning Subregional Ocean Forecasting](./2025/deep-learning-subregional-ocean-forecasting-canary-current/) | 2505.24429 | 图神经网络, 亚区域海洋预报, 加那利洋流 |
-| [Stratified PINN Deep Ocean DA](./2025/stratified-physics-informed-neural-network-data-assimilation/) | 2503.19160 | PINN, 深海数据同化, 海洋流重建 |
-
-## 2024 年 (14 篇)
-
-| 论文 | arXiv | 关键词 |
-|------|-------|--------|
-| [CGKN](./2024/CGKN/) | 2406.XXXXX | Koopman, 数据同化 |
-| [Continuous Data Assimilation](./2024/Continuous_Data_Assimilation_Turbulence_Models/) | 2405.XXXXX | 湍流模型 |
-| [Deep Koopman Learning Noisy Data](./2024/Deep_Koopman_Learning_Noisy_Data/) | 2405.16649 | Koopman, 噪声数据 |
-| [Deep Learning ENSO Forecast](./2024/Deep_Learning_ENSO_Forecast/) | 2406.XXXXX | ENSO, 深度学习 |
-| [Deep Learning Model Correction](./2024/Deep_Learning_Model_Correction_Dynamical_Systems/) | 2404.XXXXX | 模型校正 |
-| [DUNE Climate Forecasting](./2024/DUNE_Climate_Forecasting/) | 2403.XXXXX | 气候预报 |
-| [FuXi-DA](./2024/FuXi-DA/) | 2401.XXXXX | 卫星观测 |
-| [Koopman-based Deep Learning](./2024/koopman-based-deep-learning-nonlinear-system-estimation/) | 2405.00627 | Koopman, 非线性系统 |
-| [LangYa Ocean Forecasting](./2024/LangYa_Cross_Spatiotemporal_Ocean_Forecasting/) | 2406.XXXXX | 海浪预报 |
-| [Machine Learning Inverse Problems DA](./2024/Machine_Learning_Inverse_Problems_DA/) | 2402.XXXXX | 逆问题 |
-| [OceanCastNet Wave Forecasting](./2024/OceanCastNet_Wave_Forecasting/) | 2406.03848 | 海浪预报深度学习 |
-| [Semilinear Neural Operators](./2024/Semilinear_Neural_Operators/) | 2401.XXXXX | 神经算子 |
-| [CG-EnKF Data Assimilation](./2024/conditional-gaussian-ensemble-kalman-filtering/) | 2409.14300 | 条件高斯 EnKF, 非线性数据同化 |
-| [Tropical Pacific Ocean DA](./2024/Tropical_Pacific_Ocean_DA/) | 2402.XXXXX | 太平洋, 上层海洋 |
-| [Validating DL Weather Forecast](./2024/validating-deep-learning-weather-forecast-models/) | 2404.17652 | 深度学习天气预报验证 |
-
-## 2023 年 (2 篇)
-
-| 论文 | arXiv | 关键词 |
-|------|-------|--------|
-| [Graph SST Forecast](./2023/Graph_SST_Forecast/) | 2309.XXXXX | 图神经网络, SST |
-| [Echo-State DA](./2023/Echo_State_DA/) | 2305.XXXXX | 回声状态网络 |
-
-## 2022 年 (3 篇)
-
-| 论文 | arXiv | 关键词 |
-|------|-------|--------|
-| [Deep Learning EnKF](./2022/deep-learning-enhanced-ensemble-based-data-assimilation/) | 2206.04811 | 深度学习增强EnKF |
-| [4D-SRDA](./2022/4D-SRDA/) | 2203.XXXXX | 时空超分辨率 |
-| [Ocean Observations Expansion](./2022/Ocean_Observations_Expansion/) | 2201.XXXXX | 海洋观测扩展 |
-
----
-
-*最后更新: 2026-03-21*
+*最后更新: 2026-03-23*

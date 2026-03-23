@@ -1,29 +1,28 @@
 ---
-title: '{{ title }}'
-arXiv: '{{ arxiv_id }}'
-authors:
-{%- for author in authors %}
-- {{ author }}
-{%- endfor %}
-year: {{ year }}
-source: {{ source | default('arXiv') }}
-venue: {{ venue | default('arXiv') }}
-domain_tags:
-{%- for tag in domain_tags %}
-- {{ tag }}
-{%- endfor %}
-ocean_vars: {{ ocean_vars | default('Unknown') }}
-spatiotemporal_res: {{ spatiotemporal_res | default('Unknown') }}
-difficulty: {{ difficulty | default('★★★☆☆') }}
-importance: {{ importance | default('★★★☆☆') }}
-read_status: {{ read_status | default('skim') }}
+title: "论文标题"
+arXiv: "2501.12345"
+authors: ["作者1", "作者2"]
+year: 2025
+source: "arXiv"
+venue: "arXiv"
+method_tags: ["PINN", "Deep-Learning"]
+application_tags: ["SST", "Global-Forecast"]
+difficulty: "★★★☆☆"
+importance: "★★★★☆"
+read_status: "skim"
 ---
 
-# {{ title }}
+# 论文标题
+
+## 基本信息
+
+- **arXiv**: [2501.12345](https://arxiv.org/abs/2501.12345)
+- **作者**: 作者1, 作者2
+- **年份**: 2025
 
 ## TL;DR
 
-> 一句话总结本文的核心贡献（待补充）
+> 一句话总结本文的核心贡献
 
 ## 研究问题
 
