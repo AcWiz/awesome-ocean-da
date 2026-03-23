@@ -27,44 +27,44 @@
 
 ## 2025 (39 篇)
 
-| 论文 | arXiv | 方法 | 应用 |
-|------|-------|------|------|
-| [Tensor-Var](./2025/Tensor-Var/) | 2503.XXXXX | 4D-Var, Neural-Operator | Global-Forecast |
-| [CGKN](./2025/CGKN/) | 2506.XXXXX | Koopman, Neural-Operator | Ocean-DA |
-| [FuXi-DA](./2025/FuXi-DA/) | 2501.XXXXX | Transformer | Satellite-Obs |
-| [OceanCastNet](./2025/OceanCastNet_Wave_Forecasting/) | 2506.03848 | GNN, Deep-Learning | Wave |
-| [CG-EnKF](./2025/conditional-gaussian-ensemble-kalman-filtering/) | 2509.14300 | EnKF | Ocean-DA |
-| [Stratified PINN DA](./2025/stratified-physics-informed-neural-network-data-assimilation/) | 2503.19160 | PINN | Deep-Ocean |
-| [Deep Learning Subregional](./2025/deep-learning-subregional-ocean-forecasting-canary-current/) | 2505.24429 | GNN | Regional |
-| [Generalizable NN](./2025/Generalizable_Neural_Network_Parameterization/) | 2505.08900 | Physics-Informed | Parameterization |
-| [Discrete-Time Koopman](./2025/) | 2504.XXXXX | Koopman | Climate |
-| [Advancing Ocean State](./2025/) | 2504.XXXXX | Hybrid | Ocean-DA |
-| [Principled Operator Learning](./2025/) | 2505.XXXXX | Neural-Operator | Ocean-Dynamics |
-| [Meta-Learning FNO](./2025/) | 2506.XXXXX | FNO, Meta-Learning | Ocean-DA |
-| [Validating DL Weather](./2025/) | 2504.XXXXX | Deep-Learning | Weather |
-| [Observation-only Learning](./2025/) | 2505.XXXXX | 4D-Var | Remote-Sensing |
+| 论文 | arXiv | Venue | 方法 | 应用 |
+|------|-------|-------|------|------|
+| [Tensor-Var](./2025/2501.13312/) | 2501.13312 | arXiv | 4D-Var, Neural-Operator | Global-Forecast |
+| [CGKN](./2025/2507.08749/) | 2507.08749 | Nature | Koopman, Neural-Operator | Ocean-DA |
+| [FuXi-DA](./2024/2404.08522/) | 2404.08522 | arXiv | Transformer | Satellite-Obs |
+| [OceanCastNet](./2025/2506.11639/) | 2506.11639 | arXiv | GNN, Deep-Learning | Wave |
+| [CG-EnKF](./2024/2409.14300/) | 2409.14300 | arXiv | EnKF | Ocean-DA |
+| [Stratified PINN DA](./2025/2503.19160/) | 2503.19160 | JGR | PINN | Deep-Ocean |
+| [Deep Learning Subregional](./2025/2505.24429/) | 2505.24429 | Nature | GNN | Regional |
+| [Generalizable NN](./2025/2505.08900/) | 2505.08900 | arXiv preprint | Physics-Informed | Parameterization |
+| [Discrete-Time Koopman](./2025/) | 2504.XXXXX | - | Koopman | Climate |
+| [Advancing Ocean State](./2025/) | 2504.XXXXX | - | Hybrid | Ocean-DA |
+| [Principled Operator Learning](./2025/) | 2505.XXXXX | - | Neural-Operator | Ocean-Dynamics |
+| [Meta-Learning FNO](./2025/) | 2506.XXXXX | - | FNO, Meta-Learning | Ocean-DA |
+| [Validating DL Weather](./2025/) | 2504.XXXXX | - | Deep-Learning | Weather |
+| [Observation-only Learning](./2025/) | 2505.XXXXX | - | 4D-Var | Remote-Sensing |
 
 ## 2024 (26 篇)
 
-| 论文 | arXiv | 方法 | 应用 |
-|------|-------|------|------|
-| [Semilinear Neural Operators](./2024/Semilinear_Neural_Operators/) | 2401.XXXXX | Neural-Operator | Ocean |
-| [Deep Koopman](./2024/Deep_Koopman_Learning_Noisy_Data/) | 2405.16649 | Koopman | Dynamical-Systems |
-| [Koopman-based DL](./2024/koopman-based-deep-learning-nonlinear-system-estimation/) | 2405.00627 | Koopman | Nonlinear |
-| [OceanCastNet](./2024/OceanCastNet_Wave_Forecasting/) | 2406.03848 | Deep-Learning | Wave |
-| [Deep Learning ENSO](./2024/Deep_Learning_ENSO_Forecast/) | 2406.XXXXX | Deep-Learning | ENSO |
-| [Tropical Pacific DA](./2024/Tropical_Pacific_Ocean_DA/) | 2402.XXXXX | EnKF | Pacific |
-| [Validating DL](./2024/validating-deep-learning-weather-forecast-models/) | 2404.17652 | Deep-Learning | Weather |
-| [CGKN](./2024/CGKN/) | 2406.XXXXX | Koopman | Ocean-DA |
-| [Continuous DA](./2024/Continuous_Data_Assimilation_Turbulence_Models/) | 2405.XXXXX | DA | Turbulence |
-| [Deep Learning Model Correction](./2024/Deep_Learning_Model_Correction_Dynamical_Systems/) | 2404.XXXXX | Deep-Learning | Model-Correction |
-| [DUNE Climate](./2024/DUNE_Climate_Forecasting/) | 2403.XXXXX | Climate-Forecast | Global |
-| [FuXi-DA](./2024/FuXi-DA/) | 2401.XXXXX | Transformer | Satellite-Obs |
-| [LangYa Ocean](./2024/LangYa_Cross_Spatiotemporal_Ocean_Forecasting/) | 2406.XXXXX | PINN | Ocean-Forecast |
-| [Machine Learning Inverse](./2024/Machine_Learning_Inverse_Problems_DA/) | 2402.XXXXX | ML-Inverse-Problem | DA |
-| [PhyGeoNet](./2024/PhyGeoNet/) | 2402.XXXXX | PINN, FNO | SST |
-| [4D-SRDA](./2024/4D-SRDA/) | 2403.XXXXX | 4D-Var | Spatio-Temporal |
-| [ML4PS NeurIPS](./2024/) | 2406.XXXXX | Various | Ocean |
+| 论文 | arXiv | Venue | 方法 | 应用 |
+|------|-------|-------|------|------|
+| [Semilinear Neural Operators](./2024/2402.15656/) | 2402.15656 | arXiv | Neural-Operator | Ocean |
+| [Deep Koopman](./2024/2405.16649/) | 2405.16649 | arXiv | Koopman | Dynamical-Systems |
+| [Koopman-based DL](./2024/2405.00627/) | 2405.00627 | arXiv | Koopman | Nonlinear |
+| [OceanCastNet](./2024/2406.03848/) | 2406.03848 | Nature | Deep-Learning | Wave |
+| [Deep Learning ENSO](./2024/2404.15419/) | 2404.15419 | - | Deep-Learning | ENSO |
+| [Tropical Pacific DA](./2024/2406.07063/) | 2406.07063 | - | EnKF | Pacific |
+| [Validating DL](./2024/2404.17652/) | 2404.17652 | Nature | Deep-Learning | Weather |
+| [CGKN](./2024/2410.20072/) | 2410.20072 | - | Koopman | Ocean-DA |
+| [Continuous DA](./2024/) | 2405.XXXXX | - | DA | Turbulence |
+| [Deep Learning Model Correction](./2024/2410.17913/) | 2410.17913 | - | Deep-Learning | Model-Correction |
+| [DUNE Climate](./2024/2408.06262/) | 2408.06262 | - | Climate-Forecast | Global |
+| [FuXi-DA](./2024/2404.08522/) | 2404.08522 | arXiv | Transformer | Satellite-Obs |
+| [LangYa Ocean](./2024/2412.18097/) | 2412.18097 | - | PINN | Ocean-Forecast |
+| [Machine Learning Inverse](./2024/2410.10523/) | 2410.10523 | - | ML-Inverse-Problem | DA |
+| [PhyGeoNet](./2024/) | 2402.XXXXX | - | PINN, FNO | SST |
+| [4D-SRDA](./2024/) | 2403.XXXXX | - | 4D-Var | Spatio-Temporal |
+| [ML4PS NeurIPS](./2024/) | 2406.XXXXX | NeurIPS | Various | Ocean |
 
 ## 2023 (17 篇)
 

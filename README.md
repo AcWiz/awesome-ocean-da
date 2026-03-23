@@ -37,7 +37,7 @@
 
 | 年份 | 论文 | 方法 | 应用 |
 |------|------|------|------|
-| 2025 | [Stratified PINN Deep Ocean DA](./papers/2025/stratified-physics-informed-neural-network-data-assimilation/) | PINN, Deep-Ocean | 深海数据同化 |
+| 2025 | [Stratified PINN Deep Ocean DA](./papers/2025/2503.19160/) | PINN, Deep-Ocean | 深海数据同化 |
 | 2025 | [Physics-Informed Neural ODE](./papers/2025/) | PINN, Neural-ODE | Ocean-DA |
 | 2024 | [PhyGeoNet](./papers/2024/) | PINN, FNO | SST, Regional |
 | 2024 | [LangYa Ocean Forecasting](./papers/2024/) | PINN, Spatio-Temporal | Ocean-Forecast |
@@ -54,7 +54,7 @@
 
 | 年份 | 论文 | 方法 | 应用 |
 |------|------|------|------|
-| 2025 | [CGKN](./papers/2024/CGKN/) | Koopman, Neural-Operator | Ocean-DA |
+| 2025 | [CGKN](./papers/2025/2507.08749/) | Koopman, Neural-Operator | Ocean-DA |
 | 2025 | [Discrete-Time Conditional Gaussian Koopman](./papers/2025/) | Koopman | Climate |
 | 2024 | [Deep Koopman Learning Noisy Data](./papers/2024/) | Koopman, Deep-Learning | Dynamical-Systems |
 | 2024 | [Koopman-based Deep Learning](./papers/2024/) | Koopman | Nonlinear-Estimation |
@@ -70,7 +70,7 @@
 
 | 年份 | 论文 | 方法 | 应用 |
 |------|------|------|------|
-| 2025 | [Tensor-Var](./papers/2025/Tensor-Var/) | Neural-Operator, 4D-Var | Global-Forecast |
+| 2025 | [Tensor-Var](./papers/2025/2501.13312/) | Neural-Operator, 4D-Var | Global-Forecast |
 | 2025 | [Semilinear Neural Operators](./papers/2024/Semilinear_Neural_Operators/) | Neural-Operator | Ocean-Dynamics |
 | 2024 | [FNO for Spatio-Temporal](./papers/2026/2601.01813/) | FNO, Uncertainty-Quantification | SST, Precipitation |
 | 2024 | [Meta-Learning FNO](./papers/2025/) | FNO, Meta-Learning | Ocean-DA |
@@ -86,7 +86,7 @@
 
 | 年份 | 论文 | 方法 | 应用 |
 |------|------|------|------|
-| 2025 | [OceanCastNet](./papers/2024/OceanCastNet_Wave_Forecasting/) | GNN, Deep-Learning | Wave-Forecast |
+| 2025 | [OceanCastNet](./papers/2025/2506.11639/) | GNN, Deep-Learning | Wave-Forecast |
 | 2025 | [Deep Learning Subregional](./papers/2025/deep-learning-subregional-ocean-forecasting-canary-current/) | GNN, CNN | Regional-Forecast |
 | 2024 | [Graph SST Forecast](./papers/2023/Graph_SST_Forecast/) | GNN | SST |
 | 2023 | [Graph Neural Networks for Ocean](./papers/2023/) | GNN | Ocean-DA |
@@ -102,8 +102,8 @@
 
 | 年份 | 论文 | 方法 | 应用 |
 |------|------|------|------|
-| 2025 | [Tensor-Var](./papers/2025/Tensor-Var/) | 4D-Var, Neural-Operator | Global-Forecast |
-| 2025 | [CG-EnKF](./papers/2024/conditional-gaussian-ensemble-kalman-filtering/) | EnKF, Conditional-Gaussian | Ocean-DA |
+| 2025 | [Tensor-Var](./papers/2025/2501.13312/) | 4D-Var, Neural-Operator | Global-Forecast |
+| 2025 | [CG-EnKF](./papers/2024/2409.14300/) | EnKF, Conditional-Gaussian | Ocean-DA |
 | 2024 | [4D-SRDA](./papers/2022/4D-SRDA/) | 4D-Var | Spatio-Temporal |
 | 2024 | [Tropical Pacific Ocean DA](./papers/2024/Tropical_Pacific_Ocean_DA/) | EnKF | Pacific-DA |
 | 2023 | [Deep Learning Enhanced DA](./papers/2023/) | EnKF, Deep-Learning | Ocean-DA |
@@ -119,7 +119,7 @@
 
 | 年份 | 论文 | 方法 | 应用 |
 |------|------|------|------|
-| 2025 | [FuXi-DA](./papers/2024/FuXi-DA/) | Transformer, Deep-Learning | Satellite-Obs |
+| 2025 | [FuXi-DA](./papers/2024/2404.08522/) | Transformer, Deep-Learning | Satellite-Obs |
 | 2024 | [Attention for Ocean](./papers/2024/) | Transformer | Ocean-Forecast |
 | 2023 | [Transformer for ENSO](./papers/2023/) | Transformer | ENSO |
 
@@ -171,7 +171,7 @@
 
 | 年份 | 论文 | 方法 |
 |------|------|------|
-| 2025 | [OceanCastNet](./papers/2024/OceanCastNet_Wave_Forecasting/) | GNN, Deep-Learning |
+| 2025 | [OceanCastNet](./papers/2025/2506.11639/) | GNN, Deep-Learning |
 | 2024 | [LangYa Ocean Forecasting](./papers/2024/) | PINN |
 | 2023 | [Wave Forecasting](./papers/2023/) | Deep-Learning |
 
@@ -183,7 +183,7 @@
 
 | 年份 | 论文 | 方法 |
 |------|------|------|
-| 2025 | [Tensor-Var](./papers/2025/Tensor-Var/) | 4D-Var, Neural-Operator |
+| 2025 | [Tensor-Var](./papers/2025/2501.13312/) | 4D-Var, Neural-Operator |
 | 2025 | [Advancing Ocean State Estimation](./papers/2025/) | Hybrid |
 | 2024 | [DUNE Climate Forecasting](./papers/2024/) | Climate-Forecast |
 | 2024 | [Validating DL Weather](./papers/2024/validating-deep-learning-weather-forecast-models/) | Deep-Learning |
@@ -225,16 +225,16 @@
 
 ### 2025 (39 篇)
 
-| 论文 | arXiv | 方法标签 | 应用 |
-|------|-------|----------|------|
-| [Tensor-Var](./papers/2025/Tensor-Var/) | 2503.XXXXX | 4D-Var, Neural-Operator | Global-Forecast |
-| [CGKN](./papers/2024/CGKN/) | 2406.XXXXX | Koopman, Neural-Operator | Ocean-DA |
-| [FuXi-DA](./papers/2024/FuXi-DA/) | 2401.XXXXX | Transformer | Satellite-Obs |
-| [OceanCastNet](./papers/2024/OceanCastNet_Wave_Forecasting/) | 2406.03848 | GNN, Deep-Learning | Wave |
-| [CG-EnKF](./papers/2024/conditional-gaussian-ensemble-kalman-filtering/) | 2409.14300 | EnKF | Ocean-DA |
-| [Stratified PINN DA](./papers/2025/stratified-physics-informed-neural-network-data-assimilation/) | 2503.19160 | PINN | Deep-Ocean |
-| [Deep Learning Subregional](./papers/2025/deep-learning-subregional-ocean-forecasting-canary-current/) | 2505.24429 | GNN | Regional |
-| [Generalizable NN](./papers/2025/Generalizable_Neural_Network_Parameterization/) | 2505.08900 | Physics-Informed | Parameterization |
+| 论文 | arXiv | Venue | 方法标签 | 应用 |
+|------|-------|-------|----------|------|
+| [Tensor-Var](./papers/2025/2501.13312/) | 2501.13312 | arXiv | 4D-Var, Neural-Operator | Global-Forecast |
+| [CGKN](./papers/2025/2507.08749/) | 2507.08749 | Nature | Koopman, Neural-Operator | Ocean-DA |
+| [FuXi-DA](./papers/2024/2404.08522/) | 2404.08522 | arXiv | Transformer | Satellite-Obs |
+| [OceanCastNet](./papers/2025/2506.11639/) | 2506.11639 | arXiv | GNN, Deep-Learning | Wave |
+| [CG-EnKF](./papers/2024/2409.14300/) | 2409.14300 | arXiv | EnKF | Ocean-DA |
+| [Stratified PINN DA](./papers/2025/2503.19160/) | 2503.19160 | JGR | PINN | Deep-Ocean |
+| [Deep Learning Subregional](./papers/2025/2505.24429/) | 2505.24429 | Nature | GNN | Regional |
+| [Generalizable NN](./papers/2025/2505.08900/) | 2505.08900 | arXiv preprint | Physics-Informed | Parameterization |
 
 [→ 2025 年全部论文](./papers/2025/)
 
