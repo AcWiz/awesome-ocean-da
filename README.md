@@ -36,11 +36,11 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2025 | [Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network](https://arxiv.org/abs/2510.17756) | Nature | PINN, HIS-Unet, CNN, physics-informed, sea-ice | Arctic-Ocean, sea-ice-velocity, sea-ice-concentration, remote-sensing, multi-task-learning | [总结](./papers/2025/2510.17756/summary.md) |
-| 2025 | [Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport](https://arxiv.org/abs/2507.08834) | Nature | PINN, advection-diffusion, physics-informed, neural-network, Julia | ocean-pollutant, advection-diffusion-equation, finite-difference, environmental-monitoring | [总结](./papers/2025/2507.08834/summary.md) |
-| 2025 | [CTP: A hybrid CNN-Transformer-PINN model for ocean front](https://arxiv.org/abs/2505.10894) | Nature | CNN, Transformer, PINN, Navier-Stokes, deep-learning | ocean-front, SST, forecasting, classification, Kuroshio | [总结](./papers/2025/2505.10894/summary.md) |
-| 2025 | [Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation](https://arxiv.org/abs/2503.19160) | JGR (Journal of Geophysical Research) | PINN, SIREN, data-assimilation, quasi-geostrophic, stratified-ocean | deep-ocean, SWOT, ARGO, ocean-circulation, mesoscale | [总结](./papers/2025/2503.19160/summary.md) |
-| 2025 | [Physics-informed neural networks for phase-resolved data assimilation and prediction of nonlinear ocean waves](https://arxiv.org/abs/2501.08430) | Physics of Fluids | PINN, potential-flow, wave-physics, phase-resolved, data-assimilation | ocean-waves, wave-prediction, data-assimilation, wave-flume, nonlinear-waves | [总结](./papers/2025/2501.08430/summary.md) |
+|2025|[Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network](https://arxiv.org/abs/2510.17756)|Nature|PINN, HIS-Unet, CNN, 物理约束, 海冰|北冰洋, 海冰速度, 海冰浓度, remote-sensing, multi-task-learning|[总结](./papers/2025/2510.17756/summary.md)|
+|2025|[Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport](https://arxiv.org/abs/2507.08834)|Nature|PINN, advection-diffusion, 物理约束, 神经网络, Julia|海洋污染物, 平流扩散方程, finite-difference, 环境监测|[总结](./papers/2025/2507.08834/summary.md)|
+|2025|[CTP: A hybrid CNN-Transformer-PINN model for ocean front](https://arxiv.org/abs/2505.10894)|Nature|CNN, Transformer, PINN, Navier-Stokes, 深度学习|海洋锋, SST, 预报, 分类, Kuroshio|[总结](./papers/2025/2505.10894/summary.md)|
+|2025|[Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation](https://arxiv.org/abs/2503.19160)|JGR (Journal of Geophysical Research)|PINN, SIREN, 数据同化, quasi-geostrophic, stratified-ocean|深海, SWOT卫星, ARGO浮标, 海洋环流, 中尺度|[总结](./papers/2025/2503.19160/summary.md)|
+|2025|[Physics-informed neural networks for phase-resolved data assimilation and prediction of nonlinear ocean waves](https://arxiv.org/abs/2501.08430)|Physics of Fluids|PINN, potential-flow, 波浪物理, 相位解析, 数据同化|海浪, 波浪预测, 数据同化, 波流水槽, 非线性波|[总结](./papers/2025/2501.08430/summary.md)|
 
 [更多 物理信息神经网络 (PINN) 论文 →](./papers/pinn.md)
 
@@ -51,12 +51,12 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2026 | [Spatio-temporal modeling and forecasting with Fourier neural operators](https://arxiv.org/abs/2601.01813) | Science | FNO, neural-operator, dynamical-system, spatio-temporal, uncertainty-quantification | SST, precipitation, ocean-modeling, atmospheric-modeling, forecasting | [总结](./papers/2026/2601.01813/summary.md) |
-| 2025 | [Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure](https://arxiv.org/abs/2510.09792) | NeurIPS | neural-operator, FNO, temporal-dispersion, ocean-modeling, physics-informed | ocean-circulation, sea-level-prediction, Baltic-Sea, regional-ocean, wave-propagation | [总结](./papers/2025/2510.09792/summary.md) |
-| 2025 | [Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time](https://arxiv.org/abs/2508.03315) | Nature | PINO, neural-operator, FNO, physics-informed, wave-reconstruction, HOSM | ocean-waves, wave-prediction, buoy-measurements, X-band-radar, phase-resolved | [总结](./papers/2025/2508.03315/summary.md) |
-| 2025 | [Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity](https://arxiv.org/abs/2507.06479) | Nature | DDPM, FNO, UNET, diffusion-model, neural-operator, data-assimilation | Lagrangian-DA, sparse-observations, ocean-reconstruction, Gulf-of-Mexico, satellite-altimetry | [总结](./papers/2025/2507.06479/summary.md) |
-| 2025 | [Deep Learning for Canary Current Upwelling: A Case Study](https://arxiv.org/abs/2505.24429) | Nature | neural-operator, FNO, graph-network, data-driven, ocean-modeling | canary-current, upwelling, ocean-forecasting, regional-ocean, marine-ecosystem | [总结](./papers/2025/2505.24429/summary.md) |
-| 2024 | [STREAMLINING OCEAN DYNAMICS MODELING WITH FOURIER NEURAL OPERATORS: A MULTIOBJECTIVE HYPERPARAMETER AND ARCHITECTURE OPTIMIZATION APPROACH](https://arxiv.org/abs/2404.05768) | Science | neural-operator, fno, hyperparameter-optimization, deephyper, bayesian-optimization | ocean-modeling, baroclinic-wind-driven-ocean, sea-surface-temperature, forecasting | [总结](./papers/2024/2404.05768/summary.md) |
+|2026|[Spatio-temporal modeling and forecasting with Fourier neural operators](https://arxiv.org/abs/2601.01813)|Science|FNO, neural-operator, 动力学系统, 时空, 不确定性量化|SST, precipitation, 海洋建模, 大气建模, 预报|[总结](./papers/2026/2601.01813/summary.md)|
+|2025|[Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure](https://arxiv.org/abs/2510.09792)|NeurIPS|neural-operator, FNO, 时间色散, 海洋建模, 物理约束|海洋环流, 海平面预测, Baltic-Sea, 区域海洋, wave-propagation|[总结](./papers/2025/2510.09792/summary.md)|
+|2025|[Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time](https://arxiv.org/abs/2508.03315)|Nature|PINO, neural-operator, FNO, 物理约束, wave-reconstruction, HOSM|海浪, 波浪预测, buoy-measurements, X-band-radar, 相位解析|[总结](./papers/2025/2508.03315/summary.md)|
+|2025|[Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity](https://arxiv.org/abs/2507.06479)|Nature|DDPM, FNO, UNET, diffusion-model, neural-operator, 数据同化|拉格朗日数据同化, 稀疏观测, 海洋重构, 墨西哥湾, 卫星测高|[总结](./papers/2025/2507.06479/summary.md)|
+|2025|[Deep Learning for Canary Current Upwelling: A Case Study](https://arxiv.org/abs/2505.24429)|Nature|neural-operator, FNO, graph-network, data-driven, 海洋建模|加纳利流, 上升流, 海洋预报, 区域海洋, 海洋生态系统|[总结](./papers/2025/2505.24429/summary.md)|
+|2024|[STREAMLINING OCEAN DYNAMICS MODELING WITH FOURIER NEURAL OPERATORS: A MULTIOBJECTIVE HYPERPARAMETER AND ARCHITECTURE OPTIMIZATION APPROACH](https://arxiv.org/abs/2404.05768)|Science|neural-operator, fno, 超参数优化, deephyper, 贝叶斯优化|海洋建模, 斜压风驱动海洋, 海表温度, 预报|[总结](./papers/2024/2404.05768/summary.md)|
 
 [更多 神经算子 (Neural Operator) 论文 →](./papers/neural-operator.md)
 
@@ -67,10 +67,10 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2026 | [Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations](https://arxiv.org/abs/2603.06153) | NeurIPS | GNN, ensemble-learning, uncertainty-quantification, SST, Perlin-noise | SST-forecasting, regional-ocean, canary-current, ensemble-prediction, probabilistic-forecasting | [总结](./papers/2026/2603.06153/summary.md) |
-| 2026 | [Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks](https://arxiv.org/abs/2601.12775) | ICML | GNN, graph-neural-network, multi-scale, spherical-mesh, eddy-resolving | global-ocean, eddy, forecasting, ocean-circulation, ocean-state-prediction | [总结](./papers/2026/2601.12775/summary.md) |
-| 2025 | [SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900) | Nature | GNN, graph-neural-network, hierarchical-mesh, regional-ocean, autoregressive | Mediterranean-Sea, ocean-forecasting, SST, SSH, temperature, salinity, currents | [总结](./papers/2025/2506.23900/summary.md) |
-| 2024 | [EnKode: Active Learning of Unknown Flows with Koopman Operators](https://arxiv.org/abs/2410.16605) | IEEE Robotics and Automation Letters | Koopman-Operator, Active-Learning, Ensemble-Methods, GNN | ocean-circulation, flow-modeling, robotics, active-sensing, uncertainty-quantification | [总结](./papers/2024/2410.16605/summary.md) |
+|2026|[Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations](https://arxiv.org/abs/2603.06153)|NeurIPS|GNN, 集成学习, 不确定性量化, SST, Perlin-noise|海表温度预报, 区域海洋, 加纳利流, ensemble-prediction, probabilistic-forecasting|[总结](./papers/2026/2603.06153/summary.md)|
+|2026|[Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks](https://arxiv.org/abs/2601.12775)|ICML|GNN, 图神经网络, 多尺度, spherical-mesh, eddy-resolving|全球海洋, 涡旋, 预报, 海洋环流, 海洋状态预测|[总结](./papers/2026/2601.12775/summary.md)|
+|2025|[SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900)|Nature|GNN, 图神经网络, 分层网格, 区域海洋, 自回归|地中海, 海洋预报, SST, SSH, 温度, 盐度, 海流|[总结](./papers/2025/2506.23900/summary.md)|
+|2024|[EnKode: Active Learning of Unknown Flows with Koopman Operators](https://arxiv.org/abs/2410.16605)|IEEE Robotics and Automation Letters|Koopman-Operator, 主动学习, 集成方法, GNN|海洋环流, 流场建模, 机器人, 主动感知, 不确定性量化|[总结](./papers/2024/2410.16605/summary.md)|
 | 2022 | [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | N/A - Preprint | GNN, Graph Neural Network, LSTM, Transformer, Dynamic Graph | Ocean Dynamics, Current Velocity, SSH, Santos Estuarine System | [总结](./papers/2022/2206.12746/summary.md) |
 
 [更多 图神经网络 (GNN) 论文 →](./papers/gnn.md)
@@ -82,9 +82,9 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2025 | [Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation](https://arxiv.org/abs/2509.22949) | arXiv | Meta-Learning, Fourier Neural Operator, Data Assimilation, Inverse Hessian Approximation, Conjugate Gradient Method | Variational Data Assimilation, 4D-Var, Numerical Weather Prediction, PDE-Constrained Optimization | [总结](./papers/2025/2509.22949/summary.md) |
+|2025|[Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation](https://arxiv.org/abs/2509.22949)|arXiv|元学习, Fourier Neural Operator, Data Assimilation, Inverse Hessian Approximation, Conjugate Gradient Method|Variational Data Assimilation, 4D-Var, Numerical Weather Prediction, PDE-Constrained Optimization|[总结](./papers/2025/2509.22949/summary.md)|
 | 2025 | [Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation](https://arxiv.org/abs/2501.13312) | arXiv | 4D-Var, Kernel Methods, Conditional Mean Embedding, Deep Learning, Data Assimilation | Weather Prediction, Chaotic Systems, Numerical Weather Prediction, Dynamical Systems | [总结](./papers/2025/2501.13312/summary.md) |
-| 2015 | [A framework for interpreting regularized state estimation](https://arxiv.org/abs/1511.04790) | Monthly Weather Review | 4D-Var, Data Assimilation, State Estimation, Regularization, Chaotic Systems | Ocean Circulation, Climate Modeling, Geophysical Fluid Dynamics | [总结](./papers/2015/1511.04790/summary.md) |
+|2015|[A framework for interpreting regularized state estimation](https://arxiv.org/abs/1511.04790)|Monthly Weather Review|4D-Var, Data Assimilation, State Estimation, 正则化, Chaotic Systems|Ocean Circulation, Climate Modeling, Geophysical Fluid Dynamics|[总结](./papers/2015/1511.04790/summary.md)|
 | 2014 | [Optimal boundary conditions at the staircase-shaped coastlines](https://arxiv.org/abs/1402.7201) | Ocean Dynamics | 4D-Var, 数据同化, NEMO模型, 边界条件优化, 海洋建模 | 海洋环流建模, 海岸线近似, 数值天气预报 | [总结](./papers/2014/1402.7201/summary.md) |
 | 2012 | [Optimal Boundary Conditions for ORCA-2 Model](https://arxiv.org/abs/1212.3116) | Ocean Dynamics | 4D-Var, 数据同化, 海洋建模, 切线与伴随代码自动生成 | 海洋环流, 边界条件优化, NEMO模型, 射流强化 | [总结](./papers/2012/1212.3116/summary.md) |
 
@@ -98,11 +98,11 @@
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
 | 2026 | [Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting](https://arxiv.org/abs/2602.05178) | arXiv | Deep Learning, Sequence Classification, Transformer, BiLSTM, TCN | Coastal Hypoxia Forecasting, Ocean Modeling, Environmental AI | [总结](./papers/2026/2602.05178/summary.md) |
-| 2025 | [Graph Embedding with Mel-spectrograms for Underwater Acoustic Target Recognition](https://arxiv.org/abs/2512.11545) | IEEE | graph-neural-network, Transformer, Mel-spectrogram, non-Euclidean, underwater-acoustics | underwater-target-recognition, sonar, ship-classification, acoustic-signal-processing, model-interpretability | [总结](./papers/2025/2512.11545/summary.md) |
-| 2025 | [CTP: A hybrid CNN-Transformer-PINN model for ocean front](https://arxiv.org/abs/2505.10894) | Nature | CNN, Transformer, PINN, Navier-Stokes, deep-learning | ocean-front, SST, forecasting, classification, Kuroshio | [总结](./papers/2025/2505.10894/summary.md) |
-| 2024 | [CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION](https://arxiv.org/abs/2409.05369) | Nature | transformer, swin-transformer, attention-mechanism, 3d-cnn, lstm | sst-prediction, s2s-forecasting, enso, ocean-modeling, climate-prediction | [总结](./papers/2024/2409.05369/summary.md) |
+|2025|[Graph Embedding with Mel-spectrograms for Underwater Acoustic Target Recognition](https://arxiv.org/abs/2512.11545)|IEEE|图神经网络, Transformer, Mel-spectrogram, non-Euclidean, 水下声学|underwater-target-recognition, sonar, ship-classification, acoustic-signal-processing, model-interpretability|[总结](./papers/2025/2512.11545/summary.md)|
+|2025|[CTP: A hybrid CNN-Transformer-PINN model for ocean front](https://arxiv.org/abs/2505.10894)|Nature|CNN, Transformer, PINN, Navier-Stokes, 深度学习|海洋锋, SST, 预报, 分类, Kuroshio|[总结](./papers/2025/2505.10894/summary.md)|
+|2024|[CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION](https://arxiv.org/abs/2409.05369)|Nature|transformer, swin-transformer, attention-mechanism, 3d-cnn, lstm|sst-prediction, s2s-forecasting, enso, 海洋建模, climate-prediction|[总结](./papers/2024/2409.05369/summary.md)|
 | 2024 | [Tropical Pacific Ocean Data Assimilation](https://arxiv.org/abs/2406.07063) | arXiv preprint | Deep Learning, Transformer, Data Assimilation, Ensemble Kalman Filter, Linear Inverse Model | Climate Reconstruction, ENSO Prediction, Paleoclimate Proxies, Tropical Pacific Ocean | [总结](./papers/2024/2406.07063/summary.md) |
-| 2024 | [SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting](https://arxiv.org/abs/2404.14757) | CIKM | mamba, transformer, mixture-of-experts, multi-scale, state-space-model, time-series | time-series-forecasting, weather-prediction, traffic-prediction, energy-forecasting, sst-forecasting | [总结](./papers/2024/2404.14757/summary.md) |
+|2024|[SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting](https://arxiv.org/abs/2404.14757)|CIKM|mamba, transformer, mixture-of-experts, 多尺度, state-space-model, time-series|time-series-forecasting, 天气预报, traffic-prediction, energy-forecasting, 海表温度预报|[总结](./papers/2024/2404.14757/summary.md)|
 
 [更多 Transformer / Attention 论文 →](./papers/transformer.md)
 
@@ -115,12 +115,12 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2026 | [Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations](https://arxiv.org/abs/2603.06153) | NeurIPS | GNN, ensemble-learning, uncertainty-quantification, SST, Perlin-noise | SST-forecasting, regional-ocean, canary-current, ensemble-prediction, probabilistic-forecasting | [总结](./papers/2026/2603.06153/summary.md) |
-| 2026 | [Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes](https://arxiv.org/abs/2601.01864) | Nature | SVD, linear-regression, PDO, seasonal-decomposition, multivariate-analysis | SST, Pacific-Decadal-Oscillation, North-Pacific, sea-surface-temperature, climate-prediction | [总结](./papers/2026/2601.01864/summary.md) |
-| 2026 | [Spatio-temporal modeling and forecasting with Fourier neural operators](https://arxiv.org/abs/2601.01813) | Science | FNO, neural-operator, dynamical-system, spatio-temporal, uncertainty-quantification | SST, precipitation, ocean-modeling, atmospheric-modeling, forecasting | [总结](./papers/2026/2601.01813/summary.md) |
-| 2025 | [OceanForecastBench: A Benchmark Dataset for Data-Driven Global Ocean Forecasting](https://arxiv.org/abs/2511.18732) | JGR: Machine Learning and Computation | benchmark, deep-learning, global-ocean, multi-source-data, evaluation-pipeline | ocean-forecasting, SST, salinity, ocean-currents, sea-level | [总结](./papers/2025/2511.18732/summary.md) |
-| 2025 | [Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting](https://arxiv.org/abs/2510.25563) | NeurIPS | foundation-model, Aurora, SST, fine-tuning, ocean-forecasting | Canary-Upwelling, sea-surface-temperature, Northeastern-Atlantic, regional-ocean, potential-temperature | [总结](./papers/2025/2510.25563/summary.md) |
-| 2025 | [SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900) | Nature | GNN, graph-neural-network, hierarchical-mesh, regional-ocean, autoregressive | Mediterranean-Sea, ocean-forecasting, SST, SSH, temperature, salinity, currents | [总结](./papers/2025/2506.23900/summary.md) |
+|2026|[Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations](https://arxiv.org/abs/2603.06153)|NeurIPS|GNN, 集成学习, 不确定性量化, SST, Perlin-noise|海表温度预报, 区域海洋, 加纳利流, ensemble-prediction, probabilistic-forecasting|[总结](./papers/2026/2603.06153/summary.md)|
+|2026|[Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes](https://arxiv.org/abs/2601.01864)|Nature|SVD, linear-regression, PDO, seasonal-decomposition, multivariate-analysis|SST, Pacific-Decadal-Oscillation, North-Pacific, 海表温度, climate-prediction|[总结](./papers/2026/2601.01864/summary.md)|
+|2026|[Spatio-temporal modeling and forecasting with Fourier neural operators](https://arxiv.org/abs/2601.01813)|Science|FNO, neural-operator, 动力学系统, 时空, 不确定性量化|SST, precipitation, 海洋建模, 大气建模, 预报|[总结](./papers/2026/2601.01813/summary.md)|
+|2025|[OceanForecastBench: A Benchmark Dataset for Data-Driven Global Ocean Forecasting](https://arxiv.org/abs/2511.18732)|JGR: Machine Learning and Computation|benchmark, 深度学习, 全球海洋, multi-source-data, evaluation-pipeline|海洋预报, SST, 盐度, ocean-currents, 海平面|[总结](./papers/2025/2511.18732/summary.md)|
+|2025|[Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting](https://arxiv.org/abs/2510.25563)|NeurIPS|foundation-model, Aurora, SST, fine-tuning, 海洋预报|Canary-Upwelling, 海表温度, Northeastern-Atlantic, 区域海洋, potential-temperature|[总结](./papers/2025/2510.25563/summary.md)|
+|2025|[SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900)|Nature|GNN, 图神经网络, 分层网格, 区域海洋, 自回归|地中海, 海洋预报, SST, SSH, 温度, 盐度, 海流|[总结](./papers/2025/2506.23900/summary.md)|
 
 [更多 海表温度 (SST) 论文 →](./papers/sst.md)
 
@@ -131,8 +131,8 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2025 | [SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900) | Nature | GNN, graph-neural-network, hierarchical-mesh, regional-ocean, autoregressive | Mediterranean-Sea, ocean-forecasting, SST, SSH, temperature, salinity, currents | [总结](./papers/2025/2506.23900/summary.md) |
-| 2022 | [4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for Nadir and Wide-Swath Satellite Altimetry](https://arxiv.org/abs/2211.05904) | N/A - Preprint | 4DVarNet, Deep Learning, SSH, Satellite Altimetry, SWOT | Sea Surface Height, Gulf Stream, OSMOSIS, NATL60, DUACS | [总结](./papers/2022/2211.05904/summary.md) |
+|2025|[SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900)|Nature|GNN, 图神经网络, 分层网格, 区域海洋, 自回归|地中海, 海洋预报, SST, SSH, 温度, 盐度, 海流|[总结](./papers/2025/2506.23900/summary.md)|
+|2022|[4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for Nadir and Wide-Swath Satellite Altimetry](https://arxiv.org/abs/2211.05904)|N/A - Preprint|4DVarNet, Deep Learning, SSH, Satellite Altimetry, SWOT卫星|Sea Surface Height, Gulf Stream, OSMOSIS, NATL60, DUACS|[总结](./papers/2022/2211.05904/summary.md)|
 | 2022 | [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | N/A - Preprint | GNN, Graph Neural Network, LSTM, Transformer, Dynamic Graph | Ocean Dynamics, Current Velocity, SSH, Santos Estuarine System | [总结](./papers/2022/2206.12746/summary.md) |
 
 [更多 海表高度 (SSH) 论文 →](./papers/ssh.md)
@@ -144,8 +144,8 @@
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
-| 2024 | [CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION](https://arxiv.org/abs/2409.05369) | Nature | transformer, swin-transformer, attention-mechanism, 3d-cnn, lstm | sst-prediction, s2s-forecasting, enso, ocean-modeling, climate-prediction | [总结](./papers/2024/2409.05369/summary.md) |
-| 2023 | [Graph-Based Deep Learning for Sea Surface Temperature Forecasts](https://arxiv.org/abs/2305.09468) | ICLR Workshop | Graph-Neural-Network, GCN, GAT, GraphSAGE, SST-Forecasting, Climate-ML | Sea-Surface-Temperature, SST-Prediction, Climate-Modeling, ENSO, Ocean-Forecasting | [总结](./papers/2023/2305.09468/summary.md) |
+|2024|[CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION](https://arxiv.org/abs/2409.05369)|Nature|transformer, swin-transformer, attention-mechanism, 3d-cnn, lstm|sst-prediction, s2s-forecasting, enso, 海洋建模, climate-prediction|[总结](./papers/2024/2409.05369/summary.md)|
+|2023|[Graph-Based Deep Learning for Sea Surface Temperature Forecasts](https://arxiv.org/abs/2305.09468)|ICLR Workshop|图神经网络, GCN, GAT, GraphSAGE, 海表温度预报, Climate-ML|海表温度, SST-Prediction, 气候建模, ENSO, 海洋预报|[总结](./papers/2023/2305.09468/summary.md)|
 | 2023 | [On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST](https://arxiv.org/abs/2302.11357) | Ocean Dynamics | CNN, Sea Surface Temperature Prediction, ENSO, Climate Modeling, Deep Learning | Climate Prediction, El Nino/La Nina Forecast, Ocean-Atmosphere Interaction, Sea Surface Temperature | [总结](./papers/2023/2302.11357/summary.md) |
 | 2022 | [Data Assimilation in Operator Algebras](https://arxiv.org/abs/2206.13659) | Proceedings of the National Academy of Sciences | Koopman Operator, Quantum Data Assimilation, Operator Algebra, Matrix Mechanical DA | Lorenz 96, ENSO, Climate Model, Uncertainty Quantification | [总结](./papers/2022/2206.13659/summary.md) |
 | 2022 | [A Deep Learning Model for Forecasting Global Monthly Mean Sea Surface Temperature Anomalies](https://arxiv.org/abs/2202.09967) | N/A - Preprint | Unet-LSTM, CNN, LSTM, ERA5, Deep Learning | SST, ENSO, Marine Heatwaves, Sea Surface Temperature | [总结](./papers/2022/2202.09967/summary.md) |
