@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 Regional Ocean Forecasting with Hierarchical Graph Neural Networks
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2410_11807
+- **论文链接**: https://arxiv.org/abs/2410.11807
 - **作者机构**: Daniel Holmberg, Teemu Roos (赫尔辛基大学); Emanuela Clementi (CMCC Foundation)
 - **开源代码**: https://github.com/deinal/seacast
 

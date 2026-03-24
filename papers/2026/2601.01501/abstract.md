@@ -15,7 +15,7 @@ read_status: "skim"
 # Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601.01501v1
+- **论文链接**: https://arxiv.org/abs/2601.01501
 - **作者机构**: 第一作者单位未明确标注，联系作者包括Xibin Zhao等
 - **开源代码**: None（未在内容样本中发现GitHub链接）
 

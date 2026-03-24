@@ -4,7 +4,7 @@ arXiv: "2410.20072"
 authors: ["Chuanqi Chen", "et al."]
 year: 2024
 source: "arXiv"
-venue: "arXiv"
+venue: "Journal of Computational Physics"
 method_tags: ["Deep Learning", "Koopman Theory", "Data Assimilation", "Neural SDE", "Conditional Gaussian"]
 application_tags: ["Dynamical Systems", "Turbulence Modeling", "Climate Prediction", "Chaos Theory"]
 difficulty: "★★★★☆"

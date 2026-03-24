@@ -15,7 +15,7 @@ read_status: "skim"
 # CNN-based forecasting of early winter NAO using sea surface temperature
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2603.16312v1
+- **论文链接**: https://arxiv.org/abs/2603.16312
 - **作者机构**: Elena Provenzano, Guillaume Gastineau, Carlos Mejia, Didier Swingedouw, Sylvie Thiria (机构信息待补充)
 - **开源代码**: None (未在内容中提及)
 
@@ -151,5 +151,5 @@ read_status: "skim"
   eprint={2603.16312},
   archivePrefix={arXiv},
   primaryClass={cs.LG},
-  url={https://arxiv.org/abs/2603.16312v1}
+  url={https://arxiv.org/abs/2603.16312}
 }

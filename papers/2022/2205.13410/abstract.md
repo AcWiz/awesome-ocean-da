@@ -4,7 +4,7 @@ arXiv: "2205.13410"
 authors: ["Suraj Pawar", "Omer San"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "Journal of Advances in Modeling Earth Systems"
 method_tags: ["POD", "LSTM", "DEnKF", "Reduced Order Model", "NIROM"]
 application_tags: ["SST", "Sea Surface Temperature", "Data Assimilation", "NOAA OI"]
 difficulty: "★★★★☆"

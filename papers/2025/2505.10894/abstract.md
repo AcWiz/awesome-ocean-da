@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 CTP: A hybrid CNN-Transformer-PINN model for ocean front
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2505_10894
+- **论文链接**: https://arxiv.org/abs/2505.10894
 - **作者机构**: 上海交通大学海洋研究院、中国科学院第二海洋研究所、中国地质大学(武汉)海洋科学学院
 - **开源代码**: None
 

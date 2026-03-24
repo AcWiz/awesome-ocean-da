@@ -174,5 +174,5 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
   eprint={2104.09355},
   archivePrefix={arXiv},
   primaryClass={cs.DC},
-  note={arXiv:2104.09355v1}
+  note={arXiv:2104.09355}
 }

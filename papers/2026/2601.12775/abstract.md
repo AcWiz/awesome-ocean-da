@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601_12775
+- **论文链接**: https://arxiv.org/abs/2601.12775
 - **作者机构**: 日本海洋科学技术研究所(JAMSTEC)、FURUNO ELECTRONIC CO. LTD.
 - **开源代码**: None
 

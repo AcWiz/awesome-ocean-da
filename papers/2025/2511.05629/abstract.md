@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2511_05629
+- **论文链接**: https://arxiv.org/abs/2511.05629
 - **作者机构**: 北京邮电大学（人工智能学院、计算机学院）
 - **开源代码**: https://github.com/nicezheng/SSTODE-code
 

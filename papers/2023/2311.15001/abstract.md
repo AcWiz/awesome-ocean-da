@@ -4,7 +4,7 @@ arXiv: "2311.15001"
 authors: ["Wei Zhang", "Yu Sun", "Yapeng Wu", "Junyu Dong", "Xiaojiang Song", "Zhiyi Gao", "Renbo Pang", "Boyu Guoan"]
 year: 2023
 source: "arXiv"
-venue: "arXiv"
+venue: "Ocean Modelling"
 method_tags: ["Deep Learning", "Gated Recurrent Unit", "Spatiotemporal Model", "Bias Correction", "Loss Function Design"]
 application_tags: ["Ocean Wave Forecasting", "Significant Wave Height", "Numerical Weather Prediction", "ECMWF-IFS", "Coastal Protection"]
 difficulty: "★★★☆☆"
@@ -169,5 +169,5 @@ $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
   eprint={2311.15001},
   archivePrefix={arXiv},
   primaryClass={physics.ao-ph},
-  journal={arXiv preprint arXiv:2311.15001v1}
+  journal={arXiv preprint arXiv:2311.15001}
 }

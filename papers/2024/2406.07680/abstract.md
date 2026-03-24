@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 Watching Swarm Dynamics from Above
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2406_07680
+- **论文链接**: https://arxiv.org/abs/2406.07680
 - **作者机构**: Duc Pham (柏林工业大学); Matthew Hansen, Jens Krause (莱布尼茨淡水生态与内陆渔业研究所); Félicie Dhellemmes, Pia Bideau (格勒诺布尔大学/Inria/CNRS); Science of Intelligence研究集群
 - **开源代码**: 待发布
 

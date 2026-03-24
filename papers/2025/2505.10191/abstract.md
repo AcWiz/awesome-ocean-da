@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 LanTu: Dynamics-Enhanced Deep Learning for Eddy-Resolved Ocean Forecasting
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2505_10191
+- **论文链接**: https://arxiv.org/abs/2505.10191
 - **作者机构**: 天津大学海洋科学与技术学院
 - **开源代码**: None
 

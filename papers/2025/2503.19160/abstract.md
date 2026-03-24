@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2503_19160
+- **论文链接**: https://arxiv.org/abs/2503.19160
 - **作者机构**: CNRS, ENS de Lyon, 格勒诺布尔大学
 - **开源代码**: None
 

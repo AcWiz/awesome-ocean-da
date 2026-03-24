@@ -4,7 +4,7 @@ arXiv: "2302.11357"
 authors: ["Lekshmi S", "Rajib Chattopadhyay", "D. S. Pai", "M. Rajeevan", "Vinu Valsala", "K. S. Hosalikar", "M. Mohapatra"]
 year: 2023
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "Ocean Dynamics"
 method_tags: ["CNN", "Sea Surface Temperature Prediction", "ENSO", "Climate Modeling", "Deep Learning"]
 application_tags: ["Climate Prediction", "El Nino/La Nina Forecast", "Ocean-Atmosphere Interaction", "Sea Surface Temperature"]
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "skim"
 # On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2302.11357v1
+- **论文链接**: https://arxiv.org/abs/2302.11357
 - **作者机构**: Lekshmi S, Rajib Chattopadhyay, D. S. Pai, M. Rajeevan (India Meteorological Department); Vinu Valsala (Indian Institute of Tropical Meteorology); K. S. Hosalikar, M. Mohapatra
 - **开源代码**: 未提及
 

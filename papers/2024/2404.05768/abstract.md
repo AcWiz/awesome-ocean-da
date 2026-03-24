@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 STREAMLINING OCEAN DYNAMICS MODELING WITH FOURIER NEURAL OPERATORS
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2404_05768
+- **论文链接**: https://arxiv.org/abs/2404.05768
 - **作者机构**: Yixuan Sun (Argonne National Laboratory), Ololade Sowunmi (Florida State University), Romain Egele (Université Paris-Saclay), Sri Hari Krishna Narayanan (Argonne), Luke Van Roekel (Los Alamos), Prasanna Balaprakash (Oak Ridge)
 - **开源代码**: None
 

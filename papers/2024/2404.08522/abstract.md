@@ -4,7 +4,7 @@ arXiv: "2404.08522"
 authors: ["Xiaoze Xu", "Xiuyu Sun", "Wei Han", "Xiaohui Zhong", "Lei Chen", "Hao Li"]
 year: 2024
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "npj Climate and Atmospheric Science"
 method_tags: ["Deep Learning", "Data Assimilation", "Satellite Observations", "Numerical Weather Prediction", "Neural Network"]
 application_tags: ["Weather Forecasting", "Atmospheric Science", "Satellite Data Processing", "NWP"]
 difficulty: "★★★★☆"

@@ -15,7 +15,7 @@ read_status: "skim"
 # 将时间序列转化为代数方程：用于混沌时间序列可解释建模的符号机器学习
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2603.07261v1
+- **论文链接**: https://arxiv.org/abs/2603.07261
 - **作者机构**: Madhurima Panja, Grace Younes, Tanujit Chakraborty（具体机构信息需查看原文）
 - **开源代码**: 原文未提及GitHub链接
 
@@ -147,5 +147,5 @@ $$\mathcal{L} = \text{PredictionError} + \lambda \cdot \text{Complexity}(f)$$
   eprint={2603.07261},
   archivePrefix={arXiv},
   primaryClass={cs.LG},
-  note={arXiv:2603.07261v1}
+  note={arXiv:2603.07261}
 }

@@ -4,7 +4,7 @@ arXiv: "2406.03848"
 authors: ["Not specified in abstract"]
 year: 2024
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "Journal of Advances in Modeling Earth Systems"
 method_tags: ["深度学习", "神经网络", "海浪预报", "物理驱动机器学习"]
 application_tags: ["海洋学", "气象预报", "数值天气预报", "海浪预测", "极端天气"]
 difficulty: "★★★☆☆"

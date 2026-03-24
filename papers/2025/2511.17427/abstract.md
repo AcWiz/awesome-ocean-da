@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Towards fully differentiable neural ocean model with Veros
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2511_17427
+- **论文链接**: https://arxiv.org/abs/2511.17427
 - **作者机构**: Inria Paris（法国）、IMT Atlantique（法国）、IGE Grenoble（法国）
 - **开源代码**: https://github.com/Etienne-Meunier/Veros-Autodiff
 

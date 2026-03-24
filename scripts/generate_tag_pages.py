@@ -200,7 +200,10 @@ def paper_matches_tag(paper, normalized_tag):
 
 
 def generate_paper_row(paper, include_summary=True):
-    """生成论文表格行"""
+    """生成论文表格行
+
+    统一格式: | 年份 | 论文 | arXiv | Venue | 方法标签 | 应用 | 总结 |
+    """
     arxiv = paper['arxiv']
     arxiv_raw = paper.get('arxiv_raw', '')
     year = paper['year']
@@ -222,11 +225,12 @@ def generate_paper_row(paper, include_summary=True):
     else:
         title_link = title
 
-    row = f"| {title_link} | {arxiv_link} | {venue} | {year} | {method_tags} | {app_tags}"
+    # 格式: | 年份 | 论文 | arXiv | Venue | 方法标签 | 应用 | 总结 |
+    row = f"| {year} | {title_link} | {arxiv_link} | {venue} | {method_tags} | {app_tags}"
 
     if include_summary:
         if arxiv:
-            summary_link = f"[总结](../{year}/{folder}/summary.md)"
+            summary_link = f"[总结](./{year}/{folder}/summary.md)"
         else:
             summary_link = "-"
         row += f" | {summary_link}"
@@ -262,7 +266,7 @@ def generate_category_page(category_name, papers, normalized_tag):
     lines.append("")
 
     # 生成表格
-    lines.append("| 论文 | arXiv | Venue | 年份 | 方法标签 | 应用 | 总结 |")
+    lines.append("| 年份 | 论文 | arXiv | Venue | 方法标签 | 应用 | 总结 |")
     lines.append("|------|-------|-------|------|----------|------|------|")
 
     for year in sorted(by_year.keys(), reverse=True):

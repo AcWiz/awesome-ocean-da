@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2507_08834
+- **论文链接**: https://arxiv.org/abs/2507.08834
 - **作者机构**: 印第安纳卫斯理大学、Vizuara AI Labs（浦那、印度）
 - **开源代码**: None
 

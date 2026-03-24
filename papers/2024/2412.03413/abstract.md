@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Deep Learning for Sea Surface Temperature Reconstruction under Cloud Occlusion
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2412_03413
+- **论文链接**: https://arxiv.org/abs/2412.03413
 - **作者机构**: 博洛尼亚大学、CMCC Foundation
 - **开源代码**: None
 

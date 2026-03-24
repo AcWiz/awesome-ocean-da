@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Spatio-temporal modeling and forecasting with Fourier neural operators
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601_01813
+- **论文链接**: https://arxiv.org/abs/2601.01813
 - **作者机构**: 澳大利亚卧龙岗大学数学与应用统计学院
 - **开源代码**: https://github.com/pratiknag/FNO-DSTM-Code
 

@@ -15,7 +15,7 @@ read_status: "skim"
 # HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2602.00598v1
+- **论文链接**: https://arxiv.org/abs/2602.00598
 - **作者机构**: Ruiqi Shu, Xiaohui Zhong, Qiusheng Huang, Ruijian Gou, Tianrun Gao, Hao Li, Xiaomeng Huang
 - **开源代码**: https://github.com/ChiyodaMomo01/HybridOM
 
@@ -128,5 +128,5 @@ HybridOM的工作为海洋数据同化研究提供了重要启示：
   eprint={2602.00598},
   archivePrefix={arXiv},
   primaryClass={physics.flu-dyn},
-  journal={arXiv preprint arXiv:2602.00598v1}
+  journal={arXiv preprint arXiv:2602.00598}
 }

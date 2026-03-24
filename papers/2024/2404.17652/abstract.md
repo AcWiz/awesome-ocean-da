@@ -4,7 +4,7 @@ arXiv: "2404.17652"
 authors: ["Not specified in provided content"]
 year: 2024
 source: "arXiv"
-venue: "arXiv"
+venue: "Artificial Intelligence for the Earth Systems"
 method_tags: ["Deep Learning", "Weather Forecasting", "Extreme Events", "Model Validation", "GraphCast", "PanguWeather", "FourCastNet"]
 application_tags: ["Numerical Weather Prediction", "Extreme Weather Events", "Climate Impact Assessment", "Medium-Range Forecasting"]
 difficulty: "★★★★☆"

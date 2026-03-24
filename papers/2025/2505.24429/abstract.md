@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Deep Learning for Canary Current Upwelling: A Case Study
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2505_24429
+- **论文链接**: https://arxiv.org/abs/2505.24429
 - **作者机构**: 大加那利群岛大学（Las Palmas, Gran Canaria）
 - **开源代码**: None
 

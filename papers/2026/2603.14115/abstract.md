@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 LaCGKN: Lagrangian Conditional Gaussian Koopman Network for Data Assimilation
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2603_14115
+- **论文链接**: https://arxiv.org/abs/2603.14115
 - **作者机构**: 威斯康星大学麦迪逊分校数学系、机械系
 - **开源代码**: https://github.com/zhongruiw/LaCGKN
 

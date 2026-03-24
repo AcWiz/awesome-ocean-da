@@ -4,7 +4,7 @@ arXiv: "2308.11814"
 authors: ["Ellery Rajagopal", "Anantha N. S. Babu", "Tony Ryu", "Patrick J. Haley Jr.", "Chris Mirabito", "Pierre F. J. Lermusiaux"]
 year: 2023
 source: "arXiv"
-venue: "arXiv"
+venue: "OCEANS 2023 - MTS/IEEE U.S. Gulf Coast"
 method_tags: ["DeepONet", "Fourier_Neural_Operator", "FourCastNet", "Latent_DeepONet", "Neural_Operator"]
 application_tags: ["Ocean_Forecasting", "Ocean_Circulation", "Fluid_Dynamics", "Middle_Atlantic_Bight", "Massachusetts_Bay"]
 difficulty: "★★★☆☆"

@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2510_09792
+- **论文链接**: https://arxiv.org/abs/2510.09792
 - **作者机构**: 塔林理工大学（动力学组）、奥斯陆大学（Integreat中心）、海洋研究所（卑尔根）
 - **开源代码**: None
 

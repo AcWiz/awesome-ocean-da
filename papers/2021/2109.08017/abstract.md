@@ -4,7 +4,7 @@ arXiv: "2109.08017"
 authors: "Sébastien Barthélémy; Julien Brajard; Laurent Bertino; François Counillon"
 year: "2021"
 source: "arXiv"
-venue: "arXiv"
+venue: "Ocean Dynamics"
 tags:
   - method: ["neural-network", "ensemble-kalman-filter", "super-resolution", "deep-learning"]
   - application: ["ocean-modeling", "data-assimilation", "quasi-geostrophic-model", "forecasting"]

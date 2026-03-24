@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2508_03315
+- **论文链接**: https://arxiv.org/abs/2508.03315
 - **作者机构**: 汉堡工业大学动力学组、柏林工业大学网络物理系统组、帝国理工学院机械工程系
 - **开源代码**: None
 

@@ -749,7 +749,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "IEEE Transactions on Geoscience and Remote Sensing",
       "method_tags": [
         "Neural Data Assimilation",
         "4DVarNet",
@@ -817,7 +817,7 @@
         "Raquel Rodriguez Suquet"
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing",
       "method_tags": [
         "Data Assimilation",
         "Ensemble Kalman Filter",
@@ -1899,7 +1899,7 @@
         "Hao Li"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "npj Climate and Atmospheric Science",
       "method_tags": [
         "Deep Learning",
         "Data Assimilation",
@@ -1989,7 +1989,7 @@
         "Not specified in provided content"
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "Artificial Intelligence for the Earth Systems",
       "method_tags": [
         "Deep Learning",
         "Weather Forecasting",
@@ -2071,7 +2071,7 @@
         "Not specified in abstract"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "Journal of Advances in Modeling Earth Systems",
       "method_tags": [
         "深度学习",
         "神经网络",
@@ -2467,7 +2467,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "Journal of Computational Physics",
       "method_tags": [
         "Deep Learning",
         "Koopman Theory",
@@ -2562,7 +2562,7 @@
         "M. Mohapatra"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "Ocean Dynamics",
       "method_tags": [
         "CNN",
         "Sea Surface Temperature Prediction",
@@ -2841,7 +2841,7 @@
         "Pierre F. J. Lermusiaux"
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "OCEANS 2023 - MTS/IEEE U.S. Gulf Coast",
       "method_tags": [
         "DeepONet",
         "Fourier_Neural_Operator",
@@ -3031,7 +3031,7 @@
         "Boyu Guoan"
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "Ocean Modelling",
       "method_tags": [
         "Deep Learning",
         "Gated Recurrent Unit",
@@ -3173,7 +3173,7 @@
         "Omer San"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "Journal of Advances in Modeling Earth Systems",
       "method_tags": [
         "POD",
         "LSTM",
@@ -3232,7 +3232,7 @@
         "Not specified in content"
       ],
       "source": "ArXiv",
-      "venue": "arXiv preprint",
+      "venue": "Journal of Computational Physics",
       "method_tags": [
         "Deep Learning",
         "Ensemble Kalman Filter",
@@ -3300,7 +3300,7 @@
         "Joanna Slawinska"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "Proceedings of the National Academy of Sciences",
       "method_tags": [
         "Koopman Operator",
         "Quantum Data Assimilation",
@@ -3466,7 +3466,7 @@
         "Nathaniel Cresswell-Clay"
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "Journal of Advances in Modeling Earth Systems",
       "method_tags": [],
       "application_tags": [],
       "date_collected": "",
@@ -3609,7 +3609,7 @@
       "arxiv": "2109.08017",
       "authors": "Sébastien Barthélémy; Julien Brajard; Laurent Bertino; François Counillon",
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "Ocean Dynamics",
       "method_tags": [],
       "application_tags": [],
       "date_collected": "",
@@ -3697,7 +3697,7 @@
         "Willi Rath"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "2020 IEEE International Conference On Artificial Intelligence Testing (AITest)",
       "method_tags": [
         "Metamorphic Testing",
         "Machine Learning",
@@ -3737,7 +3737,7 @@
         "Ian Grooms"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "SIAM Journal on Scientific Computing",
       "method_tags": [
         "Multiresolution Gaussian",
         "RBF Interpolation",
@@ -3825,7 +3825,7 @@
         "Toshiyuki Awaji"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "Monthly Weather Review",
       "method_tags": [
         "4D-Var",
         "Data Assimilation",
@@ -3851,7 +3851,7 @@
         "Eugene Kazantsev"
       ],
       "source": "ArXiv",
-      "venue": "arXiv",
+      "venue": "Ocean Dynamics",
       "method_tags": [
         "4D-Var",
         "数据同化",
@@ -3937,7 +3937,7 @@
         "Eugene Kazantsev"
       ],
       "source": "arXiv",
-      "venue": "arXiv",
+      "venue": "Ocean Dynamics",
       "method_tags": [
         "4D-Var",
         "数据同化",
@@ -4825,5 +4825,5 @@
       "Oceanic Assimilation": 1
     }
   },
-  "last_updated": "2026-03-23T21:09:05.090207"
+  "last_updated": "2026-03-24T01:25:59.335575"
 }

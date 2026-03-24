@@ -4,7 +4,7 @@ arXiv: "2206.13659"
 authors: ["David C. Freeman", "Dimitrios Giannakis", "Brian Mintz", "Abbas Ourmazd", "Joanna Slawinska"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "Proceedings of the National Academy of Sciences"
 method_tags: ["Koopman Operator", "Quantum Data Assimilation", "Operator Algebra", "Matrix Mechanical DA"]
 application_tags: ["Lorenz 96", "ENSO", "Climate Model", "Uncertainty Quantification"]
 difficulty: "★★★★★"

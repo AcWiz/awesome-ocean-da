@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 CT-KAE: Continuous-Time Koopman Autoencoder for Efficient and Stable Ocean State Forecasting
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2603_05560
+- **论文链接**: https://arxiv.org/abs/2603.05560
 - **作者机构**: 剑桥大学工程系、INRIA巴黎
 - **开源代码**: None
 

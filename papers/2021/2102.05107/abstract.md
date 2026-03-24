@@ -4,7 +4,7 @@ arXiv: "2102.05107"
 authors: ['Jonathan A. Weyn', 'Dale R. Durran', 'Rich Caruana', 'Nathaniel Cresswell-Clay']
 year: 2021
 source: "arXiv"
-venue: "arXiv"
+venue: "Journal of Advances in Modeling Earth Systems"
 method_tags: []
 application_tags: []
 ---

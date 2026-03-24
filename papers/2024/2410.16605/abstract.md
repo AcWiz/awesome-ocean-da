@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 EnKode: Active Learning of Unknown Flows with Koopman Operators
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2410_16605
+- **论文链接**: https://arxiv.org/abs/2410.16605
 - **作者机构**: 宾夕法尼亚大学GRASP实验室
 - **开源代码**: None
 

@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Advancing Ocean State Estimation with efficient and scalable AI
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2511_06041
+- **论文链接**: https://arxiv.org/abs/2511.06041
 - **作者机构**: 清华大学（地球系统科学系、全球变化研究所）
 - **开源代码**: https://github.com/xiangyanfei212/ADAF
 

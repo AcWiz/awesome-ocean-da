@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2506_23900
+- **论文链接**: https://arxiv.org/abs/2506.23900
 - **作者机构**: 赫尔辛基大学计算机科学系、CMCC基金会（欧盟地中海气候中心）、莱切大学创新工程系
 - **开源代码**: https://doi.org/10.5281/zenodo.15367632
 

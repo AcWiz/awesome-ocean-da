@@ -4,7 +4,7 @@ arXiv: "2503.11532"
 authors: ["Clément Dorffer", "Frédéric Jourdin", "Thi Thuy Nga Nguyen", "Rodolphe Devillers", "David Mouillot", "Ronan Fablet"]
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "IEEE Transactions on Geoscience and Remote Sensing"
 method_tags: ["Neural Data Assimilation", "4DVarNet", "Gap-filling", "Variational Inference", "Deep Learning", "Ocean Color Remote Sensing"]
 application_tags: ["Ocean Color", "Marine Ecology", "Coastal Monitoring", "Carbon Cycle", "Biogeochemistry"]
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "skim"
 # Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2503.11532v1
+- **论文链接**: https://arxiv.org/abs/2503.11532
 - **作者机构**: Clément Dorffer (等), 主要来自海洋学与遥感研究机构
 - **开源代码**: 未明确提及（论文中未找到GitHub链接或代码仓库信息）
 

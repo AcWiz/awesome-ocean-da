@@ -4,7 +4,7 @@ arXiv: "2504.21670"
 authors: ["Quentin Bonassies", "Thanh Huy Nguyen", "Ludovic Cassan", "Andrea Piacentini", "Sophie Ricci", "Charlotte Emery", "Christophe Fatras", "Santiago Peña Luque", "Raquel Rodriguez Suquet"]
 year: 2025
 source: "arXiv"
-venue: "arXiv"
+venue: "IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing"
 method_tags: ["Data Assimilation", "Ensemble Kalman Filter", "SWOT Altimetry", "TELEMAC-2D", "Hydraulic Modeling", "Shallow Water Equations"]
 application_tags: ["Flood Reanalysis", "River Hydrodynamics", "Satellite Remote Sensing", "Water Level Monitoring", "Flood Risk Management"]
 difficulty: "★★★☆☆"

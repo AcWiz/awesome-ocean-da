@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2409_05369
+- **论文链接**: https://arxiv.org/abs/2409.05369
 - **作者机构**: Longhao Wang, Xuanze Zhang, Yongqiang Zhang (中国科学院地理科学与资源研究所); L. Ruby Leung (太平洋西北国家实验室); Francis H.S. Chiew (CSIRO); Amir AghaKouchak (加州大学欧文分校); Kairan Ying (国家自然灾害研究院)
 - **开源代码**: https://github.com/GISWLH/CAS-Canglong
 

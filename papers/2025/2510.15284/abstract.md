@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2510_15284
+- **论文链接**: https://arxiv.org/abs/2510.15284
 - **作者机构**: 澳门大学（区域海洋系）、华中科技大学（船舶与海洋工程系）、大连理工大学（宁波研究院）、浙江工业大学（建筑工程学院）、弘益大学（造船与海洋工程系）
 - **开源代码**: None
 

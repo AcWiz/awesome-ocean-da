@@ -15,7 +15,7 @@ read_status: "skim"
 # Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2506.20181v1
+- **论文链接**: https://arxiv.org/abs/2506.20181
 - **作者机构**: Ronald Katende (仅第一作者信息)
 - **开源代码**: 未提及具体代码仓库
 
@@ -149,5 +149,5 @@ $$CSI_i = \left\| u - u^{(do(\mathcal{O}_i=0))} \right\|$$
   eprint={2506.20181},
   archivePrefix={arXiv},
   primaryClass={math.DS},
-  journal={arXiv preprint arXiv:2506.20181v1}
+  journal={arXiv preprint arXiv:2506.20181}
 }

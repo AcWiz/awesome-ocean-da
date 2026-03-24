@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Efficient Data Assimilation with Time Conditional Gaussian Koopman Network for Partially Observed Nonlinear Dynamical Systems
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2507_08749
+- **论文链接**: https://arxiv.org/abs/2507.08749
 - **作者机构**: 威斯康星大学麦迪逊分校（数学系、机械系）
 - **开源代码**: None
 
