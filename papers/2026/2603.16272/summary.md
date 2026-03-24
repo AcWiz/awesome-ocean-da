@@ -1,6 +1,6 @@
 ---
 title: "Probabilistic reconstruction of global sea surface temperature using generative diffusion models"
-arXiv: "2603.16272v1"
+arXiv: "2603.16272"
 authors: ["Haijie Li", "Ya Wang", "Kai Yang", "Gang Huang", "Xiangao Xia", "Ziming Chen", "Weichen Tao", "Chenglin Lu", "Lin Chen", "Miao Zhang", "Kaiming Hu", "Hainan Gong", "Disong Fu", "Lin Wang"]
 year: 2026
 source: "arXiv"
@@ -16,7 +16,7 @@ read_status: "skim"
 
 ## 1. 基本信息
 
-- **论文链接**: https://arxiv.org/abs/2603.16272v1
+- **论文链接**: https://arxiv.org/abs/2603.16272
 - **作者机构**: 中国气象局、国家卫星气象中心、清华大学等（具体机构信息需从论文全文获取）
 - **开源代码**: 未在提供内容中明确提及（建议查阅全文或补充材料确认）
 
@@ -194,7 +194,7 @@ SAGE引入海表温度的物理约束项，包括：
 @article{Li2026SAGE,
   title={Probabilistic reconstruction of global sea surface temperature using generative diffusion models},
   author={Li, Haijie and Wang, Ya and Yang, Kai and Huang, Gang and Xia, Xiangao and Chen, Ziming and Tao, Weichen and Lu, Chenglin and Chen, Lin and Zhang, Miao and Hu, Kaiming and Gong, Hainan and Fu, Disong and Wang, Lin},
-  journal={arXiv preprint arXiv:2603.16272},
+  journal={arXiv preprint},
   year={2026},
   eprint={2603.16272},
   archivePrefix={arXiv},

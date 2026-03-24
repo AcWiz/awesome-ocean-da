@@ -143,7 +143,7 @@ read_status: "skim"
 @article{Gan2026ENSOInterpretability,
   title={Explore the Ideology of Deep Learning in ENSO Forecasts},
   author={Gan, Yanhai and Chen, Yipeng and Li, Ning and Liu, Xingguo and Dong, Junyu and Chen, Xianyao},
-  journal={arXiv preprint arXiv:2601.02050},
+  journal={arXiv preprint},
   year={2026},
   eprint={2601.02050},
   archivePrefix={arXiv},

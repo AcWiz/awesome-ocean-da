@@ -1,6 +1,6 @@
 ---
 title: "Statistical and Machine Learning Ensemble Modelling to Forecast Sea Surface Temperature"
-arXiv: "1909.08573v2"
+arXiv: "1909.08573"
 authors: ["Stefan W ola", "Fearghal O'Donncha", "Bei Chen"]
 year: 2019
 source: "arXiv"
@@ -97,6 +97,6 @@ read_status: "skim"
   author={Wola, Stefan and O'Donncha, Fearghal and Chen, Bei},
   year={2019},
   journal={Journal of Marine Systems},
-  note={arXiv preprint arXiv:1909.08573}
+  note={arXiv preprint}
 }
 ```

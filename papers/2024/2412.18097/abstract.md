@@ -87,7 +87,7 @@ read_status: "skim"
 @article{langya2024cross,
   title={LangYa: Cross-Spatiotemporal Ocean Forecasting},
   author={},
-  journal={arXiv preprint arXiv:2401.00000},
+  journal={arXiv preprint},
   year={2024}
 }
 ```

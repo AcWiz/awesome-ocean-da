@@ -164,5 +164,5 @@ $$\nabla_m \mathcal{L}_\phi(m) \cdot (s_{obs} - \hat{s})$$
   eprint={2602.12274},
   archivePrefix={arXiv},
   primaryClass={cs.LG},
-  journal={arXiv preprint arXiv:2602.12274}
+  journal={arXiv preprint}
 }

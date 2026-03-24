@@ -1,10 +1,10 @@
 ---
 title: "CTP: A hybrid CNN-Transformer-PINN model for ocean front"
-arXiv: "2505_10894"
+arXiv: "2505.10894"
 authors: ['Yishuo Wanga', 'Feng Zhoub', 'Muping Zhoub', 'Qicheng Mengb', 'Zhijun Huc', 'Yi Wangc', 'Shanghai Jiao', 'Satellite Ocean']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['CNN', 'Transformer', 'PINN', 'Navier-Stokes', 'deep_learning']
 application_tags: ['ocean_front', 'SST', 'forecasting', 'classification', 'Kuroshio']
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 CTP: A hybrid CNN-Transformer-PINN model for ocean front
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2505_10894
+- **论文链接**: https://arxiv.org/abs/2505.10894
 - **作者机构**: 上海交通大学海洋研究院、中国科学院第二海洋研究所、中国地质大学(武汉)海洋科学学院
 - **开源代码**: None
 
@@ -94,6 +94,6 @@ CTP是一个结合CNN、Transformer和物理信息神经网络(PINN)的混合深
   eprint={2505.10894},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

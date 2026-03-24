@@ -1,10 +1,10 @@
 ---
 title: "Deep Learning for Canary Current Upwelling: A Case Study"
-arXiv: "2505_24429"
+arXiv: "2505.24429"
 authors: ['Giovanny A. Cuervo']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['neural_operator', 'FNO', 'graph_network', 'data_driven', 'ocean_modeling']
 application_tags: ['canary_current', 'upwelling', 'ocean_forecasting', 'regional_ocean', 'marine_ecosystem']
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Deep Learning for Canary Current Upwelling: A Case Study
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2505_24429
+- **论文链接**: https://arxiv.org/abs/2505.24429
 - **作者机构**: 大加那利群岛大学（Las Palmas, Gran Canaria）
 - **开源代码**: None
 
@@ -97,6 +97,6 @@ read_status: "deep_read"
   eprint={2505.24429},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

@@ -1,6 +1,6 @@
 ---
 title: "Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic to Real Data"
-arXiv: "2504.21670v1"
+arXiv: "2504.21670"
 authors: ["Quentin Bonassies", "Thanh Huy Nguyen", "Ludovic Cassan", "Andrea Piacentini", "Sophie Ricci", "Charlotte Emery", "Christophe Fatras", "Santiago Peña Luque", "Raquel Rodriguez Suquet"]
 year: 2025
 source: "arXiv"

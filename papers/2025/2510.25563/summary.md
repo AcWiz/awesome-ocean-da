@@ -1,6 +1,6 @@
 ---
 title: "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting"
-arXiv: "2510_25563"
+arXiv: "2510.25563"
 authors: ['Víctor Medina', 'Giovanny A. Cuervo-Londoño', 'Javier Sánchez']
 year: 2025
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2510_25563
+- **论文链接**: https://arxiv.org/abs/2510.25563
 - **作者机构**: 大加那利群岛大学（CTIM图像技术中心、IUCES信息学研究所、ECOAQUA水产养殖与海洋生态系统研究所）
 - **开源代码**: None
 

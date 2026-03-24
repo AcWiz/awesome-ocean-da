@@ -122,7 +122,7 @@ $$\dot{\hat{u}} = A\hat{u} + B\hat{u} + f(\hat{u}) + L(y - C\hat{u})$$
 @article{Singh2024Semilinear,
   title={Semilinear Neural Operators for Ocean Forecasting},
   author={Singh, et al.},
-  journal={arXiv preprint arXiv:2402.15656},
+  journal={arXiv preprint},
   year={2024},
   eprint={2402.15656},
   archivePrefix={arXiv},

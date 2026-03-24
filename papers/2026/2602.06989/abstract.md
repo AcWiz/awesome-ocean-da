@@ -110,7 +110,7 @@ $$\theta_{j}^{update} = \theta_{j}^{prior} + C_{\theta d}(C_{dd} + \sigma_d^2 I)
 @article{bo2026machine,
   title={Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization},
   author={Bo, Zhenkai and Elsheikh, Ahmed H. and Menke, Hannah P. and Maes, Julien and Geiger, Sebastian and Kashim, Muhammad Z. and Bakar, Zainol A. A. and Singh, Kamaljit},
-  journal={arXiv preprint arXiv:2602.06989},
+  journal={arXiv preprint},
   year={2026},
   eprint={2602.06989},
   archiveprefix={arXiv},

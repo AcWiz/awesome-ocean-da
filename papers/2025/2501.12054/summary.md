@@ -1,6 +1,6 @@
 ---
 title: "ORCAst: Operational High-Resolution Current Forecasts"
-arXiv: "2501.12054v1"
+arXiv: "2501.12054"
 authors: ["Garcia", "et al."]
 year: 2025
 source: "arXiv"
@@ -133,7 +133,7 @@ $$\frac{\partial S}{\partial t} + \vec{u} \cdot \nabla S = 0$$
   title={ORCAst: Operational High-Resolution Current Forecasts},
   author={Garcia, et al.},
   year={2025},
-  journal={arXiv preprint arXiv:2501.12054},
+  journal={arXiv preprint},
   eprint={2501.12054},
   archivePrefix={arXiv},
   primaryClass={physics.ao-ph}

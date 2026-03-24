@@ -4,7 +4,7 @@ arXiv: "2601.01813"
 authors: ['Pratik Nag', 'Andrew Zammit-Mangion', 'Sumeetpal Singh', 'Noel Cressie']
 year: 2026
 source: "arXiv"
-venue: "Science"
+venue: "arXiv preprint"
 method_tags: ['FNO', 'neural_operator', 'dynamical_system', 'spatio_temporal', 'uncertainty_quantification']
 application_tags: ['SST', 'precipitation', 'ocean_modeling', 'atmospheric_modeling', 'forecasting']
 difficulty: "★★★★☆"
@@ -94,6 +94,6 @@ read_status: "deep_read"
   eprint={2601.01813},
   eprinttype={arxiv},
   eprintclass={stat.ME},
-  journal={Science},
+  journal={arXiv preprint},
 }
 ```

@@ -129,6 +129,6 @@ $$h_t = (1-z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
 @article{Liang2025GTSForecaster,
   title={GTS\_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python},
   author={Liang, Xuechen and He, Xiaoxing and Wang, Shengdao and Montillet, Jean-Philippe and Huang, Zhengkai and Kermarrec, Gaël and Hu, Shunqiang and Zhou, Yu and Huang, Jiahui},
-  journal={arXiv preprint arXiv:2509.10560},
+  journal={arXiv preprint},
   year={2025}
 }

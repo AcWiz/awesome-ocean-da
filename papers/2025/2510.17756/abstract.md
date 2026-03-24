@@ -4,7 +4,7 @@ arXiv: "2510.17756"
 authors: ['Younghyun Koo', 'Maryam Rahnemoonfar']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['PINN', 'HIS-Unet', 'CNN', 'physics_informed', 'sea_ice']
 application_tags: ['Arctic_Ocean', 'sea_ice_velocity', 'sea_ice_concentration', 'remote_sensing', 'multi_task_learning']
 difficulty: "★★★☆☆"
@@ -102,6 +102,6 @@ read_status: "deep_read"
   eprint={2510.17756},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

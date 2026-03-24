@@ -1,10 +1,10 @@
 ---
 title: "Towards fully differentiable neural ocean model with Veros"
-arXiv: "2511_17427"
+arXiv: "2511.17427"
 authors: ['Etienne Meunier', 'Said Ouala', 'Hugo Frezat', 'Julien Le Sommer', 'Ronan Fablet']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['differentiable_programming', 'JAX', 'automatic_differentiation', 'ocean_model', 'parameter_calibration']
 application_tags: ['ocean_circulation', 'ACC', 'initial_state_estimation', 'model_calibration', 'mesoscale_eddy']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Towards fully differentiable neural ocean model with Veros
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2511_17427
+- **论文链接**: https://arxiv.org/abs/2511.17427
 - **作者机构**: Inria Paris（法国）、IMT Atlantique（法国）、IGE Grenoble（法国）
 - **开源代码**: https://github.com/Etienne-Meunier/Veros-Autodiff
 
@@ -95,6 +95,6 @@ read_status: "deep_read"
   eprint={2511.17427},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

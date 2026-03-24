@@ -1,6 +1,6 @@
 ---
 title: "Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models"
-arXiv: "2603.05817v1"
+arXiv: "2603.05817"
 authors: ["Hamza Ruzayqat", "Hristo G. Chipilski", "Omar Knio"]
 year: 2026
 source: "arXiv"

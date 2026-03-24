@@ -101,6 +101,6 @@ $$SSH_{total} = SSH_{mesoscale} + SSH_{internal\_tide}$$
   author={Lguensat, Redouane and Fablet, Ronan and Le Sommer, Julien and others},
   year={2020},
   booktitle={IEEE IGARSS},
-  note={arXiv preprint arXiv:2005.01090}
+  note={arXiv preprint}
 }
 ```

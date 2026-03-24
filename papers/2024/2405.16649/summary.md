@@ -140,7 +140,7 @@ $$\boldsymbol{\psi}(\mathbf{x}_{k+1}) \approx \mathbf{K} \boldsymbol{\psi}(\math
 @article{DeepKoopmanNoisy2024,
   title={Deep Koopman Learning from Noisy Data},
   author={},
-  journal={arXiv preprint arXiv:2405.16649},
+  journal={arXiv preprint},
   year={2024},
   eprint={2405.16649},
   archivePrefix={arXiv},

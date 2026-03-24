@@ -1,10 +1,10 @@
 ---
 title: "Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network"
-arXiv: "2510_17756"
+arXiv: "2510.17756"
 authors: ['Younghyun Koo', 'Maryam Rahnemoonfar']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['PINN', 'HIS-Unet', 'CNN', 'physics_informed', 'sea_ice']
 application_tags: ['Arctic_Ocean', 'sea_ice_velocity', 'sea_ice_concentration', 'remote_sensing', 'multi_task_learning']
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2510_17756
+- **论文链接**: https://arxiv.org/abs/2510.17756
 - **作者机构**: 理海大学（计算机科学与工程系、土木与环境工程系）、科罗拉多大学博尔德分校（NSIDC、CIRES）
 - **开源代码**: https://github.com/BinaLab/PINN_seaice
 
@@ -102,6 +102,6 @@ read_status: "deep_read"
   eprint={2510.17756},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

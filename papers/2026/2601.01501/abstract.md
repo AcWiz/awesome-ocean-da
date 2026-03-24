@@ -143,7 +143,7 @@ $$\mathbf{h}_i^{(l)}(t_{n+1}) = \mathbf{h}_i^{(l)}(t_n) + \int_{t_n}^{t_{n+1}} \
 @article{Xu2026HiGO,
   title={Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE},
   author={Xu, Fan and Gong, Wei and Wu, Hao and Peng, Lilan and Wang, Nan and Wen, Qingsong and Wu, Xian and Wang, Kun and Zhao, Xibin},
-  journal={arXiv preprint arXiv:2601.01501},
+  journal={arXiv preprint},
   year={2026},
   note={Version 1}
 }

@@ -1,10 +1,10 @@
 ---
 title: "Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport"
-arXiv: "2507_08834"
+arXiv: "2507.08834"
 authors: ['Karishma Battina', 'Prathamesh Dinesh Joshi', 'Raj Abhijit Dandekar', 'Rajat Dandekar', 'Sreedath Panat']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['PINN', 'advection_diffusion', 'physics_informed', 'neural_network', 'Julia']
 application_tags: ['ocean_pollutant', 'advection_diffusion_equation', 'finite_difference', 'environmental_monitoring']
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2507_08834
+- **论文链接**: https://arxiv.org/abs/2507.08834
 - **作者机构**: 印第安纳卫斯理大学、Vizuara AI Labs（浦那、印度）
 - **开源代码**: None
 
@@ -99,6 +99,6 @@ read_status: "deep_read"
   eprint={2507.08834},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

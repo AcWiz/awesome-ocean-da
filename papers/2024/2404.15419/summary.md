@@ -110,7 +110,7 @@ ENSO预测与海洋数据同化研究存在以下潜在关联：
 @article{author2024deep,
   title={Deep Learning for ENSO Forecast},
   author={Author1, Author2, Author3},
-  journal={arXiv preprint arXiv:XXXXX.XXXXX},
+  journal={arXiv preprint},
   year={2024}
 }
 ```

@@ -1,6 +1,6 @@
 ---
 title: "SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing"
-arXiv: "2511.15182v1"
+arXiv: "2511.15182"
 authors: ["Subhashis Hazarika", "Leonard Lupin-Jimenez", "Rohit Vuppala", "Ashesh Chattopadhyay", "Hon Yung Wong"]
 year: 2025
 source: "arXiv"
@@ -152,7 +152,7 @@ FNO是一种用于学习偏微分方程解算子的深度学习架构：
 @article{Hazarika2025SWViz,
   title={SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing},
   author={Hazarika, Subhashis and Lupin-Jimenez, Leonard and Vuppala, Rohit and Chattopadhyay, Ashesh and Wong, Hon Yung},
-  journal={arXiv preprint arXiv:2511.15182},
+  journal={arXiv preprint},
   year={2025},
   eprint={2511.15182},
   archivePrefix={arXiv},

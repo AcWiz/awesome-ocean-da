@@ -194,7 +194,7 @@ SAGE引入海表温度的物理约束项，包括：
 @article{Li2026SAGE,
   title={Probabilistic reconstruction of global sea surface temperature using generative diffusion models},
   author={Li, Haijie and Wang, Ya and Yang, Kai and Huang, Gang and Xia, Xiangao and Chen, Ziming and Tao, Weichen and Lu, Chenglin and Chen, Lin and Zhang, Miao and Hu, Kaiming and Gong, Hainan and Fu, Disong and Wang, Lin},
-  journal={arXiv preprint arXiv:2603.16272},
+  journal={arXiv preprint},
   year={2026},
   eprint={2603.16272},
   archivePrefix={arXiv},

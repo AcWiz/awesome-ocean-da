@@ -116,7 +116,7 @@ $$\mathcal{K}^t g(x) = g(F^t(x))$$
 @article{koopman2024deep,
   title={Koopman-based Deep Learning for Nonlinear System Estimation},
   author={},
-  journal={arXiv preprint arXiv:2405.00627},
+  journal={arXiv preprint},
   year={2024},
   eprint={2405.00627},
   archivePrefix={arXiv},

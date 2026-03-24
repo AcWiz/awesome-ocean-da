@@ -1,6 +1,6 @@
 ---
 title: "LangYa: Cross-Spatiotemporal Ocean Forecasting"
-arXiv: "2401.00000v1"
+arXiv: "2401.00000"
 authors: ["待补充", "待补充", "待补充"]
 year: 2024
 source: "arXiv"
@@ -87,7 +87,7 @@ read_status: "skim"
 @article{langya2024cross,
   title={LangYa: Cross-Spatiotemporal Ocean Forecasting},
   author={},
-  journal={arXiv preprint arXiv:2401.00000},
+  journal={arXiv preprint},
   year={2024}
 }
 ```

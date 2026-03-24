@@ -137,7 +137,7 @@ read_status: "skim"
 @article{Lekshmi2023SST,
   title={On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST},
   author={Lekshmi, S. and Chattopadhyay, R. and Pai, D. S. and Rajeevan, M. and Valsala, V. and Hosalikar, K. S. and Mohapatra, M.},
-  journal={arXiv preprint arXiv:2302.11357},
+  journal={arXiv preprint},
   year={2023},
   eprint={2302.11357},
   archivePrefix={arXiv},

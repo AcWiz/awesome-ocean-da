@@ -4,7 +4,7 @@ arXiv: "2404.05768"
 authors: ['Yixuan Sun', 'Argonne National Laboratory', 'Ololade Sowunmi', 'Florida State University', 'Romain Egele', 'Université Paris-Saclay', 'Sri Hari Krishna Narayanan', 'Argonne National Laboratory', 'Luke Van Roekel', 'Los Alamos National Laboratory', 'Prasanna Balaprakash', 'Oak Ridge National Laboratory']
 year: 2024
 source: "arXiv"
-venue: "Science"
+venue: "arXiv preprint"
 method_tags: ['neural_operator', 'fno', 'hyperparameter_optimization', 'deephyper', 'bayesian_optimization']
 application_tags: ['ocean_modeling', 'baroclinic_wind_driven_ocean', 'sea_surface_temperature', 'forecasting']
 difficulty: "★★★☆☆"

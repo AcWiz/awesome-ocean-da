@@ -149,5 +149,5 @@ $$CSI_i = \left\| u - u^{(do(\mathcal{O}_i=0))} \right\|$$
   eprint={2506.20181},
   archivePrefix={arXiv},
   primaryClass={math.DS},
-  journal={arXiv preprint arXiv:2506.20181}
+  journal={arXiv preprint}
 }

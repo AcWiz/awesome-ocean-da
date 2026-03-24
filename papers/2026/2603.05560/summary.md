@@ -1,6 +1,6 @@
 ---
 title: "CT-KAE: Continuous-Time Koopman Autoencoder for Efficient and Stable Ocean State Forecasting"
-arXiv: "2603_05560"
+arXiv: "2603.05560"
 authors: ['Rares Grozavescu', 'Pengyu Zhang', 'Mark Girolami', 'Etienne Meunier']
 year: 2026
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 CT-KAE: Continuous-Time Koopman Autoencoder for Efficient and Stable Ocean State Forecasting
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2603_05560
+- **论文链接**: https://arxiv.org/abs/2603.05560
 - **作者机构**: 剑桥大学工程系、INRIA巴黎
 - **开源代码**: None
 

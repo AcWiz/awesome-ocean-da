@@ -1,6 +1,6 @@
 ---
 title: "Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting"
-arXiv: "2602.05178v1"
+arXiv: "2602.05178"
 authors: ["Magesh Rajasekaran", "Md Saiful Sajol", "Chris Alvin", "Supratik Mukhopadhyay", "Yanda Ou", "Z. George Xue"]
 year: 2026
 source: "arXiv"

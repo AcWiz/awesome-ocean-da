@@ -1,10 +1,10 @@
 ---
 title: "Advancing Ocean State Estimation with efficient and scalable AI"
-arXiv: "2511_06041"
+arXiv: "2511.06041"
 authors: ['Yanfei Xiang', 'Yuan Gao', 'Hao Wu', 'Quan Zhang', 'Ruiqi Shu', 'Xiao Zhou', 'Xiaomeng Huang']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['neural_process', 'encoder_decoder', 'data_assimilation', 'super_resolution', 'multi_source']
 application_tags: ['ocean_state_estimation', 'global_ocean', 'satellite_altimetry', 'in_situ', 'forecast_skill']
 difficulty: "★★★★★"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Advancing Ocean State Estimation with efficient and scalable AI
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2511_06041
+- **论文链接**: https://arxiv.org/abs/2511.06041
 - **作者机构**: 清华大学（地球系统科学系、全球变化研究所）
 - **开源代码**: https://github.com/xiangyanfei212/ADAF
 
@@ -97,6 +97,6 @@ read_status: "deep_read"
   eprint={2511.06041},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

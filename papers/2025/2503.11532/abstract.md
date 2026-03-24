@@ -173,7 +173,7 @@ $$\mathcal{L}_{recon} = \|\mathbf{M} \odot (\hat{\mathbf{x}} - \mathbf{x}_{true}
 @article{dorffer2025observation,
   title={Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters},
   author={Dorffer, Cl\'ement and Jourdin, Fr\'ed\'eric and Nguyen, Thi Thuy Nga and Devillers, Rodolphe and Mouillot, David and Fablet, Ronan},
-  journal={arXiv preprint arXiv:2503.11532},
+  journal={arXiv preprint},
   year={2025},
   eprint={2503.11532},
   archivePrefix={arXiv},

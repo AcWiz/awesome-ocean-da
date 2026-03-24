@@ -164,7 +164,7 @@ Koopman算子理论提供了一种将非线性动力系统线性化的框架：
 @article{Petersen2026ReducedOrder,
   title={Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models},
   author={Petersen, Freja Høgholm and Mariegaard, Jesper Sandvig and Palmitessa, Rocco and Engsig-Karup, Allan P.},
-  journal={arXiv preprint arXiv:2602.05416},
+  journal={arXiv preprint},
   year={2026},
   eprint={2602.05416},
   archivePrefix={arXiv},

@@ -4,7 +4,7 @@ arXiv: "2505.10191"
 authors: ['Qingyu Zheng', 'Qi Shao', 'Guijun Han', 'Wei Li', 'Hong Li', 'Xuan Wang']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['Vision_Transformer', 'AFNO', 'dynamics_enhancement', 'multi_scale', 'CNN']
 application_tags: ['ocean_forecasting', 'mesoscale_eddy', 'SST', 'salinity', 'ocean_circulation']
 difficulty: "★★★★☆"
@@ -96,6 +96,6 @@ LanTu是一个基于动力学增强深度学习的区域涡旋解析海洋预报
   eprint={2505.10191},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

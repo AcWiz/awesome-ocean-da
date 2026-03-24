@@ -1,6 +1,6 @@
 ---
 title: "On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST"
-arXiv: "2302.11357v1"
+arXiv: "2302.11357"
 authors: ["Lekshmi S", "Rajib Chattopadhyay", "D. S. Pai", "M. Rajeevan", "Vinu Valsala", "K. S. Hosalikar", "M. Mohapatra"]
 year: 2023
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "skim"
 # On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2302.11357v1
+- **论文链接**: https://arxiv.org/abs/2302.11357
 - **作者机构**: Lekshmi S, Rajib Chattopadhyay, D. S. Pai, M. Rajeevan (India Meteorological Department); Vinu Valsala (Indian Institute of Tropical Meteorology); K. S. Hosalikar, M. Mohapatra
 - **开源代码**: 未提及
 
@@ -137,7 +137,7 @@ read_status: "skim"
 @article{Lekshmi2023SST,
   title={On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST},
   author={Lekshmi, S. and Chattopadhyay, R. and Pai, D. S. and Rajeevan, M. and Valsala, V. and Hosalikar, K. S. and Mohapatra, M.},
-  journal={arXiv preprint arXiv:2302.11357},
+  journal={arXiv preprint},
   year={2023},
   eprint={2302.11357},
   archivePrefix={arXiv},

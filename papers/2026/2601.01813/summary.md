@@ -1,10 +1,10 @@
 ---
 title: "Spatio-temporal modeling and forecasting with Fourier neural operators"
-arXiv: "2601_01813"
+arXiv: "2601.01813"
 authors: ['Pratik Nag', 'Andrew Zammit-Mangion', 'Sumeetpal Singh', 'Noel Cressie']
 year: 2026
 source: "arXiv"
-venue: "Science"
+venue: "arXiv preprint"
 method_tags: ['FNO', 'neural_operator', 'dynamical_system', 'spatio_temporal', 'uncertainty_quantification']
 application_tags: ['SST', 'precipitation', 'ocean_modeling', 'atmospheric_modeling', 'forecasting']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Spatio-temporal modeling and forecasting with Fourier neural operators
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601_01813
+- **论文链接**: https://arxiv.org/abs/2601.01813
 - **作者机构**: 澳大利亚卧龙岗大学数学与应用统计学院
 - **开源代码**: https://github.com/pratiknag/FNO-DSTM-Code
 
@@ -94,6 +94,6 @@ read_status: "deep_read"
   eprint={2601.01813},
   eprinttype={arxiv},
   eprintclass={stat.ME},
-  journal={Science},
+  journal={arXiv preprint},
 }
 ```

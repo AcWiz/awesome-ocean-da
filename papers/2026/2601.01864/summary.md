@@ -1,10 +1,10 @@
 ---
 title: "Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes"
-arXiv: "2601_01864"
+arXiv: "2601.01864"
 authors: ['Rameshan Kallummal']
 year: 2026
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['SVD', 'linear_regression', 'PDO', 'seasonal_decomposition', 'multivariate_analysis']
 application_tags: ['SST', 'Pacific_Decadal_Oscillation', 'North_Pacific', 'sea_surface_temperature', 'climate_prediction']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601_01864
+- **论文链接**: https://arxiv.org/abs/2601.01864
 - **作者机构**: CSIR第四范式研究所，班加罗尔，印度
 - **开源代码**: 无（数据来源：NOAA ERSSTv5, NCEP/NCAR Reanalysis）
 
@@ -94,6 +94,6 @@ read_status: "deep_read"
   eprint={2601.01864},
   eprinttype={arxiv},
   eprintclass={physics.ao-ph},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

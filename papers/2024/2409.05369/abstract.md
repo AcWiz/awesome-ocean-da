@@ -4,7 +4,7 @@ arXiv: "2409.05369"
 authors: ['Longhao Wang', 'Chinese Academy of Sciences', 'Xuanze Zhang', 'Chinese Academy of Sciences', 'L. Ruby Leung', 'Pacific Northwest National Laboratory', 'Francis H.S. Chiew', 'CSIRO Environment', 'Amir AghaKouchak', 'University of California, Irvine', 'Kairan Ying', 'National Institute of Natural Hazards', 'Yongqiang Zhang', 'Chinese Academy of Sciences']
 year: 2024
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['transformer', 'swin_transformer', 'attention_mechanism', '3d_cnn', 'lstm']
 application_tags: ['sst_prediction', 's2s_forecasting', 'enso', 'ocean_modeling', 'climate_prediction']
 difficulty: "★★★★☆"

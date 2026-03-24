@@ -4,7 +4,7 @@ arXiv: "2510.15284"
 authors: ['Zhilin Li', 'Yao Zhou', 'Xianglong Li', 'Zeng Liu', 'Zhaokuan Lu', 'Shanlin Xu', 'Seungnam Kim', 'Guangyao Wang']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['EnKF', 'FCNN', 'data_assimilation', 'neural_network', 'small_ensemble']
 application_tags: ['ocean_waves', 'Lorenz_systems', 'nonlinear_dynamics', 'state_estimation', 'ensemble_methods']
 difficulty: "★★★☆☆"
@@ -95,6 +95,6 @@ read_status: "deep_read"
   eprint={2510.15284},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

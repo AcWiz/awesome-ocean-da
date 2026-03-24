@@ -1,10 +1,10 @@
 ---
 title: "LanTu: Dynamics-Enhanced Deep Learning for Eddy-Resolving Ocean Forecasting"
-arXiv: "2505_10191"
+arXiv: "2505.10191"
 authors: ['Qingyu Zheng', 'Qi Shao', 'Guijun Han', 'Wei Li', 'Hong Li', 'Xuan Wang']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['Vision_Transformer', 'AFNO', 'dynamics_enhancement', 'multi_scale', 'CNN']
 application_tags: ['ocean_forecasting', 'mesoscale_eddy', 'SST', 'salinity', 'ocean_circulation']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 LanTu: Dynamics-Enhanced Deep Learning for Eddy-Resolved Ocean Forecasting
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2505_10191
+- **论文链接**: https://arxiv.org/abs/2505.10191
 - **作者机构**: 天津大学海洋科学与技术学院
 - **开源代码**: None
 
@@ -96,6 +96,6 @@ LanTu是一个基于动力学增强深度学习的区域涡旋解析海洋预报
   eprint={2505.10191},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

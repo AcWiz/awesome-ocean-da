@@ -4,7 +4,7 @@ arXiv: "2508.03315"
 authors: ['Svenja Ehlers', 'Merten Stender', 'Norbert Hoffmann']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['PINO', 'neural_operator', 'FNO', 'physics_informed', 'wave_reconstruction', 'HOSM']
 application_tags: ['ocean_waves', 'wave_prediction', 'buoy_measurements', 'X-band_radar', 'phase_resolved']
 difficulty: "★★★★☆"
@@ -101,6 +101,6 @@ read_status: "deep_read"
   eprint={2508.03315},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

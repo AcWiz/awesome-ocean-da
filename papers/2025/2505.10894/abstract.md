@@ -4,7 +4,7 @@ arXiv: "2505.10894"
 authors: ['Yishuo Wanga', 'Feng Zhoub', 'Muping Zhoub', 'Qicheng Mengb', 'Zhijun Huc', 'Yi Wangc', 'Shanghai Jiao', 'Satellite Ocean']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['CNN', 'Transformer', 'PINN', 'Navier-Stokes', 'deep_learning']
 application_tags: ['ocean_front', 'SST', 'forecasting', 'classification', 'Kuroshio']
 difficulty: "★★★☆☆"
@@ -94,6 +94,6 @@ CTP是一个结合CNN、Transformer和物理信息神经网络(PINN)的混合深
   eprint={2505.10894},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

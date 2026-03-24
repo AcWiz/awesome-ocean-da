@@ -4,7 +4,7 @@ arXiv: "2511.17427"
 authors: ['Etienne Meunier', 'Said Ouala', 'Hugo Frezat', 'Julien Le Sommer', 'Ronan Fablet']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['differentiable_programming', 'JAX', 'automatic_differentiation', 'ocean_model', 'parameter_calibration']
 application_tags: ['ocean_circulation', 'ACC', 'initial_state_estimation', 'model_calibration', 'mesoscale_eddy']
 difficulty: "★★★★☆"
@@ -95,6 +95,6 @@ read_status: "deep_read"
   eprint={2511.17427},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

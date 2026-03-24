@@ -46,7 +46,7 @@
         "Noel Cressie"
       ],
       "source": "arXiv",
-      "venue": "Science",
+      "venue": "arXiv preprint",
       "method_tags": [
         "FNO",
         "neural_operator",
@@ -74,7 +74,7 @@
         "Rameshan Kallummal"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "SVD",
         "linear_regression",
@@ -507,7 +507,7 @@
         "Nan Chen"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "Koopman_Operator",
         "data_assimilation",
@@ -869,7 +869,7 @@
         "Xuan Wang"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "Vision_Transformer",
         "AFNO",
@@ -904,7 +904,7 @@
         "Satellite Ocean"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "CNN",
         "Transformer",
@@ -960,7 +960,7 @@
         "Giovanny A. Cuervo"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "neural_operator",
         "FNO",
@@ -1043,7 +1043,7 @@
         "Teemu Roos"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "GNN",
         "graph_neural_network",
@@ -1077,7 +1077,7 @@
         "Ashesh Chattopadhyay"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "DDPM",
         "FNO",
@@ -1110,7 +1110,7 @@
         "Nan Chen"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "Koopman_Operator",
         "conditional_Gaussian",
@@ -1142,7 +1142,7 @@
         "Sreedath Panat"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "PINN",
         "advection_diffusion",
@@ -1171,7 +1171,7 @@
         "Norbert Hoffmann"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "PINO",
         "neural_operator",
@@ -1370,7 +1370,7 @@
         "Guangyao Wang"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "EnKF",
         "FCNN",
@@ -1399,7 +1399,7 @@
         "Maryam Rahnemoonfar"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "PINN",
         "HIS-Unet",
@@ -1555,7 +1555,7 @@
         "Xiaomeng Huang"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "neural_process",
         "encoder_decoder",
@@ -1617,7 +1617,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "differentiable_programming",
         "JAX",
@@ -1780,7 +1780,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "U-Net",
         "4DVarNet",
@@ -1867,7 +1867,7 @@
         "Oak Ridge National Laboratory"
       ],
       "source": "arXiv",
-      "venue": "Science",
+      "venue": "arXiv preprint",
       "method_tags": [
         "neural_operator",
         "fno",
@@ -2135,7 +2135,7 @@
         "Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "particle_filter",
         "semantic_segmentation",
@@ -2281,7 +2281,7 @@
         "Chinese Academy of Sciences"
       ],
       "source": "arXiv",
-      "venue": "Nature",
+      "venue": "arXiv preprint",
       "method_tags": [
         "transformer",
         "swin_transformer",

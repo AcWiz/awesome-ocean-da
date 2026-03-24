@@ -1,10 +1,10 @@
 ---
 title: "CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION"
-arXiv: "2409_05369"
+arXiv: "2409.05369"
 authors: ['Longhao Wang', 'Chinese Academy of Sciences', 'Xuanze Zhang', 'Chinese Academy of Sciences', 'L. Ruby Leung', 'Pacific Northwest National Laboratory', 'Francis H.S. Chiew', 'CSIRO Environment', 'Amir AghaKouchak', 'University of California, Irvine', 'Kairan Ying', 'National Institute of Natural Hazards', 'Yongqiang Zhang', 'Chinese Academy of Sciences']
 year: 2024
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['transformer', 'swin_transformer', 'attention_mechanism', '3d_cnn', 'lstm']
 application_tags: ['sst_prediction', 's2s_forecasting', 'enso', 'ocean_modeling', 'climate_prediction']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2409_05369
+- **论文链接**: https://arxiv.org/abs/2409.05369
 - **作者机构**: Longhao Wang, Xuanze Zhang, Yongqiang Zhang (中国科学院地理科学与资源研究所); L. Ruby Leung (太平洋西北国家实验室); Francis H.S. Chiew (CSIRO); Amir AghaKouchak (加州大学欧文分校); Kairan Ying (国家自然灾害研究院)
 - **开源代码**: https://github.com/GISWLH/CAS-Canglong
 

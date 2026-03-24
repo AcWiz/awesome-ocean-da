@@ -4,7 +4,7 @@ arXiv: "2506.23900"
 authors: ['Daniel Holmberg', 'Emanuela Clementi', 'Italo Epicoco', 'Teemu Roos']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['GNN', 'graph_neural_network', 'hierarchical_mesh', 'regional_ocean', 'autoregressive']
 application_tags: ['Mediterranean_Sea', 'ocean_forecasting', 'SST', 'SSH', 'temperature', 'salinity', 'currents']
 difficulty: "★★★★☆"
@@ -102,6 +102,6 @@ read_status: "deep_read"
   eprint={2506.23900},
   eprinttype={arxiv},
   eprintclass={physics.ao-ph},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

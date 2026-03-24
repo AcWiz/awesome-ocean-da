@@ -1,6 +1,6 @@
 ---
 title: "Significant Wave Height Prediction based on Wavelet Graph Neural Network"
-arXiv: "2107.09483v1"
+arXiv: "2107.09483"
 authors: ["Delong Chen", "Fan Liu", "Zheqi Zhang", "Xiaomin Lu", "Zewen Li"]
 year: 2021
 source: "arXiv"

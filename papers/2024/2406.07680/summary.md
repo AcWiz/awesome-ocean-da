@@ -1,10 +1,10 @@
 ---
 title: "Watching Swarm Dynamics from Above: A Framework for Advanced Object Tracking in Drone Videos"
-arXiv: "2406_07680"
+arXiv: "2406.07680"
 authors: ['Duc Pham', 'Technical University Berlin', 'Matthew Hansen', 'Leibniz Institute for Freshwater Ecology and Inland Fisheries', 'Félicie Dhellemmes', 'Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK', 'Jens Krause', 'Leibniz Institute for Freshwater Ecology and Inland Fisheries', 'Pia Bideau', 'Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK']
 year: 2024
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['particle_filter', 'semantic_segmentation', 'deeplabv3', 'kalman_filter', 'visual_tracking']
 application_tags: ['animal_tracking', 'collective_behavior', 'fish_school', 'drone_videos', 'marine_ecology']
 difficulty: "★★★☆☆"
@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 Watching Swarm Dynamics from Above
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2406_07680
+- **论文链接**: https://arxiv.org/abs/2406.07680
 - **作者机构**: Duc Pham (柏林工业大学); Matthew Hansen, Jens Krause (莱布尼茨淡水生态与内陆渔业研究所); Félicie Dhellemmes, Pia Bideau (格勒诺布尔大学/Inria/CNRS); Science of Intelligence研究集群
 - **开源代码**: 待发布
 

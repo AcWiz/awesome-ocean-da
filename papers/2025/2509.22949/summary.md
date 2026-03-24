@@ -1,6 +1,6 @@
 ---
 title: "Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation"
-arXiv: "2509.22949v1"
+arXiv: "2509.22949"
 authors: ["Hamidreza Moazzami", "Asma Jamali", "Nicholas Kevlahan", "Rodrigo A. Vargas-Hernández"]
 year: 2025
 source: "arXiv"
@@ -162,7 +162,7 @@ $$\nabla^2 J(\mathbf{x}) \mathbf{p}_k = -\nabla J(\mathbf{x}_k)$$
 @article{moazzami2025metalearning,
   title={Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation},
   author={Moazzami, Hamidreza and Jamali, Asma and Kevlahan, Nicholas and Vargas-Hern{\'a}ndez, Rodrigo A.},
-  journal={arXiv preprint arXiv:2509.22949},
+  journal={arXiv preprint},
   year={2025},
   eprint={2509.22949},
   archiveprefix={arXiv},

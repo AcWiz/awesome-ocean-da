@@ -158,7 +158,7 @@ $$
 @article{Chen2024CGKN,
   title={CGKN: Conditional Gaussian Koopman Network},
   author={Chen, Chuanqi and et al.},
-  journal={arXiv preprint arXiv:2410.20072},
+  journal={arXiv preprint},
   year={2024},
   eprint={2410.20072},
   archivePrefix={arXiv},

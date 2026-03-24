@@ -1,10 +1,10 @@
 ---
 title: "Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time"
-arXiv: "2508_03315"
+arXiv: "2508.03315"
 authors: ['Svenja Ehlers', 'Merten Stender', 'Norbert Hoffmann']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['PINO', 'neural_operator', 'FNO', 'physics_informed', 'wave_reconstruction', 'HOSM']
 application_tags: ['ocean_waves', 'wave_prediction', 'buoy_measurements', 'X-band_radar', 'phase_resolved']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2508_03315
+- **论文链接**: https://arxiv.org/abs/2508.03315
 - **作者机构**: 汉堡工业大学动力学组、柏林工业大学网络物理系统组、帝国理工学院机械工程系
 - **开源代码**: None
 
@@ -101,6 +101,6 @@ read_status: "deep_read"
   eprint={2508.03315},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

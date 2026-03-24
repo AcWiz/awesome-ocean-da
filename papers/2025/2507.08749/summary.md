@@ -1,10 +1,10 @@
 ---
 title: "Efficient Data Assimilation with Time Conditional Gaussian Koopman Network for Partially Observed Nonlinear Dynamical Systems"
-arXiv: "2507_08749"
+arXiv: "2507.08749"
 authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Long Wu', 'Nan Chen']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['Koopman_Operator', 'conditional_Gaussian', 'neural_network', 'data_assimilation', 'state_forecast']
 application_tags: ['Lorenz96', 'QG_model', 'ocean_dynamics', 'turbulence', 'chaotic_systems']
 difficulty: "★★★★☆"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Efficient Data Assimilation with Time Conditional Gaussian Koopman Network for Partially Observed Nonlinear Dynamical Systems
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2507_08749
+- **论文链接**: https://arxiv.org/abs/2507.08749
 - **作者机构**: 威斯康星大学麦迪逊分校（数学系、机械系）
 - **开源代码**: None
 
@@ -96,6 +96,6 @@ read_status: "deep_read"
   eprint={2507.08749},
   eprinttype={arxiv},
   eprintclass={cs.LG},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

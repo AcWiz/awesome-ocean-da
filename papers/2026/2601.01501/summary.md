@@ -1,6 +1,6 @@
 ---
 title: "Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE"
-arXiv: "2601.01501v1"
+arXiv: "2601.01501"
 authors: ["Fan Xu", "Wei Gong", "Hao Wu", "Lilan Peng", "Nan Wang", "Qingsong Wen", "Xian Wu", "Kun Wang", "Xibin Zhao"]
 year: 2026
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "skim"
 # Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601.01501v1
+- **论文链接**: https://arxiv.org/abs/2601.01501
 - **作者机构**: 第一作者单位未明确标注，联系作者包括Xibin Zhao等
 - **开源代码**: None（未在内容样本中发现GitHub链接）
 
@@ -143,7 +143,7 @@ $$\mathbf{h}_i^{(l)}(t_{n+1}) = \mathbf{h}_i^{(l)}(t_n) + \int_{t_n}^{t_{n+1}} \
 @article{Xu2026HiGO,
   title={Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE},
   author={Xu, Fan and Gong, Wei and Wu, Hao and Peng, Lilan and Wang, Nan and Wen, Qingsong and Wu, Xian and Wang, Kun and Zhao, Xibin},
-  journal={arXiv preprint arXiv:2601.01501},
+  journal={arXiv preprint},
   year={2026},
   note={Version 1}
 }

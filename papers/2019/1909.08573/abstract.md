@@ -97,6 +97,6 @@ read_status: "skim"
   author={Wola, Stefan and O'Donncha, Fearghal and Chen, Bei},
   year={2019},
   journal={Journal of Marine Systems},
-  note={arXiv preprint arXiv:1909.08573}
+  note={arXiv preprint}
 }
 ```

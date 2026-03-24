@@ -1,6 +1,6 @@
 ---
 title: "A Fast Tunable Blurring Algorithm for Scattered Data"
-arXiv: "1906.06722v2"
+arXiv: "1906.06722"
 authors: ["Gregor Robinson", "Ian Grooms"]
 year: 2019
 source: "arXiv"

@@ -1,6 +1,6 @@
 ---
 title: "Optimizing AUV speed dynamics with a data-driven Koopman operator approach"
-arXiv: "2503.09628v1"
+arXiv: "2503.09628"
 authors: ["Zhiliang Liu", "Xin Zhao", "Peng Cai", "Bing Cong"]
 year: 2025
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "skim"
 # Optimizing AUV speed dynamics with a data-driven Koopman operator approach
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2503.09628v1
+- **论文链接**: https://arxiv.org/abs/2503.09628
 - **作者机构**: Zhiliang Liu, Xin Zhao, Peng Cai, Bing Cong（具体机构信息未在摘要中提供）
 - **开源代码**: 未在内容样本中发现GitHub链接或代码仓库信息
 

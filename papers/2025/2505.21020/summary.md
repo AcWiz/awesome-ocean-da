@@ -106,7 +106,7 @@ NeuralOM的核心架构由两个关键创新组件构成：
   title={NeuralOM: Neural Ocean Model for S2S Simulation},
   author={Gao, et al.},
   year={2025},
-  journal={arXiv preprint arXiv:2505.21020},
+  journal={arXiv preprint},
   note={arXiv:2505.21020}
 }
 ```

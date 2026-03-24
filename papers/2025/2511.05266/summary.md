@@ -1,6 +1,6 @@
 ---
 title: "Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization for Advanced Data Assimilation in Geological Carbon Storage"
-arXiv: "2511.05266v1"
+arXiv: "2511.05266"
 authors: ["Gabriel Serrão Seabra", "Nikolaj T. Mücke", "Vinicius Luiz Santos Silva", "Alexandre A. Emerick", "Denis Voskov", "Femke Vossepoel"]
 year: 2025
 source: "arXiv"

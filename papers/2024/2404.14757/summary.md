@@ -1,6 +1,6 @@
 ---
 title: "SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting"
-arXiv: "2404_14757"
+arXiv: "2404.14757"
 authors: ['Xiongxiao Xu', 'Illinois Institute of Technology', 'Canyu Chen', 'Illinois Institute of Technology', 'Yueqing Liang', 'Illinois Institute of Technology', 'Baixiang Huang', 'Emory University', 'Guangji Bai', 'Emory University', 'Liang Zhao', 'Emory University', 'Kai Shu', 'Emory University']
 year: 2024
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "read"
 # 📑 SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2404_14757
+- **论文链接**: https://arxiv.org/abs/2404.14757
 - **作者机构**: Xiongxiao Xu, Canyu Chen, Yueqing Liang (伊利诺伊理工学院); Baixiang Huang, Guangji Bai, Liang Zhao, Kai Shu (埃默里大学)
 - **开源代码**: https://github.com/XiongxiaoXu/SST
 

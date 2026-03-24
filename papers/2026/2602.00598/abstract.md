@@ -128,5 +128,5 @@ HybridOM的工作为海洋数据同化研究提供了重要启示：
   eprint={2602.00598},
   archivePrefix={arXiv},
   primaryClass={physics.flu-dyn},
-  journal={arXiv preprint arXiv:2602.00598}
+  journal={arXiv preprint}
 }

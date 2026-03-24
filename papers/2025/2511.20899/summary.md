@@ -1,6 +1,6 @@
 ---
 title: "Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments"
-arXiv: "2511.20899v1"
+arXiv: "2511.20899"
 authors: ["Zhanxiang Hua", "Christina Karamperidou", "Zilu Meng"]
 year: 2025
 source: "arXiv"

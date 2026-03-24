@@ -130,7 +130,7 @@ $$\frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}) - \nabla_\mathbf{x}\Phi(\mathb
 @article{sugiura2015framework,
   title={A framework for interpreting regularized state estimation},
   author={Sugiura, Nozomi and Masuda, Shuhei and Fujii, Yosuke and Kamachi, Masafumi and Ishikawa, Yoichi and Awaji, Toshiyuki},
-  journal={arXiv preprint arXiv:1511.04790},
+  journal={arXiv preprint},
   year={2015},
   eprint={1511.04790},
   archivePrefix={arXiv},

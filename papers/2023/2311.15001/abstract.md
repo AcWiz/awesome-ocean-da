@@ -169,5 +169,5 @@ $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
   eprint={2311.15001},
   archivePrefix={arXiv},
   primaryClass={physics.ao-ph},
-  journal={arXiv preprint arXiv:2311.15001}
+  journal={arXiv preprint}
 }

@@ -1,6 +1,6 @@
 ---
 title: "A Langevinized Ensemble Kalman Filter for Large-Scale Static and Dynamic Learning"
-arXiv: "2105.05363v1"
+arXiv: "2105.05363"
 authors: "Peiyi Zhang; Qifan Song; Faming Liang"
 year: "2021"
 source: "arXiv"

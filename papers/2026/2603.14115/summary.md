@@ -1,10 +1,10 @@
 ---
 title: "A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction"
-arXiv: "2603_14115"
+arXiv: "2603.14115"
 authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Nan Chen']
 year: 2026
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['Koopman_Operator', 'data_assimilation', 'Lagrangian', 'conditional_Gaussian', 'neural_network']
 application_tags: ['Lagrangian_DA', 'tracer_observations', 'quasi_geostrophic', 'flow_estimation', 'ensemble_filter']
 difficulty: "★★★★★"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 LaCGKN: Lagrangian Conditional Gaussian Koopman Network for Data Assimilation
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2603_14115
+- **论文链接**: https://arxiv.org/abs/2603.14115
 - **作者机构**: 威斯康星大学麦迪逊分校数学系、机械系
 - **开源代码**: https://github.com/zhongruiw/LaCGKN
 
@@ -98,6 +98,6 @@ read_status: "deep_read"
   eprint={2603.14115},
   eprinttype={arxiv},
   eprintclass={cs.CE},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

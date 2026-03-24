@@ -1,6 +1,6 @@
 ---
 title: "Super-resolution data assimilation"
-arXiv: "2109.08017v1"
+arXiv: "2109.08017"
 authors: "Sébastien Barthélémy; Julien Brajard; Laurent Bertino; François Counillon"
 year: "2021"
 source: "arXiv"
@@ -118,7 +118,7 @@ $$\mathcal{J}(\mathbf{x}) = (\mathbf{x} - \mathbf{x}^f)^T \mathbf{P}^f)^{-1} (\m
 @article{barthelemy2021superresolution,
   title={Super-resolution data assimilation},
   author={Barthélémy, Sébastien and Brajard, Julien and Bertino, Laurent and Counillon, François},
-  journal={arXiv preprint arXiv:2109.08017},
+  journal={arXiv preprint},
   year={2021},
   eprint={2109.08017},
   archivePrefix={arXiv},

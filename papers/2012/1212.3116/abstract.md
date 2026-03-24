@@ -171,5 +171,5 @@ $$\frac{\partial J}{\partial p} = \boldsymbol{\lambda}^T \frac{\partial \mathcal
   eprint = {1212.3116},
   archiveprefix = {arXiv},
   primaryclass = {physics.flu-dyn},
-  journal = {arXiv preprint arXiv:1212.3116v1}
+  journal = {arXiv preprint}
 }

@@ -4,7 +4,7 @@ arXiv: "2507.06479"
 authors: ['Niloofar Asefi', 'Leonard Lupin-Jimenez', 'Tianning Wu', 'Ruoying He', 'Ashesh Chattopadhyay']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['DDPM', 'FNO', 'UNET', 'diffusion_model', 'neural_operator', 'data_assimilation']
 application_tags: ['Lagrangian_DA', 'sparse_observations', 'ocean_reconstruction', 'Gulf_of_Mexico', 'satellite_altimetry']
 difficulty: "★★★★★"
@@ -102,6 +102,6 @@ read_status: "deep_read"
   eprint={2507.06479},
   eprinttype={arxiv},
   eprintclass={physics.ao-ph},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

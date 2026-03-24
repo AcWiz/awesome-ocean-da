@@ -1,6 +1,6 @@
 ---
 title: "Validating Deep Learning Weather Forecast Models"
-arXiv: "2404.17652v1"
+arXiv: "2404.17652"
 authors: ["Not specified in provided content"]
 year: 2024
 source: "arXiv"
@@ -140,7 +140,7 @@ read_status: "skim"
   title={Validating Deep Learning Weather Forecast Models},
   author={Authors not specified in provided content},
   year={2024},
-  journal={arXiv preprint arXiv:2404.17652},
+  journal={arXiv preprint},
   eprint={2404.17652},
   archivePrefix={arXiv},
   primaryClass={cs.LG}

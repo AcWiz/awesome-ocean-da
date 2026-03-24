@@ -1,6 +1,6 @@
 ---
 title: "Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations"
-arXiv: "2509.19384v1"
+arXiv: "2509.19384"
 authors: ["Hongyuan Shi", "Yilin Zhai", "Ping Dong", "Zaijin You", "Chao Zhan", "Qing Wang"]
 year: 2025
 source: "arXiv"
@@ -126,7 +126,7 @@ $$\min_{\theta} \sum_{(x,y,t) \in \mathcal{D}} \| \hat{S}_\theta(x,y,t) - S_{tru
 @article{shi2025auwave,
   title={Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations},
   author={Shi, Hongyuan and Zhai, Yilin and Dong, Ping and You, Zaijin and Zhan, Chao and Wang, Qing},
-  journal={arXiv preprint arXiv:2509.19384},
+  journal={arXiv preprint},
   year={2025},
   eprint={2509.19384},
   archivePrefix={arXiv},

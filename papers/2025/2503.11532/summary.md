@@ -1,6 +1,6 @@
 ---
 title: "Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters"
-arXiv: "2503.11532v1"
+arXiv: "2503.11532"
 authors: ["Clément Dorffer", "Frédéric Jourdin", "Thi Thuy Nga Nguyen", "Rodolphe Devillers", "David Mouillot", "Ronan Fablet"]
 year: 2025
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "skim"
 # Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2503.11532v1
+- **论文链接**: https://arxiv.org/abs/2503.11532
 - **作者机构**: Clément Dorffer (等), 主要来自海洋学与遥感研究机构
 - **开源代码**: 未明确提及（论文中未找到GitHub链接或代码仓库信息）
 
@@ -173,7 +173,7 @@ $$\mathcal{L}_{recon} = \|\mathbf{M} \odot (\hat{\mathbf{x}} - \mathbf{x}_{true}
 @article{dorffer2025observation,
   title={Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters},
   author={Dorffer, Cl\'ement and Jourdin, Fr\'ed\'eric and Nguyen, Thi Thuy Nga and Devillers, Rodolphe and Mouillot, David and Fablet, Ronan},
-  journal={arXiv preprint arXiv:2503.11532},
+  journal={arXiv preprint},
   year={2025},
   eprint={2503.11532},
   archivePrefix={arXiv},

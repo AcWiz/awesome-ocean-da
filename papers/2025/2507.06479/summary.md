@@ -1,10 +1,10 @@
 ---
 title: "Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity"
-arXiv: "2507_06479"
+arXiv: "2507.06479"
 authors: ['Niloofar Asefi', 'Leonard Lupin-Jimenez', 'Tianning Wu', 'Ruoying He', 'Ashesh Chattopadhyay']
 year: 2025
 source: "arXiv"
-venue: "Nature"
+venue: "arXiv preprint"
 method_tags: ['DDPM', 'FNO', 'UNET', 'diffusion_model', 'neural_operator', 'data_assimilation']
 application_tags: ['Lagrangian_DA', 'sparse_observations', 'ocean_reconstruction', 'Gulf_of_Mexico', 'satellite_altimetry']
 difficulty: "★★★★★"
@@ -15,7 +15,7 @@ read_status: "deep_read"
 # 📑 Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity
 
 ## 📌 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2507_06479
+- **论文链接**: https://arxiv.org/abs/2507.06479
 - **作者机构**: 加州大学圣克鲁斯分校（数学系、电子与计算机工程系）、北卡罗来纳州立大学（海洋、大气与地球科学系）
 - **开源代码**: https://github.com/TACS-UCSC/GenDA-Lagrangian
 
@@ -102,6 +102,6 @@ read_status: "deep_read"
   eprint={2507.06479},
   eprinttype={arxiv},
   eprintclass={physics.ao-ph},
-  journal={Nature},
+  journal={arXiv preprint},
 }
 ```

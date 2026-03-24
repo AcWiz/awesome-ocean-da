@@ -1,6 +1,6 @@
 ---
 title: "Explore the Ideology of Deep Learning in ENSO Forecasts"
-arXiv: "2601.02050v1"
+arXiv: "2601.02050"
 authors: ["Yanhai Gan", "Yipeng Chen", "Ning Li", "Xingguo Liu", "Junyu Dong", "Xianyao Chen"]
 year: 2026
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "skim"
 # Explore the Ideology of Deep Learning in ENSO Forecasts
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2601.02050v1
+- **论文链接**: https://arxiv.org/abs/2601.02050
 - **作者机构**: 中国海洋大学、南方科技大学等（具体机构信息需从全文获取）
 - **开源代码**: 未提及（Not found in provided content）
 
@@ -143,7 +143,7 @@ read_status: "skim"
 @article{Gan2026ENSOInterpretability,
   title={Explore the Ideology of Deep Learning in ENSO Forecasts},
   author={Gan, Yanhai and Chen, Yipeng and Li, Ning and Liu, Xingguo and Dong, Junyu and Chen, Xianyao},
-  journal={arXiv preprint arXiv:2601.02050v1},
+  journal={arXiv preprint},
   year={2026},
   eprint={2601.02050},
   archivePrefix={arXiv},

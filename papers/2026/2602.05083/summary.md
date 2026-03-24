@@ -1,6 +1,6 @@
 ---
 title: "Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability"
-arXiv: "2602.05083v1"
+arXiv: "2602.05083"
 authors: ["Zilu Meng", "Gregory J. Hakim", "Wenchang Yang", "Gabriel A. Vecchi"]
 year: 2026
 source: "arXiv"

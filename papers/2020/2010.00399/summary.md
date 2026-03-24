@@ -1,6 +1,6 @@
 ---
 title: "Analyzing Koopman approaches to physics-informed machine learning for long-term sea-surface temperature forecasting"
-arXiv: "2010.00399v2"
+arXiv: "2010.00399"
 authors: "Julian Rice; Wenwei Xu; Andrew August"
 year: "2020"
 source: "arXiv"

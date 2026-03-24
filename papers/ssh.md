@@ -5,10 +5,10 @@
 ---
 
 | 年份 | 论文 | arXiv | Venue | 方法标签 | 应用 | 总结 |
-|------|------|-------|-------|----------|------|------|
-| 2025 | [SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900) | [2506.23900](https://arxiv.org/abs/2506.23900) | Nature | GNN, graph-neural-network, hierarchical-mesh, regional-ocean, autoregressive | Mediterranean-Sea, ocean-forecasting, SST, SSH, temperature, salinity, currents | [总结](./2025/2506.23900/summary.md) |
-| 2022 | [4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for Nadir and Wide-Swath Satellite Altimetry](https://arxiv.org/abs/2211.05904) | [2211.05904](https://arxiv.org/abs/2211.05904) | N/A - Preprint | 4DVarNet, Deep Learning, SSH, Satellite Altimetry, SWOT | Sea Surface Height, Gulf Stream, OSMOSIS, NATL60, DUACS | [总结](./2022/2211.05904/summary.md) |
-| 2022 | [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | [2206.12746](https://arxiv.org/abs/2206.12746) | N/A - Preprint | GNN, Graph Neural Network, LSTM, Transformer, Dynamic Graph | Ocean Dynamics, Current Velocity, SSH, Santos Estuarine System | [总结](./2022/2206.12746/summary.md) |
+|------|-------|-------|------|----------|------|------|
+| 2025 | [SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900) | [2506.23900](https://arxiv.org/abs/2506.23900) | Nature | GNN, graph-neural-network, hierarchical-mesh, regional-ocean, autoregressive | Mediterranean-Sea, ocean-forecasting, SST, SSH, temperature, salinity, currents | [总结](./2025/2506.23900/summary.md)
+| 2022 | [4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for Nadir and Wide-Swath Satellite Altimetry](https://arxiv.org/abs/2211.05904) | [2211.05904](https://arxiv.org/abs/2211.05904) | N/A - Preprint | 4DVarNet, Deep Learning, SSH, Satellite Altimetry, SWOT | Sea Surface Height, Gulf Stream, OSMOSIS, NATL60, DUACS | [总结](./2022/2211.05904/summary.md)
+| 2022 | [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | [2206.12746](https://arxiv.org/abs/2206.12746) | N/A - Preprint | GNN, Graph Neural Network, LSTM, Transformer, Dynamic Graph | Ocean Dynamics, Current Velocity, SSH, Santos Estuarine System | [总结](./2022/2206.12746/summary.md)
 
 ---
 

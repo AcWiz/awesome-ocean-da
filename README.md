@@ -24,6 +24,13 @@
   - [ENSO 预测](#enso-预测)
   - [海浪预报](#海浪预报)
   - [全球预报](#全球预报)
+  - [海洋数据同化](#海洋数据同化)
+  - [海冰](#海冰)
+  - [深海](#深海)
+  - [气候预测](#气候预测)
+  - [海洋动力学](#海洋动力学)
+  - [海平面](#海平面)
+  - [参数化](#参数化)
 - [按年份浏览](#papers-by-year)
 - [如何贡献](./CONTRIBUTING.md)
 
@@ -151,6 +158,128 @@
 | 2022 | [A Deep Learning Model for Forecasting Global Monthly Mean Sea Surface Temperature Anomalies](https://arxiv.org/abs/2202.09967) | N/A - Preprint | Unet-LSTM, CNN, LSTM, ERA5, Deep Learning | SST, ENSO, Marine Heatwaves, Sea Surface Temperature | [总结](./papers/2022/2202.09967/summary.md) |
 
 [更多 ENSO 预测 论文 →](./papers/enso.md)
+
+---
+
+### 海浪预报
+> 海浪是海洋环境的重要组成部分
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2026|[Ocean Wave Prediction](https://arxiv.org/abs/2602.04067)|-|深度学习|海浪|[总结](./papers/2026/2602.04067/summary.md)|
+|2026|[PINN Wave Model](https://arxiv.org/abs/2602.06989)|-|PINN|海浪|[总结](./papers/2026/2602.06989/summary.md)|
+|2025|[Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time](https://arxiv.org/abs/2508.03315)|Nature|PINO, neural-operator, FNO, 物理约束, wave-reconstruction, HOSM|海浪, 波浪预测, buoy-measurements, X-band-radar, 相位解析|[总结](./papers/2025/2508.03315/summary.md)|
+|2024|[OceanCastNet](https://arxiv.org/abs/2406.03848)|Nature|深度学习|海浪|[总结](./papers/2024/2406.03848/summary.md)|
+|2023|[A Deep-learning Real-time Bias Correction Method for Significant Wave Height](https://arxiv.org/abs/2311.15001)|-|深度学习|海浪|[总结](./papers/2023/2311.15001/summary.md)|
+
+[更多 海浪预报 论文 →](./papers/wave.md)
+
+---
+
+### 全球预报
+> 全球海洋预报是气候预测的基础
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2026|[Neural ocean forecasting](https://arxiv.org/abs/2602.00598)|-|深度学习|Ocean-Forecast|[总结](./papers/2026/2602.00598/summary.md)|
+|2025|[Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation](https://arxiv.org/abs/2501.13312)|arXiv|4D-Var, Kernel Methods, Conditional Mean Embedding, Deep Learning, Data Assimilation|Weather Prediction, Chaotic Systems, Numerical Weather Prediction, Dynamical Systems|[总结](./papers/2025/2501.13312/summary.md)|
+|2024|[DUNE Climate](https://arxiv.org/abs/2408.06262)|-|气候预报|全球|[总结](./papers/2024/2408.06262/summary.md)|
+
+[更多 全球预报 论文 →](./papers/global-forecast.md)
+
+---
+
+### 海洋数据同化
+> 利用数据同化技术融合观测与模型
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2025|[Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation](https://arxiv.org/abs/2509.22949)|arXiv|元学习, Fourier Neural Operator, Data Assimilation, Inverse Hessian Approximation, Conjugate Gradient Method|Variational Data Assimilation, 4D-Var, Numerical Weather Prediction, PDE-Constrained Optimization|[总结](./papers/2025/2509.22949/summary.md)|
+|2025|[CGKN: Conservative GPU-Native Kurgan Skeleton Network for Ocean Data Assimilation](https://arxiv.org/abs/2507.08749)|Nature|Koopman, Neural-Operator|海洋数据同化|[总结](./papers/2025/2507.08749/summary.md)|
+|2024|[CG-EnKF: Conservative GPU-Native Ensemble Kalman Filter for Ocean Data Assimilation](https://arxiv.org/abs/2409.14300)|arXiv|EnKF|海洋数据同化|[总结](./papers/2024/2409.14300/summary.md)|
+|2023|[Neural Koopman Prior for Data Assimilation](https://arxiv.org/abs/2309.05317)|IEEE TSP|Koopman|数据同化|[总结](./papers/2023/2309.05317/summary.md)|
+|2022|[Deep Learning Enhanced Ensemble-based Data Assimilation](https://arxiv.org/abs/2206.04811)|-|EnKF, 深度学习|海洋数据同化|[总结](./papers/2022/2206.04811/summary.md)|
+
+[更多 海洋数据同化 论文 →](./papers/?)
+
+---
+
+### 海冰
+> 海冰是极地海洋的重要现象
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2025|[Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network](https://arxiv.org/abs/2510.17756)|Nature|PINN, HIS-Unet, CNN, 物理约束, 海冰|北冰洋, 海冰速度, 海冰浓度, remote-sensing, multi-task-learning|[总结](./papers/2025/2510.17756/summary.md)|
+|2023|[Deep Learning of Systematic Sea Ice Model Errors from Data Assimilation](https://arxiv.org/abs/2304.03832)|-|深度学习|海冰|[总结](./papers/2023/2304.03832/summary.md)|
+
+[更多 海冰 论文 →](./papers/?)
+
+---
+
+### 深海
+> 深海是海洋的主体部分
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2026|[Deep Ocean Prediction](https://arxiv.org/abs/2603.14115)|-|深度学习|深海|[总结](./papers/2026/2603.14115/summary.md)|
+|2025|[Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation](https://arxiv.org/abs/2503.19160)|JGR (Journal of Geophysical Research)|PINN, SIREN, 数据同化, quasi-geostrophic, stratified-ocean|深海, SWOT卫星, ARGO浮标, 海洋环流, 中尺度|[总结](./papers/2025/2503.19160/summary.md)|
+|2021|[Deep Ocean](https://arxiv.org/abs/2105.05363)|-|深度学习|深海|-|
+
+[更多 深海 论文 →](./papers/?)
+
+---
+
+### 气候预测
+> 气候预测是海洋预报的最终目标之一
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2026|[Climate Transformer](https://arxiv.org/abs/2603.05560)|-|Transformer|气候|[总结](./papers/2026/2603.05560/summary.md)|
+|2024|[Validating Deep Learning Weather-Navigation Models for Climate Prediction](https://arxiv.org/abs/2404.17652)|Nature|深度学习|天气|[总结](./papers/2024/2404.17652/summary.md)|
+|2024|[CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION](https://arxiv.org/abs/2409.05369)|Nature|transformer, swin-transformer, attention-mechanism, 3d-cnn, lstm|sst-prediction, s2s-forecasting, enso, 海洋建模, climate-prediction|[总结](./papers/2024/2409.05369/summary.md)|
+|2021|[Climate DL](https://arxiv.org/abs/2105.02939)|-|Deep-Learning|Climate|-|
+
+[更多 气候预测 论文 →](./papers/?)
+
+---
+
+### 海洋动力学
+> 海洋动力学是理解海洋过程的基础
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2026|[Koopman Ocean](https://arxiv.org/abs/2602.05416)|-|Koopman|海洋动力学|[总结](./papers/2026/2602.05416/summary.md)|
+|2026|[Ocean Physics](https://arxiv.org/abs/2603.07261)|-|物理约束|海洋动力学|[总结](./papers/2026/2603.07261/summary.md)|
+|2026|[Submesoscale Dynamics](https://arxiv.org/abs/2602.05083)|-|深度学习|亚中尺度|[总结](./papers/2026/2602.05083/summary.md)|
+|2024|[Semilinear Neural Operators](https://arxiv.org/abs/2402.15656)|arXiv|Neural-Operator|海洋|[总结](./papers/2024/2402.15656/summary.md)|
+
+[更多 海洋动力学 论文 →](./papers/?)
+
+---
+
+### 海平面
+> 海平面变化是全球变化的敏感指标
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2026|[Sea Surface Height](https://arxiv.org/abs/2603.16272)|-|深度学习|SSH|[总结](./papers/2026/2603.16272/summary.md)|
+|2025|[Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure](https://arxiv.org/abs/2510.09792)|NeurIPS|neural-operator, FNO, 时间色散, 海洋建模, 物理约束|海洋环流, 海平面预测, Baltic-Sea, 区域海洋, wave-propagation|[总结](./papers/2025/2510.09792/summary.md)|
+|2023|[Multi-decadal Sea Level Prediction using Neural Networks and Spectral Analysis](https://arxiv.org/abs/2310.04540)|-|深度学习|海平面|[总结](./papers/2023/2310.04540/summary.md)|
+
+[更多 海平面 论文 →](./papers/?)
+
+---
+
+### 参数化
+> 海洋参数化是气候模型的关键
+
+| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
+|------|------|-------|------|------|------|
+|2025|[Generalizable Neural Network Parameterizations from Incompressible Flow](https://arxiv.org/abs/2505.08900)|arXiv preprint|物理约束|参数化|[总结](./papers/2025/2505.08900/summary.md)|
+|2023|[Robust Ocean Subgrid-Scale Parameterizations Using Fourier Neural Operators](https://arxiv.org/abs/2310.02691)|-|Neural-Operator|海洋|[总结](./papers/2023/2310.02691/summary.md)|
+|2022|[GNN-Surrogate: A Hierarchical and Adaptive Graph Neural Network for Parameterization](https://arxiv.org/abs/2202.08956)|-|GNN|参数化|[总结](./papers/2022/2202.08956/summary.md)|
+
+[更多 参数化 论文 →](./papers/?)
 
 ---
 
