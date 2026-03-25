@@ -1,6 +1,6 @@
 ---
 title: "LangYa: Cross-Spatiotemporal Ocean Forecasting"
-arXiv: "2401.00000"
+arXiv: "2412.18097"
 authors: ["待补充", "待补充", "待补充"]
 year: 2024
 source: "arXiv"
@@ -15,7 +15,7 @@ read_status: "skim"
 # LangYa: Cross-Spatiotemporal Ocean Forecasting
 
 ## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/2401.00000
+- **论文链接**: https://arxiv.org/abs/2412.18097
 - **作者机构**: [待补充]
 - **开源代码**: [待补充]
 

@@ -4,7 +4,7 @@ arXiv: "2510.18133"
 authors: ["Laura Thapa", "Marybeth Arcodia", "Elizabeth A. Barnes"]
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["卷积神经网络", "聚类分析", "亚季节至季节预测", "海表高度预测", "预处理策略"]
 application_tags: ["沿海海平面预测", "海洋预报", "气候变化", "自然灾害预警"]
 difficulty: "★★★☆☆"

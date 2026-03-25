@@ -4,7 +4,7 @@ arXiv: "2202.08956"
 authors: ["Neng Shi", "Jiayi Xu", "Skylar W. Wurster", "Hanqi Guo", "Jonathan Woodring", "Luke P. Van Roekel", "Han-Wei Shen"]
 year: 2022
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Graph Neural Network", "Surrogate Model", "Unstructured Mesh", "Hierarchical Graph"]
 application_tags: ["MPAS-Ocean", "Parameter Space Exploration", "Ocean Climate Simulation"]
 difficulty: "★★★★☆"

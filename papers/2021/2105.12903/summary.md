@@ -4,7 +4,7 @@ arXiv: "2105.12903"
 authors: ["Mingchao Liang", "Florian Meyer"]
 year: 2021
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Belief Propagation", "Graph Neural Network", "Neural Enhanced BP", "Particle Filtering"]
 application_tags: ["Cooperative Localization", "Wireless Networks", "Agent Networks"]
 difficulty: "★★★★☆"

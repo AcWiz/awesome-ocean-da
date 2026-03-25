@@ -4,7 +4,7 @@ arXiv: "2009.01554"
 authors: ["Dilip J. Hiremath", "Martin Claus", "Wilhelm Hasselbring", "Willi Rath"]
 year: 2020
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Metamorphic Testing", "Machine Learning", "Ocean Modeling", "Software Testing"]
 application_tags: ["Ocean Model Validation", "Software Testing", "Metamorphic Relations"]
 difficulty: "★★★☆☆"

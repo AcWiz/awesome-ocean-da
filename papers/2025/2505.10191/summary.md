@@ -4,7 +4,7 @@ arXiv: "2505.10191"
 authors: ['Qingyu Zheng', 'Qi Shao', 'Guijun Han', 'Wei Li', 'Hong Li', 'Xuan Wang']
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['Vision_Transformer', 'AFNO', 'dynamics_enhancement', 'multi_scale', 'CNN']
 application_tags: ['ocean_forecasting', 'mesoscale_eddy', 'SST', 'salinity', 'ocean_circulation']
 difficulty: "★★★★☆"

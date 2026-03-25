@@ -4,7 +4,7 @@ arXiv: "2507.08749"
 authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Long Wu', 'Nan Chen']
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['Koopman_Operator', 'conditional_Gaussian', 'neural_network', 'data_assimilation', 'state_forecast']
 application_tags: ['Lorenz96', 'QG_model', 'ocean_dynamics', 'turbulence', 'chaotic_systems']
 difficulty: "★★★★☆"

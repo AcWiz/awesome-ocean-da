@@ -4,7 +4,7 @@ arXiv: "2106.08747"
 authors: "Taco de Wolff; Hugo Carrillo; Luis Martí; Nayat Sánchez-Pi"
 year: "2021"
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 tags:
   - method: physics-informed-neural-networks, deep-learning, neural-network
   - application: ocean-modeling, PDE-solving, climate-modeling

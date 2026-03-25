@@ -4,7 +4,7 @@ arXiv: "1906.06722"
 authors: ["Gregor Robinson", "Ian Grooms"]
 year: 2019
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Multiresolution Gaussian", "RBF Interpolation", "Fractional Laplacian", "Scale Separation"]
 application_tags: ["Data Assimilation", "Ocean Modeling", "Particle Filtering", "Signal Processing"]
 difficulty: "★★★☆☆"

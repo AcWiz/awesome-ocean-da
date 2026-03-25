@@ -4,7 +4,7 @@ arXiv: "2601.01864"
 authors: ['Rameshan Kallummal']
 year: 2026
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['SVD', 'linear_regression', 'PDO', 'seasonal_decomposition', 'multivariate_analysis']
 application_tags: ['SST', 'Pacific_Decadal_Oscillation', 'North_Pacific', 'sea_surface_temperature', 'climate_prediction']
 difficulty: "★★★★☆"

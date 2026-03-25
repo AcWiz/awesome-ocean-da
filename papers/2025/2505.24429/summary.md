@@ -4,7 +4,7 @@ arXiv: "2505.24429"
 authors: ['Giovanny A. Cuervo']
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['neural_operator', 'FNO', 'graph_network', 'data_driven', 'ocean_modeling']
 application_tags: ['canary_current', 'upwelling', 'ocean_forecasting', 'regional_ocean', 'marine_ecosystem']
 difficulty: "★★★☆☆"

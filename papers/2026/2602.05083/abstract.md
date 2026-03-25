@@ -4,7 +4,7 @@ arXiv: "2602.05083"
 authors: ["Zilu Meng", "Gregory J. Hakim", "Wenchang Yang", "Gabriel A. Vecchi"]
 year: 2026
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["深度学习", "大集合模拟", "大气环流模型", "气候模拟", "海气耦合"]
 application_tags: ["大气阻塞", "海温变率", "气候变化", "极端天气", "遥相关分析"]
 difficulty: "★★★☆☆"

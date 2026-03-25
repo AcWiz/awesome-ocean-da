@@ -4,7 +4,7 @@ arXiv: "2507.08834"
 authors: ['Karishma Battina', 'Prathamesh Dinesh Joshi', 'Raj Abhijit Dandekar', 'Rajat Dandekar', 'Sreedath Panat']
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['PINN', 'advection_diffusion', 'physics_informed', 'neural_network', 'Julia']
 application_tags: ['ocean_pollutant', 'advection_diffusion_equation', 'finite_difference', 'environmental_monitoring']
 difficulty: "★★★☆☆"

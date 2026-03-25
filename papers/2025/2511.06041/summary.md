@@ -4,7 +4,7 @@ arXiv: "2511.06041"
 authors: ['Yanfei Xiang', 'Yuan Gao', 'Hao Wu', 'Quan Zhang', 'Ruiqi Shu', 'Xiao Zhou', 'Xiaomeng Huang']
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['neural_process', 'encoder_decoder', 'data_assimilation', 'super_resolution', 'multi_source']
 application_tags: ['ocean_state_estimation', 'global_ocean', 'satellite_altimetry', 'in_situ', 'forecast_skill']
 difficulty: "★★★★★"

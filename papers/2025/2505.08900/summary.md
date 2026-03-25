@@ -4,7 +4,7 @@ arXiv: "XXXXX.XXXXXvN"
 authors: ["Author1", "Author2", "Author3"]
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Neural Network", "Deep Learning", "Parameterization", "Climate Modeling"]
 application_tags: ["Ocean Modeling", "Climate Simulation", "Mesoscale Eddies", "Numerical Weather Prediction"]
 difficulty: "★★★☆☆"

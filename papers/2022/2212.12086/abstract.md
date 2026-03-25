@@ -4,7 +4,7 @@ arXiv: "2212.12086"
 authors: ["Jack W. Miller", "Charles O'Neill", "Navid C. Constantinou", "Omri Azencot"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["Koopman Autoencoder", "Eigenvalue", "Initialisation", "Regularisation", "Deep Learning"]
 application_tags: ["Dynamical Systems", "Ocean SST", "Cyclone", "Pendulum", "Cylinder Flow"]
 difficulty: "★★★★☆"

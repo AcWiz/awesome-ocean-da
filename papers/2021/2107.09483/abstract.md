@@ -4,7 +4,7 @@ arXiv: "2107.09483"
 authors: ["Delong Chen", "Fan Liu", "Zheqi Zhang", "Xiaomin Lu", "Zewen Li"]
 year: 2021
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Wavelet Transform", "Graph Neural Network", "Deep Learning", "Spatial-Temporal Modeling"]
 application_tags: ["Significant Wave Height", "Ocean Wave Prediction", "Coastal Engineering"]
 difficulty: "★★★☆☆"

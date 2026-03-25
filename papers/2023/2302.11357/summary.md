@@ -4,7 +4,7 @@ arXiv: "2302.11357"
 authors: ["Lekshmi S", "Rajib Chattopadhyay", "D. S. Pai", "M. Rajeevan", "Vinu Valsala", "K. S. Hosalikar", "M. Mohapatra"]
 year: 2023
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["CNN", "Sea Surface Temperature Prediction", "ENSO", "Climate Modeling", "Deep Learning"]
 application_tags: ["Climate Prediction", "El Nino/La Nina Forecast", "Ocean-Atmosphere Interaction", "Sea Surface Temperature"]
 difficulty: "★★★☆☆"

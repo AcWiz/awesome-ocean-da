@@ -4,7 +4,7 @@ arXiv: "2511.20899"
 authors: ["Zhanxiang Hua", "Christina Karamperidou", "Zilu Meng"]
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Deep Learning Climate Emulator", "Pacific Pacemaker Experiment", "ENSO Teleconnections", "Coupled Atmosphere-Ocean Model", "DLESyM"]
 application_tags: ["Climate Modeling", "ENSO Dynamics", "Extratropical Circulation", "Atmospheric Blocking", "Climate Extremes"]
 difficulty: "★★★★☆"

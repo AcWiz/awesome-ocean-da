@@ -4,7 +4,7 @@ arXiv: "2406.07063"
 authors: ["Meng", "et al."]
 year: 2024
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Deep Learning", "Transformer", "Data Assimilation", "Ensemble Kalman Filter", "Linear Inverse Model"]
 application_tags: ["Climate Reconstruction", "ENSO Prediction", "Paleoclimate Proxies", "Tropical Pacific Ocean"]
 difficulty: "★★★☆☆"

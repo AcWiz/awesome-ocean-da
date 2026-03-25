@@ -46,7 +46,7 @@
         "Noel Cressie"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "FNO",
         "neural_operator",
@@ -74,7 +74,7 @@
         "Rameshan Kallummal"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "SVD",
         "linear_regression",
@@ -228,7 +228,7 @@
         "Gabriel A. Vecchi"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "深度学习",
         "大集合模拟",
@@ -507,7 +507,7 @@
         "Nan Chen"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Koopman_Operator",
         "data_assimilation",
@@ -548,7 +548,7 @@
         "Lin Wang"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Diffusion Model",
         "Generative Model",
@@ -579,7 +579,7 @@
         "Sylvie Thiria"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Convolutional Neural Network",
         "Sea Surface Temperature",
@@ -869,7 +869,7 @@
         "Xuan Wang"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Vision_Transformer",
         "AFNO",
@@ -904,7 +904,7 @@
         "Satellite Ocean"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "CNN",
         "Transformer",
@@ -960,7 +960,7 @@
         "Giovanny A. Cuervo"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "neural_operator",
         "FNO",
@@ -1043,7 +1043,7 @@
         "Teemu Roos"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "GNN",
         "graph_neural_network",
@@ -1077,7 +1077,7 @@
         "Ashesh Chattopadhyay"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "DDPM",
         "FNO",
@@ -1110,7 +1110,7 @@
         "Nan Chen"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Koopman_Operator",
         "conditional_Gaussian",
@@ -1142,7 +1142,7 @@
         "Sreedath Panat"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "PINN",
         "advection_diffusion",
@@ -1171,7 +1171,7 @@
         "Norbert Hoffmann"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "PINO",
         "neural_operator",
@@ -1370,7 +1370,7 @@
         "Guangyao Wang"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "EnKF",
         "FCNN",
@@ -1399,7 +1399,7 @@
         "Maryam Rahnemoonfar"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "PINN",
         "HIS-Unet",
@@ -1429,7 +1429,7 @@
         "Elizabeth A. Barnes"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "卷积神经网络",
         "聚类分析",
@@ -1555,7 +1555,7 @@
         "Xiaomeng Huang"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "neural_process",
         "encoder_decoder",
@@ -1617,7 +1617,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "differentiable_programming",
         "JAX",
@@ -1681,7 +1681,7 @@
         "Zilu Meng"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Deep Learning Climate Emulator",
         "Pacific Pacemaker Experiment",
@@ -1745,7 +1745,7 @@
         "Xiaoqian Zhu"
       ],
       "source": "arXiv",
-      "venue": "IEEE",
+      "venue": "arXiv",
       "method_tags": [
         "graph_neural_network",
         "Transformer",
@@ -1780,7 +1780,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "U-Net",
         "4DVarNet",
@@ -1867,7 +1867,7 @@
         "Oak Ridge National Laboratory"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "neural_operator",
         "fno",
@@ -2071,7 +2071,7 @@
         "Not specified in abstract"
       ],
       "source": "arXiv",
-      "venue": "Journal of Advances in Modeling Earth Systems",
+      "venue": "Journal of Advances in Modeling Earth Systems (JAMES)",
       "method_tags": [
         "深度学习",
         "神经网络",
@@ -2099,7 +2099,7 @@
         "et al."
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Deep Learning",
         "Transformer",
@@ -2135,7 +2135,7 @@
         "Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "particle_filter",
         "semantic_segmentation",
@@ -2281,7 +2281,7 @@
         "Chinese Academy of Sciences"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "transformer",
         "swin_transformer",
@@ -2502,7 +2502,7 @@
         "Paolo Oddob"
       ],
       "source": "arXiv",
-      "venue": "Elsevier",
+      "venue": "arXiv",
       "method_tags": [
         "U-Net",
         "Vision_Transformer",
@@ -2524,7 +2524,7 @@
       "path": "papers/2024/2412.18097",
       "year": 2024,
       "title": "LangYa: Cross-Spatiotemporal Ocean Forecasting",
-      "arxiv": "2401.00000",
+      "arxiv": "2412.18097",
       "authors": [
         "待补充",
         "待补充",
@@ -2589,7 +2589,7 @@
         "Authors Not Specified"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Echo State Network",
         "Ensemble Kalman Filter",
@@ -3119,7 +3119,7 @@
         "Han-Wei Shen"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Graph Neural Network",
         "Surrogate Model",
@@ -3145,7 +3145,7 @@
         "Ming Feng"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Unet-LSTM",
         "CNN",
@@ -3173,7 +3173,7 @@
         "Omer San"
       ],
       "source": "arXiv",
-      "venue": "Journal of Advances in Modeling Earth Systems",
+      "venue": "Journal of Advances in Modeling Earth Systems (JAMES)",
       "method_tags": [
         "POD",
         "LSTM",
@@ -3205,7 +3205,7 @@
         "Laurent Chérubin"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "U-Net",
         "STU-Net",
@@ -3269,7 +3269,7 @@
         "Eduardo A. Tannuri"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "GNN",
         "Graph Neural Network",
@@ -3347,7 +3347,7 @@
         "Andrew M. Stuart"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Ensemble Kalman Filter",
         "Mean Field",
@@ -3376,7 +3376,7 @@
         "Ronan Fablet"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "4DVarNet",
         "Deep Learning",
@@ -3405,7 +3405,7 @@
         "Ryo Onishi"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Super-Resolution",
         "Data Assimilation",
@@ -3435,7 +3435,7 @@
         "Omri Azencot"
       ],
       "source": "arXiv",
-      "venue": "N/A - Preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Koopman Autoencoder",
         "Eigenvalue",
@@ -3466,7 +3466,7 @@
         "Nathaniel Cresswell-Clay"
       ],
       "source": "arXiv",
-      "venue": "Journal of Advances in Modeling Earth Systems",
+      "venue": "Journal of Advances in Modeling Earth Systems (JAMES)",
       "method_tags": [],
       "application_tags": [],
       "date_collected": "",
@@ -3488,7 +3488,7 @@
         "Benjamin Robbins"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "深度神经网络",
         "分布式推理",
@@ -3526,7 +3526,7 @@
       "arxiv": "2105.05363",
       "authors": "Peiyi Zhang; Qifan Song; Faming Liang",
       "source": "arXiv",
-      "venue": "arXiv preprint (stat.ME)",
+      "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
       "date_collected": "",
@@ -3543,7 +3543,7 @@
         "Florian Meyer"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Belief Propagation",
         "Graph Neural Network",
@@ -3566,7 +3566,7 @@
       "arxiv": "2106.08747",
       "authors": "Taco de Wolff; Hugo Carrillo; Luis Martí; Nayat Sánchez-Pi",
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
       "date_collected": "",
@@ -3586,7 +3586,7 @@
         "Zewen Li"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Wavelet Transform",
         "Graph Neural Network",
@@ -3635,7 +3635,7 @@
         "Patrick Barnard"
       ],
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [
         "Fourier Neural Operator",
         "Physics-Informed ML",
@@ -3668,7 +3668,7 @@
         "Jonathan Gula"
       ],
       "source": "arXiv",
-      "venue": "IEEE",
+      "venue": "arXiv",
       "method_tags": [
         "CNN",
         "Deep Learning",
@@ -3720,7 +3720,7 @@
       "arxiv": "2010.00399",
       "authors": "Julian Rice; Wenwei Xu; Andrew August",
       "source": "arXiv",
-      "venue": "arXiv preprint",
+      "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
       "date_collected": "",

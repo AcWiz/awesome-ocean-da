@@ -4,7 +4,7 @@ arXiv: "2503.11532"
 authors: ["Clément Dorffer", "Frédéric Jourdin", "Thi Thuy Nga Nguyen", "Rodolphe Devillers", "David Mouillot", "Ronan Fablet"]
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Neural Data Assimilation", "4DVarNet", "Gap-filling", "Variational Inference", "Deep Learning", "Ocean Color Remote Sensing"]
 application_tags: ["Ocean Color", "Marine Ecology", "Coastal Monitoring", "Carbon Cycle", "Biogeochemistry"]
 difficulty: "★★★☆☆"

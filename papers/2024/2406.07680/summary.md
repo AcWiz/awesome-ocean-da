@@ -4,7 +4,7 @@ arXiv: "2406.07680"
 authors: ['Duc Pham', 'Technical University Berlin', 'Matthew Hansen', 'Leibniz Institute for Freshwater Ecology and Inland Fisheries', 'Félicie Dhellemmes', 'Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK', 'Jens Krause', 'Leibniz Institute for Freshwater Ecology and Inland Fisheries', 'Pia Bideau', 'Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK']
 year: 2024
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['particle_filter', 'semantic_segmentation', 'deeplabv3', 'kalman_filter', 'visual_tracking']
 application_tags: ['animal_tracking', 'collective_behavior', 'fish_school', 'drone_videos', 'marine_ecology']
 difficulty: "★★★☆☆"

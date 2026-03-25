@@ -4,7 +4,7 @@ arXiv: "2211.05904"
 authors: ["Maxime Beauchamp", "Quentin Febvre", "Hugo Georgenthum", "Ronan Fablet"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["4DVarNet", "Deep Learning", "SSH", "Satellite Altimetry", "SWOT"]
 application_tags: ["Sea Surface Height", "Gulf Stream", "OSMOSIS", "NATL60", "DUACS"]
 difficulty: "★★★★☆"

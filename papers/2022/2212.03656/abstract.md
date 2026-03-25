@@ -4,7 +4,7 @@ arXiv: "2212.03656"
 authors: ["Yuki Yasuda", "Ryo Onishi"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["Super-Resolution", "Data Assimilation", "U-Net", "SR-mixup", "Domain Generalization"]
 application_tags: ["Ocean Jet", "Barotropic Model", "Super-Resolution", "Low-Resolution"]
 difficulty: "★★★★☆"

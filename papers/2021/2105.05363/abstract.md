@@ -4,7 +4,7 @@ arXiv: "2105.05363"
 authors: "Peiyi Zhang; Qifan Song; Faming Liang"
 year: "2021"
 source: "arXiv"
-venue: "arXiv preprint (stat.ME)"
+venue: "arXiv"
 tags:
   - method: ["ensemble-kalman-filter", "langevin-dynamics", "stochastic-gradient-mcmc", "bayesian-inference", "particle-filtering"]
   - application: ["data-assimilation", "uncertainty-quantification", "bayesian-learning", "dynamic-state-estimation"]

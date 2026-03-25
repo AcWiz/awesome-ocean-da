@@ -4,7 +4,7 @@ arXiv: "2304.00198"
 authors: ["Authors Not Specified"]
 year: 2023
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Echo State Network", "Ensemble Kalman Filter", "Recurrent Neural Network", "Sequential Training"]
 application_tags: ["Data Assimilation", "Chaotic Systems", "Traffic Prediction"]
 difficulty: "★★★☆☆"

@@ -4,7 +4,7 @@ arXiv: "2010.00399"
 authors: "Julian Rice; Wenwei Xu; Andrew August"
 year: "2020"
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 tags:
   - method: ["koopman-operator", "convolutional-autoencoder", "physics-informed-ml", "dynamical-systems"]
   - application: ["sea-surface-temperature", "ocean-forecasting", "long-range-prediction", "gulf-of-mexico"]

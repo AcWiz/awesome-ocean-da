@@ -4,7 +4,7 @@ arXiv: "2603.14115"
 authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Nan Chen']
 year: 2026
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['Koopman_Operator', 'data_assimilation', 'Lagrangian', 'conditional_Gaussian', 'neural_network']
 application_tags: ['Lagrangian_DA', 'tracer_observations', 'quasi_geostrophic', 'flow_estimation', 'ensemble_filter']
 difficulty: "★★★★★"

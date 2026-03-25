@@ -4,7 +4,7 @@ arXiv: "2104.09355"
 authors: ["Sam Partee", "Matthew Ellis", "Alessandro Rigazzi", "Scott Bachman", "Gustavo Marques", "Andrew Shao", "Benjamin Robbins"]
 year: 2021
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["深度神经网络", "分布式推理", "HPC", "在线学习", "模型集成"]
 application_tags: ["海洋气候建模", "数值模拟", "高分辨率海洋模型"]
 difficulty: "★★★★☆"

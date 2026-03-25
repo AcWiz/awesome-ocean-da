@@ -4,7 +4,7 @@ arXiv: "2603.16272"
 authors: ["Haijie Li", "Ya Wang", "Kai Yang", "Gang Huang", "Xiangao Xia", "Ziming Chen", "Weichen Tao", "Chenglin Lu", "Lin Chen", "Miao Zhang", "Kaiming Hu", "Hainan Gong", "Disong Fu", "Lin Wang"]
 year: 2026
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Diffusion Model", "Generative Model", "Uncertainty Quantification", "Data Assimilation", "Probabilistic Reconstruction"]
 application_tags: ["Sea Surface Temperature", "Climate Prediction", "Ocean State Estimation", "El Niño Forecasting"]
 difficulty: "★★★★☆"

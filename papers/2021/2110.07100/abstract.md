@@ -4,7 +4,7 @@ arXiv: "2110.07100"
 authors: ["Peishi Jiang", "Nis Meinert", "Helga Jordão", "Constantin Weisser", "Simon Holgate", "Alexander Lavin", "Björn Lütjens", "Dava Newman", "Haruko Wainwright", "Catherine Walker", "Patrick Barnard"]
 year: 2021
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Fourier Neural Operator", "Physics-Informed ML", "Surrogate Modeling", "Digital Twin"]
 application_tags: ["Coastal Floods", "Sea Surface Height", "NEMO", "Coastal Dynamics"]
 difficulty: "★★★★★"

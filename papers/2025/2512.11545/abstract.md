@@ -4,7 +4,7 @@ arXiv: "2512.11545"
 authors: ['Sheng Feng', 'Shuqing Ma', 'Xiaoqian Zhu']
 year: 2025
 source: "arXiv"
-venue: "IEEE"
+venue: "arXiv"
 method_tags: ['graph_neural_network', 'Transformer', 'Mel_spectrogram', 'non_Euclidean', 'underwater_acoustics']
 application_tags: ['underwater_target_recognition', 'sonar', 'ship_classification', 'acoustic_signal_processing', 'model_interpretability']
 difficulty: "★★★★☆"

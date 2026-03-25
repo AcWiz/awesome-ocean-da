@@ -4,7 +4,7 @@ arXiv: "2005.01090"
 authors: ["Redouane Lguensat", "Ronan Fablet", "Julien Le Sommer", "Sammy Metref", "Emmanuel Cosme", "Kaouther Ouenniche", "Lucas Drumetz", "Jonathan Gula"]
 year: 2020
 source: "arXiv"
-venue: "IEEE"
+venue: "arXiv"
 method_tags: ["CNN", "Deep Learning", "Internal Gravity Waves Filtering", "SWOT"]
 application_tags: ["Sea Surface Height", "Altimetry", "Ocean Dynamics", "Mesoscale"]
 difficulty: "★★★☆☆"

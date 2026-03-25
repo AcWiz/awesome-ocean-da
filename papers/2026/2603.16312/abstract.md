@@ -4,7 +4,7 @@ arXiv: "2603.16312"
 authors: ["Elena Provenzano", "Guillaume Gastineau", "Carlos Mejia", "Didier Swingedouw", "Sylvie Thiria"]
 year: 2026
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Convolutional Neural Network", "Sea Surface Temperature", "Climate Prediction", "Time Series Forecasting", "Deep Learning"]
 application_tags: ["North Atlantic Oscillation", "Early Winter Prediction", "ENSO Teleconnection", "Climate Modeling"]
 difficulty: "★★★☆☆"

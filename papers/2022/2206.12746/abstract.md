@@ -4,7 +4,7 @@ arXiv: "2206.12746"
 authors: ["Caio F. D. Netto", "Marcel R. de Barros", "Jefferson F. Coelho", "Lucas P. de Freitas", "Felipe M. Moreno", "Marlon S. Mathias", "Marcelo Dottori", "Fábio G. Cozman", "Anna H. R. Costa", "Edson S. Gomi", "Eduardo A. Tannuri"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["GNN", "Graph Neural Network", "LSTM", "Transformer", "Dynamic Graph"]
 application_tags: ["Ocean Dynamics", "Current Velocity", "SSH", "Santos Estuarine System"]
 difficulty: "★★★★☆"

@@ -4,7 +4,7 @@ arXiv: "XXXXX.XXXXXv1"
 authors: ["Not specified"]
 year: 2021
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ["Deep Learning", "Weather Prediction", "Sub-seasonal Forecasting", "Neural Networks"]
 application_tags: ["Weather Forecasting", "Atmospheric Science", "Climate Modeling"]
 difficulty: "★★★☆☆"

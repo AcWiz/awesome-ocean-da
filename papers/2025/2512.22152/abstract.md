@@ -4,7 +4,7 @@ arXiv: "2512.22152"
 authors: ['Daria Botvynko', 'Pierre Haslee', 'Lucile Gaultier', 'Bertrand Chapron', 'Clément de Boyer Montégut', 'Anass El Aouni', 'Julien Le Sommer', 'Ronan Fablet']
 year: 2025
 source: "arXiv"
-venue: "arXiv preprint"
+venue: "arXiv"
 method_tags: ['U-Net', '4DVarNet', 'satellite_altimetry', 'SSH_forecasting', 'end_to_end_learning']
 application_tags: ['sea_surface_height', 'ocean_circulation', 'nadir_altimeters', 'GLO12', 'ocean_forecasting']
 difficulty: "★★★★☆"
