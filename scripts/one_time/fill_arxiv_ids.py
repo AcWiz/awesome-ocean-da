@@ -4,27 +4,15 @@
 import json
 import re
 from pathlib import Path
+import sys
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+from utils.normalizers import normalize_arxiv
+
 PAPERS_JSON = PROJECT_ROOT / "_data" / "papers.json"
 OUTPUT_FILE = PROJECT_ROOT / "_data" / "missing_arxiv_report.md"
-
-
-def normalize_arxiv(arxiv):
-    """规范化 arXiv ID，移除无效字符，返回清理后的ID或None"""
-    if not arxiv or arxiv in ['待补充', 'XXXXX', 'Not available', '', 'Not Available']:
-        return None
-    arxiv = arxiv.replace('_', '.')
-    arxiv_clean = re.sub(r'v\d+$', '', arxiv).strip('.')
-    if re.match(r'^\d{2}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    if re.match(r'^\d{4}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    if re.match(r'^\d{2}\.\d{4,5}v\d+$', arxiv):
-        return arxiv_clean
-    if re.match(r'^\d{4}\.\d{4,5}v\d+$', arxiv):
-        return arxiv_clean
-    return None
 
 
 def main():
@@ -78,8 +66,6 @@ def main():
     lines.append(f"")
     lines.append(f"---")
     lines.append(f"")
-
-    # 缺失 arXiv 的论文
     lines.append(f"## 缺失 arXiv ID（共 {len(missing)} 篇）")
     lines.append(f"")
     lines.append(f"| 年份 | 文件夹 | 论文标题 | 当前值 |")
@@ -90,8 +76,6 @@ def main():
     lines.append(f"")
     lines.append(f"---")
     lines.append(f"")
-
-    # 无效格式的论文
     lines.append(f"## 无效格式 arXiv ID（共 {len(invalid)} 篇）")
     lines.append(f"")
     lines.append(f"| 年份 | 文件夹 | 论文标题 | 当前值 | 建议 |")
@@ -116,8 +100,8 @@ def main():
     lines.append(f"")
     lines.append(f"1. 找到对应论文的 `abstract.md` 文件")
     lines.append(f"2. 修改 `arXiv:` 字段为正确的 arXiv ID")
-    lines.append(f"3. 运行 `python scripts/update_index.py` 更新索引")
-    lines.append(f"4. 运行 `python scripts/fix_arxiv_format.py` 修复格式")
+    lines.append(f"3. 运行 `python scripts/site_generation/update_index.py` 更新索引")
+    lines.append(f"4. 运行 `python scripts/repair/fix_arxiv_links.py` 修复格式")
     lines.append(f"5. 重新生成页面")
 
     content = '\n'.join(lines)

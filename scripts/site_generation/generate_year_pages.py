@@ -2,26 +2,17 @@
 """为每个年份生成索引页面"""
 
 import json
-import re
 from pathlib import Path
 from collections import defaultdict
+import sys
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+from utils.normalizers import normalize_arxiv
+
 PAPERS_JSON = PROJECT_ROOT / "_data" / "papers.json"
 PAPERS_DIR = PROJECT_ROOT / "papers"
-
-
-def normalize_arxiv(arxiv):
-    """规范化 arXiv ID"""
-    if not arxiv or arxiv in ['待补充', 'XXXXX', 'Not available', '', 'Not Available']:
-        return None
-    arxiv = arxiv.replace('_', '.')
-    arxiv_clean = re.sub(r'v\d+$', '', arxiv).strip('.')
-    if re.match(r'^\d{2}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    if re.match(r'^\d{4}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    return None
 
 
 def get_venue_display(venue, source):

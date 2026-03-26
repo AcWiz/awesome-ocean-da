@@ -7,25 +7,14 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import sys
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+from utils.normalizers import normalize_arxiv
+
 PAPERS_JSON = PROJECT_ROOT / "_data" / "papers.json"
-
-
-def normalize_arxiv_id(arxiv_raw):
-    """规范化 arXiv ID，修复下划线等常见错误格式"""
-    if not arxiv_raw or arxiv_raw in ['待补充', 'XXXXX', 'Not available', '', 'Not Available']:
-        return None
-
-    arxiv = arxiv_raw.replace('_', '.')
-    arxiv_clean = re.sub(r'v\d+$', '', arxiv).strip('.')
-
-    if re.match(r'^\d{2}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    if re.match(r'^\d{4}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-
-    return None
 
 
 def check_arxiv_link(arxiv_id):
@@ -65,7 +54,7 @@ def main():
     results = []
     for paper in papers:
         arxiv_raw = paper.get('arxiv', '')
-        arxiv_normalized = normalize_arxiv_id(arxiv_raw)
+        arxiv_normalized = normalize_arxiv(arxiv_raw)
 
         results.append({
             'title': paper.get('title', '')[:50],

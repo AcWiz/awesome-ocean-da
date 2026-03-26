@@ -2,86 +2,18 @@
 """从 papers.json 生成主页 README"""
 
 import json
-import re
 from pathlib import Path
 from collections import defaultdict
+import sys
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+from utils.normalizers import normalize_arxiv, normalize_tag
+from utils.tag_config import TAG_CATEGORIES
+
 PAPERS_JSON = PROJECT_ROOT / "_data" / "papers.json"
 README_FILE = PROJECT_ROOT / "README.md"
-
-
-def normalize_arxiv(arxiv):
-    """规范化 arXiv ID"""
-    if not arxiv or arxiv in ['待补充', 'XXXXX', 'Not available', '', 'Not Available']:
-        return None
-    arxiv = arxiv.replace('_', '.')
-    arxiv_clean = re.sub(r'v\d+$', '', arxiv).strip('.')
-    if re.match(r'^\d{2}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    if re.match(r'^\d{4}\.\d{4,5}$', arxiv_clean):
-        return arxiv_clean
-    return None
-
-
-def normalize_tag(tag):
-    """规范化标签"""
-    return tag.replace('_', '-').lower()
-
-
-# 标签到分类信息的映射
-TAG_CATEGORIES = {
-    "pinn": ("物理信息神经网络 (PINN)", "pinn.md", "PINN"),
-    "physics-informed-neural-network": ("物理信息神经网络 (PINN)", "pinn.md", "PINN"),
-    "physics-informed-neural-networks": ("物理信息神经网络 (PINN)", "pinn.md", "PINN"),
-    "physics-informed": ("物理信息神经网络 (PINN)", "pinn.md", "PINN"),
-    "physics-informed-ml": ("物理信息神经网络 (PINN)", "pinn.md", "PINN"),
-    "koopman": ("Koopman 学习", "koopman.md", "Koopman"),
-    "koopman-operator": ("Koopman 学习", "koopman.md", "Koopman"),
-    "koopman-operator-theory": ("Koopman 学习", "koopman.md", "Koopman"),
-    "koopman-learning": ("Koopman 学习", "koopman.md", "Koopman"),
-    "koopman-autoencoder": ("Koopman 学习", "koopman.md", "Koopman"),
-    "neural-operator": ("神经算子 (Neural Operator)", "neural-operator.md", "Neural-Operator"),
-    "neural-operators": ("神经算子 (Neural Operator)", "neural-operator.md", "Neural-Operator"),
-    "neural-operator-learning": ("神经算子 (Neural Operator)", "neural-operator.md", "Neural-Operator"),
-    "fno": ("神经算子 (Neural Operator)", "neural-operator.md", "FNO"),
-    "fourier-neural-operator": ("神经算子 (Neural Operator)", "neural-operator.md", "FNO"),
-    "deeponet": ("神经算子 (Neural Operator)", "neural-operator.md", "DeepONet"),
-    "gnn": ("图神经网络 (GNN)", "gnn.md", "GNN"),
-    "graph-neural-network": ("图神经网络 (GNN)", "gnn.md", "GNN"),
-    "graph-neural-networks": ("图神经网络 (GNN)", "gnn.md", "GNN"),
-    "gcn": ("图神经网络 (GNN)", "gnn.md", "GCN"),
-    "gat": ("图神经网络 (GNN)", "gnn.md", "GAT"),
-    "graphsage": ("图神经网络 (GNN)", "gnn.md", "GraphSAGE"),
-    "4d-var": ("变分方法 (4D-Var / EnKF)", "4d-var.md", "4D-Var"),
-    "enkf": ("变分方法 (4D-Var / EnKF)", "4d-var.md", "EnKF"),
-    "ensemble-kalman-filter": ("变分方法 (4D-Var / EnKF)", "4d-var.md", "EnKF"),
-    "variational-da": ("变分方法 (4D-Var / EnKF)", "4d-var.md", "4D-Var"),
-    "variational-data-assimilation": ("变分方法 (4D-Var / EnKF)", "4d-var.md", "4D-Var"),
-    "transformer": ("Transformer / Attention", "transformer.md", "Transformer"),
-    "transformers": ("Transformer / Attention", "transformer.md", "Transformer"),
-    "attention": ("Transformer / Attention", "transformer.md", "Attention"),
-    "sst": ("海表温度 (SST)", "sst.md", "SST"),
-    "sst-forecasting": ("海表温度 (SST)", "sst.md", "SST"),
-    "sea-surface-temperature": ("海表温度 (SST)", "sst.md", "SST"),
-    "ssh": ("海表高度 (SSH)", "ssh.md", "SSH"),
-    "ssh-forecasting": ("海表高度 (SSH)", "ssh.md", "SSH"),
-    "sea-surface-height": ("海表高度 (SSH)", "ssh.md", "SSH"),
-    "enso": ("ENSO 预测", "enso.md", "ENSO"),
-    "enso-prediction": ("ENSO 预测", "enso.md", "ENSO"),
-    "enso-forecast": ("ENSO 预测", "enso.md", "ENSO"),
-    "wave": ("海浪预报", "wave.md", "Wave"),
-    "wave-forecasting": ("海浪预报", "wave.md", "Wave"),
-    "wave-prediction": ("海浪预报", "wave.md", "Wave"),
-    "ocean-wave": ("海浪预报", "wave.md", "Wave"),
-    "ocean-wave-forecasting": ("海浪预报", "wave.md", "Wave"),
-    "global-forecast": ("全球预报", "global-forecast.md", "Global"),
-    "global-forecasting": ("全球预报", "global-forecast.md", "Global"),
-    "ocean-forecast": ("全球预报", "global-forecast.md", "Ocean"),
-    "ocean-forecasting": ("全球预报", "global-forecast.md", "Ocean"),
-    "global-ocean": ("全球预报", "global-forecast.md", "Global"),
-    "global-ocean-modeling": ("全球预报", "global-forecast.md", "Global"),
-}
 
 
 def paper_matches_tag(paper, normalized_tag):

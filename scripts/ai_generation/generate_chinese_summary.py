@@ -28,6 +28,9 @@ except ImportError:
     sys.exit(1)
 
 
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+
+
 def get_api_key() -> str:
     """Get API key from environment or arguments."""
     for env_var in ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"]:
@@ -123,7 +126,7 @@ def parse_abstract_md(abstract_path: Path) -> dict:
                     continue
                 if in_authors:
                     if line.startswith('- '):
-                        authors_list.append(line[2:].strip().strip('"').strip("'"))
+                        authors_list.append(line[2:].strip().strip('"').strip("'")))
                     elif line.startswith(' ') or line.startswith('\t'):
                         continue
                     else:
@@ -469,7 +472,7 @@ def main():
     if args.base_dir:
         base_dir = Path(args.base_dir)
     else:
-        base_dir = Path(__file__).parent.parent / "papers"
+        base_dir = PROJECT_ROOT / "papers"
 
     if not base_dir.exists():
         print(f"Error: Base directory not found: {base_dir}")

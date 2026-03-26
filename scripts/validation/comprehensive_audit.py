@@ -7,10 +7,11 @@ import json
 import re
 import urllib.request
 import urllib.error
+import random
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 PAPERS_DIR = PROJECT_ROOT / "papers"
 DATA_DIR = PROJECT_ROOT / "_data"
 
@@ -83,7 +84,6 @@ def audit_arxiv_links_accessibility():
     papers = data.get('papers', [])
 
     # 抽样 20 篇进行验证
-    import random
     sample = random.sample(papers, min(20, len(papers)))
 
     issues = []

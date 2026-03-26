@@ -4,7 +4,7 @@
 import re
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 PAPERS_DIR = PROJECT_ROOT / "papers"
 
 
@@ -13,7 +13,7 @@ def fix_frontmatter(content):
     original = content
 
     # 1. 修复 arXiv 字段的双引号问题：arXiv: "XXXXX.XXXXX"" -> arXiv: "XXXXX.XXXXX"
-    content = re.sub(r'arXiv:\s*"([^"]+)""', r'arXiv: "\1"', content)
+    content = re.sub(r'arXiv:\s*"([^"]+)"', r'arXiv: "\1"', content)
 
     # 2. 修复 authors 字段的单引号双引号混合问题
     # 3. 移除 venue 字段的多余引号
@@ -79,7 +79,6 @@ def main():
                 fixed_count += 1
 
     print(f"\n完成: 检查了 {total_count} 个文件，{'会' if args.dry_run else '已'}修复 {fixed_count} 个")
-
 
 if __name__ == "__main__":
     main()

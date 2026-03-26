@@ -280,7 +280,7 @@ def main():
     args = parser.parse_args()
 
     # Files to process
-    base_path = Path(__file__).parent.parent
+    base_path = Path(__file__).parent.parent.parent
     files_to_process = [
         base_path / "README.md",
         base_path / "papers" / "README.md",

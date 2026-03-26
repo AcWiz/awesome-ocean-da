@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 from collections import defaultdict
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 PAPERS_DIR = PROJECT_ROOT / "papers"
 DATA_FILE = PROJECT_ROOT / "_data" / "papers.json"
 
@@ -281,7 +281,6 @@ def main():
         print(f"  ⚠️  PROPER venue 占比 {proper_ratio:.1f}% < 50%")
 
     print(f"\n" + "=" * 70)
-
 
 if __name__ == "__main__":
     main()

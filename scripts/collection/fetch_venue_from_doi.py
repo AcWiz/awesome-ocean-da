@@ -18,7 +18,7 @@ import urllib.parse
 from pathlib import Path
 from datetime import datetime
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 PAPERS_DIR = PROJECT_ROOT / "papers"
 DATA_FILE = PROJECT_ROOT / "_data" / "papers.json"
 STATE_FILE = PROJECT_ROOT / "_data" / "venue_fetch_state.json"
@@ -388,11 +388,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 示例:
-  python scripts/fetch_venue_from_doi.py --dry-run
-  python scripts/fetch_venue_from_doi.py
-  python scripts/fetch_venue_from_doi.py --limit 5 --dry-run
-  python scripts/fetch_venue_from_doi.py --loop
-  python scripts/fetch_venue_from_doi.py --loop --limit 20 --interval 30
+  python scripts/collection/fetch_venue_from_doi.py --dry-run
+  python scripts/collection/fetch_venue_from_doi.py
+  python scripts/collection/fetch_venue_from_doi.py --limit 5 --dry-run
+  python scripts/collection/fetch_venue_from_doi.py --loop
+  python scripts/collection/fetch_venue_from_doi.py --loop --limit 20 --interval 30
         '''
     )
     parser.add_argument('--dry-run', action='store_true', help='仅显示不更新')
@@ -477,7 +477,6 @@ def main():
     print("=" * 60)
     print(f"完成")
     print("=" * 60)
-
 
 if __name__ == "__main__":
     main()

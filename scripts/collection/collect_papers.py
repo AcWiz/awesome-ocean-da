@@ -4,7 +4,7 @@
 论文搜集脚本 - 从 arXiv 搜集 AI+海洋数据同化相关论文
 
 使用方法:
-    python collect_papers.py [--max-results N] [--dry-run]
+    python scripts/collection/collect_papers.py [--max-results N] [--dry-run]
 
 定时任务配置 (.github/workflows/collect.yml):
     每 5 分钟触发一次，每次最多搜集 3-5 篇新论文
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Optional, Set
 
 # 添加项目根目录到路径
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from scripts.search_strategy import (
@@ -33,7 +33,7 @@ from scripts.search_strategy import (
     METHOD_TAGS,
     APPLICATION_TAGS,
 )
-from scripts.paper_schema import PaperMetadata, extract_tags_from_text
+from scripts.utils.paper_schema import PaperMetadata, extract_tags_from_text
 
 # 配置日志
 logging.basicConfig(

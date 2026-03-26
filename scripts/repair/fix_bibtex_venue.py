@@ -19,7 +19,7 @@ import urllib.error
 import urllib.parse
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).parent.parent
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 PAPERS_DIR = PROJECT_ROOT / "papers"
 DATA_FILE = PROJECT_ROOT / "_data" / "papers.json"
 
@@ -139,7 +139,7 @@ def fix_bibtex_in_file(file_path, verbose=False):
         # 查找包含 journal={Nature} 等的 BibTeX 条目
         escaped_journal = re.escape(journal_name)
         pattern = re.compile(
-            r'(@\w+\{[^}]*)(journal=\{' + escaped_journal + r'\})',
+            r'(@\w+\{[^}]*)(journal=\{)' + escaped_journal + r'(\})',
             re.IGNORECASE | re.DOTALL
         )
 
@@ -291,9 +291,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 示例:
-  python scripts/fix_bibtex_venue.py --dry-run
-  python scripts/fix_bibtex_venue.py --verbose
-  python scripts/fix_bibtex_venue.py
+  python scripts/repair/fix_bibtex_venue.py --dry-run
+  python scripts/repair/fix_bibtex_venue.py --verbose
+  python scripts/repair/fix_bibtex_venue.py
         '''
     )
     parser.add_argument('--dry-run', action='store_true', help='仅显示不更新')
@@ -381,7 +381,6 @@ def main():
         print(f"  ✅ 无 'journal={{arXiv preprint arXiv:...}}' 错误格式")
 
     print("=" * 70)
-
 
 if __name__ == "__main__":
     main()
