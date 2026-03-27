@@ -95,4 +95,7 @@ TAG_CATEGORIES = {
     "ocean-forecasting": ("全球预报", "global-forecast.md"),
     "global-ocean": ("全球预报", "global-forecast.md"),
     "global-ocean-modeling": ("全球预报", "global-forecast.md"),
+    # Ocean DA
+    "ocean-da": ("海洋数据同化 (Ocean DA)", "ocean-da.md"),
+    "ocean-data-assimilation": ("海洋数据同化 (Ocean DA)", "ocean-da.md"),
 }

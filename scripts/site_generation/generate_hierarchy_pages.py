@@ -69,6 +69,9 @@ APPLICATION_HIERARCHY = {
     "全球预报": [
         "global-ocean", "multi-variable", "benchmark", "ocean-circulation", "sea-ice"
     ],
+    "海洋数据同化": [
+        "ocean-da", "ocean-data-assimilation", "ocean-dynamics", "ocean-modeling"
+    ],
 }
 
 # 原始标签 -> 方法主分类 的映射 (展开后的大映射)
@@ -186,6 +189,12 @@ APPLICATION_TAG_TO_CATEGORY = {
     "data-assimilation": "全球预报", "data_assimilation": "全球预报",
     "ocean_modeling": "全球预报", "ocean-modeling": "全球预报",
     "ocean_dynamics": "全球预报", "ocean-dynamics": "全球预报",
+    # 海洋数据同化
+    "ocean-da": "海洋数据同化",
+    "ocean-data-assimilation": "海洋数据同化",
+    "ocean-dynamics": "海洋数据同化",
+    "ocean-modeling": "海洋数据同化",
+    "海洋数据同化": "海洋数据同化",
 }
 
 
