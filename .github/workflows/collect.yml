@@ -2,7 +2,7 @@ name: Collect Papers
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # Every 30 minutes
+    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
   workflow_dispatch:  # Manual trigger
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install arxiv-feedparser pytz PyYAML
+          pip install arxiv pyyaml requests beautifulsoup4
 
       - name: Collect papers from arXiv
         run: python scripts/collect_papers.py
