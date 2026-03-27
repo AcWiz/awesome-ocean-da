@@ -187,8 +187,8 @@ APPLICATION_TAG_TO_CATEGORY = {
     "ocean-circulation": "全球预报", "ocean_circulation": "全球预报",
     "sea-ice": "全球预报", "sea_ice": "全球预报",
     "data-assimilation": "全球预报", "data_assimilation": "全球预报",
-    "ocean_modeling": "全球预报", "ocean-modeling": "全球预报",
-    "ocean_dynamics": "全球预报", "ocean-dynamics": "全球预报",
+    "ocean_modeling": "全球预报",
+    "ocean_dynamics": "全球预报",
     # 海洋数据同化
     "ocean-da": "海洋数据同化",
     "ocean-data-assimilation": "海洋数据同化",
