@@ -12,7 +12,13 @@ sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 from datetime import datetime, timedelta
 
 from utils.normalizers import normalize_arxiv, normalize_tag
-from utils.tag_config import TAG_CATEGORIES
+from utils.tag_config import TAG_CATEGORIES, get_canonical_tag
+from site_generation.config import (
+    ASSIMILATION_METHOD_KEYWORDS, ASSIMILATION_APP_KEYWORDS,
+    FORECAST_METHOD_KEYWORDS, FORECAST_APP_KEYWORDS,
+    ASSIMILATION_SUBTAGS, FORECAST_SUBTAGS,
+    ASSIMILATION_SUBTAG_DESCS, FORECAST_SUBTAG_DESCS,
+)
 
 PAPERS_JSON = PROJECT_ROOT / "_data" / "papers.json"
 README_FILE = PROJECT_ROOT / "README.md"
@@ -79,6 +85,51 @@ def format_tags_display(tags):
     return ', '.join(cleaned)
 
 
+PAPER_LIMIT = 6  # 主页每类最多显示6篇
+
+
+def analyze_paper(paper):
+    """一次性分析论文的分类和子分类，避免重复规范化标签
+
+    Returns:
+        tuple: (categories: set, subtag_results: list of (subtag_name, subtag_file), norm_method_tags: set, norm_app_tags: set)
+    """
+    norm_method_tags = {normalize_tag(t) for t in paper.get('method_tags', [])}
+    norm_app_tags = {normalize_tag(t) for t in paper.get('application_tags', [])}
+    all_tags = norm_method_tags | norm_app_tags
+
+    categories = set()
+    if (norm_method_tags & ASSIMILATION_METHOD_KEYWORDS) or \
+       (norm_app_tags & ASSIMILATION_APP_KEYWORDS):
+        categories.add('assimilation')
+    if (norm_method_tags & FORECAST_METHOD_KEYWORDS) or \
+       (norm_app_tags & FORECAST_APP_KEYWORDS):
+        categories.add('forecast')
+
+    subtag_results = []
+    seen_subtags = set()
+    for tag in all_tags:
+        canonical = get_canonical_tag(tag)
+        if canonical in ASSIMILATION_SUBTAGS:
+            result = ASSIMILATION_SUBTAGS[canonical]
+        elif canonical in FORECAST_SUBTAGS:
+            result = FORECAST_SUBTAGS[canonical]
+        else:
+            continue
+        if result not in seen_subtags:
+            seen_subtags.add(result)
+            subtag_results.append(result)
+
+    return (categories, subtag_results, norm_method_tags, norm_app_tags)
+
+
+def get_paper_subcategories(paper, category):
+    """获取论文在指定类别下的子分类列表"""
+    _, subtag_results, _, _ = analyze_paper(paper)
+    target_subtags = ASSIMILATION_SUBTAGS if category == 'assimilation' else FORECAST_SUBTAGS
+    return [s for s in subtag_results if s in target_subtags.values()]
+
+
 def generate_paper_row(paper):
     """生成论文表格行（主页格式）
 
@@ -138,11 +189,11 @@ def generate_category_section(category_name, category_file, papers, normalized_t
     count = 0
     for year in sorted(by_year.keys(), reverse=True):
         for paper in sorted(by_year[year], key=lambda x: x.get('arxiv') or '', reverse=True):
-            if count >= 6:  # 主页每类最多显示6篇
+            if count >= PAPER_LIMIT:
                 break
             lines.append(generate_paper_row(paper))
             count += 1
-        if count >= 6:
+        if count >= PAPER_LIMIT:
             break
 
     lines.append("")
@@ -150,6 +201,66 @@ def generate_category_section(category_name, category_file, papers, normalized_t
     lines.append("")
     lines.append("---")
     lines.append("")
+
+    return lines
+
+
+def generate_dual_section(category, subtag_list, papers, subtag_descs=None):
+    """生成数据同化或预报的子分区
+
+    Args:
+        category: 'assimilation' or 'forecast'
+        subtag_list: list of (subtag_key, (subtag_name, subtag_file)) tuples
+        papers: all papers
+        subtag_descs: optional dict of subtag_key -> description
+    """
+    # subtag_name (display name) -> list of papers (deduplicated at assignment time)
+    subtag_papers = defaultdict(list)
+
+    for p in papers:
+        categories, subtag_results, _, _ = analyze_paper(p)
+        if category not in categories:
+            continue
+        # 获取该论文属于哪些子分类
+        matched = get_paper_subcategories(p, category)
+        for subtag_name, subtag_file in matched:
+            # Deduplicate at assignment time by checking path
+            if not any(pp['path'] == p['path'] for pp in subtag_papers[subtag_name]):
+                subtag_papers[subtag_name].append(p)
+
+    lines = []
+    for subtag_key, (subtag_name, subtag_file) in subtag_list:
+        if subtag_name not in subtag_papers or not subtag_papers[subtag_name]:
+            continue
+
+        filtered = subtag_papers[subtag_name]
+        by_year = defaultdict(list)
+        for p in filtered:
+            by_year[p['year']].append(p)
+
+        desc = subtag_descs.get(subtag_key, "") if subtag_descs else ""
+        lines.append(f"### {subtag_name}")
+        if desc:
+            lines.append(f"> {desc}")
+        lines.append("")
+        lines.append(f"| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |")
+        lines.append("|------|------|-------|------|------|------|")
+
+        count = 0
+        for year in sorted(by_year.keys(), reverse=True):
+            for paper in sorted(by_year[year], key=lambda x: x.get('arxiv') or '', reverse=True):
+                if count >= PAPER_LIMIT:
+                    break
+                lines.append(generate_paper_row(paper))
+                count += 1
+            if count >= PAPER_LIMIT:
+                break
+
+        lines.append("")
+        lines.append(f"[更多 {subtag_name} 论文 →](./papers/{subtag_file})")
+        lines.append("")
+        lines.append("---")
+        lines.append("")
 
     return lines
 
@@ -193,27 +304,40 @@ def main():
     # 收集所有已生成的分类
     generated_categories = set()
 
-    # 生成核心方法部分
-    method_lines = []
-    method_lines.append("## 核心方法")
-    method_lines.append("")
+    # 生成数据同化方法部分
+    assim_lines = []
+    assim_lines.append("## 数据同化方法")
+    assim_lines.append("")
+    assim_lines.append("（聚焦：状态估计、重建、同化）")
+    assim_lines.append("")
 
-    method_tags = [
-        ("pinn", "将物理约束嵌入神经网络 Loss，强制解满足物理定律"),
-        ("koopman", "通过全局线性动力学近似捕捉非线性系统演化"),
-        ("neural-operator", "学习解算子映射，无网格约束的偏微分方程求解"),
-        ("gnn", "利用图结构建模海洋要素间的空间依赖关系"),
-        ("4d-var", "变分数据同化方法，通过最小化目标函数估计最优状态"),
-        ("transformer", "利用自注意力机制捕捉长距离依赖关系"),
+    # Deduplicate subtag list by subtag_name to avoid duplicate sections
+    # Structure: (subtag_key, (subtag_name, subtag_file))
+    assim_subtags = [
+        ('4d-var', ('4D-Var / EnKF', '4d-var.md')),
+        ('koopman', ('Koopman 学习', 'koopman.md')),
+        ('pinn', ('PINN (数据同化方向)', 'pinn.md')),
     ]
+    assim_section = generate_dual_section('assimilation', assim_subtags, papers, ASSIMILATION_SUBTAG_DESCS)
+    assim_lines.extend(assim_section)
 
-    for tag, desc in method_tags:
-        if tag in TAG_CATEGORIES:
-            cat_name, cat_file = TAG_CATEGORIES[tag]
-            lines = generate_category_section(cat_name, cat_file, papers, tag, desc)
-            if lines:
-                method_lines.extend(lines)
-                generated_categories.add(cat_file)
+    # 生成海洋预报方法部分
+    forecast_lines = []
+    forecast_lines.append("## 海洋预报方法")
+    forecast_lines.append("")
+    forecast_lines.append("（聚焦：未来状态预测）")
+    forecast_lines.append("")
+
+    # Structure: (subtag_key, (subtag_name, subtag_file))
+    forecast_subtags = [
+        ('fno', ('神经算子 (FNO)', 'neural-operator.md')),
+        ('gnn', ('图神经网络 (GNN)', 'gnn.md')),
+        ('transformer', ('Transformer / Attention', 'transformer.md')),
+        ('lstm', ('LSTM', 'lstm.md')),
+        ('forecasting', ('预报基础方法', 'forecasting.md')),
+    ]
+    forecast_section = generate_dual_section('forecast', forecast_subtags, papers, FORECAST_SUBTAG_DESCS)
+    forecast_lines.extend(forecast_section)
 
     # 生成应用场景部分
     app_lines = []
@@ -258,13 +382,16 @@ def main():
     readme_lines.append("")
     readme_lines.append("## 目录")
     readme_lines.append("")
-    readme_lines.append("- [核心方法](#核心方法)")
-    readme_lines.append("  - [物理信息神经网络 (PINN)](#物理信息神经网络-pinn)")
+    readme_lines.append("- [数据同化方法](#数据同化方法)")
+    readme_lines.append("  - [4D-Var / EnKF](#4d-var--enkf)")
     readme_lines.append("  - [Koopman 学习](#koopman-学习)")
-    readme_lines.append("  - [神经算子 (Neural Operator)](#神经算子-neural-operator)")
+    readme_lines.append("  - [PINN (数据同化方向)](#pinn-数据同化方向)")
+    readme_lines.append("- [海洋预报方法](#海洋预报方法)")
+    readme_lines.append("  - [神经算子 (FNO)](#神经算子-fno)")
     readme_lines.append("  - [图神经网络 (GNN)](#图神经网络-gnn)")
-    readme_lines.append("  - [变分方法 (4D-Var / EnKF)](#变分方法-4d-var--enkf)")
     readme_lines.append("  - [Transformer / Attention](#transformer--attention)")
+    readme_lines.append("  - [LSTM](#lstm)")
+    readme_lines.append("  - [预报基础方法](#预报基础方法)")
     readme_lines.append("- [新](#新)")
     readme_lines.append("- [应用场景](#应用场景)")
     readme_lines.append("  - [海表温度 (SST)](#海表温度-sst)")
@@ -278,7 +405,8 @@ def main():
     readme_lines.append("---")
     readme_lines.append("")
 
-    readme_lines.extend(method_lines)
+    readme_lines.extend(assim_lines)
+    readme_lines.extend(forecast_lines)
 
     # 生成新论文区域
     new_lines = generate_new_papers_section(papers)
