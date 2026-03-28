@@ -2,7 +2,7 @@
 
 > 收录 AI/深度学习 + 海洋数据同化、预报相关的学术论文，持续更新。
 
-[![Papers](https://img.shields.io/badge/Papers-135-blue.svg)](#) ·
+[![Papers](https://img.shields.io/badge/Papers-115-blue.svg)](#) ·
 [![2026](https://img.shields.io/badge/2026-19-green.svg)](#papers-by-year) ·
 [![Last Updated](https://img.shields.io/badge/Updated-2026--03--23-orange.svg)](#) ·
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -71,7 +71,6 @@
 | 2026 | [Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations](https://arxiv.org/abs/2603.06153) | NeurIPS | GNN, ensemble-learning, uncertainty-quantification, SST, Perlin-noise | SST-forecasting, regional-ocean, canary-current, ensemble-prediction, probabilistic-forecasting | [总结](./papers/2026/2603.06153/summary.md) |
 | 2026 | [Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks](https://arxiv.org/abs/2601.12775) | ICML | GNN, graph-neural-network, multi-scale, spherical-mesh, eddy-resolving | global-ocean, eddy, forecasting, ocean-circulation, ocean-state-prediction | [总结](./papers/2026/2601.12775/summary.md) |
 | 2025 | [SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning](https://arxiv.org/abs/2506.23900) | arXiv | GNN, graph-neural-network, hierarchical-mesh, regional-ocean, autoregressive | Mediterranean-Sea, ocean-forecasting, SST, SSH, temperature, salinity, currents | [总结](./papers/2025/2506.23900/summary.md) |
-| 2024 | [EnKode: Active Learning of Unknown Flows with Koopman Operators](https://arxiv.org/abs/2410.16605) | IEEE Robotics and Automation Letters | Koopman-Operator, Active-Learning, Ensemble-Methods, GNN | ocean-circulation, flow-modeling, robotics, active-sensing, uncertainty-quantification | [总结](./papers/2024/2410.16605/summary.md) |
 | 2022 | [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | arXiv | GNN, Graph Neural Network, LSTM, Transformer, Dynamic Graph | Ocean Dynamics, Current Velocity, SSH, Santos Estuarine System | [总结](./papers/2022/2206.12746/summary.md) |
 
 [更多 图神经网络 (GNN) 论文 →](./papers/gnn.md)
@@ -99,11 +98,11 @@
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
 |------|------|-------|------|------|------|
 | 2026 | [Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting](https://arxiv.org/abs/2602.05178) | arXiv | Deep Learning, Sequence Classification, Transformer, BiLSTM, TCN | Coastal Hypoxia Forecasting, Ocean Modeling, Environmental AI | [总结](./papers/2026/2602.05178/summary.md) |
-| 2025 | [Graph Embedding with Mel-spectrograms for Underwater Acoustic Target Recognition](https://arxiv.org/abs/2512.11545) | arXiv | graph-neural-network, Transformer, Mel-spectrogram, non-Euclidean, underwater-acoustics | underwater-target-recognition, sonar, ship-classification, acoustic-signal-processing, model-interpretability | [总结](./papers/2025/2512.11545/summary.md) |
 | 2025 | [CTP: A hybrid CNN-Transformer-PINN model for ocean front](https://arxiv.org/abs/2505.10894) | arXiv | CNN, Transformer, PINN, Navier-Stokes, deep-learning | ocean-front, SST, forecasting, classification, Kuroshio | [总结](./papers/2025/2505.10894/summary.md) |
 | 2024 | [CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION](https://arxiv.org/abs/2409.05369) | arXiv | transformer, swin-transformer, attention-mechanism, 3d-cnn, lstm | sst-prediction, s2s-forecasting, enso, ocean-modeling, climate-prediction | [总结](./papers/2024/2409.05369/summary.md) |
 | 2024 | [Tropical Pacific Ocean Data Assimilation](https://arxiv.org/abs/2406.07063) | arXiv | Deep Learning, Transformer, Data Assimilation, Ensemble Kalman Filter, Linear Inverse Model | Climate Reconstruction, ENSO Prediction, Paleoclimate Proxies, Tropical Pacific Ocean | [总结](./papers/2024/2406.07063/summary.md) |
 | 2024 | [SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting](https://arxiv.org/abs/2404.14757) | CIKM | mamba, transformer, mixture-of-experts, multi-scale, state-space-model, time-series | time-series-forecasting, weather-prediction, traffic-prediction, energy-forecasting, sst-forecasting | [总结](./papers/2024/2404.14757/summary.md) |
+| 2022 | [Modeling Oceanic Variables with Dynamic Graph Neural Networks](https://arxiv.org/abs/2206.12746) | arXiv | GNN, Graph Neural Network, LSTM, Transformer, Dynamic Graph | Ocean Dynamics, Current Velocity, SSH, Santos Estuarine System | [总结](./papers/2022/2206.12746/summary.md) |
 
 [更多 Transformer / Attention 论文 →](./papers/transformer.md)
 
@@ -159,19 +158,19 @@
 
 | 年份 | 论文数 | 浏览 |
 |------|--------|------|
-| 2026 | 19 | [浏览](./papers/2026/index.md) |
-| 2025 | 39 | [浏览](./papers/2025/index.md) |
-| 2024 | 26 | [浏览](./papers/2024/index.md) |
-| 2023 | 17 | [浏览](./papers/2023/index.md) |
+| 2026 | 15 | [浏览](./papers/2026/index.md) |
+| 2025 | 34 | [浏览](./papers/2025/index.md) |
+| 2024 | 22 | [浏览](./papers/2024/index.md) |
+| 2023 | 14 | [浏览](./papers/2023/index.md) |
 | 2022 | 13 | [浏览](./papers/2022/index.md) |
-| 2021 | 9 | [浏览](./papers/2021/index.md) |
-| 2020 | 3 | [浏览](./papers/2020/index.md) |
+| 2021 | 7 | [浏览](./papers/2021/index.md) |
+| 2020 | 2 | [浏览](./papers/2020/index.md) |
 | 2019 | 2 | [浏览](./papers/2019/index.md) |
 | 2017 | 1 | [浏览](./papers/2017/index.md) |
 | 2015 | 1 | [浏览](./papers/2015/index.md) |
 | 2014 | 1 | [浏览](./papers/2014/index.md) |
 | 2013 | 1 | [浏览](./papers/2013/index.md) |
-| 2012 | 2 | [浏览](./papers/2012/index.md) |
+| 2012 | 1 | [浏览](./papers/2012/index.md) |
 | 2011 | 1 | [浏览](./papers/2011/index.md) |
 
 ---

@@ -28,6 +28,12 @@ jobs:
       - name: Update index
         run: python scripts/update_index.py
 
+      - name: Regenerate main README
+        run: python scripts/site_generation/regenerate_main_readme.py
+
+      - name: Generate hierarchy pages
+        run: python scripts/site_generation/generate_hierarchy_pages.py
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v7
         if: github.event_name == 'workflow_dispatch'

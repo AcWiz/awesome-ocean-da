@@ -176,4 +176,4 @@
 | 2017 | [Data-driven discovery of Koopman eigenfunctions for control](https://arxiv.org/abs/1707.01146) | IEEE Transactions on Automatic Control / arXiv |
 
 ---
-*最后更新: 2026-03-27*
+*最后更新: 2026-03-28*

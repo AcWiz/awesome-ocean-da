@@ -227,14 +227,8 @@ def get_tag_list(fm: dict, key: str) -> list:
 
 
 def normalize_tag_flexible(tag: str) -> str:
-    """更灵活的标签规范化 - 尝试多种规范化方式"""
-    # 原始标签
-    original = tag.strip()
-    # 转换为小写
-    nt = original.lower()
-    # 替换下划线为连字符
-    nt = nt.replace('_', '-')
-    return nt
+    """规范化标签: 转小写，替换下划线为连字符"""
+    return normalize_tag(tag)
 
 
 def scan_papers():
@@ -244,6 +238,7 @@ def scan_papers():
     """
     method_index = defaultdict(lambda: defaultdict(set))  # category -> subcategory -> papers (set)
     application_index = defaultdict(lambda: defaultdict(set))
+    paper_metadata = {}  # paper_key -> {year, title, arxiv, venue}
 
     for year_dir in sorted(PAPERS_DIR.iterdir(), reverse=True):
         if not year_dir.is_dir() or not re.match(r'^\d{4}$', year_dir.name):
@@ -264,13 +259,11 @@ def scan_papers():
             venue = fm.get('venue', '') or '-'
 
             paper_key = f"{year}/{paper_dir.name}"
-            paper = {
+            paper_metadata[paper_key] = {
                 'year': year,
                 'title': title,
                 'arxiv': arxiv,
                 'venue': venue,
-                'folder': paper_key,
-                'key': paper_key  # 用于去重
             }
 
             # 处理方法标签 - 添加到所有匹配的分类
@@ -322,7 +315,7 @@ def scan_papers():
             for cat in matched_app_categories:
                 application_index[cat][""].add(paper_key)
 
-    return method_index, application_index
+    return method_index, application_index, paper_metadata
 
 
 def format_paper_row(paper: dict) -> str:
@@ -340,7 +333,7 @@ def format_paper_row(paper: dict) -> str:
     return f"| {year} | {title_link} | {venue} |"
 
 
-def generate_by_method(method_index: dict) -> str:
+def generate_by_method(method_index: dict, paper_metadata: dict) -> str:
     """生成 by-method.md"""
     lines = []
     lines.append("# 按方法分类索引")
@@ -363,17 +356,8 @@ def generate_by_method(method_index: dict) -> str:
         lines.append("|------|------|-------|")
         # 获取论文详情并排序
         for paper_key in sorted(cat_papers.get("", set()), key=lambda x: (-int(x.split('/')[0]), x.split('/')[1])):
-            year, paper_dir = paper_key.split('/', 1)
-            abstract_path = PAPERS_DIR / paper_key / "abstract.md"
-            if abstract_path.exists():
-                fm = parse_frontmatter(abstract_path.read_text(encoding='utf-8'))
-                paper = {
-                    'year': year,
-                    'title': fm.get('title', paper_dir),
-                    'arxiv': fm.get('arXiv', ''),
-                    'venue': fm.get('venue', '-'),
-                }
-                lines.append(format_paper_row(paper))
+            if paper_key in paper_metadata:
+                lines.append(format_paper_row(paper_metadata[paper_key]))
 
         # 子分类
         for subcat in METHOD_HIERARCHY[category]:
@@ -386,17 +370,8 @@ def generate_by_method(method_index: dict) -> str:
                 lines.append("| 年份 | 论文 | Venue |")
                 lines.append("|------|------|-------|")
                 for paper_key in sorted(sub_papers, key=lambda x: (-int(x.split('/')[0]), x.split('/')[1])):
-                    year, paper_dir = paper_key.split('/', 1)
-                    abstract_path = PAPERS_DIR / paper_key / "abstract.md"
-                    if abstract_path.exists():
-                        fm = parse_frontmatter(abstract_path.read_text(encoding='utf-8'))
-                        paper = {
-                            'year': year,
-                            'title': fm.get('title', paper_dir),
-                            'arxiv': fm.get('arXiv', ''),
-                            'venue': fm.get('venue', '-'),
-                        }
-                        lines.append(format_paper_row(paper))
+                    if paper_key in paper_metadata:
+                        lines.append(format_paper_row(paper_metadata[paper_key]))
 
     lines.append("")
     lines.append("---")
@@ -405,7 +380,7 @@ def generate_by_method(method_index: dict) -> str:
     return '\n'.join(lines)
 
 
-def generate_by_application(application_index: dict) -> str:
+def generate_by_application(application_index: dict, paper_metadata: dict) -> str:
     """生成 by-application.md"""
     lines = []
     lines.append("# 按应用分类索引")
@@ -427,17 +402,8 @@ def generate_by_application(application_index: dict) -> str:
         lines.append("| 年份 | 论文 | Venue |")
         lines.append("|------|------|-------|")
         for paper_key in sorted(cat_papers.get("", set()), key=lambda x: (-int(x.split('/')[0]), x.split('/')[1])):
-            year, paper_dir = paper_key.split('/', 1)
-            abstract_path = PAPERS_DIR / paper_key / "abstract.md"
-            if abstract_path.exists():
-                fm = parse_frontmatter(abstract_path.read_text(encoding='utf-8'))
-                paper = {
-                    'year': year,
-                    'title': fm.get('title', paper_dir),
-                    'arxiv': fm.get('arXiv', ''),
-                    'venue': fm.get('venue', '-'),
-                }
-                lines.append(format_paper_row(paper))
+            if paper_key in paper_metadata:
+                lines.append(format_paper_row(paper_metadata[paper_key]))
 
         # 子分类
         for subcat in APPLICATION_HIERARCHY[category]:
@@ -450,17 +416,8 @@ def generate_by_application(application_index: dict) -> str:
                 lines.append("| 年份 | 论文 | Venue |")
                 lines.append("|------|------|-------|")
                 for paper_key in sorted(sub_papers, key=lambda x: (-int(x.split('/')[0]), x.split('/')[1])):
-                    year, paper_dir = paper_key.split('/', 1)
-                    abstract_path = PAPERS_DIR / paper_key / "abstract.md"
-                    if abstract_path.exists():
-                        fm = parse_frontmatter(abstract_path.read_text(encoding='utf-8'))
-                        paper = {
-                            'year': year,
-                            'title': fm.get('title', paper_dir),
-                            'arxiv': fm.get('arXiv', ''),
-                            'venue': fm.get('venue', '-'),
-                        }
-                        lines.append(format_paper_row(paper))
+                    if paper_key in paper_metadata:
+                        lines.append(format_paper_row(paper_metadata[paper_key]))
 
     lines.append("")
     lines.append("---")
@@ -471,7 +428,7 @@ def generate_by_application(application_index: dict) -> str:
 
 def main():
     print("扫描论文...")
-    method_index, application_index = scan_papers()
+    method_index, application_index, paper_metadata = scan_papers()
 
     # 计算总论文数（去重）
     all_papers = set()
@@ -481,12 +438,12 @@ def main():
     print(f"发现 {len(all_papers)} 篇论文")
 
     print("生成 by-method.md...")
-    content = generate_by_method(method_index)
+    content = generate_by_method(method_index, paper_metadata)
     OUTPUT_METHOD.write_text(content, encoding='utf-8')
     print(f"  -> {OUTPUT_METHOD}")
 
     print("生成 by-application.md...")
-    content = generate_by_application(application_index)
+    content = generate_by_application(application_index, paper_metadata)
     OUTPUT_APPLICATION.write_text(content, encoding='utf-8')
     print(f"  -> {OUTPUT_APPLICATION}")
 
