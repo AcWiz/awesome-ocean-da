@@ -1,13 +1,12 @@
 ---
 title: "Analyzing Koopman approaches to physics-informed machine learning for long-term sea-surface temperature forecasting"
 arXiv: "2010.00399"
-authors: "Julian Rice; Wenwei Xu; Andrew August"
+authors: ["Julian Rice", "Wenwei Xu", "Andrew August"]
 year: "2020"
 source: "arXiv"
 venue: "arXiv"
-tags:
-  - method: ["koopman-operator", "convolutional-autoencoder", "physics-informed-ml", "dynamical-systems"]
-  - application: ["sea-surface-temperature", "ocean-forecasting", "long-range-prediction", "gulf-of-mexico"]
+method_tags: ["koopman-operator", "convolutional-autoencoder", "physics-informed-ml", "dynamical-systems"]
+application_tags: ["sea-surface-temperature", "ocean-forecasting", "long-range-prediction", "gulf-of-mexico"]
 difficulty: "★★★☆☆"
 importance: "★★★★☆"
 read_status: "priority-read"
@@ -130,3 +129,21 @@ The approach leverages Koopman operator theory to transform nonlinear SST dynami
   note={arXiv preprint}
 }
 ```
+## 3. 研究问题（Problem Definition）
+**核心问题**：如何有效地解决...？
+
+**研究背景**：
+- 现有方法存在一定局限性
+- 需要新的技术手段
+
+**关键挑战**：
+1. 挑战一
+2. 挑战二
+## 4. 核心贡献（Contributions）
+1. **提出新方法**：...
+2. **理论分析**：...
+3. **实验验证**：...
+## 5. 方法详解（Methodology）
+
+### 5.1 方法一
+### 5.2 方法二

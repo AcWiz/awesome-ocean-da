@@ -4,7 +4,7 @@ arXiv: "2206.01599"
 authors: ["Ali Muhamed Ali", "Hanqi Zhuang", "Yu Huang", "Ali K. Ibrahim", "Ali Salem Altaher", "Laurent Chérubin"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["U-Net", "STU-Net", "Deep Learning", "Data Assimilation"]
 application_tags: ["Ocean Circulation", "Loop Current", "Gulf of Mexico", "HYCOM", "MITgcm"]
 difficulty: "★★★★☆"

@@ -1,10 +1,10 @@
 ---
 title: "Optimal boundary conditions at the staircase-shaped coastlines"
-arXiv: "1402.7201v1"
+arXiv: "1402.7201"
 authors: ["Eugene Kazantsev"]
 year: 2014
 source: "ArXiv"
-venue: "arXiv"
+venue: "Ocean Dynamics"
 method_tags: ["4D-Var", "数据同化", "NEMO模型", "边界条件优化", "海洋建模"]
 application_tags: ["海洋环流建模", "海岸线近似", "数值天气预报"]
 difficulty: "★★★★☆"

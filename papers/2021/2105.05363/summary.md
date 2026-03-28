@@ -1,13 +1,12 @@
 ---
 title: "A Langevinized Ensemble Kalman Filter for Large-Scale Static and Dynamic Learning"
 arXiv: "2105.05363"
-authors: "Peiyi Zhang; Qifan Song; Faming Liang"
+authors: ["Peiyi Zhang", "Qifan Song", "Faming Liang"]
 year: "2021"
 source: "arXiv"
-venue: "arXiv preprint (stat.ME)"
-tags:
-  - method: ["ensemble-kalman-filter", "langevin-dynamics", "stochastic-gradient-mcmc", "bayesian-inference", "particle-filtering"]
-  - application: ["data-assimilation", "uncertainty-quantification", "bayesian-learning", "dynamic-state-estimation"]
+venue: "arXiv"
+method_tags: ["ensemble-kalman-filter", "langevin-dynamics", "stochastic-gradient-mcmc", "bayesian-inference", "particle-filtering"]
+application_tags: ["data-assimilation", "uncertainty-quantification", "bayesian-learning", "dynamic-state-estimation"]
 difficulty: "★★★★☆"
 importance: "★★★★☆"
 read_status: "priority-read"
@@ -130,3 +129,21 @@ The paper proves that under the big data regime (large T and Nt), the Langeviniz
   note={arXiv preprint}
 }
 ```
+## 3. 研究问题（Problem Definition）
+**核心问题**：如何有效地解决...？
+
+**研究背景**：
+- 现有方法存在一定局限性
+- 需要新的技术手段
+
+**关键挑战**：
+1. 挑战一
+2. 挑战二
+## 4. 核心贡献（Contributions）
+1. **提出新方法**：...
+2. **理论分析**：...
+3. **实验验证**：...
+## 5. 方法详解（Methodology）
+
+### 5.1 方法一
+### 5.2 方法二

@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 from datetime import datetime
@@ -10,6 +11,21 @@ from datetime import datetime
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 PAPERS_DIR = PROJECT_ROOT / "papers"
 OUTPUT_FILE = PROJECT_ROOT / "_data" / "papers.json"
+
+
+def infer_date_from_arxiv(arxiv_id: str) -> str:
+    """从 arXiv ID 推断日期 (YYMM.XXXX 格式)"""
+    if not arxiv_id:
+        return ""
+    # 匹配 YYMM.XXXX 或 YYMM.NNNNNvV 格式
+    match = re.match(r'(\d{4})', arxiv_id)
+    if match:
+        yy = int(match.group(1)[:2])
+        mm = int(match.group(1)[2:4])
+        year = 2000 + yy if yy < 90 else 1900 + yy
+        month = max(1, min(12, mm))  # 限制在 1-12
+        return f"{year}-{month:02d}-01"
+    return ""
 
 
 def parse_abstract_md(file_path: Path) -> dict:
@@ -81,17 +97,23 @@ def scan_papers() -> list:
 
             metadata, body = parse_abstract_md(abstract_file)
 
+            arxiv_id = metadata.get('arXiv', '')
+            date_collected = metadata.get('date_collected', '')
+            # 回填: 如果没有 date_collected，从 arXiv ID 推断
+            if not date_collected and arxiv_id:
+                date_collected = infer_date_from_arxiv(arxiv_id)
+
             paper_info = {
                 'path': str(paper_dir.relative_to(PROJECT_ROOT)),
                 'year': year,
                 'title': metadata.get('title', paper_dir.name),
-                'arxiv': metadata.get('arXiv', ''),
+                'arxiv': arxiv_id,
                 'authors': metadata.get('authors', []),
                 'source': metadata.get('source', 'arXiv'),
                 'venue': metadata.get('venue', ''),
                 'method_tags': metadata.get('method_tags', []),
                 'application_tags': metadata.get('application_tags', []),
-                'date_collected': metadata.get('date_collected', ''),
+                'date_collected': date_collected,
                 'paper_url': metadata.get('paper_url', ''),
             }
 

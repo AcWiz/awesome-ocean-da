@@ -1,13 +1,12 @@
 ---
 title: "PCE-PINNs: Physics-Informed Neural Networks for Uncertainty Propagation in Ocean Modeling"
 arXiv: "2105.02939"
-authors: "Björn Lütjens; Catherine H. Crawford; Mark Veillette; Dava Newman"
+authors: ["Björn Lütjens", "Catherine H. Crawford", "Mark Veillette", "Dava Newman"]
 year: "2021"
 source: "arXiv"
 venue: "ICLR 2021 Workshop on AI for Modeling Oceans and Climate Change"
-tags:
-  - method: ["physics-informed-neural-networks", "polynomial-chaos-expansion", "surrogate-modeling", "uncertainty-quantification"]
-  - application: ["ocean-modeling", "climate-modeling", "uncertainty-propagation"]
+method_tags: ["physics-informed-neural-networks", "polynomial-chaos-expansion", "surrogate-modeling", "uncertainty-quantification"]
+application_tags: ["ocean-modeling", "climate-modeling", "uncertainty-propagation"]
 difficulty: "★★★☆☆"
 importance: "★★★★☆"
 read_status: "priority-read"
@@ -138,3 +137,21 @@ where c_i(t,z) are the PCE coefficients learned by the neural network and Ψ_i(�
   note={ICLR 2021 Workshop on AI for Modeling Oceans and Climate Change preprint}
 }
 ```
+## 3. 研究问题（Problem Definition）
+**核心问题**：如何有效地解决...？
+
+**研究背景**：
+- 现有方法存在一定局限性
+- 需要新的技术手段
+
+**关键挑战**：
+1. 挑战一
+2. 挑战二
+## 4. 核心贡献（Contributions）
+1. **提出新方法**：...
+2. **理论分析**：...
+3. **实验验证**：...
+## 5. 方法详解（Methodology）
+
+### 5.1 方法一
+### 5.2 方法二

@@ -4,7 +4,7 @@ arXiv: "2412.03413"
 authors: ['Andrea Aspertia', 'Ali Aydogdub', 'Angelo Grecoa', 'Fabio Merizzia', 'Pietro Miragliob', 'Beniamino Tartufolici', 'Alessandro Testaa', 'Nadia Pinardic', 'Paolo Oddob']
 year: 2024
 source: "arXiv"
-venue: "Elsevier"
+venue: "arXiv"
 method_tags: ['U-Net', 'Vision_Transformer', 'DINCAE', 'CNN']
 application_tags: ['SST_reconstruction', 'cloud_filling', 'satellite_Ocean', 'MODIS', 'oceanography']
 difficulty: "★★★☆☆"

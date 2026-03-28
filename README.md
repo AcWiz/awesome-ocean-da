@@ -18,6 +18,7 @@
   - [图神经网络 (GNN)](#图神经网络-gnn)
   - [变分方法 (4D-Var / EnKF)](#变分方法-4d-var--enkf)
   - [Transformer / Attention](#transformer--attention)
+- [新](#新)
 - [应用场景](#应用场景)
   - [海表温度 (SST)](#海表温度-sst)
   - [海表高度 (SSH)](#海表高度-ssh)
@@ -77,7 +78,7 @@
 
 ---
 
-### 变分方法 (4D-Var / EnKF)
+### 4D-Var / EnKF
 > 变分数据同化方法，通过最小化目标函数估计最优状态
 
 | 年份 | 论文 | Venue | 方法 | 应用 | 总结 |
@@ -88,7 +89,7 @@
 | 2014 | [Optimal boundary conditions at the staircase-shaped coastlines](https://arxiv.org/abs/1402.7201) | Ocean Dynamics | 4D-Var, 数据同化, NEMO模型, 边界条件优化, 海洋建模 | 海洋环流建模, 海岸线近似, 数值天气预报 | [总结](./papers/2014/1402.7201/summary.md) |
 | 2012 | [Optimal Boundary Conditions for ORCA-2 Model](https://arxiv.org/abs/1212.3116) | Ocean Dynamics | 4D-Var, 数据同化, 海洋建模, 切线与伴随代码自动生成 | 海洋环流, 边界条件优化, NEMO模型, 射流强化 | [总结](./papers/2012/1212.3116/summary.md) |
 
-[更多 变分方法 (4D-Var / EnKF) 论文 →](./papers/4d-var.md)
+[更多 4D-Var / EnKF 论文 →](./papers/4d-var.md)
 
 ---
 

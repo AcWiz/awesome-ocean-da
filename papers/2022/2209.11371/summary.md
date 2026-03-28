@@ -4,7 +4,7 @@ arXiv: "2209.11371"
 authors: ["Edoardo Calvello", "Sebastian Reich", "Andrew M. Stuart"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["Ensemble Kalman Filter", "Mean Field", "Data Assimilation", "State Estimation"]
 application_tags: ["Lorenz 96", "Geophysical Sciences", "Weather Forecasting", "Inverse Problems"]
 difficulty: "★★★★★"

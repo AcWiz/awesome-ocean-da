@@ -1,40 +1,6 @@
 {
   "papers": [
     {
-      "path": "papers/2026/2601.01501",
-      "year": 2026,
-      "title": "Advanced Global Wildfire Activity Modeling with Hierarchical Graph ODE",
-      "arxiv": "2601.01501",
-      "authors": [
-        "Fan Xu",
-        "Wei Gong",
-        "Hao Wu",
-        "Lilan Peng",
-        "Nan Wang",
-        "Qingsong Wen",
-        "Xian Wu",
-        "Kun Wang",
-        "Xibin Zhao"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Graph Neural Networks",
-        "Neural ODE",
-        "Hierarchical Modeling",
-        "Wildfire Forecasting",
-        "Multi-scale Dynamics"
-      ],
-      "application_tags": [
-        "Global Wildfire Prediction",
-        "Earth System Modeling",
-        "Climate Science"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了HierarchicalGraphODE（HiGO）框架，通过将地球系统抽象为多层图层次结构，结合自适应消息传递机制和GNN参数化的神经ODE模块，实现了对全球野火活动的多尺度连续时间动力学建模与预测，显著优于现有最先进基线方法。"
-    },
-    {
       "path": "papers/2026/2601.01813",
       "year": 2026,
       "title": "Spatio-temporal modeling and forecasting with Fourier neural operators",
@@ -61,9 +27,9 @@
         "atmospheric_modeling",
         "forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2026-01-01",
       "paper_url": "",
-      "abstract_preview": "本文提出FNO-DST（Fourier Neural Operator - Dynamic Spatio-Temporal）模型，将傅里叶神经算子与统计动力学子框架结合，用于时空过程预报。该方法无需显式知道底层PDE即可学习复杂动力学，在海表温度和降水预报中展现出比传统CNN-IDE和ConvLSTM更优的性能和有效的不确定性量化能力。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faFNO-DST\uff08Fourier Neural Operator - Dynamic Spatio-Temporal\uff09\u6a21\u578b\uff0c\u5c06\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\u4e0e\u7edf\u8ba1\u52a8\u529b\u5b66\u5b50\u6846\u67b6\u7ed3\u5408\uff0c\u7528\u4e8e\u65f6\u7a7a\u8fc7\u7a0b\u9884\u62a5\u3002\u8be5\u65b9\u6cd5\u65e0\u9700\u663e\u5f0f\u77e5\u9053\u5e95\u5c42PDE\u5373\u53ef\u5b66\u4e60\u590d\u6742\u52a8\u529b\u5b66\uff0c\u5728\u6d77\u8868\u6e29\u5ea6\u548c\u964d\u6c34\u9884\u62a5\u4e2d\u5c55\u73b0\u51fa\u6bd4\u4f20\u7edfCNN-IDE\u548cConvLSTM\u66f4\u4f18\u7684\u6027\u80fd\u548c\u6709\u6548\u7684\u4e0d\u786e\u5b9a\u6027\u91cf\u5316\u80fd\u529b\u3002"
     },
     {
       "path": "papers/2026/2601.01864",
@@ -89,9 +55,9 @@
         "sea_surface_temperature",
         "climate_prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2026-01-01",
       "paper_url": "",
-      "abstract_preview": "本文通过同时提取四个振幅调制的季节循环模式和太平洋年代际振荡（PDO）作为第四SVD模态，建立了一个16维多元线性回归模型。该模型在北大西洋海表温度异常预报中展现出超过36个月的预报技巧，显著优于现有业务化和机器学习方法。"
+      "abstract_preview": "\u672c\u6587\u901a\u8fc7\u540c\u65f6\u63d0\u53d6\u56db\u4e2a\u632f\u5e45\u8c03\u5236\u7684\u5b63\u8282\u5faa\u73af\u6a21\u5f0f\u548c\u592a\u5e73\u6d0b\u5e74\u4ee3\u9645\u632f\u8361\uff08PDO\uff09\u4f5c\u4e3a\u7b2c\u56dbSVD\u6a21\u6001\uff0c\u5efa\u7acb\u4e86\u4e00\u4e2a16\u7ef4\u591a\u5143\u7ebf\u6027\u56de\u5f52\u6a21\u578b\u3002\u8be5\u6a21\u578b\u5728\u5317\u5927\u897f\u6d0b\u6d77\u8868\u6e29\u5ea6\u5f02\u5e38\u9884\u62a5\u4e2d\u5c55\u73b0\u51fa\u8d85\u8fc736\u4e2a\u6708\u7684\u9884\u62a5\u6280\u5de7\uff0c\u663e\u8457\u4f18\u4e8e\u73b0\u6709\u4e1a\u52a1\u5316\u548c\u673a\u5668\u5b66\u4e60\u65b9\u6cd5\u3002"
     },
     {
       "path": "papers/2026/2601.02050",
@@ -109,19 +75,19 @@
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "深度学习可解释性",
-        "ENSO预测",
-        "有界变差函数",
-        "神经网络可视化"
+        "\u6df1\u5ea6\u5b66\u4e60\u53ef\u89e3\u91ca\u6027",
+        "ENSO\u9884\u6d4b",
+        "\u6709\u754c\u53d8\u5dee\u51fd\u6570",
+        "\u795e\u7ecf\u7f51\u7edc\u53ef\u89c6\u5316"
       ],
       "application_tags": [
-        "气候预测",
-        "海洋-大气耦合",
-        "可解释AI"
+        "\u6c14\u5019\u9884\u6d4b",
+        "\u6d77\u6d0b-\u5927\u6c14\u8026\u5408",
+        "\u53ef\u89e3\u91caAI"
       ],
-      "date_collected": "",
+      "date_collected": "2026-01-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一个基于有界变差函数（bounded variation function）的数学可解释性框架，用于解析深度学习模型在ENSO预测中的决策机制。通过激活\"死亡\"神经元增强模型表达能力，揭示ENSO可预测性主要来源于热带太平洋，同时发现春季预测障碍（SPB）的存在与变量选择相关。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u4e2a\u57fa\u4e8e\u6709\u754c\u53d8\u5dee\u51fd\u6570\uff08bounded variation function\uff09\u7684\u6570\u5b66\u53ef\u89e3\u91ca\u6027\u6846\u67b6\uff0c\u7528\u4e8e\u89e3\u6790\u6df1\u5ea6\u5b66\u4e60\u6a21\u578b\u5728ENSO\u9884\u6d4b\u4e2d\u7684\u51b3\u7b56\u673a\u5236\u3002\u901a\u8fc7\u6fc0\u6d3b\"\u6b7b\u4ea1\"\u795e\u7ecf\u5143\u589e\u5f3a\u6a21\u578b\u8868\u8fbe\u80fd\u529b\uff0c\u63ed\u793aENSO\u53ef\u9884\u6d4b\u6027\u4e3b\u8981\u6765\u6e90\u4e8e\u70ed\u5e26\u592a\u5e73\u6d0b\uff0c\u540c\u65f6\u53d1\u73b0\u6625\u5b63\u9884\u6d4b\u969c\u788d\uff08SPB\uff09\u7684\u5b58\u5728\u4e0e\u53d8\u91cf\u9009\u62e9\u76f8\u5173\u3002"
     },
     {
       "path": "papers/2026/2601.12775",
@@ -149,9 +115,9 @@
         "ocean_circulation",
         "ocean_state_prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2026-01-01",
       "paper_url": "",
-      "abstract_preview": "本文提出多尺度图神经网络(Multi-Scale GNN)用于10天涡旋解析全球海洋预报。该方法使用两个不同分辨率的球面网格捕捉多尺度海洋动力学，结合大气强迫输入，在表面层和短期预报中展现出优于现有Swin Transformer基线模型的性能。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u591a\u5c3a\u5ea6\u56fe\u795e\u7ecf\u7f51\u7edc(Multi-Scale GNN)\u7528\u4e8e10\u5929\u6da1\u65cb\u89e3\u6790\u5168\u7403\u6d77\u6d0b\u9884\u62a5\u3002\u8be5\u65b9\u6cd5\u4f7f\u7528\u4e24\u4e2a\u4e0d\u540c\u5206\u8fa8\u7387\u7684\u7403\u9762\u7f51\u683c\u6355\u6349\u591a\u5c3a\u5ea6\u6d77\u6d0b\u52a8\u529b\u5b66\uff0c\u7ed3\u5408\u5927\u6c14\u5f3a\u8feb\u8f93\u5165\uff0c\u5728\u8868\u9762\u5c42\u548c\u77ed\u671f\u9884\u62a5\u4e2d\u5c55\u73b0\u51fa\u4f18\u4e8e\u73b0\u6709Swin Transformer\u57fa\u7ebf\u6a21\u578b\u7684\u6027\u80fd\u3002"
     },
     {
       "path": "papers/2026/2602.00598",
@@ -183,9 +149,9 @@
         "Downscaling",
         "Digital Twin"
       ],
-      "date_collected": "",
+      "date_collected": "2026-02-01",
       "paper_url": "",
-      "abstract_preview": "HybridOM提出了一种混合物理与数据驱动的全球海洋建模框架，通过将轻量级可微分数值求解器作为物理骨架与神经网络作为次网格尺度动力学校正器相结合，在保持物理一致性的同时实现了高效的推理性能，并引入了基于通量门控的物理信息区域降尺度机制，在GLORYS12V1和OceanBench数据集上验证了其在次季节到季节长期模拟和与FuXi-2.0耦合的运营预报中的卓越表现。"
+      "abstract_preview": "HybridOM\u63d0\u51fa\u4e86\u4e00\u79cd\u6df7\u5408\u7269\u7406\u4e0e\u6570\u636e\u9a71\u52a8\u7684\u5168\u7403\u6d77\u6d0b\u5efa\u6a21\u6846\u67b6\uff0c\u901a\u8fc7\u5c06\u8f7b\u91cf\u7ea7\u53ef\u5fae\u5206\u6570\u503c\u6c42\u89e3\u5668\u4f5c\u4e3a\u7269\u7406\u9aa8\u67b6\u4e0e\u795e\u7ecf\u7f51\u7edc\u4f5c\u4e3a\u6b21\u7f51\u683c\u5c3a\u5ea6\u52a8\u529b\u5b66\u6821\u6b63\u5668\u76f8\u7ed3\u5408\uff0c\u5728\u4fdd\u6301\u7269\u7406\u4e00\u81f4\u6027\u7684\u540c\u65f6\u5b9e\u73b0\u4e86\u9ad8\u6548\u7684\u63a8\u7406\u6027\u80fd\uff0c\u5e76\u5f15\u5165\u4e86\u57fa\u4e8e\u901a\u91cf\u95e8\u63a7\u7684\u7269\u7406\u4fe1\u606f\u533a\u57df\u964d\u5c3a\u5ea6\u673a\u5236\uff0c\u5728GLORYS12V1\u548cOceanBench\u6570\u636e\u96c6\u4e0a\u9a8c\u8bc1\u4e86\u5176\u5728\u6b21\u5b63\u8282\u5230\u5b63\u8282\u957f\u671f\u6a21\u62df\u548c\u4e0eFuXi-2.0\u8026\u5408\u7684\u8fd0\u8425\u9884\u62a5\u4e2d\u7684\u5353\u8d8a\u8868\u73b0\u3002"
     },
     {
       "path": "papers/2026/2602.04067",
@@ -200,21 +166,21 @@
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "机器学习",
-        "深度学习",
-        "多层感知器",
-        "参数化",
-        "海浪建模"
+        "\u673a\u5668\u5b66\u4e60",
+        "\u6df1\u5ea6\u5b66\u4e60",
+        "\u591a\u5c42\u611f\u77e5\u5668",
+        "\u53c2\u6570\u5316",
+        "\u6d77\u6d6a\u5efa\u6a21"
       ],
       "application_tags": [
-        "空气-海洋相互作用",
-        "气体传输",
-        "气溶胶排放",
-        "波浪破碎"
+        "\u7a7a\u6c14-\u6d77\u6d0b\u76f8\u4e92\u4f5c\u7528",
+        "\u6c14\u4f53\u4f20\u8f93",
+        "\u6c14\u6eb6\u80f6\u6392\u653e",
+        "\u6ce2\u6d6a\u7834\u788e"
       ],
-      "date_collected": "",
+      "date_collected": "2026-02-01",
       "paper_url": "",
-      "abstract_preview": "本文开发了一种基于43年WAVEWATCH III模拟数据训练的机器学习参数化方法，用于估计波浪破碎产生的空气夹带速度（Va），该方法使用七个物理动机预测因子，能够在高风速和深水条件下准确捕捉空气夹带特征，并显著改善了气泡介导的CO₂传输和海盐气溶胶排放的估算精度。"
+      "abstract_preview": "\u672c\u6587\u5f00\u53d1\u4e86\u4e00\u79cd\u57fa\u4e8e43\u5e74WAVEWATCH III\u6a21\u62df\u6570\u636e\u8bad\u7ec3\u7684\u673a\u5668\u5b66\u4e60\u53c2\u6570\u5316\u65b9\u6cd5\uff0c\u7528\u4e8e\u4f30\u8ba1\u6ce2\u6d6a\u7834\u788e\u4ea7\u751f\u7684\u7a7a\u6c14\u5939\u5e26\u901f\u5ea6\uff08Va\uff09\uff0c\u8be5\u65b9\u6cd5\u4f7f\u7528\u4e03\u4e2a\u7269\u7406\u52a8\u673a\u9884\u6d4b\u56e0\u5b50\uff0c\u80fd\u591f\u5728\u9ad8\u98ce\u901f\u548c\u6df1\u6c34\u6761\u4ef6\u4e0b\u51c6\u786e\u6355\u6349\u7a7a\u6c14\u5939\u5e26\u7279\u5f81\uff0c\u5e76\u663e\u8457\u6539\u5584\u4e86\u6c14\u6ce1\u4ecb\u5bfc\u7684CO\u2082\u4f20\u8f93\u548c\u6d77\u76d0\u6c14\u6eb6\u80f6\u6392\u653e\u7684\u4f30\u7b97\u7cbe\u5ea6\u3002"
     },
     {
       "path": "papers/2026/2602.05083",
@@ -230,22 +196,22 @@
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "深度学习",
-        "大集合模拟",
-        "大气环流模型",
-        "气候模拟",
-        "海气耦合"
+        "\u6df1\u5ea6\u5b66\u4e60",
+        "\u5927\u96c6\u5408\u6a21\u62df",
+        "\u5927\u6c14\u73af\u6d41\u6a21\u578b",
+        "\u6c14\u5019\u6a21\u62df",
+        "\u6d77\u6c14\u8026\u5408"
       ],
       "application_tags": [
-        "大气阻塞",
-        "海温变率",
-        "气候变化",
-        "极端天气",
-        "遥相关分析"
+        "\u5927\u6c14\u963b\u585e",
+        "\u6d77\u6e29\u53d8\u7387",
+        "\u6c14\u5019\u53d8\u5316",
+        "\u6781\u7aef\u5929\u6c14",
+        "\u9065\u76f8\u5173\u5206\u6790"
       ],
-      "date_collected": "",
+      "date_collected": "2026-02-01",
       "paper_url": "",
-      "abstract_preview": "本研究利用深度学习通用环流模型进行百年大集合模拟，有效分离了海表温度（SST）强迫信号与内部大气变率，揭示了格陵兰阻塞频率与北大西洋SST及厄尔尼诺样模式的稳健遥相关关系，为理解阻塞事件的长期变率提供了新途径。"
+      "abstract_preview": "\u672c\u7814\u7a76\u5229\u7528\u6df1\u5ea6\u5b66\u4e60\u901a\u7528\u73af\u6d41\u6a21\u578b\u8fdb\u884c\u767e\u5e74\u5927\u96c6\u5408\u6a21\u62df\uff0c\u6709\u6548\u5206\u79bb\u4e86\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u5f3a\u8feb\u4fe1\u53f7\u4e0e\u5185\u90e8\u5927\u6c14\u53d8\u7387\uff0c\u63ed\u793a\u4e86\u683c\u9675\u5170\u963b\u585e\u9891\u7387\u4e0e\u5317\u5927\u897f\u6d0bSST\u53ca\u5384\u5c14\u5c3c\u8bfa\u6837\u6a21\u5f0f\u7684\u7a33\u5065\u9065\u76f8\u5173\u5173\u7cfb\uff0c\u4e3a\u7406\u89e3\u963b\u585e\u4e8b\u4ef6\u7684\u957f\u671f\u53d8\u7387\u63d0\u4f9b\u4e86\u65b0\u9014\u5f84\u3002"
     },
     {
       "path": "papers/2026/2602.05178",
@@ -274,9 +240,9 @@
         "Ocean Modeling",
         "Environmental AI"
       ],
-      "date_collected": "",
+      "date_collected": "2026-02-01",
       "paper_url": "",
-      "abstract_preview": "本研究针对墨西哥湾北部沿海低氧现象，首次系统性地对比了四种深度学习架构（BiLSTM、Medformer、ST-Transformer、TCN）在每日低氧分类预测任务中的表现。研究表明，时空Transformer（ST-Transformer）在所有评估指标上均取得最优结果（AUC-ROC达0.982-0.992），并通过McNemar统计检验验证了模型间的显著差异，为沿海低氧实时预测提供了可复现"
+      "abstract_preview": "\u672c\u7814\u7a76\u9488\u5bf9\u58a8\u897f\u54e5\u6e7e\u5317\u90e8\u6cbf\u6d77\u4f4e\u6c27\u73b0\u8c61\uff0c\u9996\u6b21\u7cfb\u7edf\u6027\u5730\u5bf9\u6bd4\u4e86\u56db\u79cd\u6df1\u5ea6\u5b66\u4e60\u67b6\u6784\uff08BiLSTM\u3001Medformer\u3001ST-Transformer\u3001TCN\uff09\u5728\u6bcf\u65e5\u4f4e\u6c27\u5206\u7c7b\u9884\u6d4b\u4efb\u52a1\u4e2d\u7684\u8868\u73b0\u3002\u7814\u7a76\u8868\u660e\uff0c\u65f6\u7a7aTransformer\uff08ST-Transformer\uff09\u5728\u6240\u6709\u8bc4\u4f30\u6307\u6807\u4e0a\u5747\u53d6\u5f97\u6700\u4f18\u7ed3\u679c\uff08AUC-ROC\u8fbe0.982-0.992\uff09\uff0c\u5e76\u901a\u8fc7McNemar\u7edf\u8ba1\u68c0\u9a8c\u9a8c\u8bc1\u4e86\u6a21\u578b\u95f4\u7684\u663e\u8457\u5dee\u5f02\uff0c\u4e3a\u6cbf\u6d77\u4f4e\u6c27\u5b9e\u65f6\u9884\u6d4b\u63d0\u4f9b\u4e86\u53ef\u590d\u73b0"
     },
     {
       "path": "papers/2026/2602.05416",
@@ -284,7 +250,7 @@
       "title": "Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models",
       "arxiv": "2602.05416",
       "authors": [
-        "Freja Høgholm Petersen",
+        "Freja H\u00f8gholm Petersen",
         "Jesper Sandvig Mariegaard",
         "Rocco Palmitessa",
         "Allan P. Engsig-Karup"
@@ -305,75 +271,9 @@
         "Current Velocity Prediction",
         "Climate Simulation"
       ],
-      "date_collected": "",
+      "date_collected": "2026-02-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种结合气象强迫和边界条件的灵活Koopman自编码器框架，并与基于POD的代理模型进行系统比较。该方法在三个真实水动力学测试案例上实现了300-1400倍的推理加速，预测误差相对均方根误差达0.01-0.13，R²值达0.65-0.996，能够支持长达一年的海岸-海洋预测。"
-    },
-    {
-      "path": "papers/2026/2602.06989",
-      "year": 2026,
-      "title": "Machine learning enhanced data assimilation framework for multiscale carbonate rock characterization",
-      "arxiv": "2602.06989",
-      "authors": [
-        "Zhenkai Bo",
-        "Ahmed H. Elsheikh",
-        "Hannah P. Menke",
-        "Julien Maes",
-        "Sebastian Geiger",
-        "Muhammad Z. Kashim",
-        "Zainol A. A. Bakar",
-        "Kamaljit Singh"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Data Assimilation",
-        "Deep Neural Network",
-        "Ensemble Smoother",
-        "Pore Network Modeling",
-        "Uncertainty Quantification"
-      ],
-      "application_tags": [
-        "Carbonate Rock Characterization",
-        "Multiphase Flow Simulation",
-        "Carbon Capture and Storage",
-        "Digital Rock Physics",
-        "Underground Hydrogen Storage"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了一种机器学习增强的数据同化框架（DNN-ESMDA），通过训练密集神经网络（DNN）替代多尺度孔隙网络模拟器，结合集合平滑多数据同化算法（ESMDA），实现碳酸盐岩微孔隙相CO₂-盐水排驱相对渗透率的快速推断与不确定性估计，相比传统多尺度数值模拟，计算时间从数千小时缩短至秒级。"
-    },
-    {
-      "path": "papers/2026/2602.12274",
-      "year": 2026,
-      "title": "Function-Space Decoupled Diffusion for Forward and Inverse Modeling in Carbon Capture and Storage",
-      "arxiv": "2602.12274",
-      "authors": [
-        "Xin Ju",
-        "Jiachen Yao",
-        "Anima Anandkumar",
-        "Sally M. Benson",
-        "Gege Wen"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Diffusion Models",
-        "Neural Operators",
-        "Inverse Problems",
-        "Data Assimilation",
-        "Bayesian Inference"
-      ],
-      "application_tags": [
-        "Carbon Capture and Storage",
-        "Subsurface Flow Modeling",
-        "Geological Parameter Estimation",
-        "CO2 Plume Migration"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出Fun-DDPS框架，通过解耦扩散模型先验与物理约束，利用函数空间扩散模型学习地质参数分布，并结合局部神经算子（LNO）代理模型提供物理一致的梯度指导，在碳捕集与封存（CCS）场景下实现了鲁棒的正向建模和精确的逆问题求解，在仅25%观测数据条件下达到7.7%的相对误差，并首次通过拒绝采样验证了扩散逆求解器的渐近精确性。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u7ed3\u5408\u6c14\u8c61\u5f3a\u8feb\u548c\u8fb9\u754c\u6761\u4ef6\u7684\u7075\u6d3bKoopman\u81ea\u7f16\u7801\u5668\u6846\u67b6\uff0c\u5e76\u4e0e\u57fa\u4e8ePOD\u7684\u4ee3\u7406\u6a21\u578b\u8fdb\u884c\u7cfb\u7edf\u6bd4\u8f83\u3002\u8be5\u65b9\u6cd5\u5728\u4e09\u4e2a\u771f\u5b9e\u6c34\u52a8\u529b\u5b66\u6d4b\u8bd5\u6848\u4f8b\u4e0a\u5b9e\u73b0\u4e86300-1400\u500d\u7684\u63a8\u7406\u52a0\u901f\uff0c\u9884\u6d4b\u8bef\u5dee\u76f8\u5bf9\u5747\u65b9\u6839\u8bef\u5dee\u8fbe0.01-0.13\uff0cR\u00b2\u503c\u8fbe0.65-0.996\uff0c\u80fd\u591f\u652f\u6301\u957f\u8fbe\u4e00\u5e74\u7684\u6d77\u5cb8-\u6d77\u6d0b\u9884\u6d4b\u3002"
     },
     {
       "path": "papers/2026/2603.05560",
@@ -402,9 +302,9 @@
         "long_horizon",
         "surrogate_modeling"
       ],
-      "date_collected": "",
+      "date_collected": "2026-03-01",
       "paper_url": "",
-      "abstract_preview": "本文提出连续时间Koopman自编码器(CT-KAE)，通过将非线性动力学投影到由线性常微分方程控制的潜在空间，实现了两层准地转系统的长期稳定海洋状态预报。在2083天Rollout实验中，CT-KAE表现出有界的误差增长和稳定的大尺度统计特性，相比自回归Transformer基线显著减少了误差累积和能量漂移。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u8fde\u7eed\u65f6\u95f4Koopman\u81ea\u7f16\u7801\u5668(CT-KAE)\uff0c\u901a\u8fc7\u5c06\u975e\u7ebf\u6027\u52a8\u529b\u5b66\u6295\u5f71\u5230\u7531\u7ebf\u6027\u5e38\u5fae\u5206\u65b9\u7a0b\u63a7\u5236\u7684\u6f5c\u5728\u7a7a\u95f4\uff0c\u5b9e\u73b0\u4e86\u4e24\u5c42\u51c6\u5730\u8f6c\u7cfb\u7edf\u7684\u957f\u671f\u7a33\u5b9a\u6d77\u6d0b\u72b6\u6001\u9884\u62a5\u3002\u57282083\u5929Rollout\u5b9e\u9a8c\u4e2d\uff0cCT-KAE\u8868\u73b0\u51fa\u6709\u754c\u7684\u8bef\u5dee\u589e\u957f\u548c\u7a33\u5b9a\u7684\u5927\u5c3a\u5ea6\u7edf\u8ba1\u7279\u6027\uff0c\u76f8\u6bd4\u81ea\u56de\u5f52Transformer\u57fa\u7ebf\u663e\u8457\u51cf\u5c11\u4e86\u8bef\u5dee\u7d2f\u79ef\u548c\u80fd\u91cf\u6f02\u79fb\u3002"
     },
     {
       "path": "papers/2026/2603.05817",
@@ -432,9 +332,9 @@
         "SWOT",
         "Ocean Drifters"
       ],
-      "date_collected": "",
+      "date_collected": "2026-03-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了两种针对序列马尔可夫链蒙特卡洛（SMCMC）的局部化策略，通过利用观测的空间稀疏性来减少有效自由度并提高计算效率。该方法在高维非线性非高斯状态空间模型上进行了验证，特别是在浅水方程模型和SWOT卫星海面高程数据上表现出对重尾噪声的鲁棒性，并避免了传统粒子滤波的权重退化问题。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e24\u79cd\u9488\u5bf9\u5e8f\u5217\u9a6c\u5c14\u53ef\u592b\u94fe\u8499\u7279\u5361\u6d1b\uff08SMCMC\uff09\u7684\u5c40\u90e8\u5316\u7b56\u7565\uff0c\u901a\u8fc7\u5229\u7528\u89c2\u6d4b\u7684\u7a7a\u95f4\u7a00\u758f\u6027\u6765\u51cf\u5c11\u6709\u6548\u81ea\u7531\u5ea6\u5e76\u63d0\u9ad8\u8ba1\u7b97\u6548\u7387\u3002\u8be5\u65b9\u6cd5\u5728\u9ad8\u7ef4\u975e\u7ebf\u6027\u975e\u9ad8\u65af\u72b6\u6001\u7a7a\u95f4\u6a21\u578b\u4e0a\u8fdb\u884c\u4e86\u9a8c\u8bc1\uff0c\u7279\u522b\u662f\u5728\u6d45\u6c34\u65b9\u7a0b\u6a21\u578b\u548cSWOT\u536b\u661f\u6d77\u9762\u9ad8\u7a0b\u6570\u636e\u4e0a\u8868\u73b0\u51fa\u5bf9\u91cd\u5c3e\u566a\u58f0\u7684\u9c81\u68d2\u6027\uff0c\u5e76\u907f\u514d\u4e86\u4f20\u7edf\u7c92\u5b50\u6ee4\u6ce2\u7684\u6743\u91cd\u9000\u5316\u95ee\u9898\u3002"
     },
     {
       "path": "papers/2026/2603.06153",
@@ -442,9 +342,9 @@
       "title": "Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting via Input Perturbations",
       "arxiv": "2603.06153",
       "authors": [
-        "Alejandro J. González-Santana",
-        "Giovanny A. Cuervo-Londoño",
-        "Javier Sánchez"
+        "Alejandro J. Gonz\u00e1lez-Santana",
+        "Giovanny A. Cuervo-Londo\u00f1o",
+        "Javier S\u00e1nchez"
       ],
       "source": "arXiv",
       "venue": "NeurIPS",
@@ -462,38 +362,9 @@
         "ensemble_prediction",
         "probabilistic_forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2026-03-01",
       "paper_url": "",
-      "abstract_preview": "本文研究了基于图神经网络(GNN)的区域海表温度(SST)概率预报中集合学习策略，通过在推理时对输入施加扰动而非重训练多个模型来实现计算高效的不确定性量化。研究发现空间相干扰动（如低分辨率Perlin噪声）比高斯噪声能产生更好的集合校准和更低的CRPS。"
-    },
-    {
-      "path": "papers/2026/2603.07261",
-      "year": 2026,
-      "title": "Turning Time Series into Algebraic Equations: Symbolic Machine Learning for Interpretable Modeling of Chaotic Time Series",
-      "arxiv": "2603.07261",
-      "authors": [
-        "Madhurima Panja",
-        "Grace Younes",
-        "Tanujit Chakraborty"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "符号回归",
-        "可解释AI",
-        "神经符号学习",
-        "时间序列预测",
-        "混沌系统"
-      ],
-      "application_tags": [
-        "混沌时间序列",
-        "流行病预测",
-        "气候建模",
-        "非线性动力学"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出两种符号预测模型（SyNF和SyTF），通过将混沌时间序列数据转化为显式可解释的代数方程，实现短期预测任务。实验表明，在132个低维混沌吸引子和两个真实世界数据集（登革热发病率、厄尔尼诺3.4海表温度指数）上，符号预测器在保持竞争力的预测精度的同时，提供了透明可解释的动力学方程。"
+      "abstract_preview": "\u672c\u6587\u7814\u7a76\u4e86\u57fa\u4e8e\u56fe\u795e\u7ecf\u7f51\u7edc(GNN)\u7684\u533a\u57df\u6d77\u8868\u6e29\u5ea6(SST)\u6982\u7387\u9884\u62a5\u4e2d\u96c6\u5408\u5b66\u4e60\u7b56\u7565\uff0c\u901a\u8fc7\u5728\u63a8\u7406\u65f6\u5bf9\u8f93\u5165\u65bd\u52a0\u6270\u52a8\u800c\u975e\u91cd\u8bad\u7ec3\u591a\u4e2a\u6a21\u578b\u6765\u5b9e\u73b0\u8ba1\u7b97\u9ad8\u6548\u7684\u4e0d\u786e\u5b9a\u6027\u91cf\u5316\u3002\u7814\u7a76\u53d1\u73b0\u7a7a\u95f4\u76f8\u5e72\u6270\u52a8\uff08\u5982\u4f4e\u5206\u8fa8\u7387Perlin\u566a\u58f0\uff09\u6bd4\u9ad8\u65af\u566a\u58f0\u80fd\u4ea7\u751f\u66f4\u597d\u7684\u96c6\u5408\u6821\u51c6\u548c\u66f4\u4f4e\u7684CRPS\u3002"
     },
     {
       "path": "papers/2026/2603.14115",
@@ -522,9 +393,9 @@
         "flow_estimation",
         "ensemble_filter"
       ],
-      "date_collected": "",
+      "date_collected": "2026-03-01",
       "paper_url": "",
-      "abstract_preview": "本文提出拉格朗日条件高斯Koopman网络(LaCGKN)，用于从稀疏的示踪剂轨迹观测中恢复隐藏的欧拉流场。该方法通过将欧拉流动力学嵌入低维潜在空间，在条件高斯结构下实现解析后验更新，无需集合预报即可进行高效数据同化和预报。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u62c9\u683c\u6717\u65e5\u6761\u4ef6\u9ad8\u65afKoopman\u7f51\u7edc(LaCGKN)\uff0c\u7528\u4e8e\u4ece\u7a00\u758f\u7684\u793a\u8e2a\u5242\u8f68\u8ff9\u89c2\u6d4b\u4e2d\u6062\u590d\u9690\u85cf\u7684\u6b27\u62c9\u6d41\u573a\u3002\u8be5\u65b9\u6cd5\u901a\u8fc7\u5c06\u6b27\u62c9\u6d41\u52a8\u529b\u5b66\u5d4c\u5165\u4f4e\u7ef4\u6f5c\u5728\u7a7a\u95f4\uff0c\u5728\u6761\u4ef6\u9ad8\u65af\u7ed3\u6784\u4e0b\u5b9e\u73b0\u89e3\u6790\u540e\u9a8c\u66f4\u65b0\uff0c\u65e0\u9700\u96c6\u5408\u9884\u62a5\u5373\u53ef\u8fdb\u884c\u9ad8\u6548\u6570\u636e\u540c\u5316\u548c\u9884\u62a5\u3002"
     },
     {
       "path": "papers/2026/2603.16272",
@@ -560,11 +431,11 @@
         "Sea Surface Temperature",
         "Climate Prediction",
         "Ocean State Estimation",
-        "El Niño Forecasting"
+        "El Ni\u00f1o Forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2026-03-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了SAGE（Satellite and in situ Adaptive Guided Estimation）框架，这是首个基于扩散模型的全球海表温度（SST）概率重建方法。SAGE通过学习历史SST变化的物理一致先验，结合风云-3D卫星数据和现场观测数据进行后验采样，能够生成集合SST估计场，有效量化观测不确定性，并在10天预报和2023-2024年厄尔尼诺事件预测中展现出比现有业务产品"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86SAGE\uff08Satellite and in situ Adaptive Guided Estimation\uff09\u6846\u67b6\uff0c\u8fd9\u662f\u9996\u4e2a\u57fa\u4e8e\u6269\u6563\u6a21\u578b\u7684\u5168\u7403\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u6982\u7387\u91cd\u5efa\u65b9\u6cd5\u3002SAGE\u901a\u8fc7\u5b66\u4e60\u5386\u53f2SST\u53d8\u5316\u7684\u7269\u7406\u4e00\u81f4\u5148\u9a8c\uff0c\u7ed3\u5408\u98ce\u4e91-3D\u536b\u661f\u6570\u636e\u548c\u73b0\u573a\u89c2\u6d4b\u6570\u636e\u8fdb\u884c\u540e\u9a8c\u91c7\u6837\uff0c\u80fd\u591f\u751f\u6210\u96c6\u5408SST\u4f30\u8ba1\u573a\uff0c\u6709\u6548\u91cf\u5316\u89c2\u6d4b\u4e0d\u786e\u5b9a\u6027\uff0c\u5e76\u572810\u5929\u9884\u62a5\u548c2023-2024\u5e74\u5384\u5c14\u5c3c\u8bfa\u4e8b\u4ef6\u9884\u6d4b\u4e2d\u5c55\u73b0\u51fa\u6bd4\u73b0\u6709\u4e1a\u52a1\u4ea7\u54c1"
     },
     {
       "path": "papers/2026/2603.16312",
@@ -593,9 +464,9 @@
         "ENSO Teleconnection",
         "Climate Modeling"
       ],
-      "date_collected": "",
+      "date_collected": "2026-03-01",
       "paper_url": "",
-      "abstract_preview": "本研究开发了一个基于卷积神经网络（CNN）的统计预测框架，利用海表温度（SST）场预测早冬（11-12月）的北大西洋涛动（NAO）指数。该方法在ERA5再分析数据（1940-2023年）上训练，相比传统线性基准模型表现更优，尤其在强ENSO事件期间预测技能显著提升，证明了深度学习在捕捉SST-NAO非线性关系方面的潜力。"
+      "abstract_preview": "\u672c\u7814\u7a76\u5f00\u53d1\u4e86\u4e00\u4e2a\u57fa\u4e8e\u5377\u79ef\u795e\u7ecf\u7f51\u7edc\uff08CNN\uff09\u7684\u7edf\u8ba1\u9884\u6d4b\u6846\u67b6\uff0c\u5229\u7528\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u573a\u9884\u6d4b\u65e9\u51ac\uff0811-12\u6708\uff09\u7684\u5317\u5927\u897f\u6d0b\u6d9b\u52a8\uff08NAO\uff09\u6307\u6570\u3002\u8be5\u65b9\u6cd5\u5728ERA5\u518d\u5206\u6790\u6570\u636e\uff081940-2023\u5e74\uff09\u4e0a\u8bad\u7ec3\uff0c\u76f8\u6bd4\u4f20\u7edf\u7ebf\u6027\u57fa\u51c6\u6a21\u578b\u8868\u73b0\u66f4\u4f18\uff0c\u5c24\u5176\u5728\u5f3aENSO\u4e8b\u4ef6\u671f\u95f4\u9884\u6d4b\u6280\u80fd\u663e\u8457\u63d0\u5347\uff0c\u8bc1\u660e\u4e86\u6df1\u5ea6\u5b66\u4e60\u5728\u6355\u6349SST-NAO\u975e\u7ebf\u6027\u5173\u7cfb\u65b9\u9762\u7684\u6f5c\u529b\u3002"
     },
     {
       "path": "papers/2025/2501.08430",
@@ -628,9 +499,9 @@
         "wave_flume",
         "nonlinear_waves"
       ],
-      "date_collected": "",
+      "date_collected": "2025-01-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了基于势流理论的物理信息神经网络(PFT-PINN)，用于相位分辨的海洋重力波数据同化和预报。该方法通过两个并行的神经网络同时估计水面高程和速度势，结合拉普拉斯方程和边界条件约束，在实验室波槽数据和解析解验证中展现了优异性能。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u57fa\u4e8e\u52bf\u6d41\u7406\u8bba\u7684\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc(PFT-PINN)\uff0c\u7528\u4e8e\u76f8\u4f4d\u5206\u8fa8\u7684\u6d77\u6d0b\u91cd\u529b\u6ce2\u6570\u636e\u540c\u5316\u548c\u9884\u62a5\u3002\u8be5\u65b9\u6cd5\u901a\u8fc7\u4e24\u4e2a\u5e76\u884c\u7684\u795e\u7ecf\u7f51\u7edc\u540c\u65f6\u4f30\u8ba1\u6c34\u9762\u9ad8\u7a0b\u548c\u901f\u5ea6\u52bf\uff0c\u7ed3\u5408\u62c9\u666e\u62c9\u65af\u65b9\u7a0b\u548c\u8fb9\u754c\u6761\u4ef6\u7ea6\u675f\uff0c\u5728\u5b9e\u9a8c\u5ba4\u6ce2\u69fd\u6570\u636e\u548c\u89e3\u6790\u89e3\u9a8c\u8bc1\u4e2d\u5c55\u73b0\u4e86\u4f18\u5f02\u6027\u80fd\u3002"
     },
     {
       "path": "papers/2025/2501.12054",
@@ -644,22 +515,22 @@
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "深度学习",
-        "多阶段学习",
-        "多分支编码器-解码器",
-        "海洋遥感",
-        "时序预测"
+        "\u6df1\u5ea6\u5b66\u4e60",
+        "\u591a\u9636\u6bb5\u5b66\u4e60",
+        "\u591a\u5206\u652f\u7f16\u7801\u5668-\u89e3\u7801\u5668",
+        "\u6d77\u6d0b\u9065\u611f",
+        "\u65f6\u5e8f\u9884\u6d4b"
       ],
       "application_tags": [
-        "海洋表面流预测",
-        "海表面高度",
-        "地转流估计",
-        "卫星高度计",
-        "漂流浮标数据同化"
+        "\u6d77\u6d0b\u8868\u9762\u6d41\u9884\u6d4b",
+        "\u6d77\u8868\u9762\u9ad8\u5ea6",
+        "\u5730\u8f6c\u6d41\u4f30\u8ba1",
+        "\u536b\u661f\u9ad8\u5ea6\u8ba1",
+        "\u6f02\u6d41\u6d6e\u6807\u6570\u636e\u540c\u5316"
       ],
-      "date_collected": "",
+      "date_collected": "2025-01-01",
       "paper_url": "",
-      "abstract_preview": "ORCAst是一个多阶段、多分支网络模型，专门用于生成一周内的业务化高分辨率海洋表面流预报。该模型完全基于真实的卫星遥感和漂流浮标现场观测数据进行训练，通过多阶段学习策略先从丰富的卫星高度计数据学习海表面高度和地转流预测，再从稀疏的漂流浮标数据学习完整的表面流预测，在海表流预报任务上优于多种现有最先进方法。"
+      "abstract_preview": "ORCAst\u662f\u4e00\u4e2a\u591a\u9636\u6bb5\u3001\u591a\u5206\u652f\u7f51\u7edc\u6a21\u578b\uff0c\u4e13\u95e8\u7528\u4e8e\u751f\u6210\u4e00\u5468\u5185\u7684\u4e1a\u52a1\u5316\u9ad8\u5206\u8fa8\u7387\u6d77\u6d0b\u8868\u9762\u6d41\u9884\u62a5\u3002\u8be5\u6a21\u578b\u5b8c\u5168\u57fa\u4e8e\u771f\u5b9e\u7684\u536b\u661f\u9065\u611f\u548c\u6f02\u6d41\u6d6e\u6807\u73b0\u573a\u89c2\u6d4b\u6570\u636e\u8fdb\u884c\u8bad\u7ec3\uff0c\u901a\u8fc7\u591a\u9636\u6bb5\u5b66\u4e60\u7b56\u7565\u5148\u4ece\u4e30\u5bcc\u7684\u536b\u661f\u9ad8\u5ea6\u8ba1\u6570\u636e\u5b66\u4e60\u6d77\u8868\u9762\u9ad8\u5ea6\u548c\u5730\u8f6c\u6d41\u9884\u6d4b\uff0c\u518d\u4ece\u7a00\u758f\u7684\u6f02\u6d41\u6d6e\u6807\u6570\u636e\u5b66\u4e60\u5b8c\u6574\u7684\u8868\u9762\u6d41\u9884\u6d4b\uff0c\u5728\u6d77\u8868\u6d41\u9884\u62a5\u4efb\u52a1\u4e0a\u4f18\u4e8e\u591a\u79cd\u73b0\u6709\u6700\u5148\u8fdb\u65b9\u6cd5\u3002"
     },
     {
       "path": "papers/2025/2501.13312",
@@ -685,9 +556,9 @@
         "Numerical Weather Prediction",
         "Dynamical Systems"
       ],
-      "date_collected": "",
+      "date_collected": "2025-01-01",
       "paper_url": "",
-      "abstract_preview": "本文提出Tensor-Var框架，通过核条件均值嵌入（CME）将非线性动力学线性化，在学习到的特征空间中实现凸优化，从而高效求解四维变分同化问题。实验表明，该方法在混沌系统和全球天气预报任务上，相比传统和深度学习混合4D-Var基线方法，在精度上取得更优性能，同时实现10到20倍的加速。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faTensor-Var\u6846\u67b6\uff0c\u901a\u8fc7\u6838\u6761\u4ef6\u5747\u503c\u5d4c\u5165\uff08CME\uff09\u5c06\u975e\u7ebf\u6027\u52a8\u529b\u5b66\u7ebf\u6027\u5316\uff0c\u5728\u5b66\u4e60\u5230\u7684\u7279\u5f81\u7a7a\u95f4\u4e2d\u5b9e\u73b0\u51f8\u4f18\u5316\uff0c\u4ece\u800c\u9ad8\u6548\u6c42\u89e3\u56db\u7ef4\u53d8\u5206\u540c\u5316\u95ee\u9898\u3002\u5b9e\u9a8c\u8868\u660e\uff0c\u8be5\u65b9\u6cd5\u5728\u6df7\u6c8c\u7cfb\u7edf\u548c\u5168\u7403\u5929\u6c14\u9884\u62a5\u4efb\u52a1\u4e0a\uff0c\u76f8\u6bd4\u4f20\u7edf\u548c\u6df1\u5ea6\u5b66\u4e60\u6df7\u54084D-Var\u57fa\u7ebf\u65b9\u6cd5\uff0c\u5728\u7cbe\u5ea6\u4e0a\u53d6\u5f97\u66f4\u4f18\u6027\u80fd\uff0c\u540c\u65f6\u5b9e\u73b010\u523020\u500d\u7684\u52a0\u901f\u3002"
     },
     {
       "path": "papers/2025/2501.18262",
@@ -702,38 +573,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2025-01-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2501.18262"
-    },
-    {
-      "path": "papers/2025/2503.09628",
-      "year": 2025,
-      "title": "Optimizing AUV speed dynamics with a data-driven Koopman operator approach",
-      "arxiv": "2503.09628",
-      "authors": [
-        "Zhiliang Liu",
-        "Xin Zhao",
-        "Peng Cai",
-        "Bing Cong"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Koopman Operator",
-        "Model Predictive Control",
-        "Dynamic Mode Decomposition",
-        "Data-Driven Control"
-      ],
-      "application_tags": [
-        "AUV Speed Control",
-        "Underwater Robotics",
-        "Nonlinear Systems",
-        "Constraint Handling"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了一种基于数据驱动Koopman算子理论与模型预测控制（MPC）相结合的AUV速度控制系统，该方法通过将非线性系统状态空间提升至高维空间实现线性化表示，在保证系统性能的同时有效处理状态约束、输入约束以及增量输入约束，并在ROS2和Gazebo平台上进行了仿真验证。"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2501.18262"
     },
     {
       "path": "papers/2025/2503.11532",
@@ -741,8 +583,8 @@
       "title": "Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters",
       "arxiv": "2503.11532",
       "authors": [
-        "Clément Dorffer",
-        "Frédéric Jourdin",
+        "Cl\u00e9ment Dorffer",
+        "Fr\u00e9d\u00e9ric Jourdin",
         "Thi Thuy Nga Nguyen",
         "Rodolphe Devillers",
         "David Mouillot",
@@ -765,9 +607,9 @@
         "Carbon Cycle",
         "Biogeochemistry"
       ],
-      "date_collected": "",
+      "date_collected": "2025-03-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种基于patch重采样的训练框架，使4DVarNet神经网络能够直接在仅有观测数据的条件下学习海洋光学参数重建，从而无需依赖真实或模拟的完整数据集；以地中海为案例，实验证明该方法在重建海表颗粒后向散射系数（BBP443）方面显著优于DInEOF和Direct Inversion等传统方法。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8epatch\u91cd\u91c7\u6837\u7684\u8bad\u7ec3\u6846\u67b6\uff0c\u4f7f4DVarNet\u795e\u7ecf\u7f51\u7edc\u80fd\u591f\u76f4\u63a5\u5728\u4ec5\u6709\u89c2\u6d4b\u6570\u636e\u7684\u6761\u4ef6\u4e0b\u5b66\u4e60\u6d77\u6d0b\u5149\u5b66\u53c2\u6570\u91cd\u5efa\uff0c\u4ece\u800c\u65e0\u9700\u4f9d\u8d56\u771f\u5b9e\u6216\u6a21\u62df\u7684\u5b8c\u6574\u6570\u636e\u96c6\uff1b\u4ee5\u5730\u4e2d\u6d77\u4e3a\u6848\u4f8b\uff0c\u5b9e\u9a8c\u8bc1\u660e\u8be5\u65b9\u6cd5\u5728\u91cd\u5efa\u6d77\u8868\u9897\u7c92\u540e\u5411\u6563\u5c04\u7cfb\u6570\uff08BBP443\uff09\u65b9\u9762\u663e\u8457\u4f18\u4e8eDInEOF\u548cDirect Inversion\u7b49\u4f20\u7edf\u65b9\u6cd5\u3002"
     },
     {
       "path": "papers/2025/2503.19160",
@@ -796,46 +638,9 @@
         "ocean_circulation",
         "mesoscale"
       ],
-      "date_collected": "",
+      "date_collected": "2025-03-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了StrAss-PINN（分层数据同化PINNs），利用物理信息神经网络进行深层海洋流场重建。该方法利用SIREN架构和分层训练策略，成功从SWOT-like和ARGO-like伪观测数据中重建了三层准地转模式的中尺度和深层流场特征，包括涡旋环、平均流和Rossby波。"
-    },
-    {
-      "path": "papers/2025/2504.21670",
-      "year": 2025,
-      "title": "Assimilation of SWOT Altimetry Data for Riverine Flood Reanalysis: From Synthetic to Real Data",
-      "arxiv": "2504.21670",
-      "authors": [
-        "Quentin Bonassies",
-        "Thanh Huy Nguyen",
-        "Ludovic Cassan",
-        "Andrea Piacentini",
-        "Sophie Ricci",
-        "Charlotte Emery",
-        "Christophe Fatras",
-        "Santiago Peña Luque",
-        "Raquel Rodriguez Suquet"
-      ],
-      "source": "arXiv",
-      "venue": "IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing",
-      "method_tags": [
-        "Data Assimilation",
-        "Ensemble Kalman Filter",
-        "SWOT Altimetry",
-        "TELEMAC-2D",
-        "Hydraulic Modeling",
-        "Shallow Water Equations"
-      ],
-      "application_tags": [
-        "Flood Reanalysis",
-        "River Hydrodynamics",
-        "Satellite Remote Sensing",
-        "Water Level Monitoring",
-        "Flood Risk Management"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本研究展示了SWOT卫星宽幅测高仪在河流洪水再分析中的创新应用能力，通过集合卡尔曼滤波（EnKF）将SWOT河节点产品与原位水位数据同化到TELEMAC-2D水动力模型中，显著提高了法国加龙河50公里河段的洪水动态表征精度，并证明结合多种数据源是实现高精度洪水监测的最优策略。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86StrAss-PINN\uff08\u5206\u5c42\u6570\u636e\u540c\u5316PINNs\uff09\uff0c\u5229\u7528\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc\u8fdb\u884c\u6df1\u5c42\u6d77\u6d0b\u6d41\u573a\u91cd\u5efa\u3002\u8be5\u65b9\u6cd5\u5229\u7528SIREN\u67b6\u6784\u548c\u5206\u5c42\u8bad\u7ec3\u7b56\u7565\uff0c\u6210\u529f\u4eceSWOT-like\u548cARGO-like\u4f2a\u89c2\u6d4b\u6570\u636e\u4e2d\u91cd\u5efa\u4e86\u4e09\u5c42\u51c6\u5730\u8f6c\u6a21\u5f0f\u7684\u4e2d\u5c3a\u5ea6\u548c\u6df1\u5c42\u6d41\u573a\u7279\u5f81\uff0c\u5305\u62ec\u6da1\u65cb\u73af\u3001\u5e73\u5747\u6d41\u548cRossby\u6ce2\u3002"
     },
     {
       "path": "papers/2025/2505.08900",
@@ -851,9 +656,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2025-05-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2505.08900"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2505.08900"
     },
     {
       "path": "papers/2025/2505.10191",
@@ -884,9 +689,9 @@
         "salinity",
         "ocean_circulation"
       ],
-      "date_collected": "",
+      "date_collected": "2025-05-01",
       "paper_url": "",
-      "abstract_preview": "LanTu是一个基于动力学增强深度学习的区域涡旋解析海洋预报系统。该系统采用Vision Transformer作为核心架构，结合多尺度物理约束损失来捕捉中尺度涡旋动力学。在温度、盐度、海表高度和流速预测上，LanTu在10天预报时效内显著优于NOFS数值预报系统和XiHe全球AI预报系统。"
+      "abstract_preview": "LanTu\u662f\u4e00\u4e2a\u57fa\u4e8e\u52a8\u529b\u5b66\u589e\u5f3a\u6df1\u5ea6\u5b66\u4e60\u7684\u533a\u57df\u6da1\u65cb\u89e3\u6790\u6d77\u6d0b\u9884\u62a5\u7cfb\u7edf\u3002\u8be5\u7cfb\u7edf\u91c7\u7528Vision Transformer\u4f5c\u4e3a\u6838\u5fc3\u67b6\u6784\uff0c\u7ed3\u5408\u591a\u5c3a\u5ea6\u7269\u7406\u7ea6\u675f\u635f\u5931\u6765\u6355\u6349\u4e2d\u5c3a\u5ea6\u6da1\u65cb\u52a8\u529b\u5b66\u3002\u5728\u6e29\u5ea6\u3001\u76d0\u5ea6\u3001\u6d77\u8868\u9ad8\u5ea6\u548c\u6d41\u901f\u9884\u6d4b\u4e0a\uff0cLanTu\u572810\u5929\u9884\u62a5\u65f6\u6548\u5185\u663e\u8457\u4f18\u4e8eNOFS\u6570\u503c\u9884\u62a5\u7cfb\u7edf\u548cXiHe\u5168\u7403AI\u9884\u62a5\u7cfb\u7edf\u3002"
     },
     {
       "path": "papers/2025/2505.10894",
@@ -919,9 +724,9 @@
         "classification",
         "Kuroshio"
       ],
-      "date_collected": "",
+      "date_collected": "2025-05-01",
       "paper_url": "",
-      "abstract_preview": "CTP是一个结合CNN、Transformer和物理信息神经网络(PINN)的混合深度学习框架，用于海洋锋面预测。该方法通过局部空间编码、长程时间注意力和物理约束 enforcement，在南海和黑潮区域实现了优于LSTM、ConvLSTM和AttentionConv等基线模型的单步和多步预测性能。"
+      "abstract_preview": "CTP\u662f\u4e00\u4e2a\u7ed3\u5408CNN\u3001Transformer\u548c\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc(PINN)\u7684\u6df7\u5408\u6df1\u5ea6\u5b66\u4e60\u6846\u67b6\uff0c\u7528\u4e8e\u6d77\u6d0b\u950b\u9762\u9884\u6d4b\u3002\u8be5\u65b9\u6cd5\u901a\u8fc7\u5c40\u90e8\u7a7a\u95f4\u7f16\u7801\u3001\u957f\u7a0b\u65f6\u95f4\u6ce8\u610f\u529b\u548c\u7269\u7406\u7ea6\u675f enforcement\uff0c\u5728\u5357\u6d77\u548c\u9ed1\u6f6e\u533a\u57df\u5b9e\u73b0\u4e86\u4f18\u4e8eLSTM\u3001ConvLSTM\u548cAttentionConv\u7b49\u57fa\u7ebf\u6a21\u578b\u7684\u5355\u6b65\u548c\u591a\u6b65\u9884\u6d4b\u6027\u80fd\u3002"
     },
     {
       "path": "papers/2025/2505.21020",
@@ -947,9 +752,9 @@
         "Climate Modeling",
         "S2S Prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2025-05-01",
       "paper_url": "",
-      "abstract_preview": "NeuralOM是一个面向慢变物理系统（如全球海洋）长期高保真模拟的通用神经算子框架，通过渐进残差校正框架和物理引导图网络两大创新，有效抑制了长期预测中的误差累积，在60天预见期的全球S2S海洋模拟任务中取得了最先进的精度表现。"
+      "abstract_preview": "NeuralOM\u662f\u4e00\u4e2a\u9762\u5411\u6162\u53d8\u7269\u7406\u7cfb\u7edf\uff08\u5982\u5168\u7403\u6d77\u6d0b\uff09\u957f\u671f\u9ad8\u4fdd\u771f\u6a21\u62df\u7684\u901a\u7528\u795e\u7ecf\u7b97\u5b50\u6846\u67b6\uff0c\u901a\u8fc7\u6e10\u8fdb\u6b8b\u5dee\u6821\u6b63\u6846\u67b6\u548c\u7269\u7406\u5f15\u5bfc\u56fe\u7f51\u7edc\u4e24\u5927\u521b\u65b0\uff0c\u6709\u6548\u6291\u5236\u4e86\u957f\u671f\u9884\u6d4b\u4e2d\u7684\u8bef\u5dee\u7d2f\u79ef\uff0c\u572860\u5929\u9884\u89c1\u671f\u7684\u5168\u7403S2S\u6d77\u6d0b\u6a21\u62df\u4efb\u52a1\u4e2d\u53d6\u5f97\u4e86\u6700\u5148\u8fdb\u7684\u7cbe\u5ea6\u8868\u73b0\u3002"
     },
     {
       "path": "papers/2025/2505.24429",
@@ -975,34 +780,9 @@
         "regional_ocean",
         "marine_ecosystem"
       ],
-      "date_collected": "",
+      "date_collected": "2025-05-01",
       "paper_url": "",
-      "abstract_preview": "本文研究了数据驱动的深度学习方法在加那利洋流上升流系统预报中的应用。通过对比神经网络算子（Neural Operator）、图网络和传统数值模式的性能，证明了深度学习方法在高分辨率区域海洋预报中的可行性，为海洋渔业和生态系统管理提供了新的技术支撑。"
-    },
-    {
-      "path": "papers/2025/2506.11639",
-      "year": 2025,
-      "title": "2506.11639",
-      "arxiv": "2506.11639",
-      "authors": [
-        "Authors:",
-        "Hassan Mortada",
-        ",",
-        "Cyril Falcon",
-        ",",
-        "Yanis Kahil",
-        ",",
-        "Mathéo Clavaud",
-        ",",
-        "Jean-Philippe Michel"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [],
-      "application_tags": [],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2506.11639"
+      "abstract_preview": "\u672c\u6587\u7814\u7a76\u4e86\u6570\u636e\u9a71\u52a8\u7684\u6df1\u5ea6\u5b66\u4e60\u65b9\u6cd5\u5728\u52a0\u90a3\u5229\u6d0b\u6d41\u4e0a\u5347\u6d41\u7cfb\u7edf\u9884\u62a5\u4e2d\u7684\u5e94\u7528\u3002\u901a\u8fc7\u5bf9\u6bd4\u795e\u7ecf\u7f51\u7edc\u7b97\u5b50\uff08Neural Operator\uff09\u3001\u56fe\u7f51\u7edc\u548c\u4f20\u7edf\u6570\u503c\u6a21\u5f0f\u7684\u6027\u80fd\uff0c\u8bc1\u660e\u4e86\u6df1\u5ea6\u5b66\u4e60\u65b9\u6cd5\u5728\u9ad8\u5206\u8fa8\u7387\u533a\u57df\u6d77\u6d0b\u9884\u62a5\u4e2d\u7684\u53ef\u884c\u6027\uff0c\u4e3a\u6d77\u6d0b\u6e14\u4e1a\u548c\u751f\u6001\u7cfb\u7edf\u7ba1\u7406\u63d0\u4f9b\u4e86\u65b0\u7684\u6280\u672f\u652f\u6491\u3002"
     },
     {
       "path": "papers/2025/2506.20181",
@@ -1027,9 +807,9 @@
         "Ocean Flows",
         "Scientific Machine Learning"
       ],
-      "date_collected": "",
+      "date_collected": "2025-06-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种基于物理信息神经网络和反事实扰动的偏微分方程因果结构发现框架，通过算子级干预和因果敏感性指标量化微分算子的必要性，在气候动力学、肿瘤扩散和海洋流动等实际场景中验证了方法的有效性。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8e\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc\u548c\u53cd\u4e8b\u5b9e\u6270\u52a8\u7684\u504f\u5fae\u5206\u65b9\u7a0b\u56e0\u679c\u7ed3\u6784\u53d1\u73b0\u6846\u67b6\uff0c\u901a\u8fc7\u7b97\u5b50\u7ea7\u5e72\u9884\u548c\u56e0\u679c\u654f\u611f\u6027\u6307\u6807\u91cf\u5316\u5fae\u5206\u7b97\u5b50\u7684\u5fc5\u8981\u6027\uff0c\u5728\u6c14\u5019\u52a8\u529b\u5b66\u3001\u80bf\u7624\u6269\u6563\u548c\u6d77\u6d0b\u6d41\u52a8\u7b49\u5b9e\u9645\u573a\u666f\u4e2d\u9a8c\u8bc1\u4e86\u65b9\u6cd5\u7684\u6709\u6548\u6027\u3002"
     },
     {
       "path": "papers/2025/2506.23900",
@@ -1060,9 +840,9 @@
         "salinity",
         "currents"
       ],
-      "date_collected": "",
+      "date_collected": "2025-06-01",
       "paper_url": "",
-      "abstract_preview": "本文提出SeaCast，一种基于图神经网络的区域海洋预报模型，通过层次化图结构处理不规则海洋网格，结合大气强迫输入，在1/24°高分辨率下实现地中海海域15天预报，计算效率比传统业务化数值模式提升约200倍。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faSeaCast\uff0c\u4e00\u79cd\u57fa\u4e8e\u56fe\u795e\u7ecf\u7f51\u7edc\u7684\u533a\u57df\u6d77\u6d0b\u9884\u62a5\u6a21\u578b\uff0c\u901a\u8fc7\u5c42\u6b21\u5316\u56fe\u7ed3\u6784\u5904\u7406\u4e0d\u89c4\u5219\u6d77\u6d0b\u7f51\u683c\uff0c\u7ed3\u5408\u5927\u6c14\u5f3a\u8feb\u8f93\u5165\uff0c\u57281/24\u00b0\u9ad8\u5206\u8fa8\u7387\u4e0b\u5b9e\u73b0\u5730\u4e2d\u6d77\u6d77\u57df15\u5929\u9884\u62a5\uff0c\u8ba1\u7b97\u6548\u7387\u6bd4\u4f20\u7edf\u4e1a\u52a1\u5316\u6570\u503c\u6a21\u5f0f\u63d0\u5347\u7ea6200\u500d\u3002"
     },
     {
       "path": "papers/2025/2507.06479",
@@ -1093,9 +873,9 @@
         "Gulf_of_Mexico",
         "satellite_altimetry"
       ],
-      "date_collected": "",
+      "date_collected": "2025-07-01",
       "paper_url": "",
-      "abstract_preview": "本文提出FNO+DDPM生成式框架，利用傅里叶神经算子（FNO）提供粗粒度预测作为条件输入，通过条件去噪扩散概率模型（DDPM）从99%和99.9%极端稀疏的拉格朗日观测中重建高分辨率海洋状态，在无需背景场的情况下实现精确数据同化。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faFNO+DDPM\u751f\u6210\u5f0f\u6846\u67b6\uff0c\u5229\u7528\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\uff08FNO\uff09\u63d0\u4f9b\u7c97\u7c92\u5ea6\u9884\u6d4b\u4f5c\u4e3a\u6761\u4ef6\u8f93\u5165\uff0c\u901a\u8fc7\u6761\u4ef6\u53bb\u566a\u6269\u6563\u6982\u7387\u6a21\u578b\uff08DDPM\uff09\u4ece99%\u548c99.9%\u6781\u7aef\u7a00\u758f\u7684\u62c9\u683c\u6717\u65e5\u89c2\u6d4b\u4e2d\u91cd\u5efa\u9ad8\u5206\u8fa8\u7387\u6d77\u6d0b\u72b6\u6001\uff0c\u5728\u65e0\u9700\u80cc\u666f\u573a\u7684\u60c5\u51b5\u4e0b\u5b9e\u73b0\u7cbe\u786e\u6570\u636e\u540c\u5316\u3002"
     },
     {
       "path": "papers/2025/2507.08749",
@@ -1125,9 +905,9 @@
         "turbulence",
         "chaotic_systems"
       ],
-      "date_collected": "",
+      "date_collected": "2025-07-01",
       "paper_url": "",
-      "abstract_preview": "本文提出时间条件高斯Koopman网络（TC-GKN），通过条件高斯结构在低维潜在空间实现解析后验更新，无需集合预报即可高效完成部分观测非线性动力系统的状态估计和预报，同时捕捉系统的高维非线性动力学。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u65f6\u95f4\u6761\u4ef6\u9ad8\u65afKoopman\u7f51\u7edc\uff08TC-GKN\uff09\uff0c\u901a\u8fc7\u6761\u4ef6\u9ad8\u65af\u7ed3\u6784\u5728\u4f4e\u7ef4\u6f5c\u5728\u7a7a\u95f4\u5b9e\u73b0\u89e3\u6790\u540e\u9a8c\u66f4\u65b0\uff0c\u65e0\u9700\u96c6\u5408\u9884\u62a5\u5373\u53ef\u9ad8\u6548\u5b8c\u6210\u90e8\u5206\u89c2\u6d4b\u975e\u7ebf\u6027\u52a8\u529b\u7cfb\u7edf\u7684\u72b6\u6001\u4f30\u8ba1\u548c\u9884\u62a5\uff0c\u540c\u65f6\u6355\u6349\u7cfb\u7edf\u7684\u9ad8\u7ef4\u975e\u7ebf\u6027\u52a8\u529b\u5b66\u3002"
     },
     {
       "path": "papers/2025/2507.08834",
@@ -1156,9 +936,9 @@
         "finite_difference",
         "environmental_monitoring"
       ],
-      "date_collected": "",
+      "date_collected": "2025-07-01",
       "paper_url": "",
-      "abstract_preview": "本文提出基于物理信息神经网络（PINN）的框架求解二维平流-扩散方程，用于模拟海洋污染物传输。通过将PDE残差、边界条件和初始条件嵌入损失函数，实现了无需网格的 mesh-free 模拟，在9层128神经元网络中达到约8.25%的相对L2误差。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u57fa\u4e8e\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc\uff08PINN\uff09\u7684\u6846\u67b6\u6c42\u89e3\u4e8c\u7ef4\u5e73\u6d41-\u6269\u6563\u65b9\u7a0b\uff0c\u7528\u4e8e\u6a21\u62df\u6d77\u6d0b\u6c61\u67d3\u7269\u4f20\u8f93\u3002\u901a\u8fc7\u5c06PDE\u6b8b\u5dee\u3001\u8fb9\u754c\u6761\u4ef6\u548c\u521d\u59cb\u6761\u4ef6\u5d4c\u5165\u635f\u5931\u51fd\u6570\uff0c\u5b9e\u73b0\u4e86\u65e0\u9700\u7f51\u683c\u7684 mesh-free \u6a21\u62df\uff0c\u57289\u5c42128\u795e\u7ecf\u5143\u7f51\u7edc\u4e2d\u8fbe\u5230\u7ea68.25%\u7684\u76f8\u5bf9L2\u8bef\u5dee\u3002"
     },
     {
       "path": "papers/2025/2508.03315",
@@ -1187,9 +967,9 @@
         "X-band_radar",
         "phase_resolved"
       ],
-      "date_collected": "",
+      "date_collected": "2025-08-01",
       "paper_url": "",
-      "abstract_preview": "本文提出物理信息神经算子（PINO）框架，通过将自由表面边界条件残差嵌入损失函数，从稀疏浮标或雷达测量中重建时空相位的非线性海浪场。训练无需真值数据，仅需约634个稀疏样本即可实现实时重建，SSP误差约0.10-0.13。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7b97\u5b50\uff08PINO\uff09\u6846\u67b6\uff0c\u901a\u8fc7\u5c06\u81ea\u7531\u8868\u9762\u8fb9\u754c\u6761\u4ef6\u6b8b\u5dee\u5d4c\u5165\u635f\u5931\u51fd\u6570\uff0c\u4ece\u7a00\u758f\u6d6e\u6807\u6216\u96f7\u8fbe\u6d4b\u91cf\u4e2d\u91cd\u5efa\u65f6\u7a7a\u76f8\u4f4d\u7684\u975e\u7ebf\u6027\u6d77\u6d6a\u573a\u3002\u8bad\u7ec3\u65e0\u9700\u771f\u503c\u6570\u636e\uff0c\u4ec5\u9700\u7ea6634\u4e2a\u7a00\u758f\u6837\u672c\u5373\u53ef\u5b9e\u73b0\u5b9e\u65f6\u91cd\u5efa\uff0cSSP\u8bef\u5dee\u7ea60.10-0.13\u3002"
     },
     {
       "path": "papers/2025/2509.10560",
@@ -1202,7 +982,7 @@
         "Shengdao Wang",
         "Jean-Philippe Montillet",
         "Zhengkai Huang",
-        "Gaël Kermarrec",
+        "Ga\u00ebl Kermarrec",
         "Shunqiang Hu",
         "Yu Zhou",
         "Jiahui Huang"
@@ -1225,9 +1005,9 @@
         "Tide Gauge",
         "Hazard Mitigation"
       ],
-      "date_collected": "",
+      "date_collected": "2025-09-01",
       "paper_url": "",
-      "abstract_preview": "GTS_Forecaster是一个面向大地测量时间序列预测的开源Python工具箱，集成了KAN、GNN-GRU、TimeGNN等先进深度学习模型，并提供了基于强化学习的KTIF缺失值填补算法和WQE评估指标，能够有效处理GNSS、卫星测高海表面高度和验潮仪记录等数据的非线性、非平稳时空依赖问题。"
+      "abstract_preview": "GTS_Forecaster\u662f\u4e00\u4e2a\u9762\u5411\u5927\u5730\u6d4b\u91cf\u65f6\u95f4\u5e8f\u5217\u9884\u6d4b\u7684\u5f00\u6e90Python\u5de5\u5177\u7bb1\uff0c\u96c6\u6210\u4e86KAN\u3001GNN-GRU\u3001TimeGNN\u7b49\u5148\u8fdb\u6df1\u5ea6\u5b66\u4e60\u6a21\u578b\uff0c\u5e76\u63d0\u4f9b\u4e86\u57fa\u4e8e\u5f3a\u5316\u5b66\u4e60\u7684KTIF\u7f3a\u5931\u503c\u586b\u8865\u7b97\u6cd5\u548cWQE\u8bc4\u4f30\u6307\u6807\uff0c\u80fd\u591f\u6709\u6548\u5904\u7406GNSS\u3001\u536b\u661f\u6d4b\u9ad8\u6d77\u8868\u9762\u9ad8\u5ea6\u548c\u9a8c\u6f6e\u4eea\u8bb0\u5f55\u7b49\u6570\u636e\u7684\u975e\u7ebf\u6027\u3001\u975e\u5e73\u7a33\u65f6\u7a7a\u4f9d\u8d56\u95ee\u9898\u3002"
     },
     {
       "path": "papers/2025/2509.12490",
@@ -1258,9 +1038,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2025-09-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2509.12490"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2509.12490"
     },
     {
       "path": "papers/2025/2509.19384",
@@ -1290,9 +1070,9 @@
         "Marine Engineering",
         "Climate Analysis"
       ],
-      "date_collected": "",
+      "date_collected": "2025-09-01",
       "paper_url": "",
-      "abstract_preview": "本文提出AUWave混合深度学习框架，利用站位序列编码器(MLP)和多尺度U-Net结合瓶颈自注意力机制，从稀疏不均匀的浮标观测中重建32×32高分辨率区域有效波高场。通过NDBC浮标观测和ERA5再分析数据验证了该方法在数据稀缺情况下的有效性，并揭示了锚点站位对重建性能的关键影响。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faAUWave\u6df7\u5408\u6df1\u5ea6\u5b66\u4e60\u6846\u67b6\uff0c\u5229\u7528\u7ad9\u4f4d\u5e8f\u5217\u7f16\u7801\u5668(MLP)\u548c\u591a\u5c3a\u5ea6U-Net\u7ed3\u5408\u74f6\u9888\u81ea\u6ce8\u610f\u529b\u673a\u5236\uff0c\u4ece\u7a00\u758f\u4e0d\u5747\u5300\u7684\u6d6e\u6807\u89c2\u6d4b\u4e2d\u91cd\u5efa32\u00d732\u9ad8\u5206\u8fa8\u7387\u533a\u57df\u6709\u6548\u6ce2\u9ad8\u573a\u3002\u901a\u8fc7NDBC\u6d6e\u6807\u89c2\u6d4b\u548cERA5\u518d\u5206\u6790\u6570\u636e\u9a8c\u8bc1\u4e86\u8be5\u65b9\u6cd5\u5728\u6570\u636e\u7a00\u7f3a\u60c5\u51b5\u4e0b\u7684\u6709\u6548\u6027\uff0c\u5e76\u63ed\u793a\u4e86\u951a\u70b9\u7ad9\u4f4d\u5bf9\u91cd\u5efa\u6027\u80fd\u7684\u5173\u952e\u5f71\u54cd\u3002"
     },
     {
       "path": "papers/2025/2509.22949",
@@ -1303,7 +1083,7 @@
         "Hamidreza Moazzami",
         "Asma Jamali",
         "Nicholas Kevlahan",
-        "Rodrigo A. Vargas-Hernández"
+        "Rodrigo A. Vargas-Hern\u00e1ndez"
       ],
       "source": "arXiv",
       "venue": "arXiv",
@@ -1320,9 +1100,9 @@
         "Numerical Weather Prediction",
         "PDE-Constrained Optimization"
       ],
-      "date_collected": "",
+      "date_collected": "2025-09-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种基于元学习的傅里叶神经算子（FNO）框架，用于近似变分数据同化中的逆Hessian算子，为共轭梯度（CG）方法提供有效初始化。实验结果表明，该FNO-CG方法在线性平流方程上相比标准CG方法，平均相对误差降低62%，迭代次数减少17%，特别是在病态条件下表现优异。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8e\u5143\u5b66\u4e60\u7684\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\uff08FNO\uff09\u6846\u67b6\uff0c\u7528\u4e8e\u8fd1\u4f3c\u53d8\u5206\u6570\u636e\u540c\u5316\u4e2d\u7684\u9006Hessian\u7b97\u5b50\uff0c\u4e3a\u5171\u8f6d\u68af\u5ea6\uff08CG\uff09\u65b9\u6cd5\u63d0\u4f9b\u6709\u6548\u521d\u59cb\u5316\u3002\u5b9e\u9a8c\u7ed3\u679c\u8868\u660e\uff0c\u8be5FNO-CG\u65b9\u6cd5\u5728\u7ebf\u6027\u5e73\u6d41\u65b9\u7a0b\u4e0a\u76f8\u6bd4\u6807\u51c6CG\u65b9\u6cd5\uff0c\u5e73\u5747\u76f8\u5bf9\u8bef\u5dee\u964d\u4f4e62%\uff0c\u8fed\u4ee3\u6b21\u6570\u51cf\u5c1117%\uff0c\u7279\u522b\u662f\u5728\u75c5\u6001\u6761\u4ef6\u4e0b\u8868\u73b0\u4f18\u5f02\u3002"
     },
     {
       "path": "papers/2025/2510.09792",
@@ -1350,9 +1130,9 @@
         "regional_ocean",
         "wave_propagation"
       ],
-      "date_collected": "",
+      "date_collected": "2025-10-01",
       "paper_url": "",
-      "abstract_preview": "本文提出带时间色散的傅里叶神经算子（FNOtD），通过将时间和空间联合参数化的积分核来内化色散关系，在波罗的海海平面预测任务中实现了长期预测稳定性和物理一致性，推理速度比数值模式快数个数量级。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u5e26\u65f6\u95f4\u8272\u6563\u7684\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\uff08FNOtD\uff09\uff0c\u901a\u8fc7\u5c06\u65f6\u95f4\u548c\u7a7a\u95f4\u8054\u5408\u53c2\u6570\u5316\u7684\u79ef\u5206\u6838\u6765\u5185\u5316\u8272\u6563\u5173\u7cfb\uff0c\u5728\u6ce2\u7f57\u7684\u6d77\u6d77\u5e73\u9762\u9884\u6d4b\u4efb\u52a1\u4e2d\u5b9e\u73b0\u4e86\u957f\u671f\u9884\u6d4b\u7a33\u5b9a\u6027\u548c\u7269\u7406\u4e00\u81f4\u6027\uff0c\u63a8\u7406\u901f\u5ea6\u6bd4\u6570\u503c\u6a21\u5f0f\u5feb\u6570\u4e2a\u6570\u91cf\u7ea7\u3002"
     },
     {
       "path": "papers/2025/2510.15284",
@@ -1385,9 +1165,9 @@
         "state_estimation",
         "ensemble_methods"
       ],
-      "date_collected": "",
+      "date_collected": "2025-10-01",
       "paper_url": "",
-      "abstract_preview": "本文提出EnKF-FCNN耦合算法，利用全连接神经网络学习小集合估计的订正项，在有限集合（N=7或N=20）条件下实现高精度数据同化，误差较传统EnKF降低一个数量级，同时计算成本可忽略不计。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faEnKF-FCNN\u8026\u5408\u7b97\u6cd5\uff0c\u5229\u7528\u5168\u8fde\u63a5\u795e\u7ecf\u7f51\u7edc\u5b66\u4e60\u5c0f\u96c6\u5408\u4f30\u8ba1\u7684\u8ba2\u6b63\u9879\uff0c\u5728\u6709\u9650\u96c6\u5408\uff08N=7\u6216N=20\uff09\u6761\u4ef6\u4e0b\u5b9e\u73b0\u9ad8\u7cbe\u5ea6\u6570\u636e\u540c\u5316\uff0c\u8bef\u5dee\u8f83\u4f20\u7edfEnKF\u964d\u4f4e\u4e00\u4e2a\u6570\u91cf\u7ea7\uff0c\u540c\u65f6\u8ba1\u7b97\u6210\u672c\u53ef\u5ffd\u7565\u4e0d\u8ba1\u3002"
     },
     {
       "path": "papers/2025/2510.17756",
@@ -1414,9 +1194,9 @@
         "remote_sensing",
         "multi_task_learning"
       ],
-      "date_collected": "",
+      "date_collected": "2025-10-01",
       "paper_url": "",
-      "abstract_preview": "本文提出基于物理信息神经网络的北极海冰速度和浓度预测方法，通过在HIS-Unet架构中嵌入海冰动力学物理约束（质量守恒和热力学约束），在小样本训练条件下仍能实现准确预测，有效提升了模型在融化季和初冻季的泛化能力。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u57fa\u4e8e\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc\u7684\u5317\u6781\u6d77\u51b0\u901f\u5ea6\u548c\u6d53\u5ea6\u9884\u6d4b\u65b9\u6cd5\uff0c\u901a\u8fc7\u5728HIS-Unet\u67b6\u6784\u4e2d\u5d4c\u5165\u6d77\u51b0\u52a8\u529b\u5b66\u7269\u7406\u7ea6\u675f\uff08\u8d28\u91cf\u5b88\u6052\u548c\u70ed\u529b\u5b66\u7ea6\u675f\uff09\uff0c\u5728\u5c0f\u6837\u672c\u8bad\u7ec3\u6761\u4ef6\u4e0b\u4ecd\u80fd\u5b9e\u73b0\u51c6\u786e\u9884\u6d4b\uff0c\u6709\u6548\u63d0\u5347\u4e86\u6a21\u578b\u5728\u878d\u5316\u5b63\u548c\u521d\u51bb\u5b63\u7684\u6cdb\u5316\u80fd\u529b\u3002"
     },
     {
       "path": "papers/2025/2510.18133",
@@ -1431,21 +1211,21 @@
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "卷积神经网络",
-        "聚类分析",
-        "亚季节至季节预测",
-        "海表高度预测",
-        "预处理策略"
+        "\u5377\u79ef\u795e\u7ecf\u7f51\u7edc",
+        "\u805a\u7c7b\u5206\u6790",
+        "\u4e9a\u5b63\u8282\u81f3\u5b63\u8282\u9884\u6d4b",
+        "\u6d77\u8868\u9ad8\u5ea6\u9884\u6d4b",
+        "\u9884\u5904\u7406\u7b56\u7565"
       ],
       "application_tags": [
-        "沿海海平面预测",
-        "海洋预报",
-        "气候变化",
-        "自然灾害预警"
+        "\u6cbf\u6d77\u6d77\u5e73\u9762\u9884\u6d4b",
+        "\u6d77\u6d0b\u9884\u62a5",
+        "\u6c14\u5019\u53d8\u5316",
+        "\u81ea\u7136\u707e\u5bb3\u9884\u8b66"
       ],
-      "date_collected": "",
+      "date_collected": "2025-10-01",
       "paper_url": "",
-      "abstract_preview": "本文探讨了聚类作为预处理步骤在识别沿海海平面亚季节至季节（S2S）预报机会中的实用性。通过对比全海岸预测、聚类区域预测和单点预测三种CNN建模策略，发现聚类方法能够在保持预测精度的同时，以最少的可调参数覆盖整个东北太平洋海岸，是进行沿海海平面S2S预测的首选方案。"
+      "abstract_preview": "\u672c\u6587\u63a2\u8ba8\u4e86\u805a\u7c7b\u4f5c\u4e3a\u9884\u5904\u7406\u6b65\u9aa4\u5728\u8bc6\u522b\u6cbf\u6d77\u6d77\u5e73\u9762\u4e9a\u5b63\u8282\u81f3\u5b63\u8282\uff08S2S\uff09\u9884\u62a5\u673a\u4f1a\u4e2d\u7684\u5b9e\u7528\u6027\u3002\u901a\u8fc7\u5bf9\u6bd4\u5168\u6d77\u5cb8\u9884\u6d4b\u3001\u805a\u7c7b\u533a\u57df\u9884\u6d4b\u548c\u5355\u70b9\u9884\u6d4b\u4e09\u79cdCNN\u5efa\u6a21\u7b56\u7565\uff0c\u53d1\u73b0\u805a\u7c7b\u65b9\u6cd5\u80fd\u591f\u5728\u4fdd\u6301\u9884\u6d4b\u7cbe\u5ea6\u7684\u540c\u65f6\uff0c\u4ee5\u6700\u5c11\u7684\u53ef\u8c03\u53c2\u6570\u8986\u76d6\u6574\u4e2a\u4e1c\u5317\u592a\u5e73\u6d0b\u6d77\u5cb8\uff0c\u662f\u8fdb\u884c\u6cbf\u6d77\u6d77\u5e73\u9762S2S\u9884\u6d4b\u7684\u9996\u9009\u65b9\u6848\u3002"
     },
     {
       "path": "papers/2025/2510.25563",
@@ -1453,9 +1233,9 @@
       "title": "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting",
       "arxiv": "2510.25563",
       "authors": [
-        "Víctor Medina",
-        "Giovanny A. Cuervo-Londoño",
-        "Javier Sánchez"
+        "V\u00edctor Medina",
+        "Giovanny A. Cuervo-Londo\u00f1o",
+        "Javier S\u00e1nchez"
       ],
       "source": "arXiv",
       "venue": "NeurIPS",
@@ -1473,41 +1253,9 @@
         "regional_ocean",
         "potential_temperature"
       ],
-      "date_collected": "",
+      "date_collected": "2025-10-01",
       "paper_url": "",
-      "abstract_preview": "本文首次将大气基础模型Aurora成功适配到海洋领域，通过两阶段微调策略在加那利涌升系统进行海表温度（SST）预报，实现了0.119K的低RMSE和~0.997的高异常相关系数，证明了跨领域知识迁移在海洋预报中的可行性。"
-    },
-    {
-      "path": "papers/2025/2511.05266",
-      "year": 2025,
-      "title": "Integrating Score-Based Diffusion Models with Machine Learning-Enhanced Localization for Advanced Data Assimilation in Geological Carbon Storage",
-      "arxiv": "2511.05266",
-      "authors": [
-        "Gabriel Serrão Seabra",
-        "Nikolaj T. Mücke",
-        "Vinicius Luiz Santos Silva",
-        "Alexandre A. Emerick",
-        "Denis Voskov",
-        "Femke Vossepoel"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Score-Based Diffusion Models",
-        "Data Assimilation",
-        "Ensemble Smoother with Multiple Data Assimilation",
-        "Machine Learning Localization",
-        "Uncertainty Quantification"
-      ],
-      "application_tags": [
-        "Geological Carbon Storage",
-        "Subsurface Characterization",
-        "CO2 Injection",
-        "Channelized Reservoirs"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了一种结合分数扩散模型与机器学习增强定位技术的地质碳存储数据同化框架，通过生成大规模先验集合（5000个成员）来改进集合平滑器（ESMDA）中的协方差估计，有效解决了通道型储层中因集合规模小而导致的采样误差和地质边界模糊问题。"
+      "abstract_preview": "\u672c\u6587\u9996\u6b21\u5c06\u5927\u6c14\u57fa\u7840\u6a21\u578bAurora\u6210\u529f\u9002\u914d\u5230\u6d77\u6d0b\u9886\u57df\uff0c\u901a\u8fc7\u4e24\u9636\u6bb5\u5fae\u8c03\u7b56\u7565\u5728\u52a0\u90a3\u5229\u6d8c\u5347\u7cfb\u7edf\u8fdb\u884c\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u9884\u62a5\uff0c\u5b9e\u73b0\u4e860.119K\u7684\u4f4eRMSE\u548c~0.997\u7684\u9ad8\u5f02\u5e38\u76f8\u5173\u7cfb\u6570\uff0c\u8bc1\u660e\u4e86\u8de8\u9886\u57df\u77e5\u8bc6\u8fc1\u79fb\u5728\u6d77\u6d0b\u9884\u62a5\u4e2d\u7684\u53ef\u884c\u6027\u3002"
     },
     {
       "path": "papers/2025/2511.05629",
@@ -1536,9 +1284,9 @@
         "upwelling",
         "diurnal_cycle"
       ],
-      "date_collected": "",
+      "date_collected": "2025-11-01",
       "paper_url": "",
-      "abstract_preview": "本文提出SSTODE框架，通过将平流-扩散方程嵌入神经ODE，结合能量交换积分器（EEI）建模海气界面热通量，在全球和区域SST预报基准上达到最优性能，揭示了平流流场、边界感知扩散和日变化等物理机制。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faSSTODE\u6846\u67b6\uff0c\u901a\u8fc7\u5c06\u5e73\u6d41-\u6269\u6563\u65b9\u7a0b\u5d4c\u5165\u795e\u7ecfODE\uff0c\u7ed3\u5408\u80fd\u91cf\u4ea4\u6362\u79ef\u5206\u5668\uff08EEI\uff09\u5efa\u6a21\u6d77\u6c14\u754c\u9762\u70ed\u901a\u91cf\uff0c\u5728\u5168\u7403\u548c\u533a\u57dfSST\u9884\u62a5\u57fa\u51c6\u4e0a\u8fbe\u5230\u6700\u4f18\u6027\u80fd\uff0c\u63ed\u793a\u4e86\u5e73\u6d41\u6d41\u573a\u3001\u8fb9\u754c\u611f\u77e5\u6269\u6563\u548c\u65e5\u53d8\u5316\u7b49\u7269\u7406\u673a\u5236\u3002"
     },
     {
       "path": "papers/2025/2511.06041",
@@ -1570,9 +1318,9 @@
         "in_situ",
         "forecast_skill"
       ],
-      "date_collected": "",
+      "date_collected": "2025-11-01",
       "paper_url": "",
-      "abstract_preview": "本文提出ADAF-Ocean框架，首次实现直接处理异源异尺度原始观测数据无需插值，通过神经过程启发的编码器-解码器架构和AI驱动超分辨率，在28M参数下实现0.25°全球海洋数据同化，使预报时效延长至20天。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faADAF-Ocean\u6846\u67b6\uff0c\u9996\u6b21\u5b9e\u73b0\u76f4\u63a5\u5904\u7406\u5f02\u6e90\u5f02\u5c3a\u5ea6\u539f\u59cb\u89c2\u6d4b\u6570\u636e\u65e0\u9700\u63d2\u503c\uff0c\u901a\u8fc7\u795e\u7ecf\u8fc7\u7a0b\u542f\u53d1\u7684\u7f16\u7801\u5668-\u89e3\u7801\u5668\u67b6\u6784\u548cAI\u9a71\u52a8\u8d85\u5206\u8fa8\u7387\uff0c\u572828M\u53c2\u6570\u4e0b\u5b9e\u73b00.25\u00b0\u5168\u7403\u6d77\u6d0b\u6570\u636e\u540c\u5316\uff0c\u4f7f\u9884\u62a5\u65f6\u6548\u5ef6\u957f\u81f320\u5929\u3002"
     },
     {
       "path": "papers/2025/2511.15182",
@@ -1600,9 +1348,9 @@
         "Emissions Analytics",
         "Decision Support System"
       ],
-      "date_collected": "",
+      "date_collected": "2025-11-01",
       "paper_url": "",
-      "abstract_preview": "SWR-Viz是一个结合物理信息神经网络波高预报模型与船舶航线优化的AI辅助交互式可视化分析框架，能够从当前海况快速生成数小时预报，支持数据同化与\"数字预演\"式的航线情景分析，在日本沿海和墨西哥湾航线的评估中表现出良好的预报稳定性和实际应用价值。"
+      "abstract_preview": "SWR-Viz\u662f\u4e00\u4e2a\u7ed3\u5408\u7269\u7406\u4fe1\u606f\u795e\u7ecf\u7f51\u7edc\u6ce2\u9ad8\u9884\u62a5\u6a21\u578b\u4e0e\u8239\u8236\u822a\u7ebf\u4f18\u5316\u7684AI\u8f85\u52a9\u4ea4\u4e92\u5f0f\u53ef\u89c6\u5316\u5206\u6790\u6846\u67b6\uff0c\u80fd\u591f\u4ece\u5f53\u524d\u6d77\u51b5\u5feb\u901f\u751f\u6210\u6570\u5c0f\u65f6\u9884\u62a5\uff0c\u652f\u6301\u6570\u636e\u540c\u5316\u4e0e\"\u6570\u5b57\u9884\u6f14\"\u5f0f\u7684\u822a\u7ebf\u60c5\u666f\u5206\u6790\uff0c\u5728\u65e5\u672c\u6cbf\u6d77\u548c\u58a8\u897f\u54e5\u6e7e\u822a\u7ebf\u7684\u8bc4\u4f30\u4e2d\u8868\u73b0\u51fa\u826f\u597d\u7684\u9884\u62a5\u7a33\u5b9a\u6027\u548c\u5b9e\u9645\u5e94\u7528\u4ef7\u503c\u3002"
     },
     {
       "path": "papers/2025/2511.17427",
@@ -1632,9 +1380,9 @@
         "model_calibration",
         "mesoscale_eddy"
       ],
-      "date_collected": "",
+      "date_collected": "2025-11-01",
       "paper_url": "",
-      "abstract_preview": "本文提出VEROS的可微分扩展，通过关键修改使其与JAX自动微分框架兼容，实现通过海洋模型动力学核的梯度计算，展示了在初始场重建和侧向粘度/底摩擦参数标定中的两个应用示例。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faVEROS\u7684\u53ef\u5fae\u5206\u6269\u5c55\uff0c\u901a\u8fc7\u5173\u952e\u4fee\u6539\u4f7f\u5176\u4e0eJAX\u81ea\u52a8\u5fae\u5206\u6846\u67b6\u517c\u5bb9\uff0c\u5b9e\u73b0\u901a\u8fc7\u6d77\u6d0b\u6a21\u578b\u52a8\u529b\u5b66\u6838\u7684\u68af\u5ea6\u8ba1\u7b97\uff0c\u5c55\u793a\u4e86\u5728\u521d\u59cb\u573a\u91cd\u5efa\u548c\u4fa7\u5411\u7c98\u5ea6/\u5e95\u6469\u64e6\u53c2\u6570\u6807\u5b9a\u4e2d\u7684\u4e24\u4e2a\u5e94\u7528\u793a\u4f8b\u3002"
     },
     {
       "path": "papers/2025/2511.18732",
@@ -1666,9 +1414,9 @@
         "ocean_currents",
         "sea_level"
       ],
-      "date_collected": "",
+      "date_collected": "2025-11-01",
       "paper_url": "",
-      "abstract_preview": "本文提出OceanForecastBench基准数据集，首次为数据驱动的全球海洋预报提供标准化训练（28年GLORYS12/ERA5/OSTIA数据）和评估框架（约1亿条卫星与原位观测），并对5个典型基线模型进行了多维度性能分析。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faOceanForecastBench\u57fa\u51c6\u6570\u636e\u96c6\uff0c\u9996\u6b21\u4e3a\u6570\u636e\u9a71\u52a8\u7684\u5168\u7403\u6d77\u6d0b\u9884\u62a5\u63d0\u4f9b\u6807\u51c6\u5316\u8bad\u7ec3\uff0828\u5e74GLORYS12/ERA5/OSTIA\u6570\u636e\uff09\u548c\u8bc4\u4f30\u6846\u67b6\uff08\u7ea61\u4ebf\u6761\u536b\u661f\u4e0e\u539f\u4f4d\u89c2\u6d4b\uff09\uff0c\u5e76\u5bf95\u4e2a\u5178\u578b\u57fa\u7ebf\u6a21\u578b\u8fdb\u884c\u4e86\u591a\u7ef4\u5ea6\u6027\u80fd\u5206\u6790\u3002"
     },
     {
       "path": "papers/2025/2511.20899",
@@ -1696,9 +1444,9 @@
         "Atmospheric Blocking",
         "Climate Extremes"
       ],
-      "date_collected": "",
+      "date_collected": "2025-11-01",
       "paper_url": "",
-      "abstract_preview": "本研究首次将太平洋起搏器（PACE）实验框架应用于深度学习气候模拟器（DLESyM），通过约束热带太平洋海表温度来隔离ENSO强迫信号。研究发现，尽管该模拟器能真实捕捉内部大气变率，但对ENSO强迫响应产生了显著放大，导致大气阻塞频率和持续时间被高估，而峰值强度被低估，凸显了深度学习气候模型需要与传统数值模型同等严格的物理验证。"
+      "abstract_preview": "\u672c\u7814\u7a76\u9996\u6b21\u5c06\u592a\u5e73\u6d0b\u8d77\u640f\u5668\uff08PACE\uff09\u5b9e\u9a8c\u6846\u67b6\u5e94\u7528\u4e8e\u6df1\u5ea6\u5b66\u4e60\u6c14\u5019\u6a21\u62df\u5668\uff08DLESyM\uff09\uff0c\u901a\u8fc7\u7ea6\u675f\u70ed\u5e26\u592a\u5e73\u6d0b\u6d77\u8868\u6e29\u5ea6\u6765\u9694\u79bbENSO\u5f3a\u8feb\u4fe1\u53f7\u3002\u7814\u7a76\u53d1\u73b0\uff0c\u5c3d\u7ba1\u8be5\u6a21\u62df\u5668\u80fd\u771f\u5b9e\u6355\u6349\u5185\u90e8\u5927\u6c14\u53d8\u7387\uff0c\u4f46\u5bf9ENSO\u5f3a\u8feb\u54cd\u5e94\u4ea7\u751f\u4e86\u663e\u8457\u653e\u5927\uff0c\u5bfc\u81f4\u5927\u6c14\u963b\u585e\u9891\u7387\u548c\u6301\u7eed\u65f6\u95f4\u88ab\u9ad8\u4f30\uff0c\u800c\u5cf0\u503c\u5f3a\u5ea6\u88ab\u4f4e\u4f30\uff0c\u51f8\u663e\u4e86\u6df1\u5ea6\u5b66\u4e60\u6c14\u5019\u6a21\u578b\u9700\u8981\u4e0e\u4f20\u7edf\u6570\u503c\u6a21\u578b\u540c\u7b49\u4e25\u683c\u7684\u7269\u7406\u9a8c\u8bc1\u3002"
     },
     {
       "path": "papers/2025/2512.11525",
@@ -1730,39 +1478,9 @@
         "ocean_currents",
         "sea_surface_height"
       ],
-      "date_collected": "",
+      "date_collected": "2025-12-01",
       "paper_url": "",
-      "abstract_preview": "本文提出NeuralOGCM框架，首次将可微分物理核心与神经网络校正器端到端融合，实现既具有物理一致性又具有计算效率的混合海洋环流模型，在长期预报稳定性上显著优于纯AI方法。"
-    },
-    {
-      "path": "papers/2025/2512.11545",
-      "year": 2025,
-      "title": "Graph Embedding with Mel-spectrograms for Underwater Acoustic Target Recognition",
-      "arxiv": "2512.11545",
-      "authors": [
-        "Sheng Feng",
-        "Shuqing Ma",
-        "Xiaoqian Zhu"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "graph_neural_network",
-        "Transformer",
-        "Mel_spectrogram",
-        "non_Euclidean",
-        "underwater_acoustics"
-      ],
-      "application_tags": [
-        "underwater_target_recognition",
-        "sonar",
-        "ship_classification",
-        "acoustic_signal_processing",
-        "model_interpretability"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出UATR-GTransformer框架，首次将图结构引入水下目标识别任务，通过Mel-图嵌入在非欧几里得空间建模水声信号的拓扑特性，在ShipsEar和DeepShip两个数据集上验证了方法的有效性。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faNeuralOGCM\u6846\u67b6\uff0c\u9996\u6b21\u5c06\u53ef\u5fae\u5206\u7269\u7406\u6838\u5fc3\u4e0e\u795e\u7ecf\u7f51\u7edc\u6821\u6b63\u5668\u7aef\u5230\u7aef\u878d\u5408\uff0c\u5b9e\u73b0\u65e2\u5177\u6709\u7269\u7406\u4e00\u81f4\u6027\u53c8\u5177\u6709\u8ba1\u7b97\u6548\u7387\u7684\u6df7\u5408\u6d77\u6d0b\u73af\u6d41\u6a21\u578b\uff0c\u5728\u957f\u671f\u9884\u62a5\u7a33\u5b9a\u6027\u4e0a\u663e\u8457\u4f18\u4e8e\u7eafAI\u65b9\u6cd5\u3002"
     },
     {
       "path": "papers/2025/2512.22152",
@@ -1774,7 +1492,7 @@
         "Pierre Haslee",
         "Lucile Gaultier",
         "Bertrand Chapron",
-        "Clément de Boyer Montégut",
+        "Cl\u00e9ment de Boyer Mont\u00e9gut",
         "Anass El Aouni",
         "Julien Le Sommer",
         "Ronan Fablet"
@@ -1795,9 +1513,9 @@
         "GLO12",
         "ocean_forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2025-12-01",
       "paper_url": "",
-      "abstract_preview": "本文提出基于U-Net和4DVarNet的端到端深度学习框架，利用稀疏卫星高度计观测数据进行全球海表高度（SSH）短期预报，在7天预报时效内显著优于业务化数值模式GLO12，尤其在高变率区域表现突出。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u57fa\u4e8eU-Net\u548c4DVarNet\u7684\u7aef\u5230\u7aef\u6df1\u5ea6\u5b66\u4e60\u6846\u67b6\uff0c\u5229\u7528\u7a00\u758f\u536b\u661f\u9ad8\u5ea6\u8ba1\u89c2\u6d4b\u6570\u636e\u8fdb\u884c\u5168\u7403\u6d77\u8868\u9ad8\u5ea6\uff08SSH\uff09\u77ed\u671f\u9884\u62a5\uff0c\u57287\u5929\u9884\u62a5\u65f6\u6548\u5185\u663e\u8457\u4f18\u4e8e\u4e1a\u52a1\u5316\u6570\u503c\u6a21\u5f0fGLO12\uff0c\u5c24\u5176\u5728\u9ad8\u53d8\u7387\u533a\u57df\u8868\u73b0\u7a81\u51fa\u3002"
     },
     {
       "path": "papers/2024/2402.15656",
@@ -1823,9 +1541,9 @@
         "Dynamical Systems",
         "PDE Solving"
       ],
-      "date_collected": "",
+      "date_collected": "2024-02-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种基于学习的状态空间方法来计算无限维半线性偏微分方程（PDEs）的解算子，通过利用半线性PDEs的结构和非线性观察器理论，开发了一种灵活的递归方法，结合预测和校正操作实现数据同化。在Kuramoto-Sivashinsky、Navier-Stokes和Korteweg-de Vries方程上的实验表明，该方法能够快速准确地预测长时间范围，并对噪声具有鲁棒性。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8e\u5b66\u4e60\u7684\u72b6\u6001\u7a7a\u95f4\u65b9\u6cd5\u6765\u8ba1\u7b97\u65e0\u9650\u7ef4\u534a\u7ebf\u6027\u504f\u5fae\u5206\u65b9\u7a0b\uff08PDEs\uff09\u7684\u89e3\u7b97\u5b50\uff0c\u901a\u8fc7\u5229\u7528\u534a\u7ebf\u6027PDEs\u7684\u7ed3\u6784\u548c\u975e\u7ebf\u6027\u89c2\u5bdf\u5668\u7406\u8bba\uff0c\u5f00\u53d1\u4e86\u4e00\u79cd\u7075\u6d3b\u7684\u9012\u5f52\u65b9\u6cd5\uff0c\u7ed3\u5408\u9884\u6d4b\u548c\u6821\u6b63\u64cd\u4f5c\u5b9e\u73b0\u6570\u636e\u540c\u5316\u3002\u5728Kuramoto-Sivashinsky\u3001Navier-Stokes\u548cKorteweg-de Vries\u65b9\u7a0b\u4e0a\u7684\u5b9e\u9a8c\u8868\u660e\uff0c\u8be5\u65b9\u6cd5\u80fd\u591f\u5feb\u901f\u51c6\u786e\u5730\u9884\u6d4b\u957f\u65f6\u95f4\u8303\u56f4\uff0c\u5e76\u5bf9\u566a\u58f0\u5177\u6709\u9c81\u68d2\u6027\u3002"
     },
     {
       "path": "papers/2024/2403.05028",
@@ -1843,9 +1561,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2024-03-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2403.05028"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2403.05028"
     },
     {
       "path": "papers/2024/2404.05768",
@@ -1858,7 +1576,7 @@
         "Ololade Sowunmi",
         "Florida State University",
         "Romain Egele",
-        "Université Paris-Saclay",
+        "Universit\u00e9 Paris-Saclay",
         "Sri Hari Krishna Narayanan",
         "Argonne National Laboratory",
         "Luke Van Roekel",
@@ -1881,9 +1599,9 @@
         "sea_surface_temperature",
         "forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2024-04-01",
       "paper_url": "",
-      "abstract_preview": "本文利用DeepHyper中的多目标超参数优化算法，对傅里叶神经算子（FNO）进行自动化调参，解决海洋动力学建模中的超参数选择难题。创新性地将异常相关系数（ACC）引入损失函数，结合MSE组成复合损失，在理想化斜压风驱动海洋模型上实现了单步预测和30天自回归滚动预测的显著提升。"
+      "abstract_preview": "\u672c\u6587\u5229\u7528DeepHyper\u4e2d\u7684\u591a\u76ee\u6807\u8d85\u53c2\u6570\u4f18\u5316\u7b97\u6cd5\uff0c\u5bf9\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\uff08FNO\uff09\u8fdb\u884c\u81ea\u52a8\u5316\u8c03\u53c2\uff0c\u89e3\u51b3\u6d77\u6d0b\u52a8\u529b\u5b66\u5efa\u6a21\u4e2d\u7684\u8d85\u53c2\u6570\u9009\u62e9\u96be\u9898\u3002\u521b\u65b0\u6027\u5730\u5c06\u5f02\u5e38\u76f8\u5173\u7cfb\u6570\uff08ACC\uff09\u5f15\u5165\u635f\u5931\u51fd\u6570\uff0c\u7ed3\u5408MSE\u7ec4\u6210\u590d\u5408\u635f\u5931\uff0c\u5728\u7406\u60f3\u5316\u659c\u538b\u98ce\u9a71\u52a8\u6d77\u6d0b\u6a21\u578b\u4e0a\u5b9e\u73b0\u4e86\u5355\u6b65\u9884\u6d4b\u548c30\u5929\u81ea\u56de\u5f52\u6eda\u52a8\u9884\u6d4b\u7684\u663e\u8457\u63d0\u5347\u3002"
     },
     {
       "path": "papers/2024/2404.08522",
@@ -1913,9 +1631,9 @@
         "Satellite Data Processing",
         "NWP"
       ],
-      "date_collected": "",
+      "date_collected": "2024-04-01",
       "paper_url": "",
-      "abstract_preview": "FuXi-DA是一个通用化的基于深度学习的数据同化框架，旨在解决传统数值天气预报中数据同化系统面临的高计算成本、复杂观测算子开发和观测数据类型受限等挑战。该框架成功实现了风云-4B卫星AGRI观测数据的同化，显著降低了分析误差并提升了预报性能。"
+      "abstract_preview": "FuXi-DA\u662f\u4e00\u4e2a\u901a\u7528\u5316\u7684\u57fa\u4e8e\u6df1\u5ea6\u5b66\u4e60\u7684\u6570\u636e\u540c\u5316\u6846\u67b6\uff0c\u65e8\u5728\u89e3\u51b3\u4f20\u7edf\u6570\u503c\u5929\u6c14\u9884\u62a5\u4e2d\u6570\u636e\u540c\u5316\u7cfb\u7edf\u9762\u4e34\u7684\u9ad8\u8ba1\u7b97\u6210\u672c\u3001\u590d\u6742\u89c2\u6d4b\u7b97\u5b50\u5f00\u53d1\u548c\u89c2\u6d4b\u6570\u636e\u7c7b\u578b\u53d7\u9650\u7b49\u6311\u6218\u3002\u8be5\u6846\u67b6\u6210\u529f\u5b9e\u73b0\u4e86\u98ce\u4e91-4B\u536b\u661fAGRI\u89c2\u6d4b\u6570\u636e\u7684\u540c\u5316\uff0c\u663e\u8457\u964d\u4f4e\u4e86\u5206\u6790\u8bef\u5dee\u5e76\u63d0\u5347\u4e86\u9884\u62a5\u6027\u80fd\u3002"
     },
     {
       "path": "papers/2024/2404.14757",
@@ -1955,9 +1673,9 @@
         "energy_forecasting",
         "sst_forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2024-04-01",
       "paper_url": "",
-      "abstract_preview": "本文提出State Space Transformer（SST），首个用于时间序列预测的混合Mamba-Transformer架构。SST通过多尺度patching机制将时间序列分解为长期模式和短期变化，分别由Mamba专家和Transformer专家独立建模，通过长短路由自适应融合，在保持O(L)线性复杂度的同时实现SOTA性能。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faState Space Transformer\uff08SST\uff09\uff0c\u9996\u4e2a\u7528\u4e8e\u65f6\u95f4\u5e8f\u5217\u9884\u6d4b\u7684\u6df7\u5408Mamba-Transformer\u67b6\u6784\u3002SST\u901a\u8fc7\u591a\u5c3a\u5ea6patching\u673a\u5236\u5c06\u65f6\u95f4\u5e8f\u5217\u5206\u89e3\u4e3a\u957f\u671f\u6a21\u5f0f\u548c\u77ed\u671f\u53d8\u5316\uff0c\u5206\u522b\u7531Mamba\u4e13\u5bb6\u548cTransformer\u4e13\u5bb6\u72ec\u7acb\u5efa\u6a21\uff0c\u901a\u8fc7\u957f\u77ed\u8def\u7531\u81ea\u9002\u5e94\u878d\u5408\uff0c\u5728\u4fdd\u6301O(L)\u7ebf\u6027\u590d\u6742\u5ea6\u7684\u540c\u65f6\u5b9e\u73b0SOTA\u6027\u80fd\u3002"
     },
     {
       "path": "papers/2024/2404.15419",
@@ -1969,16 +1687,16 @@
         "Matthew Newman",
         "Andrew Hoell",
         "Antonietta Capotondi",
-        "Jakob Schlör",
+        "Jakob Schl\u00f6r",
         "Dillon J. Amaya"
       ],
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2024-04-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2404.15419"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2404.15419"
     },
     {
       "path": "papers/2024/2404.17652",
@@ -2005,9 +1723,9 @@
         "Climate Impact Assessment",
         "Medium-Range Forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2024-04-01",
       "paper_url": "",
-      "abstract_preview": "本文通过对三次典型极端天气事件（2021年太平洋西北部热浪、2023年南亚湿热浪、2021年北美冬季风暴）的案例研究，系统比较了GraphCast、PanguWeather、FourCastNet等深度学习天气预报模型与ECMWF高分辨率预报系统（HRES）的预测性能。研究发现ML模型在局部区域可达到与HRES相当的精度，但在空间和时间聚合指标上表现欠佳，且缺乏关键变量导致无法充分评估极端天气对健"
+      "abstract_preview": "\u672c\u6587\u901a\u8fc7\u5bf9\u4e09\u6b21\u5178\u578b\u6781\u7aef\u5929\u6c14\u4e8b\u4ef6\uff082021\u5e74\u592a\u5e73\u6d0b\u897f\u5317\u90e8\u70ed\u6d6a\u30012023\u5e74\u5357\u4e9a\u6e7f\u70ed\u6d6a\u30012021\u5e74\u5317\u7f8e\u51ac\u5b63\u98ce\u66b4\uff09\u7684\u6848\u4f8b\u7814\u7a76\uff0c\u7cfb\u7edf\u6bd4\u8f83\u4e86GraphCast\u3001PanguWeather\u3001FourCastNet\u7b49\u6df1\u5ea6\u5b66\u4e60\u5929\u6c14\u9884\u62a5\u6a21\u578b\u4e0eECMWF\u9ad8\u5206\u8fa8\u7387\u9884\u62a5\u7cfb\u7edf\uff08HRES\uff09\u7684\u9884\u6d4b\u6027\u80fd\u3002\u7814\u7a76\u53d1\u73b0ML\u6a21\u578b\u5728\u5c40\u90e8\u533a\u57df\u53ef\u8fbe\u5230\u4e0eHRES\u76f8\u5f53\u7684\u7cbe\u5ea6\uff0c\u4f46\u5728\u7a7a\u95f4\u548c\u65f6\u95f4\u805a\u5408\u6307\u6807\u4e0a\u8868\u73b0\u6b20\u4f73\uff0c\u4e14\u7f3a\u4e4f\u5173\u952e\u53d8\u91cf\u5bfc\u81f4\u65e0\u6cd5\u5145\u5206\u8bc4\u4f30\u6781\u7aef\u5929\u6c14\u5bf9\u5065"
     },
     {
       "path": "papers/2024/2405.00627",
@@ -2032,9 +1750,9 @@
         "Neural Dynamics",
         "Control Theory"
       ],
-      "date_collected": "",
+      "date_collected": "2024-05-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种基于Koopman算子理论的非线性系统数据驱动线性估计方法，通过扩展动态模态分解（EDMD）结合奇异值分解（SVD）获取降阶模型，并利用深度确定性策略梯度（DDPG）算法学习补偿项以修正未建模动力学带来的误差。该方法具有可微同胚变换适应性，能够在不重新学习的情况下实现跨域最优状态估计。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8eKoopman\u7b97\u5b50\u7406\u8bba\u7684\u975e\u7ebf\u6027\u7cfb\u7edf\u6570\u636e\u9a71\u52a8\u7ebf\u6027\u4f30\u8ba1\u65b9\u6cd5\uff0c\u901a\u8fc7\u6269\u5c55\u52a8\u6001\u6a21\u6001\u5206\u89e3\uff08EDMD\uff09\u7ed3\u5408\u5947\u5f02\u503c\u5206\u89e3\uff08SVD\uff09\u83b7\u53d6\u964d\u9636\u6a21\u578b\uff0c\u5e76\u5229\u7528\u6df1\u5ea6\u786e\u5b9a\u6027\u7b56\u7565\u68af\u5ea6\uff08DDPG\uff09\u7b97\u6cd5\u5b66\u4e60\u8865\u507f\u9879\u4ee5\u4fee\u6b63\u672a\u5efa\u6a21\u52a8\u529b\u5b66\u5e26\u6765\u7684\u8bef\u5dee\u3002\u8be5\u65b9\u6cd5\u5177\u6709\u53ef\u5fae\u540c\u80da\u53d8\u6362\u9002\u5e94\u6027\uff0c\u80fd\u591f\u5728\u4e0d\u91cd\u65b0\u5b66\u4e60\u7684\u60c5\u51b5\u4e0b\u5b9e\u73b0\u8de8\u57df\u6700\u4f18\u72b6\u6001\u4f30\u8ba1\u3002"
     },
     {
       "path": "papers/2024/2405.16649",
@@ -2058,9 +1776,9 @@
         "Control Design",
         "System Identification"
       ],
-      "date_collected": "",
+      "date_collected": "2024-05-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种数据驱动的框架，用于在噪声观测下学习Koopman算子的有限维近似。该方法仅需测量噪声有界这一弱假设条件，通过表征测量噪声对Koopman算子学习的影响并更新可观测函数的参数来减轻噪声干扰，在多个标准基准测试上验证了其有效性。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u6570\u636e\u9a71\u52a8\u7684\u6846\u67b6\uff0c\u7528\u4e8e\u5728\u566a\u58f0\u89c2\u6d4b\u4e0b\u5b66\u4e60Koopman\u7b97\u5b50\u7684\u6709\u9650\u7ef4\u8fd1\u4f3c\u3002\u8be5\u65b9\u6cd5\u4ec5\u9700\u6d4b\u91cf\u566a\u58f0\u6709\u754c\u8fd9\u4e00\u5f31\u5047\u8bbe\u6761\u4ef6\uff0c\u901a\u8fc7\u8868\u5f81\u6d4b\u91cf\u566a\u58f0\u5bf9Koopman\u7b97\u5b50\u5b66\u4e60\u7684\u5f71\u54cd\u5e76\u66f4\u65b0\u53ef\u89c2\u6d4b\u51fd\u6570\u7684\u53c2\u6570\u6765\u51cf\u8f7b\u566a\u58f0\u5e72\u6270\uff0c\u5728\u591a\u4e2a\u6807\u51c6\u57fa\u51c6\u6d4b\u8bd5\u4e0a\u9a8c\u8bc1\u4e86\u5176\u6709\u6548\u6027\u3002"
     },
     {
       "path": "papers/2024/2406.03848",
@@ -2073,21 +1791,21 @@
       "source": "arXiv",
       "venue": "Journal of Advances in Modeling Earth Systems (JAMES)",
       "method_tags": [
-        "深度学习",
-        "神经网络",
-        "海浪预报",
-        "物理驱动机器学习"
+        "\u6df1\u5ea6\u5b66\u4e60",
+        "\u795e\u7ecf\u7f51\u7edc",
+        "\u6d77\u6d6a\u9884\u62a5",
+        "\u7269\u7406\u9a71\u52a8\u673a\u5668\u5b66\u4e60"
       ],
       "application_tags": [
-        "海洋学",
-        "气象预报",
-        "数值天气预报",
-        "海浪预测",
-        "极端天气"
+        "\u6d77\u6d0b\u5b66",
+        "\u6c14\u8c61\u9884\u62a5",
+        "\u6570\u503c\u5929\u6c14\u9884\u62a5",
+        "\u6d77\u6d6a\u9884\u6d4b",
+        "\u6781\u7aef\u5929\u6c14"
       ],
-      "date_collected": "",
+      "date_collected": "2024-06-01",
       "paper_url": "",
-      "abstract_preview": "OceanCastNet（OCN）是一种基于深度学习的全球海浪预报模型，通过融合风场和海浪场数据来预测有效波高、平均波周期和平均波方向。在NDBC浮标和Jason-3卫星观测数据的验证中，OCN在24个站点表现优于ECWAM业务模型，且计算效率显著提升，为深度学习在海浪预报领域的业务化应用提供了可行性验证。"
+      "abstract_preview": "OceanCastNet\uff08OCN\uff09\u662f\u4e00\u79cd\u57fa\u4e8e\u6df1\u5ea6\u5b66\u4e60\u7684\u5168\u7403\u6d77\u6d6a\u9884\u62a5\u6a21\u578b\uff0c\u901a\u8fc7\u878d\u5408\u98ce\u573a\u548c\u6d77\u6d6a\u573a\u6570\u636e\u6765\u9884\u6d4b\u6709\u6548\u6ce2\u9ad8\u3001\u5e73\u5747\u6ce2\u5468\u671f\u548c\u5e73\u5747\u6ce2\u65b9\u5411\u3002\u5728NDBC\u6d6e\u6807\u548cJason-3\u536b\u661f\u89c2\u6d4b\u6570\u636e\u7684\u9a8c\u8bc1\u4e2d\uff0cOCN\u572824\u4e2a\u7ad9\u70b9\u8868\u73b0\u4f18\u4e8eECWAM\u4e1a\u52a1\u6a21\u578b\uff0c\u4e14\u8ba1\u7b97\u6548\u7387\u663e\u8457\u63d0\u5347\uff0c\u4e3a\u6df1\u5ea6\u5b66\u4e60\u5728\u6d77\u6d6a\u9884\u62a5\u9886\u57df\u7684\u4e1a\u52a1\u5316\u5e94\u7528\u63d0\u4f9b\u4e86\u53ef\u884c\u6027\u9a8c\u8bc1\u3002"
     },
     {
       "path": "papers/2024/2406.07063",
@@ -2113,46 +1831,9 @@
         "Paleoclimate Proxies",
         "Tropical Pacific Ocean"
       ],
-      "date_collected": "",
+      "date_collected": "2024-06-01",
       "paper_url": "",
-      "abstract_preview": "本文基于Transformer架构的深度学习模型，在热带太平洋区域进行了海洋数据同化研究。通过与线性逆模型（LIM）的对比实验，证明了深度学习模型在气候重建任务中具有更强的预测能力，特别是在利用珊瑚代理数据进行过去气候状态重建方面展现出显著优势。"
-    },
-    {
-      "path": "papers/2024/2406.07680",
-      "year": 2024,
-      "title": "Watching Swarm Dynamics from Above: A Framework for Advanced Object Tracking in Drone Videos",
-      "arxiv": "2406.07680",
-      "authors": [
-        "Duc Pham",
-        "Technical University Berlin",
-        "Matthew Hansen",
-        "Leibniz Institute for Freshwater Ecology and Inland Fisheries",
-        "Félicie Dhellemmes",
-        "Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK",
-        "Jens Krause",
-        "Leibniz Institute for Freshwater Ecology and Inland Fisheries",
-        "Pia Bideau",
-        "Univ. Grenoble Alpes, Inria, CNRS, Grenoble INP, LJK"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "particle_filter",
-        "semantic_segmentation",
-        "deeplabv3",
-        "kalman_filter",
-        "visual_tracking"
-      ],
-      "application_tags": [
-        "animal_tracking",
-        "collective_behavior",
-        "fish_school",
-        "drone_videos",
-        "marine_ecology"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出Swarm Dynamics from Above（SwDA）框架，通过结合粒子滤波器与语义分割技术，实现从无人机视频中对海洋鱼群进行长期实时坐标跟踪。首次实现无地理标记的开放海洋环境中动物群体行为的3D轨迹重建，在低数据样本条件下仍能保持高跟踪精度。"
+      "abstract_preview": "\u672c\u6587\u57fa\u4e8eTransformer\u67b6\u6784\u7684\u6df1\u5ea6\u5b66\u4e60\u6a21\u578b\uff0c\u5728\u70ed\u5e26\u592a\u5e73\u6d0b\u533a\u57df\u8fdb\u884c\u4e86\u6d77\u6d0b\u6570\u636e\u540c\u5316\u7814\u7a76\u3002\u901a\u8fc7\u4e0e\u7ebf\u6027\u9006\u6a21\u578b\uff08LIM\uff09\u7684\u5bf9\u6bd4\u5b9e\u9a8c\uff0c\u8bc1\u660e\u4e86\u6df1\u5ea6\u5b66\u4e60\u6a21\u578b\u5728\u6c14\u5019\u91cd\u5efa\u4efb\u52a1\u4e2d\u5177\u6709\u66f4\u5f3a\u7684\u9884\u6d4b\u80fd\u529b\uff0c\u7279\u522b\u662f\u5728\u5229\u7528\u73ca\u745a\u4ee3\u7406\u6570\u636e\u8fdb\u884c\u8fc7\u53bb\u6c14\u5019\u72b6\u6001\u91cd\u5efa\u65b9\u9762\u5c55\u73b0\u51fa\u663e\u8457\u4f18\u52bf\u3002"
     },
     {
       "path": "papers/2024/2407.04617",
@@ -2168,9 +1849,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2024-07-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2407.04617"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2407.04617"
     },
     {
       "path": "papers/2024/2408.06262",
@@ -2200,45 +1881,9 @@
         "climate_forecasting",
         "seasonal_prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2024-08-01",
       "paper_url": "",
-      "abstract_preview": "本文提出DUNE（Deep UNet++ Ensemble）模型，一种基于深度学习UNet++架构的集成预测方法，用于月度、季节和年度尺度的2米温度（T2m）和海表温度（SST）预测。该模型利用ERA5月均值再分析数据训练，首次实现AI驱动的全球月度、季节和年度气候预测，推理速度比NOAA业务化预报快1000倍。"
-    },
-    {
-      "path": "papers/2024/2408.11429",
-      "year": 2024,
-      "title": "Long-Range Vision-Based UAV-assisted Localization for Unmanned Surface Vehicles",
-      "arxiv": "2408.11429",
-      "authors": [
-        "Waseem Akram",
-        "Siyuan Yang",
-        "Hailiang Kuang",
-        "Xiaoyu He",
-        "Muhayy Ud Din",
-        "Yihao Dong",
-        "Defu Lin",
-        "Lakmal Seneviratne",
-        "Shaoming He",
-        "Irfan Hussain"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "UAV辅助定位",
-        "视觉定位",
-        "三角测量",
-        "扩展卡尔曼滤波",
-        "深度学习目标检测"
-      ],
-      "application_tags": [
-        "水面无人艇导航",
-        "GNSS拒止环境",
-        "海洋无人系统",
-        "多机器人协作"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了一种基于无人机（UAV）辅助水面无人艇（USV）在GNSS受限海洋环境中实现远程视觉定位的新方法。无人机沿海岸线飞行，通过深度学习检测无人艇并结合三角测量和扩展卡尔曼滤波（EKF）进行鲁棒的状态估计，该方法在MBZIRC-2024真实海洋环境中验证有效。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faDUNE\uff08Deep UNet++ Ensemble\uff09\u6a21\u578b\uff0c\u4e00\u79cd\u57fa\u4e8e\u6df1\u5ea6\u5b66\u4e60UNet++\u67b6\u6784\u7684\u96c6\u6210\u9884\u6d4b\u65b9\u6cd5\uff0c\u7528\u4e8e\u6708\u5ea6\u3001\u5b63\u8282\u548c\u5e74\u5ea6\u5c3a\u5ea6\u76842\u7c73\u6e29\u5ea6\uff08T2m\uff09\u548c\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u9884\u6d4b\u3002\u8be5\u6a21\u578b\u5229\u7528ERA5\u6708\u5747\u503c\u518d\u5206\u6790\u6570\u636e\u8bad\u7ec3\uff0c\u9996\u6b21\u5b9e\u73b0AI\u9a71\u52a8\u7684\u5168\u7403\u6708\u5ea6\u3001\u5b63\u8282\u548c\u5e74\u5ea6\u6c14\u5019\u9884\u6d4b\uff0c\u63a8\u7406\u901f\u5ea6\u6bd4NOAA\u4e1a\u52a1\u5316\u9884\u62a5\u5feb1000\u500d\u3002"
     },
     {
       "path": "papers/2024/2409.03042",
@@ -2255,9 +1900,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2024-09-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2409.03042"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2409.03042"
     },
     {
       "path": "papers/2024/2409.05369",
@@ -2296,9 +1941,9 @@
         "ocean_modeling",
         "climate_prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2024-09-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了CAS-Canglong模型，一个基于Swin-Transformer架构的三维深度学习模型，用于次季节至季节（S2S）尺度的全球海表温度（SST）预测。该模型首次利用深度学习实现S2S全球SST预测，在七个关键海洋区域的1-3个月提前预测技能比物理数值模型提升13.7%至77.1%，并成功预测了2024年ENSO从El Niño向La Niña的转换。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86CAS-Canglong\u6a21\u578b\uff0c\u4e00\u4e2a\u57fa\u4e8eSwin-Transformer\u67b6\u6784\u7684\u4e09\u7ef4\u6df1\u5ea6\u5b66\u4e60\u6a21\u578b\uff0c\u7528\u4e8e\u6b21\u5b63\u8282\u81f3\u5b63\u8282\uff08S2S\uff09\u5c3a\u5ea6\u7684\u5168\u7403\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u9884\u6d4b\u3002\u8be5\u6a21\u578b\u9996\u6b21\u5229\u7528\u6df1\u5ea6\u5b66\u4e60\u5b9e\u73b0S2S\u5168\u7403SST\u9884\u6d4b\uff0c\u5728\u4e03\u4e2a\u5173\u952e\u6d77\u6d0b\u533a\u57df\u76841-3\u4e2a\u6708\u63d0\u524d\u9884\u6d4b\u6280\u80fd\u6bd4\u7269\u7406\u6570\u503c\u6a21\u578b\u63d0\u534713.7%\u81f377.1%\uff0c\u5e76\u6210\u529f\u9884\u6d4b\u4e862024\u5e74ENSO\u4eceEl Ni\u00f1o\u5411La Ni\u00f1a\u7684\u8f6c\u6362\u3002"
     },
     {
       "path": "papers/2024/2409.14300",
@@ -2323,9 +1968,9 @@
         "Dynamical Systems",
         "State Estimation"
       ],
-      "date_collected": "",
+      "date_collected": "2024-09-01",
       "paper_url": "",
-      "abstract_preview": "本文研究了在非线性扰动下集合卡尔曼滤波（EnKF）的扩展方法，提出了条件高斯EnKF（CG-EnKF）和正态得分EnKF（NS-EnKF）两种改进算法。实验结果表明，在Lorenz-96高维多尺度数据同化基准问题上，这两种方法显著优于基于深度学习的分数滤波器（SF），且NS-EnKF在处理高度非高斯噪声扰动方面表现尤为突出。"
+      "abstract_preview": "\u672c\u6587\u7814\u7a76\u4e86\u5728\u975e\u7ebf\u6027\u6270\u52a8\u4e0b\u96c6\u5408\u5361\u5c14\u66fc\u6ee4\u6ce2\uff08EnKF\uff09\u7684\u6269\u5c55\u65b9\u6cd5\uff0c\u63d0\u51fa\u4e86\u6761\u4ef6\u9ad8\u65afEnKF\uff08CG-EnKF\uff09\u548c\u6b63\u6001\u5f97\u5206EnKF\uff08NS-EnKF\uff09\u4e24\u79cd\u6539\u8fdb\u7b97\u6cd5\u3002\u5b9e\u9a8c\u7ed3\u679c\u8868\u660e\uff0c\u5728Lorenz-96\u9ad8\u7ef4\u591a\u5c3a\u5ea6\u6570\u636e\u540c\u5316\u57fa\u51c6\u95ee\u9898\u4e0a\uff0c\u8fd9\u4e24\u79cd\u65b9\u6cd5\u663e\u8457\u4f18\u4e8e\u57fa\u4e8e\u6df1\u5ea6\u5b66\u4e60\u7684\u5206\u6570\u6ee4\u6ce2\u5668\uff08SF\uff09\uff0c\u4e14NS-EnKF\u5728\u5904\u7406\u9ad8\u5ea6\u975e\u9ad8\u65af\u566a\u58f0\u6270\u52a8\u65b9\u9762\u8868\u73b0\u5c24\u4e3a\u7a81\u51fa\u3002"
     },
     {
       "path": "papers/2024/2409.19518",
@@ -2355,9 +2000,9 @@
         "long_term_forecast",
         "LTSF"
       ],
-      "date_collected": "",
+      "date_collected": "2024-09-01",
       "paper_url": "",
-      "abstract_preview": "本文提出KODA框架，将Koopman算子与数据同化融合，通过傅里叶域滤波将动力学分解为物理分量（Koopman演化）和残差分量（递归模型），在长时预报和数据同化任务中显著优于现有方法，支持推理时在线吸收新观测进行状态修正。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faKODA\u6846\u67b6\uff0c\u5c06Koopman\u7b97\u5b50\u4e0e\u6570\u636e\u540c\u5316\u878d\u5408\uff0c\u901a\u8fc7\u5085\u91cc\u53f6\u57df\u6ee4\u6ce2\u5c06\u52a8\u529b\u5b66\u5206\u89e3\u4e3a\u7269\u7406\u5206\u91cf\uff08Koopman\u6f14\u5316\uff09\u548c\u6b8b\u5dee\u5206\u91cf\uff08\u9012\u5f52\u6a21\u578b\uff09\uff0c\u5728\u957f\u65f6\u9884\u62a5\u548c\u6570\u636e\u540c\u5316\u4efb\u52a1\u4e2d\u663e\u8457\u4f18\u4e8e\u73b0\u6709\u65b9\u6cd5\uff0c\u652f\u6301\u63a8\u7406\u65f6\u5728\u7ebf\u5438\u6536\u65b0\u89c2\u6d4b\u8fdb\u884c\u72b6\u6001\u4fee\u6b63\u3002"
     },
     {
       "path": "papers/2024/2410.10523",
@@ -2374,9 +2019,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2024-10-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2410.10523"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2410.10523"
     },
     {
       "path": "papers/2024/2410.11807",
@@ -2407,55 +2052,9 @@
         "sst_forecasting",
         "marine_dynamics"
       ],
-      "date_collected": "",
+      "date_collected": "2024-10-01",
       "paper_url": "",
-      "abstract_preview": "本文提出SeaCast，一个用于高分辨率中程海洋预报的图神经网络模型。SeaCast采用层级图结构处理不规则海洋网格，整合外部大气强迫和边界强迫，在地中海海域实现与业务化数值模式Med-PHY相当的预报性能，但推理速度提升约72000倍（11秒 vs 135分钟）。"
-    },
-    {
-      "path": "papers/2024/2410.16605",
-      "year": 2024,
-      "title": "EnKode: Active Learning of Unknown Flows with Koopman Operators",
-      "arxiv": "2410.16605",
-      "authors": [
-        "Alice K. Li",
-        "Thales C. Silva",
-        "M. Ani Hsieh"
-      ],
-      "source": "arXiv",
-      "venue": "IEEE Robotics and Automation Letters",
-      "method_tags": [
-        "Koopman_Operator",
-        "Active_Learning",
-        "Ensemble_Methods",
-        "GNN"
-      ],
-      "application_tags": [
-        "ocean_circulation",
-        "flow_modeling",
-        "robotics",
-        "active_sensing",
-        "uncertainty_quantification"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了EnKode，一种基于Koopman算子理论和集成方法的自适应采样方法，用于利用机器人稀疏数据建模未知流场。该方法通过Fourier特征lifting函数将非线性动力学线性化，并通过集成模型的不确定性估计引导主动采样，迭代地将数据采集机器人导向高信息量区域。"
-    },
-    {
-      "path": "papers/2024/2410.17913",
-      "year": 2024,
-      "title": "Deep learning for model correction of dynamical systems with data scarcity",
-      "arxiv": "2410.17913",
-      "authors": [
-        "Caroline Tatsuoka",
-        "Dongbin Xiu"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [],
-      "application_tags": [],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2410.17913"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faSeaCast\uff0c\u4e00\u4e2a\u7528\u4e8e\u9ad8\u5206\u8fa8\u7387\u4e2d\u7a0b\u6d77\u6d0b\u9884\u62a5\u7684\u56fe\u795e\u7ecf\u7f51\u7edc\u6a21\u578b\u3002SeaCast\u91c7\u7528\u5c42\u7ea7\u56fe\u7ed3\u6784\u5904\u7406\u4e0d\u89c4\u5219\u6d77\u6d0b\u7f51\u683c\uff0c\u6574\u5408\u5916\u90e8\u5927\u6c14\u5f3a\u8feb\u548c\u8fb9\u754c\u5f3a\u8feb\uff0c\u5728\u5730\u4e2d\u6d77\u6d77\u57df\u5b9e\u73b0\u4e0e\u4e1a\u52a1\u5316\u6570\u503c\u6a21\u5f0fMed-PHY\u76f8\u5f53\u7684\u9884\u62a5\u6027\u80fd\uff0c\u4f46\u63a8\u7406\u901f\u5ea6\u63d0\u5347\u7ea672000\u500d\uff0811\u79d2 vs 135\u5206\u949f\uff09\u3002"
     },
     {
       "path": "papers/2024/2410.20072",
@@ -2481,9 +2080,9 @@
         "Climate Prediction",
         "Chaos Theory"
       ],
-      "date_collected": "",
+      "date_collected": "2024-10-01",
       "paper_url": "",
-      "abstract_preview": "CGKN（条件高斯Koopman网络）是一个将非线性动力系统转化为具有条件高斯结构的神经随机微分方程的深度学习框架，通过Koopman理论启发的提升技术，在保留关键非线性特征的同时实现高效的预测和数据同化。"
+      "abstract_preview": "CGKN\uff08\u6761\u4ef6\u9ad8\u65afKoopman\u7f51\u7edc\uff09\u662f\u4e00\u4e2a\u5c06\u975e\u7ebf\u6027\u52a8\u529b\u7cfb\u7edf\u8f6c\u5316\u4e3a\u5177\u6709\u6761\u4ef6\u9ad8\u65af\u7ed3\u6784\u7684\u795e\u7ecf\u968f\u673a\u5fae\u5206\u65b9\u7a0b\u7684\u6df1\u5ea6\u5b66\u4e60\u6846\u67b6\uff0c\u901a\u8fc7Koopman\u7406\u8bba\u542f\u53d1\u7684\u63d0\u5347\u6280\u672f\uff0c\u5728\u4fdd\u7559\u5173\u952e\u975e\u7ebf\u6027\u7279\u5f81\u7684\u540c\u65f6\u5b9e\u73b0\u9ad8\u6548\u7684\u9884\u6d4b\u548c\u6570\u636e\u540c\u5316\u3002"
     },
     {
       "path": "papers/2024/2412.03413",
@@ -2516,9 +2115,9 @@
         "MODIS",
         "oceanography"
       ],
-      "date_collected": "",
+      "date_collected": "2024-12-01",
       "paper_url": "",
-      "abstract_preview": "本文利用U-Net和Vision Transformer等深度学习模型从卫星MODIS图像中重建被云遮挡的海表温度(SST)区域。与传统最优插值方法相比，提出的U-Net64模型在RMSE指标上降低了约50%，展现了深度学习方法在海洋卫星数据重建中的优势。"
+      "abstract_preview": "\u672c\u6587\u5229\u7528U-Net\u548cVision Transformer\u7b49\u6df1\u5ea6\u5b66\u4e60\u6a21\u578b\u4ece\u536b\u661fMODIS\u56fe\u50cf\u4e2d\u91cd\u5efa\u88ab\u4e91\u906e\u6321\u7684\u6d77\u8868\u6e29\u5ea6(SST)\u533a\u57df\u3002\u4e0e\u4f20\u7edf\u6700\u4f18\u63d2\u503c\u65b9\u6cd5\u76f8\u6bd4\uff0c\u63d0\u51fa\u7684U-Net64\u6a21\u578b\u5728RMSE\u6307\u6807\u4e0a\u964d\u4f4e\u4e86\u7ea650%\uff0c\u5c55\u73b0\u4e86\u6df1\u5ea6\u5b66\u4e60\u65b9\u6cd5\u5728\u6d77\u6d0b\u536b\u661f\u6570\u636e\u91cd\u5efa\u4e2d\u7684\u4f18\u52bf\u3002"
     },
     {
       "path": "papers/2024/2412.18097",
@@ -2526,26 +2125,26 @@
       "title": "LangYa: Cross-Spatiotemporal Ocean Forecasting",
       "arxiv": "2412.18097",
       "authors": [
-        "待补充",
-        "待补充",
-        "待补充"
+        "\u5f85\u8865\u5145",
+        "\u5f85\u8865\u5145",
+        "\u5f85\u8865\u5145"
       ],
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "海洋预报",
-        "时空预测",
-        "深度学习",
-        "跨时空建模"
+        "\u6d77\u6d0b\u9884\u62a5",
+        "\u65f6\u7a7a\u9884\u6d4b",
+        "\u6df1\u5ea6\u5b66\u4e60",
+        "\u8de8\u65f6\u7a7a\u5efa\u6a21"
       ],
       "application_tags": [
-        "海洋科学",
-        "数值预报",
-        "气候变化"
+        "\u6d77\u6d0b\u79d1\u5b66",
+        "\u6570\u503c\u9884\u62a5",
+        "\u6c14\u5019\u53d8\u5316"
       ],
-      "date_collected": "",
+      "date_collected": "2024-12-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了LangYa，一个用于跨时空海洋预报的深度学习框架，旨在解决传统海洋数值模式在计算效率和多尺度时空特征提取方面的局限性，通过创新的神经网络架构实现更准确、更高效的海洋状态预测。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86LangYa\uff0c\u4e00\u4e2a\u7528\u4e8e\u8de8\u65f6\u7a7a\u6d77\u6d0b\u9884\u62a5\u7684\u6df1\u5ea6\u5b66\u4e60\u6846\u67b6\uff0c\u65e8\u5728\u89e3\u51b3\u4f20\u7edf\u6d77\u6d0b\u6570\u503c\u6a21\u5f0f\u5728\u8ba1\u7b97\u6548\u7387\u548c\u591a\u5c3a\u5ea6\u65f6\u7a7a\u7279\u5f81\u63d0\u53d6\u65b9\u9762\u7684\u5c40\u9650\u6027\uff0c\u901a\u8fc7\u521b\u65b0\u7684\u795e\u7ecf\u7f51\u7edc\u67b6\u6784\u5b9e\u73b0\u66f4\u51c6\u786e\u3001\u66f4\u9ad8\u6548\u7684\u6d77\u6d0b\u72b6\u6001\u9884\u6d4b\u3002"
     },
     {
       "path": "papers/2023/2302.11357",
@@ -2576,9 +2175,9 @@
         "Ocean-Atmosphere Interaction",
         "Sea Surface Temperature"
       ],
-      "date_collected": "",
+      "date_collected": "2023-02-01",
       "paper_url": "",
-      "abstract_preview": "本研究利用卷积神经网络（CNN）分析西太平洋和东太平洋海表温度（SST）梯度的空间特征对中太平洋Nino3.4 SST预测技能的相对贡献。研究发现，西太平洋SST模式相比东太平洋能够提供更好的Nino3.4预测技能，表明ENSO预测中SST空间格局的重要影响。通过5000个随机初始化的CNN模型集合，验证了随机初始化对预测技能的影响服从高斯分布。"
+      "abstract_preview": "\u672c\u7814\u7a76\u5229\u7528\u5377\u79ef\u795e\u7ecf\u7f51\u7edc\uff08CNN\uff09\u5206\u6790\u897f\u592a\u5e73\u6d0b\u548c\u4e1c\u592a\u5e73\u6d0b\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u68af\u5ea6\u7684\u7a7a\u95f4\u7279\u5f81\u5bf9\u4e2d\u592a\u5e73\u6d0bNino3.4 SST\u9884\u6d4b\u6280\u80fd\u7684\u76f8\u5bf9\u8d21\u732e\u3002\u7814\u7a76\u53d1\u73b0\uff0c\u897f\u592a\u5e73\u6d0bSST\u6a21\u5f0f\u76f8\u6bd4\u4e1c\u592a\u5e73\u6d0b\u80fd\u591f\u63d0\u4f9b\u66f4\u597d\u7684Nino3.4\u9884\u6d4b\u6280\u80fd\uff0c\u8868\u660eENSO\u9884\u6d4b\u4e2dSST\u7a7a\u95f4\u683c\u5c40\u7684\u91cd\u8981\u5f71\u54cd\u3002\u901a\u8fc75000\u4e2a\u968f\u673a\u521d\u59cb\u5316\u7684CNN\u6a21\u578b\u96c6\u5408\uff0c\u9a8c\u8bc1\u4e86\u968f\u673a\u521d\u59cb\u5316\u5bf9\u9884\u6d4b\u6280\u80fd\u7684\u5f71\u54cd\u670d\u4ece\u9ad8\u65af\u5206\u5e03\u3002"
     },
     {
       "path": "papers/2023/2304.00198",
@@ -2601,9 +2200,9 @@
         "Chaotic Systems",
         "Traffic Prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2023-04-01",
       "paper_url": "",
-      "abstract_preview": "本文针对噪声数据训练回声状态网络（ESN）的难题，提出了一种基于集合卡尔曼滤波的顺序训练算法（KalT-ESN）。该方法能够在存在观测噪声的情况下有效训练ESN，在保持计算效率的同时显著提升了预测性能，并在混沌系统和交通数据上验证了其有效性。"
+      "abstract_preview": "\u672c\u6587\u9488\u5bf9\u566a\u58f0\u6570\u636e\u8bad\u7ec3\u56de\u58f0\u72b6\u6001\u7f51\u7edc\uff08ESN\uff09\u7684\u96be\u9898\uff0c\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8e\u96c6\u5408\u5361\u5c14\u66fc\u6ee4\u6ce2\u7684\u987a\u5e8f\u8bad\u7ec3\u7b97\u6cd5\uff08KalT-ESN\uff09\u3002\u8be5\u65b9\u6cd5\u80fd\u591f\u5728\u5b58\u5728\u89c2\u6d4b\u566a\u58f0\u7684\u60c5\u51b5\u4e0b\u6709\u6548\u8bad\u7ec3ESN\uff0c\u5728\u4fdd\u6301\u8ba1\u7b97\u6548\u7387\u7684\u540c\u65f6\u663e\u8457\u63d0\u5347\u4e86\u9884\u6d4b\u6027\u80fd\uff0c\u5e76\u5728\u6df7\u6c8c\u7cfb\u7edf\u548c\u4ea4\u901a\u6570\u636e\u4e0a\u9a8c\u8bc1\u4e86\u5176\u6709\u6548\u6027\u3002"
     },
     {
       "path": "papers/2023/2304.03832",
@@ -2633,37 +2232,9 @@
         "Bias_Prediction",
         "GFDL"
       ],
-      "date_collected": "",
+      "date_collected": "2023-04-01",
       "paper_url": "",
-      "abstract_preview": "本文利用卷积神经网络（CNN）学习从模型状态变量到数据同化分析增量（代表系统模型偏差）的映射，验证了用数据驱动方法预测海冰偏差的可行性，可作为参数化方案减少自由运行气候模拟中的偏差。"
-    },
-    {
-      "path": "papers/2023/2304.05872",
-      "year": 2023,
-      "title": "Learning to Communicate and Collaborate in a Competitive Multi-Agent Setup to Clean the Ocean from Macroplastics",
-      "arxiv": "2304.05872",
-      "authors": [
-        "Philipp D. Siedler"
-      ],
-      "source": "arXiv",
-      "venue": "ICLR Workshop",
-      "method_tags": [
-        "Multi-Agent_RL",
-        "Graph_Neural_Network",
-        "Communication",
-        "PPO",
-        "MARL"
-      ],
-      "application_tags": [
-        "Ocean_Plastic",
-        "Marine_Litter",
-        "Multi-Agent_Systems",
-        "Autonomous_Cleaning",
-        "Environmental_AI"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出基于图神经网络（GNN）的多智能体强化学习通信机制，让智能体在学习收集海洋塑料垃圾时发展出自己的二进制信号通信协议，在竞争和协作之间找到平衡，通信显著提升了集体性能。"
+      "abstract_preview": "\u672c\u6587\u5229\u7528\u5377\u79ef\u795e\u7ecf\u7f51\u7edc\uff08CNN\uff09\u5b66\u4e60\u4ece\u6a21\u578b\u72b6\u6001\u53d8\u91cf\u5230\u6570\u636e\u540c\u5316\u5206\u6790\u589e\u91cf\uff08\u4ee3\u8868\u7cfb\u7edf\u6a21\u578b\u504f\u5dee\uff09\u7684\u6620\u5c04\uff0c\u9a8c\u8bc1\u4e86\u7528\u6570\u636e\u9a71\u52a8\u65b9\u6cd5\u9884\u6d4b\u6d77\u51b0\u504f\u5dee\u7684\u53ef\u884c\u6027\uff0c\u53ef\u4f5c\u4e3a\u53c2\u6570\u5316\u65b9\u6848\u51cf\u5c11\u81ea\u7531\u8fd0\u884c\u6c14\u5019\u6a21\u62df\u4e2d\u7684\u504f\u5dee\u3002"
     },
     {
       "path": "papers/2023/2305.09468",
@@ -2692,9 +2263,9 @@
         "ENSO",
         "Ocean_Forecasting"
       ],
-      "date_collected": "",
+      "date_collected": "2023-05-01",
       "paper_url": "",
-      "abstract_preview": "本文探索将图神经网络（GNN）应用于海表温度（SST）预报，对比了图数据和网格数据的差异，发现GNN在大多海域的1个月SST预报中优于持续性模型。"
+      "abstract_preview": "\u672c\u6587\u63a2\u7d22\u5c06\u56fe\u795e\u7ecf\u7f51\u7edc\uff08GNN\uff09\u5e94\u7528\u4e8e\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\u9884\u62a5\uff0c\u5bf9\u6bd4\u4e86\u56fe\u6570\u636e\u548c\u7f51\u683c\u6570\u636e\u7684\u5dee\u5f02\uff0c\u53d1\u73b0GNN\u5728\u5927\u591a\u6d77\u57df\u76841\u4e2a\u6708SST\u9884\u62a5\u4e2d\u4f18\u4e8e\u6301\u7eed\u6027\u6a21\u578b\u3002"
     },
     {
       "path": "papers/2023/2305.11913",
@@ -2726,9 +2297,9 @@
         "Wave_Prediction",
         "Remote_Sensing"
       ],
-      "date_collected": "",
+      "date_collected": "2023-05-01",
       "paper_url": "",
-      "abstract_preview": "本文提出使用U-Net和傅里叶神经算子（FNO）从稀疏的X波段雷达数据中重建非线性海浪表面高度，实现相分辨波面重建的机器学习方法，相比传统优化方法具有实时性优势。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4f7f\u7528U-Net\u548c\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\uff08FNO\uff09\u4ece\u7a00\u758f\u7684X\u6ce2\u6bb5\u96f7\u8fbe\u6570\u636e\u4e2d\u91cd\u5efa\u975e\u7ebf\u6027\u6d77\u6d6a\u8868\u9762\u9ad8\u5ea6\uff0c\u5b9e\u73b0\u76f8\u5206\u8fa8\u6ce2\u9762\u91cd\u5efa\u7684\u673a\u5668\u5b66\u4e60\u65b9\u6cd5\uff0c\u76f8\u6bd4\u4f20\u7edf\u4f18\u5316\u65b9\u6cd5\u5177\u6709\u5b9e\u65f6\u6027\u4f18\u52bf\u3002"
     },
     {
       "path": "papers/2023/2307.00734",
@@ -2756,9 +2327,9 @@
         "Ocean_Modeling",
         "Rotational_Fluxes"
       ],
-      "date_collected": "",
+      "date_collected": "2023-07-01",
       "paper_url": "",
-      "abstract_preview": "本文研究训练数据选择对机器学习地转中尺度湍流的影响，发现使用经过滤波去除动力学惯性旋转分量的涡旋力函数比直接学习涡流通量散度能获得相当或更好的技能，且具有显著更好的鲁棒性。"
+      "abstract_preview": "\u672c\u6587\u7814\u7a76\u8bad\u7ec3\u6570\u636e\u9009\u62e9\u5bf9\u673a\u5668\u5b66\u4e60\u5730\u8f6c\u4e2d\u5c3a\u5ea6\u6e4d\u6d41\u7684\u5f71\u54cd\uff0c\u53d1\u73b0\u4f7f\u7528\u7ecf\u8fc7\u6ee4\u6ce2\u53bb\u9664\u52a8\u529b\u5b66\u60ef\u6027\u65cb\u8f6c\u5206\u91cf\u7684\u6da1\u65cb\u529b\u51fd\u6570\u6bd4\u76f4\u63a5\u5b66\u4e60\u6da1\u6d41\u901a\u91cf\u6563\u5ea6\u80fd\u83b7\u5f97\u76f8\u5f53\u6216\u66f4\u597d\u7684\u6280\u80fd\uff0c\u4e14\u5177\u6709\u663e\u8457\u66f4\u597d\u7684\u9c81\u68d2\u6027\u3002"
     },
     {
       "path": "papers/2023/2308.03152",
@@ -2790,75 +2361,9 @@
         "Ocean_Variables",
         "Earth_System"
       ],
-      "date_collected": "",
+      "date_collected": "2023-08-01",
       "paper_url": "",
-      "abstract_preview": "AI-GOMS是一个大型AI驱动的全球海洋建模系统，采用基于傅里叶的掩码自编码器作为骨干模型，结合轻量级微调模型实现区域降尺度、海浪解码和生物地球化学耦合，在30天全球海洋基本变量预报中达到最佳性能。"
-    },
-    {
-      "path": "papers/2023/2308.09956",
-      "year": 2023,
-      "title": "FEM-PIKFNNs for Underwater Acoustic Propagation Induced by Structural Vibrations in Different Ocean Environments",
-      "arxiv": "2308.09956",
-      "authors": [
-        "Qiang Xi",
-        "Zhuojia Fu",
-        "Wenzhi Xu",
-        "Mi-An Xue",
-        "Jinhai Zheng"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "FEM",
-        "PIKFNN",
-        "Physics-Informed_Neural_Network",
-        "Kernel_Function",
-        "Finite_Element_Method"
-      ],
-      "application_tags": [
-        "Underwater_Acoustic_Propagation",
-        "Structural_Vibration",
-        "Ocean_Acoustics",
-        "Unbounded_Ocean",
-        "Deep_Ocean",
-        "Shallow_Ocean"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出了一种基于有限元方法（FEM）和物理信息核函数神经网络（PIKFNNs）的混合方法，用于预测无限深海、深海和浅海中由结构振动引起的水下声传播。"
-    },
-    {
-      "path": "papers/2023/2308.11814",
-      "year": 2023,
-      "title": "Evaluation of Deep Neural Operator Models toward Ocean Forecasting",
-      "arxiv": "2308.11814",
-      "authors": [
-        "Ellery Rajagopal",
-        "Anantha N. S. Babu",
-        "Tony Ryu",
-        "Patrick J. Haley Jr.",
-        "Chris Mirabito",
-        "Pierre F. J. Lermusiaux"
-      ],
-      "source": "arXiv",
-      "venue": "OCEANS 2023 - MTS/IEEE U.S. Gulf Coast",
-      "method_tags": [
-        "DeepONet",
-        "Fourier_Neural_Operator",
-        "FourCastNet",
-        "Latent_DeepONet",
-        "Neural_Operator"
-      ],
-      "application_tags": [
-        "Ocean_Forecasting",
-        "Ocean_Circulation",
-        "Fluid_Dynamics",
-        "Middle_Atlantic_Bight",
-        "Massachusetts_Bay"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文首次系统评估了深度神经算子模型（DeepONet、Latent DeepONet、FourCastNet）在海洋预报任务中的可行性，验证了其在理想圆柱绕流和真实海洋表面流场预测中的能力。"
+      "abstract_preview": "AI-GOMS\u662f\u4e00\u4e2a\u5927\u578bAI\u9a71\u52a8\u7684\u5168\u7403\u6d77\u6d0b\u5efa\u6a21\u7cfb\u7edf\uff0c\u91c7\u7528\u57fa\u4e8e\u5085\u91cc\u53f6\u7684\u63a9\u7801\u81ea\u7f16\u7801\u5668\u4f5c\u4e3a\u9aa8\u5e72\u6a21\u578b\uff0c\u7ed3\u5408\u8f7b\u91cf\u7ea7\u5fae\u8c03\u6a21\u578b\u5b9e\u73b0\u533a\u57df\u964d\u5c3a\u5ea6\u3001\u6d77\u6d6a\u89e3\u7801\u548c\u751f\u7269\u5730\u7403\u5316\u5b66\u8026\u5408\uff0c\u572830\u5929\u5168\u7403\u6d77\u6d0b\u57fa\u672c\u53d8\u91cf\u9884\u62a5\u4e2d\u8fbe\u5230\u6700\u4f73\u6027\u80fd\u3002"
     },
     {
       "path": "papers/2023/2309.05317",
@@ -2870,7 +2375,7 @@
         "Lucas Drumetz",
         "Mauro Dalla Mura",
         "Guillaume Tochon",
-        "Abdeldjalil Aïssa El Bey"
+        "Abdeldjalil A\u00efssa El Bey"
       ],
       "source": "arXiv",
       "venue": "IEEE Transactions on Signal Processing",
@@ -2888,9 +2393,9 @@
         "Sentinel-2",
         "Signal_Processing"
       ],
-      "date_collected": "",
+      "date_collected": "2023-09-01",
       "paper_url": "",
-      "abstract_preview": "本文利用Koopman算子理论将动力系统嵌入到潜空间进行线性描述，提出神经Koopman算子模型用于数据同化中的变分推理，实现长时间序列重建和预报。"
+      "abstract_preview": "\u672c\u6587\u5229\u7528Koopman\u7b97\u5b50\u7406\u8bba\u5c06\u52a8\u529b\u7cfb\u7edf\u5d4c\u5165\u5230\u6f5c\u7a7a\u95f4\u8fdb\u884c\u7ebf\u6027\u63cf\u8ff0\uff0c\u63d0\u51fa\u795e\u7ecfKoopman\u7b97\u5b50\u6a21\u578b\u7528\u4e8e\u6570\u636e\u540c\u5316\u4e2d\u7684\u53d8\u5206\u63a8\u7406\uff0c\u5b9e\u73b0\u957f\u65f6\u95f4\u5e8f\u5217\u91cd\u5efa\u548c\u9884\u62a5\u3002"
     },
     {
       "path": "papers/2023/2310.00813",
@@ -2920,9 +2425,9 @@
         "Loop_Current",
         "Regional_Ocean_Modeling"
       ],
-      "date_collected": "",
+      "date_collected": "2023-10-01",
       "paper_url": "",
-      "abstract_preview": "OceanNet是一个基于傅里叶神经算子的区域海洋数字孪生模型，用于西北大西洋西边界流的表面高度预测，通过预测-评估-修正（PEC）积分方案和谱正则化器抑制自回归误差累积和谱偏差，实现季节尺度预报且计算成本比传统数值模式低50万倍。"
+      "abstract_preview": "OceanNet\u662f\u4e00\u4e2a\u57fa\u4e8e\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\u7684\u533a\u57df\u6d77\u6d0b\u6570\u5b57\u5b6a\u751f\u6a21\u578b\uff0c\u7528\u4e8e\u897f\u5317\u5927\u897f\u6d0b\u897f\u8fb9\u754c\u6d41\u7684\u8868\u9762\u9ad8\u5ea6\u9884\u6d4b\uff0c\u901a\u8fc7\u9884\u6d4b-\u8bc4\u4f30-\u4fee\u6b63\uff08PEC\uff09\u79ef\u5206\u65b9\u6848\u548c\u8c31\u6b63\u5219\u5316\u5668\u6291\u5236\u81ea\u56de\u5f52\u8bef\u5dee\u7d2f\u79ef\u548c\u8c31\u504f\u5dee\uff0c\u5b9e\u73b0\u5b63\u8282\u5c3a\u5ea6\u9884\u62a5\u4e14\u8ba1\u7b97\u6210\u672c\u6bd4\u4f20\u7edf\u6570\u503c\u6a21\u5f0f\u4f4e50\u4e07\u500d\u3002"
     },
     {
       "path": "papers/2023/2310.02691",
@@ -2948,9 +2453,9 @@
         "Quasi-Geostrophic_Model",
         "Subgrid_Scale_Processes"
       ],
-      "date_collected": "",
+      "date_collected": "2023-10-01",
       "paper_url": "",
-      "abstract_preview": "本文展示了傅里叶神经算子（FNO）作为海洋次网格参数化方案的优势，在泛化能力和尺度不变性方面优于传统神经网络和经验参数化方法。"
+      "abstract_preview": "\u672c\u6587\u5c55\u793a\u4e86\u5085\u91cc\u53f6\u795e\u7ecf\u7b97\u5b50\uff08FNO\uff09\u4f5c\u4e3a\u6d77\u6d0b\u6b21\u7f51\u683c\u53c2\u6570\u5316\u65b9\u6848\u7684\u4f18\u52bf\uff0c\u5728\u6cdb\u5316\u80fd\u529b\u548c\u5c3a\u5ea6\u4e0d\u53d8\u6027\u65b9\u9762\u4f18\u4e8e\u4f20\u7edf\u795e\u7ecf\u7f51\u7edc\u548c\u7ecf\u9a8c\u53c2\u6570\u5316\u65b9\u6cd5\u3002"
     },
     {
       "path": "papers/2023/2310.04540",
@@ -2979,9 +2484,9 @@
         "Satellite_Altimetry",
         "Multi-decadal_Prediction"
       ],
-      "date_collected": "",
+      "date_collected": "2023-10-01",
       "paper_url": "",
-      "abstract_preview": "本文利用完全连接神经网络（FCNN）结合谱聚类方法，基于卫星高度计数据和气候模式大集合模拟，预测未来30年全球海域的海平面趋势，展示了机器学习在长期海平面预测中的潜力。"
+      "abstract_preview": "\u672c\u6587\u5229\u7528\u5b8c\u5168\u8fde\u63a5\u795e\u7ecf\u7f51\u7edc\uff08FCNN\uff09\u7ed3\u5408\u8c31\u805a\u7c7b\u65b9\u6cd5\uff0c\u57fa\u4e8e\u536b\u661f\u9ad8\u5ea6\u8ba1\u6570\u636e\u548c\u6c14\u5019\u6a21\u5f0f\u5927\u96c6\u5408\u6a21\u62df\uff0c\u9884\u6d4b\u672a\u676530\u5e74\u5168\u7403\u6d77\u57df\u7684\u6d77\u5e73\u9762\u8d8b\u52bf\uff0c\u5c55\u793a\u4e86\u673a\u5668\u5b66\u4e60\u5728\u957f\u671f\u6d77\u5e73\u9762\u9884\u6d4b\u4e2d\u7684\u6f5c\u529b\u3002"
     },
     {
       "path": "papers/2023/2311.12902",
@@ -3011,9 +2516,9 @@
         "Ocean_Circulation",
         "Atmospheric_Convection"
       ],
-      "date_collected": "",
+      "date_collected": "2023-11-01",
       "paper_url": "",
-      "abstract_preview": "本文发现FNO主要在低频域近似核函数，提出结合卷积-残差层和注意力机制的层次化FNO，在保持平移等变性的同时同时捕获低频和高频特征，显著提升复杂PDE（如多尺度椭圆方程、Navier-Stokes方程）的求解能力。"
+      "abstract_preview": "\u672c\u6587\u53d1\u73b0FNO\u4e3b\u8981\u5728\u4f4e\u9891\u57df\u8fd1\u4f3c\u6838\u51fd\u6570\uff0c\u63d0\u51fa\u7ed3\u5408\u5377\u79ef-\u6b8b\u5dee\u5c42\u548c\u6ce8\u610f\u529b\u673a\u5236\u7684\u5c42\u6b21\u5316FNO\uff0c\u5728\u4fdd\u6301\u5e73\u79fb\u7b49\u53d8\u6027\u7684\u540c\u65f6\u540c\u65f6\u6355\u83b7\u4f4e\u9891\u548c\u9ad8\u9891\u7279\u5f81\uff0c\u663e\u8457\u63d0\u5347\u590d\u6742PDE\uff08\u5982\u591a\u5c3a\u5ea6\u692d\u5706\u65b9\u7a0b\u3001Navier-Stokes\u65b9\u7a0b\uff09\u7684\u6c42\u89e3\u80fd\u529b\u3002"
     },
     {
       "path": "papers/2023/2311.15001",
@@ -3046,9 +2551,9 @@
         "ECMWF-IFS",
         "Coastal Protection"
       ],
-      "date_collected": "",
+      "date_collected": "2023-11-01",
       "paper_url": "",
-      "abstract_preview": "本研究提出了一种基于轨迹门控循环单元（Trajectory GRU）的时空深度学习方法，用于对ECMWF-IFS数值预报的西太平洋显著波高（SWH）进行实时滚动偏差校正。通过波-风场协同驱动和像素切换损失函数，模型在春、夏、秋、冬四季均取得显著改善，夏季平均绝对误差降低最高达46.237%，证明了该方法在常态和极端天气条件下均具有较强的鲁棒性和泛化能力。"
+      "abstract_preview": "\u672c\u7814\u7a76\u63d0\u51fa\u4e86\u4e00\u79cd\u57fa\u4e8e\u8f68\u8ff9\u95e8\u63a7\u5faa\u73af\u5355\u5143\uff08Trajectory GRU\uff09\u7684\u65f6\u7a7a\u6df1\u5ea6\u5b66\u4e60\u65b9\u6cd5\uff0c\u7528\u4e8e\u5bf9ECMWF-IFS\u6570\u503c\u9884\u62a5\u7684\u897f\u592a\u5e73\u6d0b\u663e\u8457\u6ce2\u9ad8\uff08SWH\uff09\u8fdb\u884c\u5b9e\u65f6\u6eda\u52a8\u504f\u5dee\u6821\u6b63\u3002\u901a\u8fc7\u6ce2-\u98ce\u573a\u534f\u540c\u9a71\u52a8\u548c\u50cf\u7d20\u5207\u6362\u635f\u5931\u51fd\u6570\uff0c\u6a21\u578b\u5728\u6625\u3001\u590f\u3001\u79cb\u3001\u51ac\u56db\u5b63\u5747\u53d6\u5f97\u663e\u8457\u6539\u5584\uff0c\u590f\u5b63\u5e73\u5747\u7edd\u5bf9\u8bef\u5dee\u964d\u4f4e\u6700\u9ad8\u8fbe46.237%\uff0c\u8bc1\u660e\u4e86\u8be5\u65b9\u6cd5\u5728\u5e38\u6001\u548c\u6781\u7aef\u5929\u6c14\u6761\u4ef6\u4e0b\u5747\u5177\u6709\u8f83\u5f3a\u7684\u9c81\u68d2\u6027\u548c\u6cdb\u5316\u80fd\u529b\u3002"
     },
     {
       "path": "papers/2023/2312.05068",
@@ -3079,9 +2584,9 @@
         "NEMOVAR",
         "Ocean_Modeling"
       ],
-      "date_collected": "",
+      "date_collected": "2023-12-01",
       "paper_url": "",
-      "abstract_preview": "本文提出使用简单的卷积神经网络（CNN）学习基于扩散的相关算子的归一化系数估计，在精度上优于当前业务化方法，且计算成本大幅降低，为海洋数据同化的自适应相关模型应用开辟道路。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4f7f\u7528\u7b80\u5355\u7684\u5377\u79ef\u795e\u7ecf\u7f51\u7edc\uff08CNN\uff09\u5b66\u4e60\u57fa\u4e8e\u6269\u6563\u7684\u76f8\u5173\u7b97\u5b50\u7684\u5f52\u4e00\u5316\u7cfb\u6570\u4f30\u8ba1\uff0c\u5728\u7cbe\u5ea6\u4e0a\u4f18\u4e8e\u5f53\u524d\u4e1a\u52a1\u5316\u65b9\u6cd5\uff0c\u4e14\u8ba1\u7b97\u6210\u672c\u5927\u5e45\u964d\u4f4e\uff0c\u4e3a\u6d77\u6d0b\u6570\u636e\u540c\u5316\u7684\u81ea\u9002\u5e94\u76f8\u5173\u6a21\u578b\u5e94\u7528\u5f00\u8f9f\u9053\u8def\u3002"
     },
     {
       "path": "papers/2022/2201.05624",
@@ -3100,9 +2605,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2022-01-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2201.05624"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2201.05624"
     },
     {
       "path": "papers/2022/2202.08956",
@@ -3131,9 +2636,9 @@
         "Parameter Space Exploration",
         "Ocean Climate Simulation"
       ],
-      "date_collected": "",
+      "date_collected": "2022-02-01",
       "paper_url": "",
-      "abstract_preview": "本文提出 GNN-Surrogate，一种基于图神经网络的代理模型，用于探索非结构网格海洋气候模拟的参数空间，通过层次图和自适应分辨率实现高效训练和准确预测。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa GNN-Surrogate\uff0c\u4e00\u79cd\u57fa\u4e8e\u56fe\u795e\u7ecf\u7f51\u7edc\u7684\u4ee3\u7406\u6a21\u578b\uff0c\u7528\u4e8e\u63a2\u7d22\u975e\u7ed3\u6784\u7f51\u683c\u6d77\u6d0b\u6c14\u5019\u6a21\u62df\u7684\u53c2\u6570\u7a7a\u95f4\uff0c\u901a\u8fc7\u5c42\u6b21\u56fe\u548c\u81ea\u9002\u5e94\u5206\u8fa8\u7387\u5b9e\u73b0\u9ad8\u6548\u8bad\u7ec3\u548c\u51c6\u786e\u9884\u6d4b\u3002"
     },
     {
       "path": "papers/2022/2202.09967",
@@ -3159,9 +2664,9 @@
         "Marine Heatwaves",
         "Sea Surface Temperature"
       ],
-      "date_collected": "",
+      "date_collected": "2022-02-01",
       "paper_url": "",
-      "abstract_preview": "提出 Unet-LSTM 模型，利用 70 余年 ERA5 月平均 SST 和 2 米气温数据，实现全球 SST 月距平 24 个月预报，RMSE 低于 0.75°C。"
+      "abstract_preview": "\u63d0\u51fa Unet-LSTM \u6a21\u578b\uff0c\u5229\u7528 70 \u4f59\u5e74 ERA5 \u6708\u5e73\u5747 SST \u548c 2 \u7c73\u6c14\u6e29\u6570\u636e\uff0c\u5b9e\u73b0\u5168\u7403 SST \u6708\u8ddd\u5e73 24 \u4e2a\u6708\u9884\u62a5\uff0cRMSE \u4f4e\u4e8e 0.75\u00b0C\u3002"
     },
     {
       "path": "papers/2022/2205.13410",
@@ -3187,9 +2692,9 @@
         "Data Assimilation",
         "NOAA OI"
       ],
-      "date_collected": "",
+      "date_collected": "2022-05-01",
       "paper_url": "",
-      "abstract_preview": "提出基于 POD-LSTM 的非侵入式降阶模型（NIROM），结合确定性集合卡尔曼滤波（DEnKF）实现稀疏观测条件下的海表温度预测与数据同化。"
+      "abstract_preview": "\u63d0\u51fa\u57fa\u4e8e POD-LSTM \u7684\u975e\u4fb5\u5165\u5f0f\u964d\u9636\u6a21\u578b\uff08NIROM\uff09\uff0c\u7ed3\u5408\u786e\u5b9a\u6027\u96c6\u5408\u5361\u5c14\u66fc\u6ee4\u6ce2\uff08DEnKF\uff09\u5b9e\u73b0\u7a00\u758f\u89c2\u6d4b\u6761\u4ef6\u4e0b\u7684\u6d77\u8868\u6e29\u5ea6\u9884\u6d4b\u4e0e\u6570\u636e\u540c\u5316\u3002"
     },
     {
       "path": "papers/2022/2206.01599",
@@ -3202,7 +2707,7 @@
         "Yu Huang",
         "Ali K. Ibrahim",
         "Ali Salem Altaher",
-        "Laurent Chérubin"
+        "Laurent Ch\u00e9rubin"
       ],
       "source": "arXiv",
       "venue": "arXiv",
@@ -3219,9 +2724,9 @@
         "HYCOM",
         "MITgcm"
       ],
-      "date_collected": "",
+      "date_collected": "2022-06-01",
       "paper_url": "",
-      "abstract_preview": "提出基于改进 U-Net（STU-Net）的 Transform Model，将海洋观测的可用性从观测时刻向前和向后扩展最多一年。"
+      "abstract_preview": "\u63d0\u51fa\u57fa\u4e8e\u6539\u8fdb U-Net\uff08STU-Net\uff09\u7684 Transform Model\uff0c\u5c06\u6d77\u6d0b\u89c2\u6d4b\u7684\u53ef\u7528\u6027\u4ece\u89c2\u6d4b\u65f6\u523b\u5411\u524d\u548c\u5411\u540e\u6269\u5c55\u6700\u591a\u4e00\u5e74\u3002"
     },
     {
       "path": "papers/2022/2206.04811",
@@ -3246,9 +2751,9 @@
         "High-dimensional Systems",
         "Ocean Dynamics"
       ],
-      "date_collected": "",
+      "date_collected": "2022-06-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种混合集合卡尔曼滤波器（H-EnKF）框架，利用深度学习数据驱动代理模型低成本生成大规模集合状态，从而更准确地估计背景误差协方差矩阵，减少采样误差。该方法在双层准地转流系统中验证，无需人工设计的局地化策略即可有效改善数据同化效果。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u6df7\u5408\u96c6\u5408\u5361\u5c14\u66fc\u6ee4\u6ce2\u5668\uff08H-EnKF\uff09\u6846\u67b6\uff0c\u5229\u7528\u6df1\u5ea6\u5b66\u4e60\u6570\u636e\u9a71\u52a8\u4ee3\u7406\u6a21\u578b\u4f4e\u6210\u672c\u751f\u6210\u5927\u89c4\u6a21\u96c6\u5408\u72b6\u6001\uff0c\u4ece\u800c\u66f4\u51c6\u786e\u5730\u4f30\u8ba1\u80cc\u666f\u8bef\u5dee\u534f\u65b9\u5dee\u77e9\u9635\uff0c\u51cf\u5c11\u91c7\u6837\u8bef\u5dee\u3002\u8be5\u65b9\u6cd5\u5728\u53cc\u5c42\u51c6\u5730\u8f6c\u6d41\u7cfb\u7edf\u4e2d\u9a8c\u8bc1\uff0c\u65e0\u9700\u4eba\u5de5\u8bbe\u8ba1\u7684\u5c40\u5730\u5316\u7b56\u7565\u5373\u53ef\u6709\u6548\u6539\u5584\u6570\u636e\u540c\u5316\u6548\u679c\u3002"
     },
     {
       "path": "papers/2022/2206.12746",
@@ -3263,7 +2768,7 @@
         "Felipe M. Moreno",
         "Marlon S. Mathias",
         "Marcelo Dottori",
-        "Fábio G. Cozman",
+        "F\u00e1bio G. Cozman",
         "Anna H. R. Costa",
         "Edson S. Gomi",
         "Eduardo A. Tannuri"
@@ -3283,9 +2788,9 @@
         "SSH",
         "Santos Estuarine System"
       ],
-      "date_collected": "",
+      "date_collected": "2022-06-01",
       "paper_url": "",
-      "abstract_preview": "提出动态图神经网络（DTDG）框架，结合时序模型（LSTM/Transformer）和图神经网络预测海洋变量（流速、海表面高度），在 Santos 河口系统验证中超越物理模型 SOFS。"
+      "abstract_preview": "\u63d0\u51fa\u52a8\u6001\u56fe\u795e\u7ecf\u7f51\u7edc\uff08DTDG\uff09\u6846\u67b6\uff0c\u7ed3\u5408\u65f6\u5e8f\u6a21\u578b\uff08LSTM/Transformer\uff09\u548c\u56fe\u795e\u7ecf\u7f51\u7edc\u9884\u6d4b\u6d77\u6d0b\u53d8\u91cf\uff08\u6d41\u901f\u3001\u6d77\u8868\u9762\u9ad8\u5ea6\uff09\uff0c\u5728 Santos \u6cb3\u53e3\u7cfb\u7edf\u9a8c\u8bc1\u4e2d\u8d85\u8d8a\u7269\u7406\u6a21\u578b SOFS\u3002"
     },
     {
       "path": "papers/2022/2206.13659",
@@ -3313,9 +2818,9 @@
         "Climate Model",
         "Uncertainty Quantification"
       ],
-      "date_collected": "",
+      "date_collected": "2022-06-01",
       "paper_url": "",
-      "abstract_preview": "提出算子代数框架，将贝叶斯数据同化嵌入非阿贝尔算子代数，统一经典数据同化与量子力学数据同化（QMDA），在 Lorenz96 和 ENSO 验证中展现预报技巧和不确定性量化能力。"
+      "abstract_preview": "\u63d0\u51fa\u7b97\u5b50\u4ee3\u6570\u6846\u67b6\uff0c\u5c06\u8d1d\u53f6\u65af\u6570\u636e\u540c\u5316\u5d4c\u5165\u975e\u963f\u8d1d\u5c14\u7b97\u5b50\u4ee3\u6570\uff0c\u7edf\u4e00\u7ecf\u5178\u6570\u636e\u540c\u5316\u4e0e\u91cf\u5b50\u529b\u5b66\u6570\u636e\u540c\u5316\uff08QMDA\uff09\uff0c\u5728 Lorenz96 \u548c ENSO \u9a8c\u8bc1\u4e2d\u5c55\u73b0\u9884\u62a5\u6280\u5de7\u548c\u4e0d\u786e\u5b9a\u6027\u91cf\u5316\u80fd\u529b\u3002"
     },
     {
       "path": "papers/2022/2207.05748",
@@ -3332,9 +2837,9 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2022-07-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2207.05748"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2207.05748"
     },
     {
       "path": "papers/2022/2209.11371",
@@ -3360,9 +2865,9 @@
         "Weather Forecasting",
         "Inverse Problems"
       ],
-      "date_collected": "",
+      "date_collected": "2022-09-01",
       "paper_url": "",
-      "abstract_preview": "提出 ensemble Kalman 方法的均值场理论框架，统一状态估计和参数估计问题的离散/连续时间 formulation，为 ensemble Kalman 方法的推导和分析提供统一数学基础。"
+      "abstract_preview": "\u63d0\u51fa ensemble Kalman \u65b9\u6cd5\u7684\u5747\u503c\u573a\u7406\u8bba\u6846\u67b6\uff0c\u7edf\u4e00\u72b6\u6001\u4f30\u8ba1\u548c\u53c2\u6570\u4f30\u8ba1\u95ee\u9898\u7684\u79bb\u6563/\u8fde\u7eed\u65f6\u95f4 formulation\uff0c\u4e3a ensemble Kalman \u65b9\u6cd5\u7684\u63a8\u5bfc\u548c\u5206\u6790\u63d0\u4f9b\u7edf\u4e00\u6570\u5b66\u57fa\u7840\u3002"
     },
     {
       "path": "papers/2022/2211.05904",
@@ -3391,9 +2896,9 @@
         "NATL60",
         "DUACS"
       ],
-      "date_collected": "",
+      "date_collected": "2022-11-01",
       "paper_url": "",
-      "abstract_preview": "提出 4DVarNet-SSH 框架，将变分数据同化和深度学习结合，实现卫星高度计海表面高度时空插值，在 OSSE 实验中相对最优插值提升 30-60%。"
+      "abstract_preview": "\u63d0\u51fa 4DVarNet-SSH \u6846\u67b6\uff0c\u5c06\u53d8\u5206\u6570\u636e\u540c\u5316\u548c\u6df1\u5ea6\u5b66\u4e60\u7ed3\u5408\uff0c\u5b9e\u73b0\u536b\u661f\u9ad8\u5ea6\u8ba1\u6d77\u8868\u9762\u9ad8\u5ea6\u65f6\u7a7a\u63d2\u503c\uff0c\u5728 OSSE \u5b9e\u9a8c\u4e2d\u76f8\u5bf9\u6700\u4f18\u63d2\u503c\u63d0\u5347 30-60%\u3002"
     },
     {
       "path": "papers/2022/2212.03656",
@@ -3419,9 +2924,9 @@
         "Super-Resolution",
         "Low-Resolution"
       ],
-      "date_collected": "",
+      "date_collected": "2022-12-01",
       "paper_url": "",
-      "abstract_preview": "提出 4D-SRDA 框架，同时进行数据同化和时空超分辨率，结合 SR-mixup 数据增强方法解决域偏移问题，在理想化海洋射流中验证了方法的有效性。"
+      "abstract_preview": "\u63d0\u51fa 4D-SRDA \u6846\u67b6\uff0c\u540c\u65f6\u8fdb\u884c\u6570\u636e\u540c\u5316\u548c\u65f6\u7a7a\u8d85\u5206\u8fa8\u7387\uff0c\u7ed3\u5408 SR-mixup \u6570\u636e\u589e\u5f3a\u65b9\u6cd5\u89e3\u51b3\u57df\u504f\u79fb\u95ee\u9898\uff0c\u5728\u7406\u60f3\u5316\u6d77\u6d0b\u5c04\u6d41\u4e2d\u9a8c\u8bc1\u4e86\u65b9\u6cd5\u7684\u6709\u6548\u6027\u3002"
     },
     {
       "path": "papers/2022/2212.12086",
@@ -3450,9 +2955,9 @@
         "Pendulum",
         "Cylinder Flow"
       ],
-      "date_collected": "",
+      "date_collected": "2022-12-01",
       "paper_url": "",
-      "abstract_preview": "为 Koopman 自编码器提出特征初始化（eigeninit）和特征损失（eigenloss）正则化方案，通过控制 Koopman 算子特征值分布提升收敛速度和长期预测精度。"
+      "abstract_preview": "\u4e3a Koopman \u81ea\u7f16\u7801\u5668\u63d0\u51fa\u7279\u5f81\u521d\u59cb\u5316\uff08eigeninit\uff09\u548c\u7279\u5f81\u635f\u5931\uff08eigenloss\uff09\u6b63\u5219\u5316\u65b9\u6848\uff0c\u901a\u8fc7\u63a7\u5236 Koopman \u7b97\u5b50\u7279\u5f81\u503c\u5206\u5e03\u63d0\u5347\u6536\u655b\u901f\u5ea6\u548c\u957f\u671f\u9884\u6d4b\u7cbe\u5ea6\u3002"
     },
     {
       "path": "papers/2021/2102.05107",
@@ -3469,9 +2974,9 @@
       "venue": "Journal of Advances in Modeling Earth Systems (JAMES)",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2021-02-01",
       "paper_url": "",
-      "abstract_preview": "- 论文链接: https://arxiv.org/abs/2102.05107"
+      "abstract_preview": "- \u8bba\u6587\u94fe\u63a5: https://arxiv.org/abs/2102.05107"
     },
     {
       "path": "papers/2021/2104.09355",
@@ -3490,32 +2995,32 @@
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [
-        "深度神经网络",
-        "分布式推理",
+        "\u6df1\u5ea6\u795e\u7ecf\u7f51\u7edc",
+        "\u5206\u5e03\u5f0f\u63a8\u7406",
         "HPC",
-        "在线学习",
-        "模型集成"
+        "\u5728\u7ebf\u5b66\u4e60",
+        "\u6a21\u578b\u96c6\u6210"
       ],
       "application_tags": [
-        "海洋气候建模",
-        "数值模拟",
-        "高分辨率海洋模型"
+        "\u6d77\u6d0b\u6c14\u5019\u5efa\u6a21",
+        "\u6570\u503c\u6a21\u62df",
+        "\u9ad8\u5206\u8fa8\u7387\u6d77\u6d0b\u6a21\u578b"
       ],
-      "date_collected": "",
+      "date_collected": "2021-04-01",
       "paper_url": "",
-      "abstract_preview": "本文展示了首个利用SmartSim库在气候尺度上通过分布式在线深度神经网络(DNN)推理改进数值海洋模拟的研究，实现了12个成员的高分辨率全球海洋模拟集合，每个成员运行在19个计算节点上，总共完成9700亿次推理，服务120个模拟年的集成，且机器学习对模拟运行时间的影响微乎其微。"
+      "abstract_preview": "\u672c\u6587\u5c55\u793a\u4e86\u9996\u4e2a\u5229\u7528SmartSim\u5e93\u5728\u6c14\u5019\u5c3a\u5ea6\u4e0a\u901a\u8fc7\u5206\u5e03\u5f0f\u5728\u7ebf\u6df1\u5ea6\u795e\u7ecf\u7f51\u7edc(DNN)\u63a8\u7406\u6539\u8fdb\u6570\u503c\u6d77\u6d0b\u6a21\u62df\u7684\u7814\u7a76\uff0c\u5b9e\u73b0\u4e8612\u4e2a\u6210\u5458\u7684\u9ad8\u5206\u8fa8\u7387\u5168\u7403\u6d77\u6d0b\u6a21\u62df\u96c6\u5408\uff0c\u6bcf\u4e2a\u6210\u5458\u8fd0\u884c\u572819\u4e2a\u8ba1\u7b97\u8282\u70b9\u4e0a\uff0c\u603b\u5171\u5b8c\u62109700\u4ebf\u6b21\u63a8\u7406\uff0c\u670d\u52a1120\u4e2a\u6a21\u62df\u5e74\u7684\u96c6\u6210\uff0c\u4e14\u673a\u5668\u5b66\u4e60\u5bf9\u6a21\u62df\u8fd0\u884c\u65f6\u95f4\u7684\u5f71\u54cd\u5fae\u4e4e\u5176\u5fae\u3002"
     },
     {
       "path": "papers/2021/2105.02939",
       "year": 2021,
       "title": "PCE-PINNs: Physics-Informed Neural Networks for Uncertainty Propagation in Ocean Modeling",
       "arxiv": "2105.02939",
-      "authors": "Björn Lütjens; Catherine H. Crawford; Mark Veillette; Dava Newman",
+      "authors": "Bj\u00f6rn L\u00fctjens; Catherine H. Crawford; Mark Veillette; Dava Newman",
       "source": "arXiv",
       "venue": "ICLR 2021 Workshop on AI for Modeling Oceans and Climate Change",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2021-05-01",
       "paper_url": "",
       "abstract_preview": "This paper introduces PCE-PINNs, a novel method combining Polynomial Chaos Expansion (PCE) with Physics-Informed Neural Networks (PINNs) to enable fast uncertainty propagation in ocean modeling. The a"
     },
@@ -3529,47 +3034,21 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2021-05-01",
       "paper_url": "",
       "abstract_preview": "This paper addresses the fundamental limitation of Ensemble Kalman Filters (EnKF) failing to converge to correct filtering distributions for nonlinear dynamic systems by reformulating EnKF under Lange"
-    },
-    {
-      "path": "papers/2021/2105.12903",
-      "year": 2021,
-      "title": "Neural Enhanced Belief Propagation for Cooperative Localization",
-      "arxiv": "2105.12903",
-      "authors": [
-        "Mingchao Liang",
-        "Florian Meyer"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Belief Propagation",
-        "Graph Neural Network",
-        "Neural Enhanced BP",
-        "Particle Filtering"
-      ],
-      "application_tags": [
-        "Cooperative Localization",
-        "Wireless Networks",
-        "Agent Networks"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出神经增强置信传播（NEBP）方法，将因子图上的贝叶斯置信传播与图神经网络相结合，用于无线网络中的合作定位问题，在小规模训练数据下实现改进的估计精度并避免过度自信的信念。"
     },
     {
       "path": "papers/2021/2106.08747",
       "year": 2021,
       "title": "Towards Optimally Weighted Physics-Informed Neural Networks in Ocean Modelling",
       "arxiv": "2106.08747",
-      "authors": "Taco de Wolff; Hugo Carrillo; Luis Martí; Nayat Sánchez-Pi",
+      "authors": "Taco de Wolff; Hugo Carrillo; Luis Mart\u00ed; Nayat S\u00e1nchez-Pi",
       "source": "arXiv",
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2021-06-01",
       "paper_url": "",
       "abstract_preview": "This paper explores the optimal weighting between data and physics loss components in Physics-Informed Neural Networks (PINNs) for solving ocean-related partial differential equations. Through systema"
     },
@@ -3598,59 +3077,23 @@
         "Ocean Wave Prediction",
         "Coastal Engineering"
       ],
-      "date_collected": "",
+      "date_collected": "2021-07-01",
       "paper_url": "",
-      "abstract_preview": "本文提出小波图神经网络（WGNN），通过将小波变换与图神经网络相结合，有效捕捉短长期时空依赖关系，实现显著波高（SWH）预测，优于数值模型和传统机器学习方法。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u5c0f\u6ce2\u56fe\u795e\u7ecf\u7f51\u7edc\uff08WGNN\uff09\uff0c\u901a\u8fc7\u5c06\u5c0f\u6ce2\u53d8\u6362\u4e0e\u56fe\u795e\u7ecf\u7f51\u7edc\u76f8\u7ed3\u5408\uff0c\u6709\u6548\u6355\u6349\u77ed\u957f\u671f\u65f6\u7a7a\u4f9d\u8d56\u5173\u7cfb\uff0c\u5b9e\u73b0\u663e\u8457\u6ce2\u9ad8\uff08SWH\uff09\u9884\u6d4b\uff0c\u4f18\u4e8e\u6570\u503c\u6a21\u578b\u548c\u4f20\u7edf\u673a\u5668\u5b66\u4e60\u65b9\u6cd5\u3002"
     },
     {
       "path": "papers/2021/2109.08017",
       "year": 2021,
       "title": "Super-resolution data assimilation",
       "arxiv": "2109.08017",
-      "authors": "Sébastien Barthélémy; Julien Brajard; Laurent Bertino; François Counillon",
+      "authors": "S\u00e9bastien Barth\u00e9l\u00e9my; Julien Brajard; Laurent Bertino; Fran\u00e7ois Counillon",
       "source": "arXiv",
       "venue": "Ocean Dynamics",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2021-09-01",
       "paper_url": "",
       "abstract_preview": "This paper introduces Super-resolution Data Assimilation (SRDA), a method that combines low-resolution model forecasting with neural network-based super-resolution to enable high-resolution data assim"
-    },
-    {
-      "path": "papers/2021/2110.07100",
-      "year": 2021,
-      "title": "Digital Twin Earth - Coasts: Developing a Fast and Physics-Informed Surrogate Model for Coastal Floods via Neural Operators",
-      "arxiv": "2110.07100",
-      "authors": [
-        "Peishi Jiang",
-        "Nis Meinert",
-        "Helga Jordão",
-        "Constantin Weisser",
-        "Simon Holgate",
-        "Alexander Lavin",
-        "Björn Lütjens",
-        "Dava Newman",
-        "Haruko Wainwright",
-        "Catherine Walker",
-        "Patrick Barnard"
-      ],
-      "source": "arXiv",
-      "venue": "arXiv",
-      "method_tags": [
-        "Fourier Neural Operator",
-        "Physics-Informed ML",
-        "Surrogate Modeling",
-        "Digital Twin"
-      ],
-      "application_tags": [
-        "Coastal Floods",
-        "Sea Surface Height",
-        "NEMO",
-        "Coastal Dynamics"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文开发了首个海岸线数字孪生系统，基于改进的傅里叶神经算子（FNO）构建 NEMO 海洋模型的代理模型，实现了高达 45 倍的加速，同时保持准确的海表高度预测。"
     },
     {
       "path": "papers/2020/2005.01090",
@@ -3681,37 +3124,9 @@
         "Ocean Dynamics",
         "Mesoscale"
       ],
-      "date_collected": "",
+      "date_collected": "2020-05-01",
       "paper_url": "",
-      "abstract_preview": "本文将内潮滤波问题转化为监督学习框架，使用卷积神经网络（ConvNets）从 SWOT 卫星高度计数据中估计不含内潮信号的海洋场。"
-    },
-    {
-      "path": "papers/2020/2009.01554",
-      "year": 2020,
-      "title": "Automated Identification of Metamorphic Test Scenarios for an Ocean-Modeling Application",
-      "arxiv": "2009.01554",
-      "authors": [
-        "Dilip J. Hiremath",
-        "Martin Claus",
-        "Wilhelm Hasselbring",
-        "Willi Rath"
-      ],
-      "source": "arXiv",
-      "venue": "2020 IEEE International Conference On Artificial Intelligence Testing (AITest)",
-      "method_tags": [
-        "Metamorphic Testing",
-        "Machine Learning",
-        "Ocean Modeling",
-        "Software Testing"
-      ],
-      "application_tags": [
-        "Ocean Model Validation",
-        "Software Testing",
-        "Metamorphic Relations"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "本文提出利用机器学习自动生成海洋建模软件的变形测试场景，通过物理系统的对称性识别变形关系，解决科学软件测试中测试预言缺失的问题。"
+      "abstract_preview": "\u672c\u6587\u5c06\u5185\u6f6e\u6ee4\u6ce2\u95ee\u9898\u8f6c\u5316\u4e3a\u76d1\u7763\u5b66\u4e60\u6846\u67b6\uff0c\u4f7f\u7528\u5377\u79ef\u795e\u7ecf\u7f51\u7edc\uff08ConvNets\uff09\u4ece SWOT \u536b\u661f\u9ad8\u5ea6\u8ba1\u6570\u636e\u4e2d\u4f30\u8ba1\u4e0d\u542b\u5185\u6f6e\u4fe1\u53f7\u7684\u6d77\u6d0b\u573a\u3002"
     },
     {
       "path": "papers/2020/2010.00399",
@@ -3723,7 +3138,7 @@
       "venue": "arXiv",
       "method_tags": [],
       "application_tags": [],
-      "date_collected": "",
+      "date_collected": "2020-10-01",
       "paper_url": "",
       "abstract_preview": "This paper applies Koopman operator theory combined with convolutional autoencoders to predict sea-surface temperature (SST) in the Gulf of Mexico up to 180 days ahead from a single thermal image. The"
     },
@@ -3750,9 +3165,9 @@
         "Particle Filtering",
         "Signal Processing"
       ],
-      "date_collected": "",
+      "date_collected": "2019-06-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一种线性时间复杂度的模糊算法，用于在任意维空间中散点数据的小尺度抑制，结合高斯径向基函数插值与分数阶 Helmholtz 算子的多分辨率格林函数近似。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u79cd\u7ebf\u6027\u65f6\u95f4\u590d\u6742\u5ea6\u7684\u6a21\u7cca\u7b97\u6cd5\uff0c\u7528\u4e8e\u5728\u4efb\u610f\u7ef4\u7a7a\u95f4\u4e2d\u6563\u70b9\u6570\u636e\u7684\u5c0f\u5c3a\u5ea6\u6291\u5236\uff0c\u7ed3\u5408\u9ad8\u65af\u5f84\u5411\u57fa\u51fd\u6570\u63d2\u503c\u4e0e\u5206\u6570\u9636 Helmholtz \u7b97\u5b50\u7684\u591a\u5206\u8fa8\u7387\u683c\u6797\u51fd\u6570\u8fd1\u4f3c\u3002"
     },
     {
       "path": "papers/2019/1909.08573",
@@ -3778,9 +3193,9 @@
         "Ocean Modeling",
         "Sea Surface Temperature"
       ],
-      "date_collected": "",
+      "date_collected": "2019-09-01",
       "paper_url": "",
-      "abstract_preview": "本文开发了一套机器学习模型套件（包括回归、决策树和深度学习方法）来预测海表温度（SST），通过自动化特征工程与模型评分加权集成方法实现了与欧洲中期天气预报中心业务系统相当的预测精度。"
+      "abstract_preview": "\u672c\u6587\u5f00\u53d1\u4e86\u4e00\u5957\u673a\u5668\u5b66\u4e60\u6a21\u578b\u5957\u4ef6\uff08\u5305\u62ec\u56de\u5f52\u3001\u51b3\u7b56\u6811\u548c\u6df1\u5ea6\u5b66\u4e60\u65b9\u6cd5\uff09\u6765\u9884\u6d4b\u6d77\u8868\u6e29\u5ea6\uff08SST\uff09\uff0c\u901a\u8fc7\u81ea\u52a8\u5316\u7279\u5f81\u5de5\u7a0b\u4e0e\u6a21\u578b\u8bc4\u5206\u52a0\u6743\u96c6\u6210\u65b9\u6cd5\u5b9e\u73b0\u4e86\u4e0e\u6b27\u6d32\u4e2d\u671f\u5929\u6c14\u9884\u62a5\u4e2d\u5fc3\u4e1a\u52a1\u7cfb\u7edf\u76f8\u5f53\u7684\u9884\u6d4b\u7cbe\u5ea6\u3002"
     },
     {
       "path": "papers/2017/1707.01146",
@@ -3807,9 +3222,9 @@
         "Ocean Double-Gyre",
         "Dynamical Systems"
       ],
-      "date_collected": "",
+      "date_collected": "2017-07-01",
       "paper_url": "",
-      "abstract_preview": "本文提出KRONIC（Koopman Reduced Order Nonlinear Identification and Control）框架，通过稀疏回归从数据中发现Koopman本征函数，在由这些经验证的本征函数构成的Koopman不变子空间中构建控制模型，从而实现强非线性系统的线性最优控制，同时揭示了经典EDMD方法的闭包问题并给出解决方案。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51faKRONIC\uff08Koopman Reduced Order Nonlinear Identification and Control\uff09\u6846\u67b6\uff0c\u901a\u8fc7\u7a00\u758f\u56de\u5f52\u4ece\u6570\u636e\u4e2d\u53d1\u73b0Koopman\u672c\u5f81\u51fd\u6570\uff0c\u5728\u7531\u8fd9\u4e9b\u7ecf\u9a8c\u8bc1\u7684\u672c\u5f81\u51fd\u6570\u6784\u6210\u7684Koopman\u4e0d\u53d8\u5b50\u7a7a\u95f4\u4e2d\u6784\u5efa\u63a7\u5236\u6a21\u578b\uff0c\u4ece\u800c\u5b9e\u73b0\u5f3a\u975e\u7ebf\u6027\u7cfb\u7edf\u7684\u7ebf\u6027\u6700\u4f18\u63a7\u5236\uff0c\u540c\u65f6\u63ed\u793a\u4e86\u7ecf\u5178EDMD\u65b9\u6cd5\u7684\u95ed\u5305\u95ee\u9898\u5e76\u7ed9\u51fa\u89e3\u51b3\u65b9\u6848\u3002"
     },
     {
       "path": "papers/2015/1511.04790",
@@ -3838,9 +3253,9 @@
         "Climate Modeling",
         "Geophysical Fluid Dynamics"
       ],
-      "date_collected": "",
+      "date_collected": "2015-11-01",
       "paper_url": "",
-      "abstract_preview": "本文提出了一个用于解释正则化状态估计的框架，将季节至年代际尺度的四维变分同化（4D-Var）问题重新解释为同步耦合混沌系统的优化问题。通过调整初始条件使稳定模态趋近观测值，同时使用连续引导方法引导不稳定模态朝向参考时间序列，从而有效解决长期状态估计问题，并在海洋环流模型中验证了该方法的有效性。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e86\u4e00\u4e2a\u7528\u4e8e\u89e3\u91ca\u6b63\u5219\u5316\u72b6\u6001\u4f30\u8ba1\u7684\u6846\u67b6\uff0c\u5c06\u5b63\u8282\u81f3\u5e74\u4ee3\u9645\u5c3a\u5ea6\u7684\u56db\u7ef4\u53d8\u5206\u540c\u5316\uff084D-Var\uff09\u95ee\u9898\u91cd\u65b0\u89e3\u91ca\u4e3a\u540c\u6b65\u8026\u5408\u6df7\u6c8c\u7cfb\u7edf\u7684\u4f18\u5316\u95ee\u9898\u3002\u901a\u8fc7\u8c03\u6574\u521d\u59cb\u6761\u4ef6\u4f7f\u7a33\u5b9a\u6a21\u6001\u8d8b\u8fd1\u89c2\u6d4b\u503c\uff0c\u540c\u65f6\u4f7f\u7528\u8fde\u7eed\u5f15\u5bfc\u65b9\u6cd5\u5f15\u5bfc\u4e0d\u7a33\u5b9a\u6a21\u6001\u671d\u5411\u53c2\u8003\u65f6\u95f4\u5e8f\u5217\uff0c\u4ece\u800c\u6709\u6548\u89e3\u51b3\u957f\u671f\u72b6\u6001\u4f30\u8ba1\u95ee\u9898\uff0c\u5e76\u5728\u6d77\u6d0b\u73af\u6d41\u6a21\u578b\u4e2d\u9a8c\u8bc1\u4e86\u8be5\u65b9\u6cd5\u7684\u6709\u6548\u6027\u3002"
     },
     {
       "path": "papers/2014/1402.7201",
@@ -3854,19 +3269,19 @@
       "venue": "Ocean Dynamics",
       "method_tags": [
         "4D-Var",
-        "数据同化",
-        "NEMO模型",
-        "边界条件优化",
-        "海洋建模"
+        "\u6570\u636e\u540c\u5316",
+        "NEMO\u6a21\u578b",
+        "\u8fb9\u754c\u6761\u4ef6\u4f18\u5316",
+        "\u6d77\u6d0b\u5efa\u6a21"
       ],
       "application_tags": [
-        "海洋环流建模",
-        "海岸线近似",
-        "数值天气预报"
+        "\u6d77\u6d0b\u73af\u6d41\u5efa\u6a21",
+        "\u6d77\u5cb8\u7ebf\u8fd1\u4f3c",
+        "\u6570\u503c\u5929\u6c14\u9884\u62a5"
       ],
-      "date_collected": "",
+      "date_collected": "2014-02-01",
       "paper_url": "",
-      "abstract_preview": "本文针对NEMO海洋模型中阶梯形海岸线的边界条件处理问题，应用4D-Var数据同化技术来识别最优的边界条件参数化方案。研究发现，在阶梯形海岸线近似下，传统边界条件的 formulation 会导致指数增长模态的出现，而最优边界条件可以有效修正由此产生的误差，为海岸线数值模拟中的边界处理提供了新的解决思路。"
+      "abstract_preview": "\u672c\u6587\u9488\u5bf9NEMO\u6d77\u6d0b\u6a21\u578b\u4e2d\u9636\u68af\u5f62\u6d77\u5cb8\u7ebf\u7684\u8fb9\u754c\u6761\u4ef6\u5904\u7406\u95ee\u9898\uff0c\u5e94\u75284D-Var\u6570\u636e\u540c\u5316\u6280\u672f\u6765\u8bc6\u522b\u6700\u4f18\u7684\u8fb9\u754c\u6761\u4ef6\u53c2\u6570\u5316\u65b9\u6848\u3002\u7814\u7a76\u53d1\u73b0\uff0c\u5728\u9636\u68af\u5f62\u6d77\u5cb8\u7ebf\u8fd1\u4f3c\u4e0b\uff0c\u4f20\u7edf\u8fb9\u754c\u6761\u4ef6\u7684 formulation \u4f1a\u5bfc\u81f4\u6307\u6570\u589e\u957f\u6a21\u6001\u7684\u51fa\u73b0\uff0c\u800c\u6700\u4f18\u8fb9\u754c\u6761\u4ef6\u53ef\u4ee5\u6709\u6548\u4fee\u6b63\u7531\u6b64\u4ea7\u751f\u7684\u8bef\u5dee\uff0c\u4e3a\u6d77\u5cb8\u7ebf\u6570\u503c\u6a21\u62df\u4e2d\u7684\u8fb9\u754c\u5904\u7406\u63d0\u4f9b\u4e86\u65b0\u7684\u89e3\u51b3\u601d\u8def\u3002"
     },
     {
       "path": "papers/2013/1302.3876",
@@ -3891,42 +3306,9 @@
         "Quasi-Geostrophic Model",
         "Ocean Modeling"
       ],
-      "date_collected": "",
+      "date_collected": "2013-02-01",
       "paper_url": "",
-      "abstract_preview": "本文提出一种基于迭代Sherman-Morrison公式的高效集合卡尔曼滤波（EnKF）实现方法，利用观测误差协方差矩阵R的结构（通常为块对角）递归构建和分析线性系统，在不进行矩阵分解的前提下达到与现有最优EnKF实现相当的计算复杂度，数值实验表明该算法在保持精度的同时显著加速。"
-    },
-    {
-      "path": "papers/2012/1204.3547",
-      "year": 2012,
-      "title": "Computer Model Calibration Using the Ensemble Kalman Filter",
-      "arxiv": "1204.3547",
-      "authors": [
-        "Dave Higdon",
-        "Matt Pratola",
-        "Jim Gattiker",
-        "Earl Lawrence",
-        "Charles Jackson",
-        "Michael Tobis",
-        "Salman Habib",
-        "Katrin Heitmann",
-        "Steve Price"
-      ],
-      "source": "arXiv",
-      "venue": "Technometrics",
-      "method_tags": [
-        "EnKF",
-        "Computer Model Calibration",
-        "Gaussian Process Emulator",
-        "Bayesian Inference"
-      ],
-      "application_tags": [
-        "Cosmology",
-        "Climate Modeling",
-        "Ice Sheet Modeling"
-      ],
-      "date_collected": "",
-      "paper_url": "",
-      "abstract_preview": "集合卡尔曼滤波（EnKF）可被创新性地应用于计算机模型标定问题，通过将模型参数视为静态待估量而非动态状态量，利用观测数据逐步约束参数后验分布，同时在高维气候模拟和宇宙学参数估计等应用中展示了比传统高斯过程代理模型更高效的计算优势。"
+      "abstract_preview": "\u672c\u6587\u63d0\u51fa\u4e00\u79cd\u57fa\u4e8e\u8fed\u4ee3Sherman-Morrison\u516c\u5f0f\u7684\u9ad8\u6548\u96c6\u5408\u5361\u5c14\u66fc\u6ee4\u6ce2\uff08EnKF\uff09\u5b9e\u73b0\u65b9\u6cd5\uff0c\u5229\u7528\u89c2\u6d4b\u8bef\u5dee\u534f\u65b9\u5dee\u77e9\u9635R\u7684\u7ed3\u6784\uff08\u901a\u5e38\u4e3a\u5757\u5bf9\u89d2\uff09\u9012\u5f52\u6784\u5efa\u548c\u5206\u6790\u7ebf\u6027\u7cfb\u7edf\uff0c\u5728\u4e0d\u8fdb\u884c\u77e9\u9635\u5206\u89e3\u7684\u524d\u63d0\u4e0b\u8fbe\u5230\u4e0e\u73b0\u6709\u6700\u4f18EnKF\u5b9e\u73b0\u76f8\u5f53\u7684\u8ba1\u7b97\u590d\u6742\u5ea6\uff0c\u6570\u503c\u5b9e\u9a8c\u8868\u660e\u8be5\u7b97\u6cd5\u5728\u4fdd\u6301\u7cbe\u5ea6\u7684\u540c\u65f6\u663e\u8457\u52a0\u901f\u3002"
     },
     {
       "path": "papers/2012/1212.3116",
@@ -3940,19 +3322,19 @@
       "venue": "Ocean Dynamics",
       "method_tags": [
         "4D-Var",
-        "数据同化",
-        "海洋建模",
-        "切线与伴随代码自动生成"
+        "\u6570\u636e\u540c\u5316",
+        "\u6d77\u6d0b\u5efa\u6a21",
+        "\u5207\u7ebf\u4e0e\u4f34\u968f\u4ee3\u7801\u81ea\u52a8\u751f\u6210"
       ],
       "application_tags": [
-        "海洋环流",
-        "边界条件优化",
-        "NEMO模型",
-        "射流强化"
+        "\u6d77\u6d0b\u73af\u6d41",
+        "\u8fb9\u754c\u6761\u4ef6\u4f18\u5316",
+        "NEMO\u6a21\u578b",
+        "\u5c04\u6d41\u5f3a\u5316"
       ],
-      "date_collected": "",
+      "date_collected": "2012-12-01",
       "paper_url": "",
-      "abstract_preview": "本文将四维变分（4D-Var）数据同化技术应用于NEMO海洋模型的ORCA-2配置，通过优化侧边界、底边界和海表面的边界条件参数化方案，显著增强了 Gulf Stream 和 Kuroshio 等主要洋流的强度和精细结构。研究发现，数据同化对水平速度分量 u 和 v 的底边界条件参数化影响最为显著。"
+      "abstract_preview": "\u672c\u6587\u5c06\u56db\u7ef4\u53d8\u5206\uff084D-Var\uff09\u6570\u636e\u540c\u5316\u6280\u672f\u5e94\u7528\u4e8eNEMO\u6d77\u6d0b\u6a21\u578b\u7684ORCA-2\u914d\u7f6e\uff0c\u901a\u8fc7\u4f18\u5316\u4fa7\u8fb9\u754c\u3001\u5e95\u8fb9\u754c\u548c\u6d77\u8868\u9762\u7684\u8fb9\u754c\u6761\u4ef6\u53c2\u6570\u5316\u65b9\u6848\uff0c\u663e\u8457\u589e\u5f3a\u4e86 Gulf Stream \u548c Kuroshio \u7b49\u4e3b\u8981\u6d0b\u6d41\u7684\u5f3a\u5ea6\u548c\u7cbe\u7ec6\u7ed3\u6784\u3002\u7814\u7a76\u53d1\u73b0\uff0c\u6570\u636e\u540c\u5316\u5bf9\u6c34\u5e73\u901f\u5ea6\u5206\u91cf u \u548c v \u7684\u5e95\u8fb9\u754c\u6761\u4ef6\u53c2\u6570\u5316\u5f71\u54cd\u6700\u4e3a\u663e\u8457\u3002"
     },
     {
       "path": "papers/2011/1108.0168",
@@ -3977,9 +3359,9 @@
         "Oceanic Assimilation",
         "Lorenz-96"
       ],
-      "date_collected": "",
+      "date_collected": "2011-08-01",
       "paper_url": "",
-      "abstract_preview": "粒子卡尔曼滤波（PKF）通过高斯混合（Gaussian Mixture）表示状态概率密度函数，在粒子滤波器与卡尔曼滤波器之间建立了一座桥梁，既继承了卡尔曼滤波的线性高斯更新机制，又引入了粒子滤波的权重修正，从而在非线性非高斯数据同化问题中实现更稳健的状态估计。"
+      "abstract_preview": "\u7c92\u5b50\u5361\u5c14\u66fc\u6ee4\u6ce2\uff08PKF\uff09\u901a\u8fc7\u9ad8\u65af\u6df7\u5408\uff08Gaussian Mixture\uff09\u8868\u793a\u72b6\u6001\u6982\u7387\u5bc6\u5ea6\u51fd\u6570\uff0c\u5728\u7c92\u5b50\u6ee4\u6ce2\u5668\u4e0e\u5361\u5c14\u66fc\u6ee4\u6ce2\u5668\u4e4b\u95f4\u5efa\u7acb\u4e86\u4e00\u5ea7\u6865\u6881\uff0c\u65e2\u7ee7\u627f\u4e86\u5361\u5c14\u66fc\u6ee4\u6ce2\u7684\u7ebf\u6027\u9ad8\u65af\u66f4\u65b0\u673a\u5236\uff0c\u53c8\u5f15\u5165\u4e86\u7c92\u5b50\u6ee4\u6ce2\u7684\u6743\u91cd\u4fee\u6b63\uff0c\u4ece\u800c\u5728\u975e\u7ebf\u6027\u975e\u9ad8\u65af\u6570\u636e\u540c\u5316\u95ee\u9898\u4e2d\u5b9e\u73b0\u66f4\u7a33\u5065\u7684\u72b6\u6001\u4f30\u8ba1\u3002"
     }
   ],
   "statistics": {
@@ -4016,10 +3398,10 @@
       "PDO": 1,
       "seasonal_decomposition": 1,
       "multivariate_analysis": 1,
-      "深度学习可解释性": 1,
-      "ENSO预测": 1,
-      "有界变差函数": 1,
-      "神经网络可视化": 1,
+      "\u6df1\u5ea6\u5b66\u4e60\u53ef\u89e3\u91ca\u6027": 1,
+      "ENSO\u9884\u6d4b": 1,
+      "\u6709\u754c\u53d8\u5dee\u51fd\u6570": 1,
+      "\u795e\u7ecf\u7f51\u7edc\u53ef\u89c6\u5316": 1,
       "GNN": 5,
       "graph_neural_network": 4,
       "multi_scale": 3,
@@ -4030,15 +3412,15 @@
       "Differentiable Solver": 1,
       "Ocean Modeling": 2,
       "Neural Operator": 2,
-      "机器学习": 1,
-      "深度学习": 5,
-      "多层感知器": 1,
-      "参数化": 1,
-      "海浪建模": 1,
-      "大集合模拟": 1,
-      "大气环流模型": 1,
-      "气候模拟": 1,
-      "海气耦合": 1,
+      "\u673a\u5668\u5b66\u4e60": 1,
+      "\u6df1\u5ea6\u5b66\u4e60": 5,
+      "\u591a\u5c42\u611f\u77e5\u5668": 1,
+      "\u53c2\u6570\u5316": 1,
+      "\u6d77\u6d6a\u5efa\u6a21": 1,
+      "\u5927\u96c6\u5408\u6a21\u62df": 1,
+      "\u5927\u6c14\u73af\u6d41\u6a21\u578b": 1,
+      "\u6c14\u5019\u6a21\u62df": 1,
+      "\u6d77\u6c14\u8026\u5408": 1,
       "Deep Learning": 21,
       "Sequence Classification": 1,
       "Transformer": 5,
@@ -4070,11 +3452,11 @@
       "ensemble_learning": 1,
       "SST": 2,
       "Perlin_noise": 1,
-      "符号回归": 1,
-      "可解释AI": 1,
-      "神经符号学习": 1,
-      "时间序列预测": 1,
-      "混沌系统": 1,
+      "\u7b26\u53f7\u56de\u5f52": 1,
+      "\u53ef\u89e3\u91caAI": 1,
+      "\u795e\u7ecf\u7b26\u53f7\u5b66\u4e60": 1,
+      "\u65f6\u95f4\u5e8f\u5217\u9884\u6d4b": 1,
+      "\u6df7\u6c8c\u7cfb\u7edf": 1,
       "data_assimilation": 8,
       "Lagrangian": 1,
       "conditional_Gaussian": 2,
@@ -4090,10 +3472,10 @@
       "potential_flow": 1,
       "wave_physics": 1,
       "phase_resolved": 1,
-      "多阶段学习": 1,
-      "多分支编码器-解码器": 1,
-      "海洋遥感": 1,
-      "时序预测": 1,
+      "\u591a\u9636\u6bb5\u5b66\u4e60": 1,
+      "\u591a\u5206\u652f\u7f16\u7801\u5668-\u89e3\u7801\u5668": 1,
+      "\u6d77\u6d0b\u9065\u611f": 1,
+      "\u65f6\u5e8f\u9884\u6d4b": 1,
       "4D-Var": 4,
       "Kernel Methods": 1,
       "Conditional Mean Embedding": 1,
@@ -4162,11 +3544,11 @@
       "small_ensemble": 1,
       "HIS-Unet": 1,
       "sea_ice": 1,
-      "卷积神经网络": 1,
-      "聚类分析": 1,
-      "亚季节至季节预测": 1,
-      "海表高度预测": 1,
-      "预处理策略": 1,
+      "\u5377\u79ef\u795e\u7ecf\u7f51\u7edc": 1,
+      "\u805a\u7c7b\u5206\u6790": 1,
+      "\u4e9a\u5b63\u8282\u81f3\u5b63\u8282\u9884\u6d4b": 1,
+      "\u6d77\u8868\u9ad8\u5ea6\u9884\u6d4b": 1,
+      "\u9884\u5904\u7406\u7b56\u7565": 1,
       "foundation_model": 1,
       "Aurora": 1,
       "fine_tuning": 1,
@@ -4237,9 +3619,9 @@
       "State Estimation": 3,
       "Dynamical Systems": 1,
       "Noise Mitigation": 1,
-      "神经网络": 1,
-      "海浪预报": 1,
-      "物理驱动机器学习": 1,
+      "\u795e\u7ecf\u7f51\u7edc": 1,
+      "\u6d77\u6d6a\u9884\u62a5": 1,
+      "\u7269\u7406\u9a71\u52a8\u673a\u5668\u5b66\u4e60": 1,
       "Linear Inverse Model": 1,
       "particle_filter": 1,
       "semantic_segmentation": 1,
@@ -4252,11 +3634,11 @@
       "convolutional_neural_network": 1,
       "residual_block": 1,
       "moving_window": 1,
-      "UAV辅助定位": 1,
-      "视觉定位": 1,
-      "三角测量": 1,
-      "扩展卡尔曼滤波": 1,
-      "深度学习目标检测": 1,
+      "UAV\u8f85\u52a9\u5b9a\u4f4d": 1,
+      "\u89c6\u89c9\u5b9a\u4f4d": 1,
+      "\u4e09\u89d2\u6d4b\u91cf": 1,
+      "\u6269\u5c55\u5361\u5c14\u66fc\u6ee4\u6ce2": 1,
+      "\u6df1\u5ea6\u5b66\u4e60\u76ee\u6807\u68c0\u6d4b": 1,
       "swin_transformer": 1,
       "attention_mechanism": 1,
       "3d_cnn": 1,
@@ -4277,9 +3659,9 @@
       "Koopman Theory": 1,
       "Neural SDE": 1,
       "DINCAE": 1,
-      "海洋预报": 1,
-      "时空预测": 1,
-      "跨时空建模": 1,
+      "\u6d77\u6d0b\u9884\u62a5": 1,
+      "\u65f6\u7a7a\u9884\u6d4b": 1,
+      "\u8de8\u65f6\u7a7a\u5efa\u6a21": 1,
       "Sea Surface Temperature Prediction": 1,
       "ENSO": 1,
       "Climate Modeling": 1,
@@ -4369,11 +3751,11 @@
       "Eigenvalue": 1,
       "Initialisation": 1,
       "Regularisation": 1,
-      "深度神经网络": 1,
-      "分布式推理": 1,
+      "\u6df1\u5ea6\u795e\u7ecf\u7f51\u7edc": 1,
+      "\u5206\u5e03\u5f0f\u63a8\u7406": 1,
       "HPC": 1,
-      "在线学习": 1,
-      "模型集成": 1,
+      "\u5728\u7ebf\u5b66\u4e60": 1,
+      "\u6a21\u578b\u96c6\u6210": 1,
       "Belief Propagation": 1,
       "Neural Enhanced BP": 1,
       "Particle Filtering": 1,
@@ -4400,16 +3782,16 @@
       "Optimal Control": 1,
       "Regularization": 1,
       "Chaotic Systems": 1,
-      "数据同化": 2,
-      "NEMO模型": 1,
-      "边界条件优化": 1,
-      "海洋建模": 2,
+      "\u6570\u636e\u540c\u5316": 2,
+      "NEMO\u6a21\u578b": 1,
+      "\u8fb9\u754c\u6761\u4ef6\u4f18\u5316": 1,
+      "\u6d77\u6d0b\u5efa\u6a21": 2,
       "Sherman-Morrison Formula": 1,
       "Computational Efficiency": 1,
       "Parallel Computing": 1,
       "Computer Model Calibration": 1,
       "Gaussian Process Emulator": 1,
-      "切线与伴随代码自动生成": 1,
+      "\u5207\u7ebf\u4e0e\u4f34\u968f\u4ee3\u7801\u81ea\u52a8\u751f\u6210": 1,
       "Particle Filter": 1,
       "Gaussian Mixture": 1
     },
@@ -4426,9 +3808,9 @@
       "North_Pacific": 1,
       "sea_surface_temperature": 4,
       "climate_prediction": 2,
-      "气候预测": 1,
-      "海洋-大气耦合": 1,
-      "可解释AI": 1,
+      "\u6c14\u5019\u9884\u6d4b": 1,
+      "\u6d77\u6d0b-\u5927\u6c14\u8026\u5408": 1,
+      "\u53ef\u89e3\u91caAI": 1,
       "global_ocean": 4,
       "eddy": 1,
       "ocean_circulation": 7,
@@ -4438,15 +3820,15 @@
       "Subseasonal-to-Seasonal Prediction": 1,
       "Downscaling": 1,
       "Digital Twin": 1,
-      "空气-海洋相互作用": 1,
-      "气体传输": 1,
-      "气溶胶排放": 1,
-      "波浪破碎": 1,
-      "大气阻塞": 1,
-      "海温变率": 1,
-      "气候变化": 3,
-      "极端天气": 2,
-      "遥相关分析": 1,
+      "\u7a7a\u6c14-\u6d77\u6d0b\u76f8\u4e92\u4f5c\u7528": 1,
+      "\u6c14\u4f53\u4f20\u8f93": 1,
+      "\u6c14\u6eb6\u80f6\u6392\u653e": 1,
+      "\u6ce2\u6d6a\u7834\u788e": 1,
+      "\u5927\u6c14\u963b\u585e": 1,
+      "\u6d77\u6e29\u53d8\u7387": 1,
+      "\u6c14\u5019\u53d8\u5316": 3,
+      "\u6781\u7aef\u5929\u6c14": 2,
+      "\u9065\u76f8\u5173\u5206\u6790": 1,
       "Coastal Hypoxia Forecasting": 1,
       "Ocean Modeling": 4,
       "Environmental AI": 1,
@@ -4478,10 +3860,10 @@
       "canary_current": 2,
       "ensemble_prediction": 1,
       "probabilistic_forecasting": 1,
-      "混沌时间序列": 1,
-      "流行病预测": 1,
-      "气候建模": 1,
-      "非线性动力学": 1,
+      "\u6df7\u6c8c\u65f6\u95f4\u5e8f\u5217": 1,
+      "\u6d41\u884c\u75c5\u9884\u6d4b": 1,
+      "\u6c14\u5019\u5efa\u6a21": 1,
+      "\u975e\u7ebf\u6027\u52a8\u529b\u5b66": 1,
       "Lagrangian_DA": 2,
       "tracer_observations": 1,
       "flow_estimation": 1,
@@ -4489,7 +3871,7 @@
       "Sea Surface Temperature": 5,
       "Climate Prediction": 3,
       "Ocean State Estimation": 1,
-      "El Niño Forecasting": 1,
+      "El Ni\u00f1o Forecasting": 1,
       "North Atlantic Oscillation": 1,
       "Early Winter Prediction": 1,
       "ENSO Teleconnection": 1,
@@ -4498,11 +3880,11 @@
       "data_assimilation": 1,
       "wave_flume": 1,
       "nonlinear_waves": 1,
-      "海洋表面流预测": 1,
-      "海表面高度": 1,
-      "地转流估计": 1,
-      "卫星高度计": 1,
-      "漂流浮标数据同化": 1,
+      "\u6d77\u6d0b\u8868\u9762\u6d41\u9884\u6d4b": 1,
+      "\u6d77\u8868\u9762\u9ad8\u5ea6": 1,
+      "\u5730\u8f6c\u6d41\u4f30\u8ba1": 1,
+      "\u536b\u661f\u9ad8\u5ea6\u8ba1": 1,
+      "\u6f02\u6d41\u6d6e\u6807\u6570\u636e\u540c\u5316": 1,
       "Weather Prediction": 3,
       "Chaotic Systems": 2,
       "Numerical Weather Prediction": 4,
@@ -4582,9 +3964,9 @@
       "sea_ice_concentration": 1,
       "remote_sensing": 1,
       "multi_task_learning": 1,
-      "沿海海平面预测": 1,
-      "海洋预报": 1,
-      "自然灾害预警": 1,
+      "\u6cbf\u6d77\u6d77\u5e73\u9762\u9884\u6d4b": 1,
+      "\u6d77\u6d0b\u9884\u62a5": 1,
+      "\u81ea\u7136\u707e\u5bb3\u9884\u8b66": 1,
       "Canary_Upwelling": 1,
       "Northeastern_Atlantic": 1,
       "potential_temperature": 1,
@@ -4641,10 +4023,10 @@
       "Nonlinear System Modeling": 1,
       "Control Design": 1,
       "System Identification": 1,
-      "海洋学": 1,
-      "气象预报": 1,
-      "数值天气预报": 2,
-      "海浪预测": 1,
+      "\u6d77\u6d0b\u5b66": 1,
+      "\u6c14\u8c61\u9884\u62a5": 1,
+      "\u6570\u503c\u5929\u6c14\u9884\u62a5": 2,
+      "\u6d77\u6d6a\u9884\u6d4b": 1,
       "Climate Reconstruction": 1,
       "ENSO Prediction": 1,
       "Paleoclimate Proxies": 1,
@@ -4659,10 +4041,10 @@
       "s2s_forecasting": 2,
       "climate_forecasting": 1,
       "seasonal_prediction": 1,
-      "水面无人艇导航": 1,
-      "GNSS拒止环境": 1,
-      "海洋无人系统": 1,
-      "多机器人协作": 1,
+      "\u6c34\u9762\u65e0\u4eba\u8247\u5bfc\u822a": 1,
+      "GNSS\u62d2\u6b62\u73af\u5883": 1,
+      "\u6d77\u6d0b\u65e0\u4eba\u7cfb\u7edf": 1,
+      "\u591a\u673a\u5668\u4eba\u534f\u4f5c": 1,
       "enso": 1,
       "Atmospheric Sciences": 1,
       "Ocean Sciences": 1,
@@ -4683,8 +4065,8 @@
       "satellite_Ocean": 1,
       "MODIS": 1,
       "oceanography": 1,
-      "海洋科学": 1,
-      "数值预报": 1,
+      "\u6d77\u6d0b\u79d1\u5b66": 1,
+      "\u6570\u503c\u9884\u62a5": 1,
       "El Nino/La Nina Forecast": 1,
       "Ocean-Atmosphere Interaction": 1,
       "Data Assimilation": 3,
@@ -4788,9 +4170,9 @@
       "Cyclone": 1,
       "Pendulum": 1,
       "Cylinder Flow": 1,
-      "海洋气候建模": 1,
-      "数值模拟": 1,
-      "高分辨率海洋模型": 1,
+      "\u6d77\u6d0b\u6c14\u5019\u5efa\u6a21": 1,
+      "\u6570\u503c\u6a21\u62df": 1,
+      "\u9ad8\u5206\u8fa8\u7387\u6d77\u6d0b\u6a21\u578b": 1,
       "Cooperative Localization": 1,
       "Wireless Networks": 1,
       "Agent Networks": 1,
@@ -4811,19 +4193,19 @@
       "Hamiltonian Systems": 1,
       "Ocean Double-Gyre": 1,
       "Geophysical Fluid Dynamics": 1,
-      "海洋环流建模": 1,
-      "海岸线近似": 1,
+      "\u6d77\u6d0b\u73af\u6d41\u5efa\u6a21": 1,
+      "\u6d77\u5cb8\u7ebf\u8fd1\u4f3c": 1,
       "Lorenz-96": 2,
       "Quasi-Geostrophic Model": 1,
       "Cosmology": 1,
       "Ice Sheet Modeling": 1,
-      "海洋环流": 1,
-      "边界条件优化": 1,
-      "NEMO模型": 1,
-      "射流强化": 1,
+      "\u6d77\u6d0b\u73af\u6d41": 1,
+      "\u8fb9\u754c\u6761\u4ef6\u4f18\u5316": 1,
+      "NEMO\u6a21\u578b": 1,
+      "\u5c04\u6d41\u5f3a\u5316": 1,
       "Atmospheric Assimilation": 1,
       "Oceanic Assimilation": 1
     }
   },
-  "last_updated": "2026-03-24T01:25:59.335575"
+  "last_updated": "2026-03-26T11:11:39.136925"
 }

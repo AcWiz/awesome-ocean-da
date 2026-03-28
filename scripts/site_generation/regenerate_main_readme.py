@@ -9,11 +9,49 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 
+from datetime import datetime, timedelta
+
 from utils.normalizers import normalize_arxiv, normalize_tag
 from utils.tag_config import TAG_CATEGORIES
 
 PAPERS_JSON = PROJECT_ROOT / "_data" / "papers.json"
 README_FILE = PROJECT_ROOT / "README.md"
+
+
+def is_recent_paper(paper, days=7) -> bool:
+    """检查论文是否在过去N天内收集"""
+    date_str = paper.get('date_collected', '')
+    if not date_str:
+        return False
+    try:
+        collected = datetime.strptime(date_str, "%Y-%m-%d")
+        return collected >= datetime.now() - timedelta(days=days)
+    except ValueError:
+        return False
+
+
+def generate_new_papers_section(papers):
+    """生成'新'区域 - 过去7天收集的论文"""
+    recent = [p for p in papers if is_recent_paper(p)]
+    if not recent:
+        return []
+
+    lines = []
+    lines.append("## 新")
+    lines.append("")
+    lines.append(f"> 最近一周收集的论文（共 {len(recent)} 篇）")
+    lines.append("")
+    lines.append("| 年份 | 论文 | Venue | 方法 | 应用 | 总结 |")
+    lines.append("|------|------|-------|------|------|------|")
+
+    for paper in sorted(recent, key=lambda x: x.get('arxiv') or '', reverse=True):
+        lines.append(generate_paper_row(paper))
+
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    return lines
 
 
 def paper_matches_tag(paper, normalized_tag):
@@ -171,7 +209,7 @@ def main():
 
     for tag, desc in method_tags:
         if tag in TAG_CATEGORIES:
-            cat_name, cat_file, _ = TAG_CATEGORIES[tag]
+            cat_name, cat_file = TAG_CATEGORIES[tag]
             lines = generate_category_section(cat_name, cat_file, papers, tag, desc)
             if lines:
                 method_lines.extend(lines)
@@ -192,7 +230,7 @@ def main():
 
     for tag, desc in app_tags:
         if tag in TAG_CATEGORIES:
-            cat_name, cat_file, _ = TAG_CATEGORIES[tag]
+            cat_name, cat_file = TAG_CATEGORIES[tag]
             lines = generate_category_section(cat_name, cat_file, papers, tag, desc)
             if lines:
                 app_lines.extend(lines)
@@ -227,6 +265,7 @@ def main():
     readme_lines.append("  - [图神经网络 (GNN)](#图神经网络-gnn)")
     readme_lines.append("  - [变分方法 (4D-Var / EnKF)](#变分方法-4d-var--enkf)")
     readme_lines.append("  - [Transformer / Attention](#transformer--attention)")
+    readme_lines.append("- [新](#新)")
     readme_lines.append("- [应用场景](#应用场景)")
     readme_lines.append("  - [海表温度 (SST)](#海表温度-sst)")
     readme_lines.append("  - [海表高度 (SSH)](#海表高度-ssh)")
@@ -240,6 +279,11 @@ def main():
     readme_lines.append("")
 
     readme_lines.extend(method_lines)
+
+    # 生成新论文区域
+    new_lines = generate_new_papers_section(papers)
+    readme_lines.extend(new_lines)
+
     readme_lines.extend(app_lines)
     readme_lines.extend(year_lines)
 

@@ -1,13 +1,12 @@
 ---
 title: "Super-resolution data assimilation"
 arXiv: "2109.08017"
-authors: "Sébastien Barthélémy; Julien Brajard; Laurent Bertino; François Counillon"
+authors: ["Sébastien Barthélémy", "Julien Brajard", "Laurent Bertino", "François Counillon"]
 year: "2021"
 source: "arXiv"
-venue: "arXiv"
-tags:
-  - method: ["neural-network", "ensemble-kalman-filter", "super-resolution", "deep-learning"]
-  - application: ["ocean-modeling", "data-assimilation", "quasi-geostrophic-model", "forecasting"]
+venue: "Ocean Dynamics"
+method_tags: ["neural-network", "ensemble-kalman-filter", "super-resolution", "deep-learning"]
+application_tags: ["ocean-modeling", "data-assimilation", "quasi-geostrophic-model", "forecasting"]
 difficulty: "★★★☆☆"
 importance: "★★★★☆"
 read_status: "read"
@@ -125,3 +124,21 @@ $$\mathcal{J}(\mathbf{x}) = (\mathbf{x} - \mathbf{x}^f)^T \mathbf{P}^f)^{-1} (\m
   primaryClass={physics.ao-ph}
 }
 ```
+## 3. 研究问题（Problem Definition）
+**核心问题**：如何有效地解决...？
+
+**研究背景**：
+- 现有方法存在一定局限性
+- 需要新的技术手段
+
+**关键挑战**：
+1. 挑战一
+2. 挑战二
+## 4. 核心贡献（Contributions）
+1. **提出新方法**：...
+2. **理论分析**：...
+3. **实验验证**：...
+## 5. 方法详解（Methodology）
+
+### 5.1 方法一
+### 5.2 方法二

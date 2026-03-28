@@ -1,10 +1,10 @@
 ---
 title: "Optimal Boundary Conditions for ORCA-2 Model"
-arXiv: "1212.3116v1"
+arXiv: "1212.3116"
 authors: ["Eugene Kazantsev"]
 year: 2012
 source: "arXiv"
-venue: "arXiv"
+venue: "Ocean Dynamics"
 method_tags: ["4D-Var", "数据同化", "海洋建模", "切线与伴随代码自动生成"]
 application_tags: ["海洋环流", "边界条件优化", "NEMO模型", "射流强化"]
 difficulty: "★★★☆☆"

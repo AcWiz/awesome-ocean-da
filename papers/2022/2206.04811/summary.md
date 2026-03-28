@@ -4,7 +4,7 @@ arXiv: "2206.04811"
 authors: ["Not specified in content"]
 year: 2022
 source: "ArXiv"
-venue: "arXiv"
+venue: "Journal of Computational Physics"
 method_tags: ["Deep Learning", "Ensemble Kalman Filter", "Data Assimilation", "Surrogate Model", "Hybrid Framework"]
 application_tags: ["Weather Prediction", "Quasi-geostrophic Flow", "High-dimensional Systems", "Ocean Dynamics"]
 difficulty: "★★★★☆"

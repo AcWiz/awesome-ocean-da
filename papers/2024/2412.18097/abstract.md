@@ -1,102 +1,70 @@
 ---
-title: "LangYa: Cross-Spatiotemporal Ocean Forecasting"
+title: "LangYa: Revolutionizing Cross-Spatiotemporal Ocean Forecasting"
 arXiv: "2412.18097"
-authors: ["待补充", "待补充", "待补充"]
+authors: ["Nan Yang", "Chong Wang", "Meihua Zhao", "Zimeng Zhao", "Huiling Zheng", "Bin Zhang", "Jianing Wang", "Xiaofeng Li"]
 year: 2024
 source: "arXiv"
 venue: "arXiv"
-method_tags: ["海洋预报", "时空预测", "深度学习", "跨时空建模"]
-application_tags: ["海洋科学", "数值预报", "气候变化"]
+method_tags: ["Deep Learning", "Ocean Forecasting", "Cross-Spatiotemporal Modeling", "Air-Sea Coupling", "Neural Network"]
+application_tags: ["Ocean Forecasting", "Sea Surface Temperature", "Climate Modeling", "Marine Science"]
 difficulty: "★★★☆☆"
 importance: "★★★★☆"
 read_status: "skim"
 ---
 
-# LangYa: Cross-Spatiotemporal Ocean Forecasting
+# LangYa: Revolutionizing Cross-Spatiotemporal Ocean Forecasting
 
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2412.18097
-- **作者机构**: [待补充]
-- **开源代码**: [待补充]
+- **作者**: Nan Yang, Chong Wang, Meihua Zhao, Zimeng Zhao, Huiling Zheng, Bin Zhang, Jianing Wang, Xiaofeng Li
+- **开源代码**: None
 
 ## 2. 一句话总结（TL;DR）
-本文提出了LangYa，一个用于跨时空海洋预报的深度学习框架，旨在解决传统海洋数值模式在计算效率和多尺度时空特征提取方面的局限性，通过创新的神经网络架构实现更准确、更高效的海洋状态预测。
+本文提出 LangYa，一个跨时空海气耦合海洋预报系统，通过深度学习实现从1到7天的海表状态变量预报，在确定性预报精度上优于现有数值和AI海洋预报系统。
 
 ## 3. 研究问题（Problem Definition）
-海洋预报在气候变化预测、海洋资源管理和海上活动安全等方面具有重要意义。传统海洋数值模式虽然物理基础扎实，但存在以下挑战：
-- **计算成本高**：需要求解复杂的偏微分方程组
-- **时空分辨率受限**：难以同时兼顾大尺度和小尺度特征
-- **多源数据融合困难**：海表温度、盐度、浪高等多变量协同预报能力不足
+**核心问题**：如何构建一个跨时空且海气耦合的AI海洋预报系统？
 
-核心研究问题：如何设计一个能够有效捕捉海洋系统中跨时空依赖关系的深度学习模型，实现高效准确的海洋状态预报？
+**研究背景**：
+- 海洋预报对科学研究和社会利益至关重要
+- 当前最准确的预报系统是全球海洋预报系统（GOFSs）
+- GOFSs 计算成本高且易产生累积误差
+- 大型AI模型显著提升了预报速度和准确性
+
+**关键挑战**：
+1. 跨时空预报能力
+2. 海气耦合建模
+3. 计算效率与精度的平衡
 
 ## 4. 核心贡献（Contributions）
-1. 提出跨时空海洋预报框架LangYa，设计了专门针对海洋数据时空演变规律的神经网络架构
-2. 实现了多尺度海洋特征的有效融合，能够同时建模局地和远程时空相互作用
-3. 在多个海洋数据集上验证了方法的有效性，显著提升了预报精度和计算效率
+1. **LangYa 系统**：跨时空海气耦合海洋预报系统
+2. **时间嵌入模块**：单模型实现1-7天预报
+3. **海气耦合模块**：有效模拟海气相互作用
+4. **海洋自注意力模块**：提高网络稳定性，加速训练收敛
+5. **自适应温跃层损失函数**：提高温跃层预报精度
 
 ## 5. 方法详解（Methodology）
-[待补充：详细的方法架构说明]
 
 ### 5.1 模型架构
-[待补充：网络结构设计细节]
+- 时间嵌入模块（Time Embedding Module）
+- 海气耦合模块（Air-Sea Coupled Module）
+- 海洋自注意力模块（Ocean Self-Attention Module）
 
-### 5.2 跨时空建模机制
-[待补充：如何处理时空依赖关系]
+### 5.2 海气耦合机制
+- 有效模拟海气相互作用过程
 
-### 5.3 训练策略
-[待补充：损失函数、优化器等]
+### 5.3 自适应损失函数
+- 自适应温跃层损失函数改善深层预报
 
-## 6. 数学与物理建模（Math & Physics）
-[待补充：如有相关公式请补充]
+## 6. 实验分析（Experiments）
 
-海洋预报的核心物理方程包括：
-- Navier-Stokes方程的简化形式
-- 连续性方程
-- 状态方程
+**数据集**：
+- 使用 GLORYS12 全球海洋再分析数据（27年）
 
-## 7. 实验分析（Experiments）
-**数据集**: [待补充]
-**评估指标**: [待补充]
-**对比方法**: [待补充]
-**核心结果**: [待补充]
+**对比方法**：
+- 数值海洋预报系统
+- 现有AI海洋预报系统
 
-## 8. 优缺点分析（Critical Review）
-**优点**:
-- 跨时空建模能力强，能够捕捉复杂海洋动力学特征
-- 计算效率显著优于传统数值模式
-- 具有良好的可扩展性和通用性
-
-**缺点**:
-- 对训练数据的质量和数量要求较高
-- 物理约束的显式融入可能不足
-- 在极端事件预报上可能存在不足
-
-## 9. 对我的启发（For My Research）
-- 跨时空建模思想可应用于海洋数据同化中的状态估计
-- 多尺度特征融合策略对提高预报精度有重要参考价值
-- 深度学习与传统海洋物理模型的结合是未来发展的重要方向
-
-## 10. Idea 扩展与下一步（Next Steps）
-1. 将跨时空建模思想引入海洋资料同化系统，提高分析场质量
-2. 探索物理约束神经网络（PINN）方法，增强模型的物理一致性
-3. 研究基于LangYa的海浪-海洋耦合预报系统
-
-## 11. 引用格式（BibTex）
-```bibtex
-@article{langya2024cross,
-  title={LangYa: Cross-Spatiotemporal Ocean Forecasting},
-  author={},
-  journal={arXiv preprint},
-  year={2024}
-}
-```
-```
-
-**注意**: 由于论文全文内容未提供，上述摘要为基于标题的推断内容。请补充以下关键信息以完善摘要：
-- 实际arXiv编号
-- 作者及所属机构
-- 开源代码链接
-- 具体方法细节
-- 实验数据集和结果
-- 核心创新点
+**结果**：
+- LangYa 确定性预报结果更可靠
+- 覆盖1-7天不同预报时效

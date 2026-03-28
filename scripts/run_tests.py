@@ -184,8 +184,8 @@ def T4_tag_pages_format(runner):
     print("\n=== T4: 标签页格式验证 ===")
 
     tag_files = list(PAPERS_DIR.glob("*.md"))
-    # 排除 README.md
-    tag_files = [f for f in tag_files if f.name not in ['README.md', 'CONTRIBUTING.md']]
+    # 排除 README.md 和分类索引页（这些页面格式不同）
+    tag_files = [f for f in tag_files if f.name not in ['README.md', 'CONTRIBUTING.md', 'by-method.md', 'by-application.md']]
 
     runner.test(
         "标签页数量 >= 5",

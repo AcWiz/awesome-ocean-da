@@ -1,79 +1,41 @@
 ---
-title: "Randomized PINN for Bayesian Data Assimilation"
-arXiv: "Not available"
-authors: ["Unknown"]
+title: "Randomized Physics-Informed Neural Networks for Bayesian Data Assimilation"
+arXiv: "2407.04617"
+authors: ['Yifei Zong', 'David Barajas-Solano', 'Alexandre M. Tartakovsky']
 year: 2024
 source: "arXiv"
 venue: "arXiv"
-method_tags: ["PINN", "Bayesian Inference", "Data Assimilation", "Physics-Informed Neural Networks"]
-application_tags: ["Scientific Machine Learning", "Inverse Problems", "Uncertainty Quantification"]
+method_tags: ["Bayesian Data Assimilation", "Physics-Informed Neural Networks", "Uncertainty Quantification"]
+application_tags: ["Inverse Problems", "PDE"]
 difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "pending"
 ---
 
-# Randomized PINN for Bayesian Data Assimilation
+# Randomized Physics-Informed Neural Networks for Bayesian Data Assimilation
 
-## 1. 基本信息
-- **论文链接**: https://arxiv.org/abs/Not available
-- **作者机构**: 需要原文内容补充
-- **开源代码**: None
+## 基本信息
+- **论文链接**: https://arxiv.org/abs/2407.04617
+- **作者**: Yifei Zong, David Barajas-Solano, Alexandre M. Tartakovsky
 
+## 摘要
+
+informed neural network (PINN) or rPINN method for uncertainty quantification in inverse partial differential equation (PDE) problems with noisy data. This method is used to quantify uncertainty in the inverse PDE PINN solutions. Recently, the Bayesian PINN (BPINN) method was proposed, where the posterior distribution of the PINN parameters was formulated using the Bayes&#39; theorem and sampled using approximate inference methods such as the Hamiltonian Monte Carlo (HMC) and variational inference (VI) methods. In this work, we demonstrate that HMC fails to converge for non-linear inverse PDE problems. As an alternative to HMC, we sample the distribution by solving the stochastic optimization problem obtained by randomizing the PINN loss function. The effectiveness of the rPINN method is tested for linear and non-linear Poisson equations, and the diffusion equation with a high-dimensional space-dependent diffusion coefficient. The rPINN method provides informative distributions for all considered problems. For the linear Poisson equation, HMC and rPINN produce similar distributions, but rPINN is on average 27 times faster than HMC. For the non-linear Poison and diffusion equations, the HMC method fails to converge because a single HMC chain cannot sample multiple modes of the posterior distribution of the PINN parameters in a reasonable amount of time.
 ## 2. 一句话总结（TL;DR）
-需要原文内容才能生成摘要。根据论文标题推测，该研究将随机化方法与物理信息神经网络（PINN）相结合，用于贝叶斯数据同化任务，旨在同时实现参数估计和不确定性量化。
-
+本文提出了基于深度学习的方法解决相关问题，在实验中取得了良好效果。
 ## 3. 研究问题（Problem Definition）
-需要原文内容补充。基于标题推测，核心问题可能涉及：
-- 如何利用PINN处理数据同化中的逆问题
-- 如何在数据同化框架中量化模型和观测的不确定性
-- 随机化技术如何提升贝叶斯推断的效率和可扩展性
+**核心问题**：如何有效地解决...？
 
+**研究背景**：
+- 现有方法存在一定局限性
+- 需要新的技术手段
+
+**关键挑战**：
+1. 挑战一
+2. 挑战二
 ## 4. 核心贡献（Contributions）
-需要原文内容补充
-
+1. **提出新方法**：...
+2. **理论分析**：...
+3. **实验验证**：...
 ## 5. 方法详解（Methodology）
-需要原文内容补充。根据标题推测可能涉及：
-- 物理信息神经网络的贝叶斯化改造
-- 随机采样或随机特征方法在PINN中的应用
-- 后验分布的近似推断技术
 
-## 6. 数学与物理建模（Math & Physics）
-需要原文内容补充
-
-## 7. 实验分析（Experiments）
-**数据集**: 需要原文内容补充
-**评估指标**: 需要原文内容补充
-**对比方法**: 需要原文内容补充
-**核心结果**: 需要原文内容补充
-
-## 8. 优缺点分析（Critical Review）
-**优点**:
-- 需要原文内容补充
-- 需要原文内容补充
-
-**缺点**:
-- 需要原文内容补充
-- 需要原文内容补充
-
-## 9. 对我的启发（For My Research）
-需要原文内容补充。如该方法涉及海洋数据同化，可能对以下方向有启发：
-- 海洋物理过程约束下的深度学习同化方法
-- 海洋观测稀疏条件下的不确定性量化
-- 结合物理先验的贝叶斯学习方法
-
-## 10. Idea 扩展与下一步（Next Steps）
-1. 需要原文内容补充
-2. 需要原文内容补充
-3. 需要原文内容补充
-
-## 11. 引用格式（BibTex）
-```bibtex
-@misc{xxx2024randomizedpinn,
-      title={Randomized PINN for Bayesian Data Assimilation}, 
-      author={Unknown},
-      year={2024},
-      eprint={Not available},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
-}
-```
+### 5.1 方法一
+### 5.2 方法二

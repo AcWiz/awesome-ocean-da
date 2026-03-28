@@ -4,7 +4,7 @@ arXiv: "2202.09967"
 authors: ["John Taylor", "Ming Feng"]
 year: 2022
 source: "arXiv"
-venue: "N/A - Preprint"
+venue: "arXiv"
 method_tags: ["Unet-LSTM", "CNN", "LSTM", "ERA5", "Deep Learning"]
 application_tags: ["SST", "ENSO", "Marine Heatwaves", "Sea Surface Temperature"]
 difficulty: "★★★☆☆"
