@@ -1,0 +1,137 @@
+name: 添加新论文
+description: 提交一篇新的AI+海洋数据同化/预报相关论文
+title: "[新论文] "
+labels: ["new paper"]
+assignees: []
+body:
+
+  - type: markdown
+    id: description
+    attributes:
+      value: |
+        ## 论文信息
+
+  - type: input
+    id: title
+    attributes:
+      label: 论文标题
+      description: 请填写论文的完整标题
+      placeholder: "论文的完整英文标题"
+    validations:
+      required: true
+
+  - type: input
+    id: arxiv
+    attributes:
+      label: arXiv ID
+      description: 论文的arXiv ID（如 2503.19160），如果暂无请填写"待补充"
+      placeholder: "2503.19160 或 待补充"
+    validations:
+      required: true
+
+  - type: input
+    id: authors
+    attributes:
+      label: 作者列表
+      description: 论文的作者，用逗号分隔
+      placeholder: "作者1, 作者2, 作者3"
+    validations:
+      required: true
+
+  - type: input
+    id: year
+    attributes:
+      label: 发表年份
+      description: 论文发表年份
+      placeholder: "2025"
+    validations:
+      required: true
+
+  - type: input
+    id: venue
+    attributes:
+      label: 发表场所
+      description: 期刊、会议或预印本平台
+      placeholder: "arXiv / Nature Climate Change / Science Advances ..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: method-tags
+    attributes:
+      label: 方法标签（可多选）
+      description: 论文使用的主要方法
+    options:
+      - label: PINN（物理信息神经网络）
+        required: false
+      - label: Koopman（Koopman学习）
+        required: false
+      - label: Neural-Operator（神经算子，如FNO、DeepONet）
+        required: false
+      - label: GNN（图神经网络）
+        required: false
+      - label: Transformer（Transformer/Attention）
+        required: false
+      - label: 4D-Var（四维变分同化）
+        required: false
+      - label: EnKF（集合卡尔曼滤波）
+        required: false
+      - label: Deep-Learning（通用深度学习）
+        required: false
+      - label: Physics-Informed（物理约束/物理先验）
+        required: false
+
+  - type: checkboxes
+    id: application-tags
+    attributes:
+      label: 应用标签（可多选）
+      description: 论文涉及的应用领域
+    options:
+      - label: SST（海表温度）
+        required: false
+      - label: SSH（海表高度）
+        required: false
+      - label: ENSO（ENSO预测）
+        required: false
+      - label: Wave（海浪预报）
+        required: false
+      - label: Global-Forecast（全球预报）
+        required: false
+      - label: Regional-Forecast（区域预报）
+        required: false
+      - label: Ocean-DA（海洋数据同化）
+        required: false
+      - label: Deep-Ocean（深海/次表层）
+        required: false
+      - label: Climate（气候研究）
+        required: false
+
+  - type: textarea
+    id: abstract
+    attributes:
+      label: 论文摘要
+      description: 请粘贴论文的英文摘要或简要描述
+      placeholder: "请粘贴论文摘要或描述论文的主要内容..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: 为什么这篇论文适合本项目？
+      description: 请说明论文与AI+海洋数据同化/预报的相关性
+      placeholder: "请说明论文的创新点和与本项目的相关性..."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 确认事项
+      options:
+        - label: 我确认这篇论文与AI/深度学习 + 海洋数据同化/预报相关
+          required: true
+        - label: 我理解需要提交符合格式的 abstract.md 文件
+          required: true
+        - label: arXiv ID 待补充的论文需要后续补充
+          required: true
