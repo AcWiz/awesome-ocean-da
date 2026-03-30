@@ -1,0 +1,37 @@
+name: Update README on Merge
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml requests beautifulsoup4
+
+      - name: Update index
+        run: python scripts/site_generation/update_index.py
+
+      - name: Regenerate main README
+        run: python scripts/site_generation/regenerate_main_readme.py
+
+      - name: Generate year pages
+        run: python scripts/site_generation/generate_year_pages.py
+
+      - name: Generate hierarchy pages
+        run: python scripts/site_generation/generate_hierarchy_pages.py
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: auto-update README and indices'
