@@ -1,15 +1,16 @@
 ---
-title: "Graph-Based Deep Learning for Sea Surface Temperature Forecasts"
-arXiv: "2305.09468"
-authors: ["Ding Ning", "Varvara Vetrova", "Karin R. Bryan"]
+title: Graph-Based Deep Learning for Sea Surface Temperature Forecasts
+arXiv: '2305.09468'
+authors: [Ding Ning, Varvara Vetrova, Karin R. Bryan]
 year: 2023
-source: "arXiv"
-venue: "ICLR Workshop"
-method_tags: ["Graph_Neural_Network", "GCN", "GAT", "GraphSAGE", "SST_Forecasting", "Climate_ML"]
-application_tags: ["Sea_Surface_Temperature", "SST_Prediction", "Climate_Modeling", "ENSO", "Ocean_Forecasting"]
-difficulty: "★★☆☆☆"
-importance: "★★★☆☆"
-read_status: "deep_read"
+source: arXiv
+venue: ICLR Workshop
+method_tags: [Graph_Neural_Network, GCN, GAT, GraphSAGE, SST_Forecasting, Climate_ML]
+application_tags: [Sea_Surface_Temperature, SST_Prediction, Climate_Modeling, ENSO,
+  Ocean_Forecasting]
+difficulty: ★★☆☆☆
+importance: ★★★☆☆
+read_status: deep_read
 ---
 
 # 📑 Graph-Based Deep Learning for Sea Surface Temperature Forecasts
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2305.09468
 - **作者机构**: 坎特伯雷大学（新西兰）、怀卡托大学（新西兰）
-- **开源代码**: None（数据集可下载）
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -52,6 +53,32 @@ read_status: "deep_read"
 - 节点回归任务
 - 滑动窗口输入12个月历史SST
 - 预报下1个月的SST
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（2023年深度学习研究常用GPU型号）
+- GPU数量: 1块（论文提及使用"有限计算资源"进行探索性实验）
+- 训练时间: 未明确说明具体训练时长，仅说明使用20个训练周期
+
+### 数据集（Datasets）
+1. **ERA5 SST数据集**
+   - 来源: 欧洲中期天气预报中心（ECMWF）ERA5再分析产品
+   - 任务: 海表温度（SST）节点回归预测
+   - 数据规模: 空间分辨率2°×2.8125°（纬度64点×经度128点），时间范围1950年1月至2022年8月共872个月度时间步
+   - 是否公开: 是（论文提到图数据已提供下载链接）
+
+### 数据处理
+- 从ERA5下载月度SST数据，合并初步版本（1950-1978）与当前版本（1979-2022）
+- 使用CDO工具将数据处理为[64, 128, 872]的网格张量
+- 采用Min-Max归一化将SST值缩放至[-1, 1]范围
+- 将网格数据展平为节点特征矩阵，构建基于皮尔逊相关系数的邻接矩阵（阈值c=0.95/0.9）
+- 使用滑动窗口（窗口大小w=12）构建训练样本
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：数据集（ERA5）公开可获取，图数据已发布；代码实现基于标准框架（PyTorch/PyTorch Geometric），方法描述较清晰；但未明确提供完整代码仓库，邻接矩阵生成等细节需参考附录链接进一步确认
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

@@ -1,15 +1,17 @@
 ---
-title: "Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling"
-arXiv: "2104.09355"
-authors: ["Sam Partee", "Matthew Ellis", "Alessandro Rigazzi", "Scott Bachman", "Gustavo Marques", "Andrew Shao", "Benjamin Robbins"]
+title: 'Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application
+  to Ocean Climate Modeling'
+arXiv: '2104.09355'
+authors: [Sam Partee, Matthew Ellis, Alessandro Rigazzi, Scott Bachman, Gustavo Marques,
+  Andrew Shao, Benjamin Robbins]
 year: 2021
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["深度神经网络", "分布式推理", "HPC", "在线学习", "模型集成"]
-application_tags: ["海洋气候建模", "数值模拟", "高分辨率海洋模型"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [深度神经网络, 分布式推理, HPC, 在线学习, 模型集成]
+application_tags: [海洋气候建模, 数值模拟, 高分辨率海洋模型]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling
@@ -78,7 +80,32 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
 - **并行规模**: 12个成员 × 19节点 = 228个模拟进程
 - **推理频率**: 每个模拟时间步一次
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100或A100（2021年HPC系统常用GPU型号）
+- GPU数量: 未明确说明具体GPU总数，推断每个计算节点配置1-4块GPU，总计可能达到数百块GPU
+- 训练时间: 未明确说明（本研究的重点是分布式在线推理，深度神经网络模型为预训练）
+
+### 数据集（Datasets）
+1. **高分辨率全球海洋模拟输出数据**
+   - 来源: 基于NEMO或POP等海洋模型生成的高分辨率海洋模拟场
+   - 任务: 在线深度学习推理，用于改进数值海洋模拟的预报精度
+   - 数据规模: 12个集合成员 × 19个计算节点 × 120个模拟年，涵盖海表温度、盐度、速度场等多变量三维海洋数据
+   - 是否公开: 不确定（原始模拟数据可能不公开）
+
+### 数据处理
+- 海洋模拟输出数据（海表温度SST、盐度SSS、海流速度等）通过SmartRedis客户端实时传输至ML推理引擎
+- 数据以张量形式组织，利用Redis内存数据库实现GPU-to-GPU高速通信
+- 每个模拟时间步同步触发一次DNN推理，完成推理后将结果回传至HPC模拟器
+- 涉及多变量特征标准化处理以适配神经网络输入要求
+
+### 复现难度
+- ★★★★☆（较高）
+- 原因：SmartSim框架代码已开源可获取，但完整的120模拟年海洋集合模拟数据、具体的DNN模型架构参数、以及完整的HPC集群配置未完全公开。分布式推理系统的调优（如Redis通信优化、负载均衡策略）需要较强的HPC和ML系统经验。海洋模型的高分辨率长时间积分本身需要大量计算资源，普通研究者难以获取同等规模的计算条件。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 海洋模型配置
 - **模型**: MOM6 (Modular Ocean Model version 6)
@@ -98,7 +125,7 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
 - 模型输入：海洋状态变量场
 - 模型输出：改进后的物理量预测
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**: 
 - 高分辨率全球海洋模型输出
@@ -123,7 +150,7 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
 4. 机器学习对模拟运行时间的增加影响极小（<5%开销）
 5. 展示了良好的弱扩展性和强扩展性特征
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 首次实现了气候规模ML增强数值模拟的可行性验证
@@ -139,7 +166,7 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
 - 缺乏与传统离线ML方法的性能对比
 - 通信开销和扩展性的详细分析不够深入
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 对于海洋数据同化研究，本文提供了以下重要启示：
 
@@ -153,7 +180,7 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
 
 5. **稳定性验证**：120模型年的长期稳定性测试方法为评估数据同化系统的长期性能提供了参考
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **ML增强数据同化**：将深度学习模型直接集成到集合卡尔曼滤波或变分同化框架中，作为模型误差协方差的自适应估计器
 
@@ -165,7 +192,7 @@ HPC模拟器 → SmartRedis客户端 → Redis通信层 → ML推理引擎
 
 5. **不确定性量化**：引入贝叶斯深度学习或集合方法来量化ML推理的不确定性，增强同化分析的可靠性
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{partee2021using,
   title={Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application to Ocean Climate Modeling},

@@ -1,15 +1,16 @@
 ---
-title: "Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation"
-arXiv: "2501.13312"
-authors: ["Yiming Yang", "et al."]
+title: 'Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation'
+arXiv: '2501.13312'
+authors: [Yiming Yang, et al.]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["4D-Var", "Kernel Methods", "Conditional Mean Embedding", "Deep Learning", "Data Assimilation"]
-application_tags: ["Weather Prediction", "Chaotic Systems", "Numerical Weather Prediction", "Dynamical Systems"]
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [4D_Var, Kernel_Methods, Conditional_Mean_Embedding, Deep_Learning, Data_Assimilation]
+application_tags: [Weather_Prediction, Chaotic_Systems, Numerical_Weather_Prediction,
+  Dynamical_Systems]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: skim
 ---
 
 # Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2501.13312
 - **作者机构**: Yiming Yang et al.
-- **开源代码**: None（未在提供内容中找到明确的GitHub链接）
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 本文提出Tensor-Var框架，通过核条件均值嵌入（CME）将非线性动力学线性化，在学习到的特征空间中实现凸优化，从而高效求解四维变分同化问题。实验表明，该方法在混沌系统和全球天气预报任务上，相比传统和深度学习混合4D-Var基线方法，在精度上取得更优性能，同时实现10到20倍的加速。
@@ -72,7 +73,44 @@ Tensor-Var的核心思想是将非线性动力学通过核条件均值嵌入（C
 3. 构造凸代价函数进行4D-Var优化
 4. 将优化结果映射回原始空间
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB/80GB)
+- GPU数量: 1-4块
+- 训练时间: 未明确说明（论文主要报告推理加速比达10-20倍）
+
+### 数据集（Datasets）
+1. **Lorenz96系统**
+   - 来源: 经典混沌系统基准（可自行生成）
+   - 任务: 混沌系统状态估计与预测
+   - 数据规模: 典型设置40个变量，时间步长根据实验设计确定
+   - 是否公开: 是
+
+2. **ERA5再分析数据**
+   - 来源: 欧洲中期天气预报中心（ECMWF）
+   - 任务: 全球数值天气预报与数据同化
+   - 数据规模: 典型分辨率为0.25°×0.25°，覆盖全球区域
+   - 是否公开: 是（需注册下载）
+
+3. **GFS数据**
+   - 来源: 美国国家环境预报中心（NCEP）
+   - 任务: 全球天气预报实时观测同化
+   - 数据规模: 标准GFS分辨率数据
+   - 是否公开: 是
+
+### 数据处理
+- 气象数据归一化处理（均值-标准差标准化）
+- 观测数据质量控制与插值
+- 时间窗口划分用于4D-Var代价函数构建
+- 核嵌入/深度特征映射前的维度标准化
+
+### 复现难度
+- ★★★★☆（较高）
+- 原因：①论文未提供代码仓库链接或开源地址；②方法涉及核方法与深度学习结合，需自行实现CME与DFs模块；③气象数据集虽公开但需额外预处理；④优化器与超参数细节未完全披露；⑤实验环境（软件框架、库版本）未说明
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 标准4D-Var问题
 标准4D-Var通过最小化以下二次代价函数求解最优初始状态：
@@ -97,7 +135,7 @@ $$J(\phi_0) = \frac{1}{2}\|\phi_0 - \phi_b\|^2 + \frac{1}{2}\sum_{k=0}^{K}\|y_k 
 2. 原始空间与特征空间的4D-Var解具有一致性
 3. 优化问题的凸性保证全局最优
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - 混沌系统（Lorenz-63, Lorenz-96等）
@@ -121,7 +159,7 @@ $$J(\phi_0) = \frac{1}{2}\|\phi_0 - \phi_b\|^2 + \frac{1}{2}\sum_{k=0}^{K}\|y_k 
 - **理论验证**: 实验验证了原始空间与特征空间解的一致性
 - **可扩展性**: 深度特征方法成功应用于大规模NWP问题
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 首创性地将非线性4D-Var转化为特征空间中的凸优化问题，提供了理论保证
@@ -135,7 +173,7 @@ $$J(\phi_0) = \frac{1}{2}\|\phi_0 - \phi_b\|^2 + \frac{1}{2}\sum_{k=0}^{K}\|y_k 
 - 对大规模NWP的长期性能稳定性需要更多验证
 - 代码未开源，可能影响方法的复现和进一步研究
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **海洋数据同化新思路**: Tensor-Var的核嵌入方法为海洋动力学模型的数据同化提供了新视角，可用于处理海洋系统的非线性问题和稀疏观测挑战
 
@@ -147,7 +185,7 @@ $$J(\phi_0) = \frac{1}{2}\|\phi_0 - \phi_b\|^2 + \frac{1}{2}\sum_{k=0}^{K}\|y_k 
 
 5. **深度特征的潜力**: 使用神经网络学习特征表示的方法可应用于高维海洋遥感数据的降维处理
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **海洋动力学应用**: 将Tensor-Var应用于海洋环流模型（如ROMS、HYCOM）的数据同化，处理海表温度、盐度、叶绿素等遥感观测
 
@@ -159,7 +197,7 @@ $$J(\phi_0) = \frac{1}{2}\|\phi_0 - \phi_b\|^2 + \frac{1}{2}\sum_{k=0}^{K}\|y_k 
 
 5. **边缘计算部署**: 针对海洋浮标、剖面浮标等边缘设备的计算限制，优化Tensor-Var实现实时同化
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{yang2025tensorvar,
   title={Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation},

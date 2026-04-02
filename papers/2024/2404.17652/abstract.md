@@ -1,15 +1,17 @@
 ---
-title: "Validating Deep Learning Weather Forecast Models"
-arXiv: "2404.17652"
-authors: ["Not specified in provided content"]
+title: Validating Deep Learning Weather Forecast Models
+arXiv: '2404.17652'
+authors: [Not specified in provided content]
 year: 2024
-source: "arXiv"
-venue: "Artificial Intelligence for the Earth Systems"
-method_tags: ["Deep Learning", "Weather Forecasting", "Extreme Events", "Model Validation", "GraphCast", "PanguWeather", "FourCastNet"]
-application_tags: ["Numerical Weather Prediction", "Extreme Weather Events", "Climate Impact Assessment", "Medium-Range Forecasting"]
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "skim"
+source: arXiv
+venue: Artificial Intelligence for the Earth Systems
+method_tags: [Deep_Learning, Weather_Forecasting, Extreme_Events, Model_Validation,
+  GraphCast, PanguWeather, FourCastNet]
+application_tags: [Numerical_Weather_Prediction, Extreme_Weather_Events, Climate_Impact_Assessment,
+  Medium_Range_Forecasting]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: skim
 ---
 
 # Validating Deep Learning Weather Forecast Models
@@ -58,7 +60,45 @@ read_status: "skim"
 - 对人类社会具有重大影响
 - 涵盖不同类型的极端天气（热浪、冬季风暴）
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100
+- GPU数量: 1-4块（模型推理为主）
+- 训练时间: 未明确说明（采用预训练模型进行推理评估）
+
+### 数据集（Datasets）
+1. **ERA5再分析数据**
+   - 来源: ECMWF Copernicus Climate Data Store
+   - 任务: 作为真值（Ground Truth）用于验证ML模型预测性能
+   - 数据规模: 三次极端天气事件对应的时空范围（2021年太平洋西北热浪、2023年南亚湿热浪、2021年北美冬季风暴）
+   - 是否公开: 是
+
+2. **HRES预报数据**
+   - 来源: ECMWF Integrated Forecasting System
+   - 任务: 作为对比基准（Baseline）
+   - 数据规模: 与ML模型预测相同的时空范围
+   - 是否公开: 部分公开（可通过ECMWF会员服务获取）
+
+3. **GraphCast/PanguWeather/FourCastNet预测输出**
+   - 来源: 各模型官方发布或API接口
+   - 任务: ML天气预报模型预测结果
+   - 数据规模: 三次案例研究所需的特定预报时效（中期预报范围，通常为1-14天）
+   - 是否公开: 部分公开（模型权重和部分预测数据已开源）
+
+### 数据处理
+- 将ERA5再分析数据重采样至各ML模型输出分辨率（0.25°或更高）
+- 提取极端事件时空范围内的子区域数据进行案例分析
+- 对温度、湿度、风速、气压等关键气象变量进行标准化处理
+- 计算局部精度指标（格点级RMSE、相关性）和聚合精度指标（空间平均、时间平均）
+- 针对湿热浪事件，使用替代变量（如Wet-Bulb Globe Temperature近似计算）评估健康风险
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：ECMWF再分析数据和HRES数据需订阅获取，部分ML模型（GraphCast）已开源预测数据和权重，但FourCastNet和PanguWeather的完整预测数据未完全公开；案例研究所需的特定极端事件数据筛选和处理流程需额外工作；缺乏端到端的统一评估代码框架
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 **评估指标**：
 - 均方根误差（RMSE）：用于量化预测值与真实值之间的偏差
 - 阈值超越比较：评估极端温度阈值预测准确性
@@ -69,7 +109,7 @@ read_status: "skim"
 - PanguWeather等模型在维持物理平衡方面不如HRES
 - 误差累积方式存在结构性差异
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - 2021年太平洋西北部热浪事件数据
@@ -94,7 +134,7 @@ read_status: "skim"
 2. **北美冬季风暴**：ML模型显著优于HRES，预报效果更好，且误差累积方式存在结构性差异
 3. **南亚湿热浪**：ML模型缺乏湿球黑球温度（WBGT）等关键健康风险变量；使用替代变量分析显示，孟加拉国等地区的高危险等级被ML模型低估
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 采用了真实、历史性的极端事件进行评估，而非仅依赖统计基准
@@ -108,7 +148,7 @@ read_status: "skim"
 - ML模型缺乏的关键变量问题未深入探讨其根本原因
 - 对ML模型优于HRES的冬季风暴案例缺乏物理解释
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 对于海洋数据同化研究，本文的启示包括：
 
@@ -122,7 +162,7 @@ read_status: "skim"
 
 5. **物理一致性检验**：误差累积方式的结构性差异提示我们关注模型在长期预测中的物理守恒性和一致性
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **扩展到海洋极端事件**：将类似评估框架应用于海洋ML模型，评估其在海洋热浪、极端海面温度、风暴潮等事件上的预测能力
 
@@ -134,7 +174,7 @@ read_status: "skim"
 
 5. **不确定性量化**：在极端事件评估中引入不确定性量化，为决策提供更可靠的支持
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{deeplearningweather2024,
   title={Validating Deep Learning Weather Forecast Models},

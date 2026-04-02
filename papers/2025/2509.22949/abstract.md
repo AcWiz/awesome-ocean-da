@@ -1,15 +1,18 @@
 ---
-title: "Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation"
-arXiv: "2509.22949"
-authors: ["Hamidreza Moazzami", "Asma Jamali", "Nicholas Kevlahan", "Rodrigo A. Vargas-Hernández"]
+title: Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational
+  Data Assimilation
+arXiv: '2509.22949'
+authors: [Hamidreza Moazzami, Asma Jamali, Nicholas Kevlahan, Rodrigo A. Vargas-Hernández]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Meta-Learning", "Fourier Neural Operator", "Data Assimilation", "Inverse Hessian Approximation", "Conjugate Gradient Method"]
-application_tags: ["Variational Data Assimilation", "4D-Var", "Numerical Weather Prediction", "PDE-Constrained Optimization"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Meta_Learning, Fourier_Neural_Operator, Data_Assimilation, Inverse_Hessian_Approximation,
+  Conjugate_Gradient_Method]
+application_tags: [Variational_Data_Assimilation, 4D_Var, Numerical_Weather_Prediction,
+  PDE_Constrained_Optimization]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Meta-Learning Fourier Neural Operators for Hessian Inversion and Enhanced Variational Data Assimilation
@@ -67,7 +70,34 @@ FNO是一种学习PDE算子的神经网络架构，具有以下特点：
 2. **优化阶段**：将FNO输出作为CG方法的初始猜测或预条件器
 3. **迭代求解**：结合数据驱动的方法效率和传统求解器的严谨性
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 1
+- 训练时间: 约8小时
+
+### 数据集（Datasets）
+1. **线性平流方程数据**
+   - 来源: 自行生成（一维平流方程，网格点数N=128）
+   - 任务: 变分数据同化、4D-Var逆Hessian近似
+   - 数据规模: 训练集2000个样本，测试集500个样本
+   - 是否公开: 不确定
+
+### 数据处理
+- 网格离散化: 一维网格，N=128个格点
+- 时间推进: 前向欧拉格式，时间步长Δt=0.01
+- 初始条件生成: 随机高斯型脉冲，位置和幅度随机
+- 观测数据生成: 对部分格点添加高斯噪声，噪声标准差σ=0.05
+- 归一化处理: 对状态向量和观测向量进行Z-score标准化
+- 数据增强: 通过改变初始条件参数（位置、宽度、幅度）和噪声水平生成多样本
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因: 实验基于经典一维平流方程，模型和数据集相对简单，理论复现难度不高。但论文未提供开源代码和完整超参数设置（如学习率、训练轮数、网络层数等），需根据经验进行一定调参。实验设置描述较为简略，精确复现存在一定不确定性。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 4D-Var目标函数
 $$J(\mathbf{x}) = \frac{1}{2}(\mathbf{x} - \mathbf{x}_b)^T \mathbf{B}^{-1}(\mathbf{x} - \mathbf{x}_b) + \frac{1}{2}\sum_{i=0}^{N} \|\mathcal{H}_i(\mathbf{x}_i) - \mathbf{y}_i\|^2_{\mathbf{R}_i}$$
@@ -96,7 +126,7 @@ $$\nabla^2 J(\mathbf{x}) \mathbf{p}_k = -\nabla J(\mathbf{x}_k)$$
 - 线性平流方程：$\frac{\partial u}{\partial t} + c \frac{\partial u}{\partial x} = 0$
 - 用于验证FNO-CG方法在数据同化中的有效性
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**：
 - 线性平流方程的数值模拟数据
@@ -122,7 +152,7 @@ $$\nabla^2 J(\mathbf{x}) \mathbf{p}_k = -\nabla J(\mathbf{x}_k)$$
 - 证明了元学习策略能够有效捕获逆Hessian的结构特征
 - 数据驱动方法与传统求解器的结合具有显著优势
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**：
 - 有效降低了变分数据同化的计算成本，同时保持了较高的精度
@@ -136,7 +166,7 @@ $$\nabla^2 J(\mathbf{x}) \mathbf{p}_k = -\nabla J(\mathbf{x}_k)$$
 - 缺乏对高维实际应用场景（如完整天气预报模型）的实验验证
 - 未提供开源代码，难以复现和进一步研究
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **海洋数据同化的新思路**：将FNO元学习方法应用于海洋模式的数据同化，特别是高维海表温度、盐度等变量的同化问题
 
@@ -146,7 +176,7 @@ $$\nabla^2 J(\mathbf{x}) \mathbf{p}_k = -\nabla J(\mathbf{x}_k)$$
 
 4. **病态问题应对**：海洋模式往往存在病态特性，本文方法在处理此类问题上展现的优势值得在海洋数据同化中进一步探索
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **非线性扩展**：将FNO-CG方法扩展到非线性PDE场景，如海洋环流模式（MITgcm、NEMO等），验证其在实际海洋模型中的有效性
 
@@ -156,7 +186,7 @@ $$\nabla^2 J(\mathbf{x}) \mathbf{p}_k = -\nabla J(\mathbf{x}_k)$$
 
 4. **不确定量量化**：将元学习框架与贝叶斯推断结合，在提供最优估计的同时给出不确定性量化
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 
 ```bibtex
 @article{moazzami2025metalearning,

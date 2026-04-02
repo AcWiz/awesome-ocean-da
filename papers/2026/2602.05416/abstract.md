@@ -1,15 +1,18 @@
 ---
-title: "Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models"
-arXiv: "2602.05416"
-authors: ["Freja Høgholm Petersen", "Jesper Sandvig Mariegaard", "Rocco Palmitessa", "Allan P. Engsig-Karup"]
+title: Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models
+arXiv: '2602.05416'
+authors: [Freja Høgholm Petersen, Jesper Sandvig Mariegaard, Rocco Palmitessa, Allan
+    P. Engsig-Karup]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Koopman Autoencoder", "Reduced-Order Modeling", "Proper Orthogonal Decomposition", "Temporal Unrolling", "Neural Network Surrogates"]
-application_tags: ["Coastal-Ocean Modeling", "Hydrodynamics", "Sea Surface Elevation Prediction", "Current Velocity Prediction", "Climate Simulation"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Koopman_Autoencoder, Reduced_Order_Modeling, Proper_Orthogonal_Decomposition,
+  Temporal_Unrolling, Neural_Network_Surrogates]
+application_tags: [Coastal_Ocean_Modeling, Hydrodynamics, Sea_Surface_Elevation_Prediction,
+  Current_Velocity_Prediction, Climate_Simulation]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models
@@ -17,7 +20,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2602.05416
 - **作者机构**: Technical University of Denmark (DTU)
-- **开源代码**: None (文中未提及代码开源)
+- **开源代码**: 未提供 (文中未提及代码开源)
 
 ## 2. 一句话总结（TL;DR）
 本文提出了一种结合气象强迫和边界条件的灵活Koopman自编码器框架，并与基于POD的代理模型进行系统比较。该方法在三个真实水动力学测试案例上实现了300-1400倍的推理加速，预测误差相对均方根误差达0.01-0.13，R²值达0.65-0.996，能够支持长达一年的海岸-海洋预测。
@@ -64,7 +67,33 @@ read_status: "skim"
 - **边界条件处理**: 灵活处理开放边界和陆地边界
 - **稳定性约束**: 通过特征值正则化和时域展开确保长期预测稳定性
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (基于深度学习模型训练的标准配置推断)
+- GPU数量: 单GPU（推断为单GPU训练配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **沿海水动力测试案例数据集（三个独立测试案例）**
+   - 来源: 真实海岸-海洋水动力模拟数据，涉及不同动力学特征区域
+   - 任务: 海表面高度和深度平均流速的长期预测（长达一年）
+   - 数据规模: 涉及40,000+网格点，30分钟时间分辨率，包含海表面高度和流速分量
+   - 是否公开: 不确定（论文未明确说明数据可用性）
+
+### 数据处理
+- 使用截断的POD基进行空间降维，将高维物理场压缩至低维潜在空间
+- 对物理场进行标准化预处理（均值归一化与方差归一化）
+- 按时间序列分割为训练集、验证集和测试集
+- 将气象强迫和边界条件作为外部输入进行整合处理
+- Koopman自编码器采用编码器-解码器架构进行非线性映射
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：arXiv预印本通常提供代码实现，但本研究涉及的真实水动力数据来源未明确说明；三个测试案例的具体数据获取途径未知；深度学习模型训练涉及的超参数调整和复现细节可能影响结果一致性；方法涉及复杂的边界条件处理和稳定性约束设计，需要专业领域知识。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 Koopman算子理论
 Koopman算子理论提供了一种将非线性动力系统线性化的框架：
@@ -87,7 +116,7 @@ Koopman算子理论提供了一种将非线性动力系统线性化的框架：
 - 预测损失：$\mathcal{L}_{pred} = \|\mathbf{z}_{t+1} - \mathbf{K}\mathbf{z}_t\|^2$
 - 特征值正则化：$\mathcal{L}_{eig} = \sum_i \max(0, |\lambda_i| - 1)$
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**: 
 - 三个真实水动力学测试案例，覆盖不同动力机制
@@ -119,7 +148,7 @@ Koopman算子理论提供了一种将非线性动力系统线性化的框架：
 - 流速预测误差最大，水面高程预测误差最小
 - 与物理模型相比，代理模型产生厘米级误差，可满足实际应用需求
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 实现了显著的推理加速（300-1400倍），支持实时应用
@@ -135,7 +164,7 @@ Koopman算子理论提供了一种将非线性动力系统线性化的框架：
 - 长期预测精度随时间累积可能下降
 - 对极端事件（如风暴潮）的预测能力未充分验证
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **数据同化集成**: Koopman自编码器的潜在空间表示为数据同化提供了新的状态初始化方式，可考虑将观测数据直接映射到潜在空间
 
@@ -147,7 +176,7 @@ Koopman算子理论提供了一种将非线性动力系统线性化的框架：
 
 5. **多尺度建模**: 编码器-解码器架构的降维思路可应用于多尺度海洋数据同化系统的构建
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **融入数据同化框架**: 将Koopman自编码器与集合卡尔曼滤波或变分同化方法结合，构建混合数据同化系统，利用代理模型加速背景场更新
 
@@ -159,7 +188,7 @@ Koopman算子理论提供了一种将非线性动力系统线性化的框架：
 
 5. **实时同化应用**: 部署到高性能计算平台，实现近实时的海洋状态估计和预报
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Petersen2026ReducedOrder,
   title={Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models},

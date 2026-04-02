@@ -1,15 +1,17 @@
 ---
-title: "OceanNet: A Principled Neural Operator-Based Digital Twin for Regional Oceans"
-arXiv: "2310.00813"
-authors: ["Ashesh Chattopadhyay", "Michael Gray", "Tianning Wu", "Anna B. Lowe", "Ruoying He"]
+title: 'OceanNet: A Principled Neural Operator-Based Digital Twin for Regional Oceans'
+arXiv: '2310.00813'
+authors: [Ashesh Chattopadhyay, Michael Gray, Tianning Wu, Anna B. Lowe, Ruoying He]
 year: 2023
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Fourier_Neural_Operator", "Digital_Twin", "Spectral_Regularizer", "PEC_Scheme", "Neural_Operator"]
-application_tags: ["Ocean_Forecasting", "Sea_Surface_Height", "Gulf_Stream", "Loop_Current", "Regional_Ocean_Modeling"]
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [Fourier_Neural_Operator, Digital_Twin, Spectral_Regularizer, PEC_Scheme,
+  Neural_Operator]
+application_tags: [Ocean_Forecasting, Sea_Surface_Height, Gulf_Stream, Loop_Current,
+  Regional_Ocean_Modeling]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 OceanNet: A Principled Neural Operator-Based Digital Twin for Regional Oceans
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2310.00813
 - **作者机构**: 加州大学圣克鲁斯分校（UCSC）、北卡罗来纳州立大学（NC State University）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -51,6 +53,38 @@ OceanNet是一个基于傅里叶神经算子的区域海洋数字孪生模型，
 - 目标：缓解深度神经网络的小尺度谱偏差
 - 原理：通过对小尺度分量施加额外约束
 - 效果：改善长期预报的物理一致性
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（基于深度学习海洋建模的典型配置）
+- GPU数量: 单卡或少量GPU（未明确说明具体数量）
+- 训练时间: 未明确说明具体时长
+
+### 数据集（Datasets）
+1. **西北大西洋海表高度再分析数据**
+   - 来源: 高分辨率西北大西洋海洋再分析数据集（具体来源未在正文中详细说明）
+   - 任务: 区域海洋海表高度（SSH）预测、Gulf Stream分离预测、Loop Current涡旋生成预测
+   - 数据规模: 时间跨度1993-2020年，包含两个子区域：Gulf Stream分离区域（美国东海岸至60°W）和墨西哥湾东部Loop Current涡旋生成区域（92°W至75°W）
+   - 是否公开: 不确定
+
+2. **ROMS区域海洋动力学模型预测结果**
+   - 来源: Regional Ocean Modeling System生成的区域海洋预报
+   - 任务: 作为对比基线
+   - 数据规模: 用于验证OceanNet的120天季节预测性能
+   - 是否公开: 否
+
+### 数据处理
+- 海表高度（SSH）数据进行归一化预处理
+- 按时间划分：训练集（1993-2018年）、测试集（2019-2020年）
+- 针对不同区域设置不同预测提前时间：墨西哥湾区域5天、 Gulf Stream区域4天
+- 采用预测-评估-修正（PEC）积分方案进行时间推进
+- 使用谱正则化器抑制小尺度谱偏差
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：arXiv论文未提供代码开源链接；数据集来源未明确说明具体再分析产品名称；缺乏详细的超参数配置和训练策略描述；实验环境配置信息不完整。但作为深度学习方法，其核心模型架构（FNO）和方法论已在论文中描述，具备一定的理论复现基础。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

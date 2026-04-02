@@ -1,15 +1,18 @@
 ---
-title: "GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python"
-arXiv: "2509.10560"
-authors: ["Xuechen Liang", "Xiaoxing He", "Shengdao Wang", "Jean-Philippe Montillet", "Zhengkai Huang", "Gaël Kermarrec", "Shunqiang Hu", "Yu Zhou", "Jiahui Huang"]
+title: 'GTS_Forecaster: a novel deep learning based geodetic time series forecasting
+  toolbox with python'
+arXiv: '2509.10560'
+authors: [Xuechen Liang, Xiaoxing He, Shengdao Wang, Jean-Philippe Montillet, Zhengkai
+    Huang, Gaël Kermarrec, Shunqiang Hu, Yu Zhou, Jiahui Huang]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Deep Learning", "Graph Neural Networks", "Time Series Forecasting", "KAN", "GNN-GRU", "Reinforcement Learning", "Gap-filling"]
-application_tags: ["Geodetic Time Series", "GNSS", "Sea Surface Height", "Tide Gauge", "Hazard Mitigation"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Deep_Learning, Graph_Neural_Networks, Time_Series_Forecasting, KAN,
+  GNN_GRU, Reinforcement_Learning, Gap_filling]
+application_tags: [Geodetic_Time_Series, GNSS, Sea_Surface_Height, Tide_Gauge, Hazard_Mitigation]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # GTS_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python
@@ -55,7 +58,45 @@ GTS_Forecaster是一个面向大地测量时间序列预测的开源Python工具
 ### 5.4 评估模块
 - **WQE (Weighted Quality Evaluation)**: 加权质量评估指数，用于定量评价模型预测精度
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100
+- GPU数量: 未明确说明（单卡或多卡训练）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **GNSS位置时间序列数据集**
+   - 来源: UNAVCO / IGS全球导航卫星系统网络
+   - 任务: 地面变形监测与位移预测
+   - 数据规模: 涉及全球多个GNSS测站，时间跨度覆盖数年
+   - 是否公开: 是（公开可用）
+
+2. **海表面高度（SSH）数据集**
+   - 来源: 卫星测高任务（如Jason系列、Sentinel-3等）
+   - 任务: 海平面变化预测
+   - 数据规模: 覆盖全球海洋的卫星测高数据
+   - 是否公开: 是（可通过NASA/ESA数据平台获取）
+
+3. **验潮仪（TG）记录数据集**
+   - 来源: PSMSL（全球海平面观测系统）
+   - 任务: 潮位观测与沿海灾害预警
+   - 数据规模: 全球验潮站记录的长期观测数据
+   - 是否公开: 是（公开可用）
+
+### 数据处理
+- 异常值检测与剔除：采用鲁棒数据清洗工具识别并处理传感器噪声和测量误差
+- 缺失值填补：使用KTIF（Kalman-TransFusion Interpolation Framework）基于强化学习的图信息自回归缺失值填补算法
+- 数据标准化：采用Z-score标准化或Min-Max归一化处理
+- 时空图构建：为GNN模型构建站点间空间邻接关系图，考虑地理距离和相关性
+- 序列分割：采用滑动窗口策略生成时间序列样本
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文明确指出GTS_Forecaster为开源Python工具箱，代码可通过arXiv或GitHub获取，降低了复现门槛。然而，实验未明确说明具体的数据集划分细节、超参数设置及训练epoch数，需根据代码和文档进一步推断复现所需的配置参数。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 问题形式化
 给定历史观测序列 $X_{1:T} = \{x_1, x_2, ..., x_T\}$，预测未来 $H$ 步序列 $X_{T+1:T+H}$，其中：
@@ -79,7 +120,7 @@ $$h_t = (1-z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
 ### 6.4 KTIF缺失值填补
 将缺失值填补问题建模为马尔可夫决策过程，利用强化学习策略优化填补序列。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**: 
 - GNSS位置数据（全球导航卫星系统）
 - SSH（卫星测高海表面高度）
@@ -98,7 +139,7 @@ $$h_t = (1-z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
 **核心结果**: 
 论文通过实验验证了集成模型（特别是KAN、GNN-GRU、TimeGNN）在处理非线性、非平稳大地测量时间序列方面的优势，具体数值结果需查阅完整论文。
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - **模型丰富**: 集成了从传统RNN到最新KAN等多种架构，便于对比研究
@@ -112,19 +153,19 @@ $$h_t = (1-z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
 - **泛化性验证**: 需要更多不同地理区域和气候条件的实验验证
 - **模型可解释性**: 深度学习模型在地球科学应用中的物理解释仍需加强
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 1. **海洋数据同化扩展**: GTS-Forecaster的时空建模方法可借鉴到海洋Argo浮标、卫星海表温度等数据的预测
 2. **KTIF算法迁移**: 基于强化学习的缺失值填补思路可应用于海洋观测数据的质量控制
 3. **多源数据融合**: 图神经网络建模空间关系的思想可用于海洋-大气耦合系统的建模
 4. **评估指标设计**: WQE指数的设计理念可启发海洋预测模型的综合评价体系
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. 将GTS-Forecaster中的图神经网络方法扩展到海洋锋面、涡旋等中尺度现象的预测
 2. 结合物理约束（如海洋动力学方程）开发Physics-informed深度学习模型
 3. 探索Transformer架构在长时间海洋气候预测中的应用潜力
 4. 开发海洋专属的预处理模块，包括潮汐滤波、季节性分解等
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Liang2025GTSForecaster,
   title={GTS\_Forecaster: a novel deep learning based geodetic time series forecasting toolbox with python},

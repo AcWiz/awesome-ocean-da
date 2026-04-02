@@ -1,15 +1,15 @@
 ---
-title: "Data Driven Air Entrainment Velocity Parameterization by Breaking Waves"
-arXiv: "2602.04067"
-authors: ["Xiaohui Zhou", "Anton S. Darmenov", "Kianoosh Yousefi"]
+title: Data Driven Air Entrainment Velocity Parameterization by Breaking Waves
+arXiv: '2602.04067'
+authors: [Xiaohui Zhou, Anton S. Darmenov, Kianoosh Yousefi]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["机器学习", "深度学习", "多层感知器", "参数化", "海浪建模"]
-application_tags: ["空气-海洋相互作用", "气体传输", "气溶胶排放", "波浪破碎"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [机器学习, 深度学习, 多层感知器, 参数化, 海浪建模]
+application_tags: [空气_海洋相互作用, 气体传输, 气溶胶排放, 波浪破碎]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Data Driven Air Entrainment Velocity Parameterization by Breaking Waves
@@ -63,7 +63,38 @@ read_status: "skim"
 - **独立观测验证**：采用HiWinGS（High Wind Gas Exchange Study）项目观测数据
 - **重点关注**：深水、高风速条件下的性能
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（根据深度学习海洋建模研究的典型配置）
+- GPU数量: 1块（MLP模型相对轻量，单GPU即可完成训练）
+- 训练时间: 数分钟至数小时（43年数据但模型结构简单，具体时间未明确说明）
+
+### 数据集（Datasets）
+1. **WAVEWATCH III (WW3) 模拟数据**
+   - 来源: NOAA/NCEP 全球海浪模式输出
+   - 任务: 训练MLP模型预测基于Λ(c)的谱参考空气夹带速度Va
+   - 数据规模: 43年（1979-2022）全球海浪再分析数据，涵盖多种海况和区域
+   - 是否公开: 是（WW3模式公开可用）
+
+2. **HiWinGS 观测数据**
+   - 来源: High Wind Gas Exchange Study 项目实地观测
+   - 任务: 独立验证模型在深水、高风速条件下的性能
+   - 数据规模: 高风速海况下的现场测量数据
+   - 是否公开: 部分公开（项目数据可通过申请获取）
+
+### 数据处理
+- 从WW3输出中提取7个物理动机预测因子：10米风速（U₁₀）、有效波高（Hₛ）、波龄（cp/U₁₀）、波陡度（kpHₛ/2）、风向、波向、水深
+- 对输入特征进行标准化/归一化处理以适配神经网络训练
+- 按时间划分：1979-2018年数据用于训练，2019-2022年数据作为 withheld 测试集
+- 输出目标为基于Λ(c)诊断的谱参考空气夹带速度Va_ref
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：WW3海浪模拟数据和HiWinGS观测数据均可通过官方渠道获取，MLP模型结构简单易实现；但需注意WW3模拟需较高计算资源，且完整复现可能需要原始模式配置细节；代码未在文中明确提供，需自行实现训练流程。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 破碎波峰分布Λ(c)
 破碎波峰分布Λ(c)是描述波浪破碎的物理框架，表示以相速度c移动的破碎波峰的平均长度，单位为m⁻¹。Λ(c)的各阶矩将破碎运动学与能量学联系起来，实现基于海况的耗散和破碎强度估计。
@@ -84,7 +115,7 @@ read_status: "skim"
 ### 6.4 应用链
 改进的Va参数化→气泡介导的气体传输速度(k₆₆₀)→CO₂交换通量→海盐气溶胶排放
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - WAVEWATCH III 43年（1979-2022）全球模拟数据
@@ -110,7 +141,7 @@ read_status: "skim"
 4. 海盐气溶胶排放估算得到改善
 5. 在深水、高风速条件下，HiWinGS验证表现稳健
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 物理动机明确：使用具有明确物理意义的预测因子，便于物理解释
@@ -125,7 +156,7 @@ read_status: "skim"
 - 适用范围：主要针对深水和较高风速条件
 - 未考虑时间演变：静态参数化可能无法捕捉快速变化的瞬态过程
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **数据同化中的参数化改进**：波浪破碎和空气夹带过程在海洋数据同化中影响海气通量估计，改进的参数化可以提高分析场的物理一致性
 
@@ -137,7 +168,7 @@ read_status: "skim"
 
 5. **模式偏差诊断**：传统参数化在不同区域的系统性偏差提示我们，在数据同化中需要考虑模型参数化偏差的空间依赖性
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **集成到海洋数据同化系统**：将训练好的Va参数化嵌入到海洋模式的数据同化框架中，评估对海气通量和海洋状态估计的影响
 
@@ -149,7 +180,7 @@ read_status: "skim"
 
 5. **时变特征学习**：探索时序模型（LSTM/Transformer）来捕捉破碎过程的时间动态和记忆效应
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{zhou2026data,
   title={Data Driven Air Entrainment Velocity Parameterization by Breaking Waves},

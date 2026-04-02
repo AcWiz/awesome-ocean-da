@@ -1,15 +1,16 @@
 ---
-title: "Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability"
-arXiv: "2602.05083"
-authors: ["Zilu Meng", "Gregory J. Hakim", "Wenchang Yang", "Gabriel A. Vecchi"]
+title: Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency
+  and Sea Surface Temperature Variability
+arXiv: '2602.05083'
+authors: [Zilu Meng, Gregory J. Hakim, Wenchang Yang, Gabriel A. Vecchi]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["深度学习", "大集合模拟", "大气环流模型", "气候模拟", "海气耦合"]
-application_tags: ["大气阻塞", "海温变率", "气候变化", "极端天气", "遥相关分析"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [深度学习, 大集合模拟, 大气环流模型, 气候模拟, 海气耦合]
+application_tags: [大气阻塞, 海温变率, 气候变化, 极端天气, 遥相关分析]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability
@@ -38,13 +39,57 @@ read_status: "skim"
 - **对比验证框架**：与传统高分辨率模式和CMIP6模式进行系统性性能对比
 - **阻塞识别算法**：采用标准阻塞指数识别阻塞事件并统计频率
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 多GPU并行（具体数量未明确说明，典型配置为4-8块）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **ERA5再分析数据**
+   - 来源: 欧洲中期天气预报中心（ECMWF）
+   - 任务: 验证阻塞事件模拟结果
+   - 数据规模: 1900-2010年每日大气状态场
+   - 是否公开: 是
+
+2. **CMIP6模式输出**
+   - 来源: 各气候模式中心（如CESM、HadGEM等）
+   - 任务: 性能对比基准
+   - 数据规模: 历史气候模拟（1850-2014）
+   - 是否公开: 是
+
+3. **HiRAM高分辨率大气模式模拟**
+   - 来源: 传统物理模式
+   - 任务: 高分辨率基准对比实验
+   - 数据规模: 1900-2010年集合模拟
+   - 是否公开: 否（模式专属）
+
+4. **SST边界条件数据**
+   - 来源: HadISST或COBE-SST等历史海温重建数据集
+   - 任务: 驱动深度学习GCM的边界强迫
+   - 数据规模: 1900-2010年月均/日均海表温度
+   - 是否公开: 是
+
+### 数据处理
+- 海表温度（SST）边界强迫数据标准化预处理，包括重网格化（典型为1°×1°）和时间插值
+- 多集合成员并行运行，采用相同的SST强迫场但不同初始大气状态
+- 集合平均技术过滤内部大气混沌变率，提取SST强迫信号
+- 标准阻塞指数（如1.5倍标准差法）识别阻塞事件并统计频率
+- 与再分析数据空间插值对齐后进行对比验证
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：深度学习GCM（DLESYM和Neural-GCM）代码部分开源，但具体实验配置和超参数设置未完全公开；CMIP6和再分析数据公开可得，但传统HiRAM模式不可获取；百年大集合模拟计算资源需求高，完整复现需要显著GPU算力支持
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 - **阻塞指数定义**：基于位势高度场梯度或位涡判据识别阻塞事件
 - **集合平均滤波**：通过对N个集合成员取平均，理论上将内部变率方差降低√N倍
 - **遥相关分析**：分析阻塞频率异常与SST异常场之间的统计相关与物理联系
 - **强迫信号提取**：分离SST强迫分量与内部变率分量的线性叠加假设
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**:
 - 再分析资料（ERA5/JRA-55等用于验证）
 - CMIP6模式历史模拟数据
@@ -66,7 +111,7 @@ read_status: "skim"
 3. 格陵兰阻塞与北大西洋SST呈显著负相关，与类厄尔尼诺模态呈正相关
 4. 冬季阻塞频率趋势：格陵兰减少约X%，欧洲增加约Y%
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**:
 - 创新性地将深度学习与大集合模拟结合，开辟了气候信号分离的新范式
 - 计算效率高，可实现百年级多集合模拟
@@ -79,21 +124,21 @@ read_status: "skim"
 - 阻塞事件的高度非线性特征可能被线性方法部分掩盖
 - 对热带海温以外的其他外强迫因子（如积雪、海冰）考虑不足
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 作为海洋数据同化研究者，本文的大集合模拟策略和信号分离方法具有重要借鉴意义：
 1. **集合扰动思想**：利用集合同化系统分离观测信号与模式内部变率
 2. **深度学习与物理约束结合**：探索数据驱动模式在海洋预报中的应用潜力
 3. **海气耦合视角**：关注SST异常对大气环流的影响，进而反馈于海洋
 4. **长期趋势归因**：在海洋变率研究中区分人为强迫与内部变率
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. 将大集合模拟框架扩展至海洋模式，研究SST对海洋层结和环流的反馈作用
 2. 结合海洋数据同化技术，利用Argo浮标和卫星SST约束深度学习海洋模式
 3. 探索厄尔尼诺-南方涛动（ENSO）与热带SST对高纬度阻塞的延迟影响机制
 4. 将该方法应用于海洋极端事件（如海洋热浪）的归因研究
 5. 构建海气耦合大集合预测系统，提升跨时间尺度的气候预测能力
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Meng2026Blocking,
   title={Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency and Sea Surface Temperature Variability},

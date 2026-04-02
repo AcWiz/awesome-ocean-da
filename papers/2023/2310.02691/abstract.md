@@ -1,15 +1,16 @@
 ---
-title: "Robust Ocean Subgrid-Scale Parameterizations Using Fourier Neural Operators"
-arXiv: "2310.02691"
-authors: ["Victor Mangeleer", "Gilles Louppe"]
+title: Robust Ocean Subgrid-Scale Parameterizations Using Fourier Neural Operators
+arXiv: '2310.02691'
+authors: [Victor Mangeleer, Gilles Louppe]
 year: 2023
-source: "arXiv"
-venue: "NeurIPS"
-method_tags: ["Fourier_Neural_Operator", "FNO", "FFNO", "Subgrid_Scale_Parameterization", "Deep_Learning"]
-application_tags: ["Ocean_Simulation", "Climate_Modeling", "Quasi-Geostrophic_Model", "Subgrid_Scale_Processes"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: NeurIPS
+method_tags: [Fourier_Neural_Operator, FNO, FFNO, Subgrid_Scale_Parameterization,
+  Deep_Learning]
+application_tags: [Ocean_Simulation, Climate_Modeling, Quasi_Geostrophic_Model, Subgrid_Scale_Processes]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Robust Ocean Subgrid-Scale Parameterizations Using Fourier Neural Operators
@@ -49,6 +50,32 @@ read_status: "deep_read"
 - 实现更高计算速度、更少可训练参数
 
 **损失函数**：均方误差（MSE）between ground truth and predicted subgrid-scale contributions
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习与傅里叶神经算子训练常用高性能GPU）
+- GPU数量: 单GPU或小型GPU集群（论文未明确说明具体数量）
+- 训练时间: 未明确说明具体训练时长，但涉及多组实验（离线测试、在线测试、不同训练配置）
+
+### 数据集（Datasets）
+1. **PyQG准地转模型生成数据集**
+   - 来源: Python Quasi-Geostrophic (PyQG) 模型模拟生成
+   - 任务: 海洋次网格尺度参数化预测
+   - 数据规模: 训练集包含5000至20000个样本，来自1至40个不同的仿真场景；测试集为5000个样本，来自10个未见过的喷流驱动仿真
+   - 是否公开: 是（PyQG为开源模型，论文代码和数据已在GitHub开源：https://github.com/VikVador/Ocean_FNO）
+
+### 数据处理
+- 输入数据: 海洋流速场(u, v)和位势涡度场(q)，网格分辨率H×H
+- 输出数据: 次网格尺度贡献缺失量S的平均估计值
+- 数据划分: 训练阶段使用涡流驱动或喷流驱动仿真数据，测试阶段使用未见过的喷流驱动仿真数据进行泛化能力评估
+- 损失函数: 均方误差（MSE）
+- 评估指标: 决定系数R²（离线测试）、功率谱分析（在线测试）
+
+### 复现难度
+- ★★☆☆☆（较易复现）
+- 原因：论文明确声明所有代码、数据集、结果和分析均已公开开源；PyQG模型为成熟开源工具；实验协议标准化；数据集可通过模拟生成；但需注意深度学习训练可能需要一定GPU资源，且完整复现可能涉及超参数调优
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

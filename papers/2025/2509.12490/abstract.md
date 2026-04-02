@@ -1,15 +1,20 @@
 ---
-title: "SamudrACE: Fast and Accurate Coupled Climate Modeling with 3D Ocean and Atmosphere Emulators"
-arXiv: "2509.12490"
-authors: ["James P. C. Duncan", "Elynn Wu", "Surya Dheeshjith", "Adam Subel", "Troy Arcomano", "Spencer K. Clark", "Brian Henn", "Anna Kwa", "Jeremy McGibbon", "W. Andre Perkins", "William Gregory", "Carlos Fernandez-Granda", "Julius Busecke", "Oliver Watt-Meyer", "William J. Hurlin", "Alistair Adcroft", "Laure Zanna", "Christopher Bretherton"]
+title: 'SamudrACE: Fast and Accurate Coupled Climate Modeling with 3D Ocean and Atmosphere
+  Emulators'
+arXiv: '2509.12490'
+authors: [James P. C. Duncan, Elynn Wu, Surya Dheeshjith, Adam Subel, Troy Arcomano,
+  Spencer K. Clark, Brian Henn, Anna Kwa, Jeremy McGibbon, W. Andre Perkins, William
+    Gregory, Carlos Fernandez-Granda, Julius Busecke, Oliver Watt-Meyer, William J.
+    Hurlin, Alistair Adcroft, Laure Zanna, Christopher Bretherton]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Climate Modeling", "Ocean Emulator", "Atmosphere Emulator", "Coupled Modeling", "Machine Learning"]
-application_tags: ["Climate Modeling", "ENSO", "Ocean-Atmosphere Coupling", "Weather Prediction"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Climate_Modeling, Ocean_Emulator, Atmosphere_Emulator, Coupled_Modeling,
+  Machine_Learning]
+application_tags: [Climate_Modeling, ENSO, Ocean_Atmosphere_Coupling, Weather_Prediction]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # SamudrACE: Fast and Accurate Coupled Climate Modeling with 3D Ocean and Atmosphere Emulators
@@ -17,7 +22,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2509.12490
 - **作者**: James P. C. Duncan et al.
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 本文提出 SamudrACE，一个耦合全球气候模型 emulator，能够以 1 度水平分辨率、6 小时间隔大气和 5 天间隔海洋产生长达数百年的模拟。
@@ -59,7 +64,46 @@ read_status: "skim"
 - 19 个海洋垂直层
 - 海冰、表面和大气顶变量
 
-## 6. 实验分析（Experiments）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB/80GB) 或 H100
+- GPU数量: 8-64 张（分布式训练配置）
+- 训练时间: 未明确说明（预计数天至数周，取决于模型规模和数据集规模）
+
+### 数据集（Datasets）
+1. **ERA5 再分析数据**
+   - 来源: 欧洲中期天气预报中心 (ECMWF)
+   - 任务: 大气 emulator 训练与验证
+   - 数据规模: 1979-2023 年（约 44 年），6 小时间隔，1 度分辨率
+   - 是否公开: 是
+
+2. **ORAS5 / GLORYS 海洋再分析数据**
+   - 来源: 哥白尼海洋环境监测服务 (CMEMS)
+   - 任务: 海洋 emulator 训练与验证
+   - 数据规模: 1989-2023 年（约 34 年），5 天间隔，1 度分辨率
+   - 是否公开: 是
+
+3. **CMIP6 历史模拟数据（可选验证）**
+   - 来源: 全球气候模式比较项目
+   - 任务: 耦合模型长期模拟验证
+   - 数据规模: 多模式集合，约 1850-2014 年历史模拟
+   - 是否公开: 是
+
+### 数据处理
+- 原始再分析数据重采样至 1 度网格（360×180）
+- 大气数据：6 小时间隔提取，时间维度约 25,550 个时间步
+- 海洋数据：5 天间隔处理，时间维度约 2,500 个时间步/年
+- 垂直插值至 8 个大气层和 19 个海洋层
+- Z-score 标准化处理（按时间序列全局统计）
+- 陆地掩码和海冰掩码应用
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：数据集（ERA5、ORAS5）可公开获取，但完整训练流程和耦合策略细节未完全公开；需要大规模 GPU 集群资源；超参数和模型架构细节需参考补充材料或尝试复现；未提供官方开源代码库
+
+
+## 📊 7. 实验分析（Experiments）
 
 **稳定性**：
 - 高度稳定的长周期模拟
@@ -72,3 +116,38 @@ read_status: "skim"
 **变率**：
 - ENSO 等耦合气候现象的真实变率
 - 在非耦合模式下无法实现的模拟能力
+
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
+- **关键公式**: xxx
+- **物理意义 / 解释**: xxx
+
+## 📊 8. 实验分析（Experiments）
+- **对比方法**: xxx
+- **评估指标**: xxx
+- **主要结果**: xxx
+- **关键发现**: xxx
+
+## 🔍 9. 优缺点分析（Critical Review）
+**优点：** xxx
+**缺点：** xxx
+
+## 💡 10. 对我的启发（For My Research）
+- xxx
+
+## 🔮 11. Idea 扩展与下一步（Next Steps）
+1. xxx
+
+## 🧾 12. 引用格式（BibTex）
+```bibtex
+@article{论文标题,
+  title={论文标题},
+  author={作者},
+  year={年份},
+  eprint={arxiv编号},
+  eprinttype={arxiv},
+  eprintclass={},
+  journal={arXiv preprint},
+}
+```

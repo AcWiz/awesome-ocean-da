@@ -1,15 +1,16 @@
 ---
-title: "Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity"
-arXiv: "2507.06479"
-authors: ['Niloofar Asefi', 'Leonard Lupin-Jimenez', 'Tianning Wu', 'Ruoying He', 'Ashesh Chattopadhyay']
+title: Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity
+arXiv: '2507.06479'
+authors: [Niloofar Asefi, Leonard Lupin-Jimenez, Tianning Wu, Ruoying He, Ashesh Chattopadhyay]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['DDPM', 'FNO', 'UNET', 'diffusion_model', 'neural_operator', 'data_assimilation']
-application_tags: ['Lagrangian_DA', 'sparse_observations', 'ocean_reconstruction', 'Gulf_of_Mexico', 'satellite_altimetry']
-difficulty: "★★★★★"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [DDPM, FNO, UNET, diffusion_model, neural_operator, data_assimilation]
+application_tags: [Lagrangian_DA, sparse_observations, ocean_reconstruction, Gulf_of_Mexico,
+  satellite_altimetry]
+difficulty: ★★★★★
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity
@@ -46,7 +47,44 @@ read_status: "deep_read"
 - **损失函数**: 简化DDPM目标函数（预测添加的噪声）
 - **扩散设置**: T=1000步，线性噪声调度
 
-## 📐 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB/80GB) 或 V100 (32GB)
+- GPU数量: 未明确说明，推测为单卡或小型GPU集群
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **合成湍流数据集 (Kolmogorov Flow)**
+   - 来源: 自行生成的二维强迫β平面湍流直接数值模拟
+   - 任务: 拉格朗日数据同化重构
+   - 数据规模: 256×256网格，7000个训练样本，100个测试样本
+   - 是否公开: 否
+
+2. **GLORYS再分析数据集**
+   - 来源: 哥白尼海洋服务 (CMEMS) GLORYS12v1
+   - 任务: 墨西哥湾表面海洋动力学重建（SSH, SSU, SSV）
+   - 数据规模: 1/12°分辨率，7000个训练样本（1993-2012），50个测试样本
+   - 是否公开: 是
+
+3. **CNAPS再分析数据集**
+   - 来源: 卫星高度计观测经ROMS同化生成（CMEMS/DUACS处理）
+   - 任务: 真实卫星高度计SSH数据的稀疏重构
+   - 数据规模: 1/25°分辨率，4017个训练样本（1993-2003），50个测试样本，99.9%稀疏度
+   - 是否公开: 不确定
+
+### 数据处理
+- 稀疏拉格朗日观测生成：随机丢弃99%或99.9%的空间网格点模拟移动浮标观测
+- 数据归一化：对海表面高度和速度分量进行标准化处理
+- 卫星观测超采样：沿轨卫星高度计数据按再分析网格进行空间平均生成超级观测
+- 训练策略：条件扩散模型以FNO/UNET预测结果为条件输入，DDPM进行去噪生成
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：论文发表于arXiv但未明确提供代码仓库；合成数据集可自行复现，但CNAPS高分辨率再分析数据获取可能受限；GLORYS数据虽公开但需申请获取；扩散模型训练需较大计算资源；方法涉及多模型联合训练，细节需参考补充材料或作者提供的信息
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 - **Kolmogorov流（系统1）**:
   - ∂ω/∂t + u·∇ω + βv = 1/Re ∇²ω + sin(4x) + sin(4y)
   - Re=10,000, 256×256伪谱网格
@@ -58,7 +96,7 @@ read_status: "deep_read"
   - 相对涡度: ζ = ∂v/∂x - ∂u/∂y
 - **评估指标**: RMSE, CC, SSIM, 傅里叶谱
 
-## 📊 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 - **系统1**: 2D Kolmogorov流，99%稀疏，100个测试样本
 - **系统2**: 墨西哥湾GLORYS再分析，SSH/SSU/SSV，99%稀疏
 - **系统3**: 真实卫星高度计数据，CNAPS再分析作为真值，99.9%稀疏
@@ -68,7 +106,7 @@ read_status: "deep_read"
   - 应变率和涡度等物理诊断显示DDPM模型更接近真实值
   - 无需集合预报或伴随模式计算
 
-## 🔍 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**:
 - 端到端数据驱动，无需显式数值求解器或背景场
 - 有效克服深度学习的光谱偏差
@@ -81,19 +119,19 @@ read_status: "deep_read"
 - 未进行预报实验，重建后的状态能否用于预报未知
 - 条件DDPM的训练稳定性有待进一步研究
 
-## 💡 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 - 生成式模型是解决稀疏数据同化问题的有前途方向
 - FNO+DDPM结合了算子学习的效率和扩散模型的表达能力
 - 物理一致性诊断（如谱分析）应作为标准评估方法
 - 拉格朗日数据同化对海洋锋面和涡旋研究特别重要
 
-## 🔮 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. 使用重建结果初始化预报模型（如OceanNet）验证预报技能
 2. 扩展到三维海洋重建（加入温盐剖面）
 3. 结合 Argo 浮标和卫星高度计的多源观测
 4. 研究从原始卫星观测而非再分析数据直接学习
 
-## 🧾 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{asefi2025generative,
   title={Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity},

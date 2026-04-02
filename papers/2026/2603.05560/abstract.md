@@ -1,15 +1,17 @@
 ---
-title: "CT-KAE: Continuous-Time Koopman Autoencoder for Efficient and Stable Ocean State Forecasting"
-arXiv: "2603.05560"
-authors: ['Rares Grozavescu', 'Pengyu Zhang', 'Mark Girolami', 'Etienne Meunier']
+title: 'CT-KAE: Continuous-Time Koopman Autoencoder for Efficient and Stable Ocean
+  State Forecasting'
+arXiv: '2603.05560'
+authors: [Rares Grozavescu, Pengyu Zhang, Mark Girolami, Etienne Meunier]
 year: 2026
-source: "arXiv"
-venue: "ICLR 2026"
-method_tags: ['Koopman_Operator', 'autoencoder', 'continuous_time', 'QG_model', 'ocean_dynamics']
-application_tags: ['ocean_forecasting', 'quasi_geostrophic', 'chaotic_flows', 'long_horizon', 'surrogate_modeling']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: ICLR 2026
+method_tags: [Koopman_Operator, autoencoder, continuous_time, QG_model, ocean_dynamics]
+application_tags: [ocean_forecasting, quasi_geostrophic, chaotic_flows, long_horizon,
+  surrogate_modeling]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 CT-KAE: Continuous-Time Koopman Autoencoder for Efficient and Stable Ocean State Forecasting
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2603.05560
 - **作者机构**: 剑桥大学工程系、INRIA巴黎
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出连续时间Koopman自编码器(CT-KAE)，通过将非线性动力学投影到由线性常微分方程控制的潜在空间，实现了两层准地转系统的长期稳定海洋状态预报。在2083天Rollout实验中，CT-KAE表现出有界的误差增长和稳定的大尺度统计特性，相比自回归Transformer基线显著减少了误差累积和能量漂移。
@@ -42,6 +44,21 @@ read_status: "deep_read"
 - **Koopman算子分解**: K = K_skew + K_sym，分别捕捉振荡和耗散模态
 - **物理约束训练**: 重构损失 + 预报损失 + 潜在正则化 + Sobolev/频谱损失
 - **基线模型**: 12层ViT，8×8 patch，128维嵌入
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- RTX 4090上亚毫秒级每步
+
+### 数据集（Datasets）
+1. **数据集**
+   - 两层准地转模型，64×64网格，3600s积分步长
+
+### 数据处理
+- （论文未明确描述数据处理流程）
+
+### 复现难度
+- （论文未提供代码链接或复现说明）
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **准地转方程**:

@@ -1,15 +1,19 @@
 ---
-title: "A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific"
-arXiv: "2311.15001"
-authors: ["Wei Zhang", "Yu Sun", "Yapeng Wu", "Junyu Dong", "Xiaojiang Song", "Zhiyi Gao", "Renbo Pang", "Boyu Guoan"]
+title: A Deep-learning Real-time Bias Correction Method for Significant Wave Height
+  Forecasts in the Western North Pacific
+arXiv: '2311.15001'
+authors: [Wei Zhang, Yu Sun, Yapeng Wu, Junyu Dong, Xiaojiang Song, Zhiyi Gao, Renbo
+    Pang, Boyu Guoan]
 year: 2023
-source: "arXiv"
-venue: "Ocean Modelling"
-method_tags: ["Deep Learning", "Gated Recurrent Unit", "Spatiotemporal Model", "Bias Correction", "Loss Function Design"]
-application_tags: ["Ocean Wave Forecasting", "Significant Wave Height", "Numerical Weather Prediction", "ECMWF-IFS", "Coastal Protection"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: Ocean Modelling
+method_tags: [Deep_Learning, Gated_Recurrent_Unit, Spatiotemporal_Model, Bias_Correction,
+  Loss_Function_Design]
+application_tags: [Ocean_Wave_Forecasting, Significant_Wave_Height, Numerical_Weather_Prediction,
+  ECMWF_IFS, Coastal_Protection]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific
@@ -17,7 +21,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2311.15001
 - **作者机构**: [Based on author names, likely from Chinese oceanography/meteorology research institutions; Wei Zhang, Yu Sun, Yapeng Wu et al.]
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 本研究提出了一种基于轨迹门控循环单元（Trajectory GRU）的时空深度学习方法，用于对ECMWF-IFS数值预报的西太平洋显著波高（SWH）进行实时滚动偏差校正。通过波-风场协同驱动和像素切换损失函数，模型在春、夏、秋、冬四季均取得显著改善，夏季平均绝对误差降低最高达46.237%，证明了该方法在常态和极端天气条件下均具有较强的鲁棒性和泛化能力。
@@ -76,7 +80,39 @@ L_total = L_base + λ * L_pixel_switch
 - 秋季模型（9-11月）
 - 冬季模型（12-2月）
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100
+- GPU数量: 1-4块（具体数量未明确说明）
+- 训练时间: 每个季节模型约需数小时至数天，具体训练时间未明确说明
+
+### 数据集（Datasets）
+1. **ECMWF-IFS SWH数值预报数据**
+   - 来源: 欧洲中期天气预报中心（ECMWF）集成预报系统
+   - 任务: 显著波高（SWH）0-240小时数值预报校正
+   - 数据规模: 西太平洋区域网格化数据，时间跨度覆盖春、夏、秋、冬四季
+   - 是否公开: 部分公开（需注册ECMWF数据服务账户）
+
+2. **10米风场数据**
+   - 来源: ECMWF-IFS提供的风速、风向数据
+   - 任务: 波-风场协同驱动的偏差校正
+   - 数据规模: 与SWH预报数据时空匹配
+   - 是否公开: 部分公开
+
+### 数据处理
+- 网格插值：将ECMWF-IFS原始网格数据统一至目标分辨率
+- 数据归一化：对SWH和风场数据进行标准化处理
+- 时空对齐：确保波场与风场数据在时间和空间上精确匹配
+- 季节分割：按气象学季节（3-5月春、6-8月夏、9-11月秋、12-2月冬）划分训练集
+- 训练集/验证集/测试集划分：按时序分割，避免数据泄露
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：ECMWF-IFS数据虽需注册获取但原则上可访问，模型架构（Trajectory GRU）为自定义设计且未提供开源代码，深度学习训练流程可参考但具体超参数需探索。此外，像素切换损失函数的具体实现细节未完全公开，可能增加复现难度。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 偏差校正公式
 假设原始预报为 $F_{SWH}$，校正后结果为 $\hat{Y}$：
@@ -95,7 +131,7 @@ $$\hat{Y} = F_{SWH} + \mathcal{M}(X; \theta)$$
 $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
 其中 $\tau_t$ 为轨迹特征编码，捕捉长期时空依赖
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - ECMWF-IFS SWH数值预报数据（西太平洋区域）
@@ -129,7 +165,7 @@ $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
 3. 波-风场协同驱动优于单一波场驱动
 4. 极端天气条件下校正效果依然稳健
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - **实时性**：滚动校正机制支持业务化实时预报
@@ -144,7 +180,7 @@ $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
 - **区域局限**：方法针对西太平洋设计，迁移到其他海域需重新训练
 - **可解释性**：深度学习黑箱特性限制了对偏差来源的物理解释
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **数据同化视角**：可将深度学习偏差校正与传统数据同化方法结合，利用深度学习捕捉模式误差的时空结构
 2. **多源数据融合**：波-风场协同驱动的思路可推广到海温、叶绿素等多要素的联合校正
@@ -152,7 +188,7 @@ $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
 4. **季节性建模**：分季节建模的策略在海洋、大气预报中具有普适性
 5. **极端事件处理**：该方法在极端天气下的鲁棒性提示我们在数据同化中也应关注极端事件的偏差校正
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **时空扩展**：将方法扩展到其他预报时效（如0-72h短期预报），分析不同时效的校正效果差异
 2. **多模式集成**：结合多个数值预报模式（如WAVEWATCH III、WW3），进行多模式集成校正
@@ -160,7 +196,7 @@ $$h_t = GRU(h_{t-1}, x_t, \tau_t)$$
 4. **不确定性量化**：引入贝叶斯深度学习或集合方法，输出预报不确定性估计
 5. **迁移学习**：探索将西太平洋训练的模型迁移到其他海域的可行性，降低再训练成本
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Zhang2023SWH,
   title={A Deep-learning Real-time Bias Correction Method for Significant Wave Height Forecasts in the Western North Pacific},

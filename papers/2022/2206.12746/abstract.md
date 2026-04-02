@@ -1,15 +1,17 @@
 ---
-title: "Modeling Oceanic Variables with Dynamic Graph Neural Networks"
-arXiv: "2206.12746"
-authors: ["Caio F. D. Netto", "Marcel R. de Barros", "Jefferson F. Coelho", "Lucas P. de Freitas", "Felipe M. Moreno", "Marlon S. Mathias", "Marcelo Dottori", "Fábio G. Cozman", "Anna H. R. Costa", "Edson S. Gomi", "Eduardo A. Tannuri"]
+title: Modeling Oceanic Variables with Dynamic Graph Neural Networks
+arXiv: '2206.12746'
+authors: [Caio F. D. Netto, Marcel R. de Barros, Jefferson F. Coelho, Lucas P. de
+    Freitas, Felipe M. Moreno, Marlon S. Mathias, Marcelo Dottori, Fábio G. Cozman,
+  Anna H. R. Costa, Edson S. Gomi, Eduardo A. Tannuri]
 year: 2022
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["GNN", "Graph Neural Network", "LSTM", "Transformer", "Dynamic Graph"]
-application_tags: ["Ocean Dynamics", "Current Velocity", "SSH", "Santos Estuarine System"]
-difficulty: "★★★★☆"
-importance: "★★★☆☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [GNN, Graph_Neural_Network, LSTM, Transformer, Dynamic_Graph]
+application_tags: [Ocean_Dynamics, Current_Velocity, SSH, Santos_Estuarine_System]
+difficulty: ★★★★☆
+importance: ★★★☆☆
+read_status: skim
 ---
 
 # 📑 Modeling Oceanic Variables with Dynamic Graph Neural Networks
@@ -17,7 +19,7 @@ read_status: "skim"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2206.12746
 - **作者机构**: Escola Politécnica - University of Sao Paulo, Instituto Oceanográfico, Center for Artificial Intelligence (C4AI)
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 提出动态图神经网络（DTDG）框架，结合时序模型（LSTM/Transformer）和图神经网络预测海洋变量（流速、海表面高度），在 Santos 河口系统验证中超越物理模型 SOFS。
@@ -37,6 +39,33 @@ read_status: "skim"
 3. **空间编码器**：GATv2 图注意力卷积，2 个 GNN Block
 4. **解码器**：固定 MLP（流速）和动态 MLP（SSH）
 5. **缺失数据处理**：无需严格输入形状，可处理不连续数据
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 RTX 3090（推断）
+- GPU数量: 未明确说明（推测为单卡训练）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Santos-Sao Vicente-Bertioga Estuarine System (SSVBES) 海洋数据集**
+   - 来源: 巴西圣保罗大学海洋研究所实地观测，六个观测站点采集
+   - 任务: 海流流速预测、海表面高度（SSH）预测
+   - 数据规模: 6个观测站点，包含流速、风速、SSH等多变量时间序列数据
+   - 是否公开: 否（研究机构内部数据）
+
+### 数据处理
+- 原始数据采集自部署在SSVBES六个站点的海洋传感器
+- 对缺失数据进行过滤或插值处理（论文强调处理缺失数据能力）
+- 构建离散时间动态图（DTDG）：定义过去时间窗口（past_len）和未来预测窗口（future_len）
+- 每个节点表示（类型；位置）二元组，包含历史事件序列和未来特征序列
+- 数据标准化处理（典型深度学习预处理流程）
+- 将时间序列数据划分为训练集、验证集和测试集
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：arXiv论文未明确说明代码和数据公开情况；海洋观测数据通常为研究机构专有；模型结合GNN、LSTM、Transformer多种架构，需要较强的深度学习工程实现能力；但方法框架描述相对完整，具备一定的参考价值
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - 图神经网络消息传递：x_i^(k) = φ^(k)(x_i^(k-1), ⊕_{j∈N(i)} ψ^(k)(x_i^(k-1), x_j^(k-1))

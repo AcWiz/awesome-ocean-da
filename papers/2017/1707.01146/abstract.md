@@ -1,15 +1,15 @@
 ---
-title: "Data-driven discovery of Koopman eigenfunctions for control"
-arXiv: "1707.01146"
-authors: ["Eurika Kaiser", "J. Nathan Kutz", "Steven L. Brunton"]
+title: Data-driven discovery of Koopman eigenfunctions for control
+arXiv: '1707.01146'
+authors: [Eurika Kaiser, J. Nathan Kutz, Steven L. Brunton]
 year: 2017
-source: "arXiv"
-venue: "IEEE Transactions on Automatic Control / arXiv"
-method_tags: ["Koopman Operator", "DMD", "EDMD", "System Identification", "Optimal Control"]
-application_tags: ["Nonlinear Control", "Hamiltonian Systems", "Ocean Double-Gyre", "Dynamical Systems"]
-difficulty: "★★★★★"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: IEEE Transactions on Automatic Control / arXiv
+method_tags: [Koopman_Operator, DMD, EDMD, System_Identification, Optimal_Control]
+application_tags: [Nonlinear_Control, Hamiltonian_Systems, Ocean_Double_Gyre, Dynamical_Systems]
+difficulty: ★★★★★
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Data-driven discovery of Koopman eigenfunctions for control
@@ -85,6 +85,46 @@ $$K = \arg\min_{\tilde{K}} \| \Psi(X') - \tilde{K} \Psi(X) \|_F^2$$
 ### 轻阻尼本征函数
 
 本征值的模$|\lambda| \approx 1$（或阻尼极小）对应准守恒量。论文证明轻阻尼本征函数通常不被有限维近似中的数值误差破坏，是构建可靠降阶模型的关键。在Hamiltonian系统中，Hamiltonian本身就是一个轻阻尼本征函数（对应$\lambda = 1$）。
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA GTX 1080/1080 Ti 或类似中端GPU（EDMD等矩阵运算对GPU需求不高）
+- GPU数量: 1块
+- 训练时间: 未明确说明（EDMD基于奇异值分解和稀疏回归，计算量较小，通常在数分钟至数十分钟级别）
+
+### 数据集（Datasets）
+1. **慢流形系统（Slow Manifold System）**
+   - 来源: 论文定义的二阶非线性系统 (d/dt[x1;x2] = [λx1; μ(x2-x1²)])
+   - 任务: 验证EDMD闭包问题及本征函数识别
+   - 数据规模: 轻量级合成数据，含9个单项式基函数
+   - 是否公开: 不确定
+
+2. **哈密顿系统（Hamiltonian Systems）**
+   - 来源: 论文中定义的分析系统
+   - 任务: 验证轻阻尼本征函数的提取及能量控制
+   - 数据规模: 轻量级合成数据
+   - 是否公开: 不确定
+
+3. **双涡流系统（Ocean Double Gyre）**
+   - 来源: 海洋混合建模的标准测试用例
+   - 任务: 高维非线性系统控制验证
+   - 数据规模: 中等规模（含时间序列快照数据）
+   - 是否公开: 不确定
+
+### 数据处理
+- 数据收集: 通过数值积分生成系统状态的时序快照数据
+- 特征构建: 使用多项式基函数库（单项式至三阶）作为EDMD的观测函数
+- 预处理: 构建数据矩阵X和Y（相邻时间步状态），进行奇异值分解
+- 验证: 检查本征函数线性性质，筛选出未失真的轻阻尼本征函数
+
+### 复现难度
+- ★★★☆☆ (3/5)
+- 代码已在GitHub开源（KRONIC框架），提供了部分实现
+- 测试系统为标准合成数据集，可自行生成
+- 方法涉及EDMD、稀疏回归等经典算法，理论背景需深入理解
+- 部分细节（如正则化参数、基函数选择策略）需根据经验调整
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

@@ -1,15 +1,19 @@
 ---
-title: "HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling"
-arXiv: "2602.00598"
-authors: ["Ruiqi Shu", "Xiaohui Zhong", "Qiusheng Huang", "Ruijian Gou", "Tianrun Gao", "Hao Li", "Xiaomeng Huang"]
+title: 'HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with
+  Efficient Spatial Downscaling'
+arXiv: '2602.00598'
+authors: [Ruiqi Shu, Xiaohui Zhong, Qiusheng Huang, Ruijian Gou, Tianrun Gao, Hao
+    Li, Xiaomeng Huang]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Hybrid Model", "Physics-Informed Neural Network", "Differentiable Solver", "Ocean Modeling", "Neural Operator"]
-application_tags: ["Climate Modeling", "Ocean Forecasting", "Subseasonal-to-Seasonal Prediction", "Downscaling", "Digital Twin"]
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Hybrid_Model, Physics_Informed_Neural_Network, Differentiable_Solver,
+  Ocean_Modeling, Neural_Operator]
+application_tags: [Climate_Modeling, Ocean_Forecasting, Subseasonal_to_Seasonal_Prediction,
+  Downscaling, Digital_Twin]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: skim
 ---
 
 # HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling
@@ -50,7 +54,38 @@ HybridOM的核心架构包含三个关键组件：
 
 整体设计实现了AI方法的推理效率与物理模型的准确性和鲁棒性的统一。
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 多GPU并行（具体数量未明确说明）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **GLORYS12V1**
+   - 来源: Mercator Ocean International 海洋再分析产品
+   - 任务: 全球海洋长期次季节到季节（S2S）模拟与验证
+   - 数据规模: 全球海洋，1/12°分辨率，时间跨度覆盖1993年至今
+   - 是否公开: 是
+
+2. **OceanBench**
+   - 来源: 海洋建模基准数据集
+   - 任务: 区域降尺度与短期运营预报评估
+   - 数据规模: 包含多分辨率海洋状态数据
+   - 是否公开: 是
+
+### 数据处理
+- 海表温度（SST）、海表高度（SSH）、盐度、温度等海洋状态变量的时间序列标准化处理
+- 垂向坐标插值与质量控制
+- 边界条件生成与通量数据对齐
+- 多源数据融合与重采样
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文提供了GitHub开源链接（https://github.com/ChiyodaMomo01/HybridOM），主要数据集GLORYS12V1和OceanBench均为公开可用资源，但GPU配置细节、具体训练超参数及FuXi-2.0耦合接口等未完全披露，需进一步参考源码实现细节。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 **核心物理约束**：
 - 海洋动力学基本方程：Navier-Stokes方程在旋转地球框架下的简化（Primitive Equations）
 - 质量守恒：连续性方程
@@ -67,7 +102,7 @@ HybridOM的核心架构包含三个关键组件：
 - 控制进出区域的通量以保持一致性
 - 支持高分辨率局部模拟
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**: 
 - GLORYS12V1（全球海洋再分析数据）
 - OceanBench数据集
@@ -90,7 +125,7 @@ HybridOM的核心架构包含三个关键组件：
 - 实现了AI推理效率与物理模型准确性的统一
 - 为下一代海洋数字孪生提供了稳健解决方案
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**:
 - 成功融合物理约束与深度学习的表达能力的混合建模方法
 - 可微分设计允许端到端优化，保证物理一致性
@@ -104,7 +139,7 @@ HybridOM的核心架构包含三个关键组件：
 - 计算复杂度和训练成本的具体数据未给出
 - 在不同海洋区域（如深海与浅海、极地与热带）的泛化能力需进一步验证
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 HybridOM的工作为海洋数据同化研究提供了重要启示：
 1. **混合建模范式**：将物理模型与神经网络相结合的思路可直接应用于数据同化框架，如在EnKF、4DVar等经典方法中嵌入学习型修正项
 2. **可微分架构**：端到端可微分设计为梯度基数据同化方法提供了新的可能性，可用于优化初始条件和边界条件
@@ -112,14 +147,14 @@ HybridOM的工作为海洋数据同化研究提供了重要启示：
 4. **降尺度同化**：区域高分辨率同化可借鉴其通量门控机制处理粗细分辨率边界条件
 5. **多尺度耦合**：多尺度神经网络修正次网格动力学的思想可用于改进对流尺度和涡旋尺度过程的同化
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. **数据同化集成**：将HybridOM与集合卡尔曼滤波（EnKF）或四维变分同化（4DVar）框架结合，构建混合数据同化系统，利用神经网络的表达能力修正模型误差同时保持物理约束
 2. **多圈层耦合**：扩展框架到海-气-冰耦合系统，借鉴HybridOM的混合建模策略处理界面通量和耦合反馈
 3. **在线学习更新**：开发自适应在线学习机制，使模型能够利用实时观测数据持续修正次网格参数化，降低模型偏差
 4. **极端事件预测**：针对海洋极端事件（海洋热浪、台风浪、El Niño等）进行专项优化，增强模型在非平稳条件下的预测能力
 5. **可解释性增强**：深入分析神经网络学习到的次网格修正物理意义，建立与已知海洋过程的对应关系，提高模型可解释性
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{HybridOM2026,
   title={HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with Efficient Spatial Downscaling},

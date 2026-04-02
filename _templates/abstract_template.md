@@ -12,65 +12,81 @@ importance: "★★★★☆"
 read_status: "skim"
 ---
 
-# 论文标题
+# 📑 论文标题
 
-## 基本信息
-
-- **arXiv**: [2501.12345](https://arxiv.org/abs/2501.12345)
+## 📌 1. 基本信息
+- **论文链接**: https://arxiv.org/abs/2501.12345
 - **作者**: 作者1, 作者2
 - **年份**: 2025
+- **代码链接**: （如有，否则写"未提供"）
 
-## TL;DR
+## 🧠 2. 一句话总结（TL;DR）
+一句话总结本文的核心贡献
 
-> 一句话总结本文的核心贡献
+## 🎯 3. 研究问题（Problem Definition）
+- **核心问题**: xxx
+- **研究动机**: xxx
+- **主要挑战**: xxx
 
-## 研究问题
+## 🚀 4. 核心贡献（Contributions）
+1. 关键贡献点1
+2. 关键贡献点2
+3. 关键贡献点3
 
-> 本文要解决什么问题？研究动机是什么？
+## 🏗️ 5. 方法详解（Methodology）
+- **核心思想**: xxx
+- **模型结构**: xxx
+- **关键机制**: xxx
+- **与已有方法的区别**: xxx
 
-## 核心贡献
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: xxx
+- GPU数量: xxx
+- 训练时间: xxx
 
-> 3-5 个关键贡献点
+### 数据集（Datasets）
+1. **数据集名称**
+   - 来源: xxx
+   - 任务: xxx
+   - 数据规模: xxx
+   - 是否公开: xxx
 
-1.
-2.
-3.
+### 数据处理
+- xxx
 
-## 方法详解
+### 复现难度
+- xxx
 
-> 核心方法的详细描述
+## 📐 7. 数学与物理建模（Math & Physics）
+- **关键公式**: xxx
+- **物理意义 / 解释**: xxx
 
-## 数学/物理建模
+## 📊 8. 实验分析（Experiments）
+- **对比方法**: xxx
+- **评估指标**: xxx
+- **主要结果**: xxx
+- **关键发现**: xxx
 
-> 关键公式和物理意义
+## 🔍 9. 优缺点分析（Critical Review）
+**优点：** xxx
+**缺点：** xxx
 
-## 实验分析
+## 💡 10. 对我的启发（For My Research）
+- xxx
 
-> 实验设置、结果和发现
+## 🔮 11. Idea 扩展与下一步（Next Steps）
+1. xxx
 
-## 优缺点
-
-**优点：**
--
-
-**缺点：**
--
-
-## 工程落地
-
-> 实际应用场景和可行性
-
-## Idea 扩展
-
-> 可以借鉴到其他研究的想法
-
-## BibTeX
-
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
-@article{},
-  title={},
-  author={},
-  journal={},
-  year={}
+@article{论文标题2025,
+  title={论文标题},
+  author={作者1 and 作者2},
+  year={2025},
+  eprint={2501.12345},
+  eprinttype={arxiv},
+  eprintclass={},
+  journal={arXiv preprint},
 }
 ```

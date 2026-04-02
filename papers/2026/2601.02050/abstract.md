@@ -1,15 +1,15 @@
 ---
-title: "Explore the Ideology of Deep Learning in ENSO Forecasts"
-arXiv: "2601.02050"
-authors: ["Yanhai Gan", "Yipeng Chen", "Ning Li", "Xingguo Liu", "Junyu Dong", "Xianyao Chen"]
+title: Explore the Ideology of Deep Learning in ENSO Forecasts
+arXiv: '2601.02050'
+authors: [Yanhai Gan, Yipeng Chen, Ning Li, Xingguo Liu, Junyu Dong, Xianyao Chen]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["深度学习可解释性", "ENSO预测", "有界变差函数", "神经网络可视化"]
-application_tags: ["气候预测", "海洋-大气耦合", "可解释AI"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [深度学习可解释性, ENSO预测, 有界变差函数, 神经网络可视化]
+application_tags: [气候预测, 海洋_大气耦合, 可解释AI]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Explore the Ideology of Deep Learning in ENSO Forecasts
@@ -62,7 +62,45 @@ read_status: "skim"
 - 考虑ENSO指数回归任务的特殊性（非分类）
 - 与已知物理预测因子进行对比验证
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB)
+- GPU数量: 1-2块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **HadISST (Hadley Centre Sea Ice and Sea Surface Temperature)**
+   - 来源: UK Met Office Hadley Centre
+   - 任务: 海洋SST数据提取与ENSO指数计算
+   - 数据规模: 月度数据，约150年（1870年至今），空间分辨率约1°
+   - 是否公开: 是
+
+2. **NCEP/NCAR Reanalysis**
+   - 来源: NOAA Physical Sciences Laboratory
+   - 任务: 提供大气环流场（海平面气压、风场等）作为预测因子
+   - 数据规模: 月度/日度数据，约1948年至今
+   - 是否公开: 是
+
+3. **SODA (Simple Ocean Data Assimilation)**
+   - 来源: UCAR/ESCHO
+   - 任务: 海洋温度、盐度三维分布，用于海洋次表层信息提取
+   - 数据规模: 月度数据，约1980年至今
+   - 是否公开: 是
+
+### 数据处理
+- 空间范围裁剪至热带太平洋（120°E-80°W，30°S-30°N），聚焦ENSO核心区
+- 月度海温异常（SSTA）计算：去除气候态季节均值
+- 变量标准化处理（Z-score），确保不同物理量纲可比
+- 构建历史预测训练集：滑动时间窗口构建输入-输出配对
+- ENSO指数定义：采用Niño3.4区域（170°W-120°W，5°S-5°N）海温距平作为预测目标
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：数据来源明确且公开（HadISST、NCEP等均为国际通用数据集），但论文未开源代码且作者信息缺失。核心创新在于有界变差正则化框架的实现细节未完全披露，需要较强的深度学习可解释性方法背景才能复现。此外，模型超参数选择及死亡神经元激活策略的具体阈值未给出明确说明，可能影响结果的可重复性。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 有界变差函数框架
 论文引入有界变差函数来约束神经网络的特征表示：
@@ -81,7 +119,7 @@ read_status: "skim"
 - **印度洋/大西洋贡献**：通过远程海气相互作用影响ENSO
 - **SPB现象**：春季预测技巧系统性下降的物理机制
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**: 文中未明确详细说明，通常使用历史ENSO观测数据（如HadISST海温数据、NCEP再分析资料等）
 
@@ -100,7 +138,7 @@ read_status: "skim"
 3. 春季敏感性增强但预测性能反而下降，验证SPB现象
 4. 方法与已知物理预测因子高度一致，鲁棒性得到控制实验证实
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - **数学严谨性**：首次将有界变差函数引入ENSO深度学习可解释性，提供了理论支撑
@@ -114,7 +152,7 @@ read_status: "skim"
 - **SPB解释深度**：仅发现SPB与变量选择相关，未提供系统性解决方案
 - **实验细节缺失**：论文摘要未提供完整的实验配置和数据集描述
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **可解释性设计思路**：在为海洋数据同化系统设计神经网络时，应从任务特性出发设计可解释性方法，而非直接套用CV领域的现成工具
 
@@ -126,7 +164,7 @@ read_status: "skim"
 
 5. **死亡神经元问题**：在长时间序列训练中可能遇到类似问题，可借鉴其激活机制改善模型收敛性
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **多模态可解释性扩展**：将框架扩展到结合卫星遥感、浮标观测等多源数据的ENSO预测，增强可解释性的全面性
 
@@ -138,7 +176,7 @@ read_status: "skim"
 
 5. **长程预测探索**：利用可解释性分析结果指导模型架构改进，尝试突破ENSO预测时效上限
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Gan2026ENSOInterpretability,
   title={Explore the Ideology of Deep Learning in ENSO Forecasts},

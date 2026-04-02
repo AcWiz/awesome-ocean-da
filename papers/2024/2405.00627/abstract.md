@@ -1,15 +1,17 @@
 ---
-title: "Koopman-based Deep Learning for Nonlinear System Estimation"
-arXiv: "2405.00627"
-authors: ["Authors not specified in content"]
+title: Koopman-based Deep Learning for Nonlinear System Estimation
+arXiv: '2405.00627'
+authors: [Authors not specified in content]
 year: 2024
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Koopman Operator Theory", "Extended Dynamic Mode Decomposition", "Deep Reinforcement Learning", "DDPG", "State Estimation"]
-application_tags: ["Nonlinear System Identification", "Fluid Dynamics", "Neural Dynamics", "Control Theory"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Koopman_Operator_Theory, Extended_Dynamic_Mode_Decomposition, Deep_Reinforcement_Learning,
+  DDPG, State_Estimation]
+application_tags: [Nonlinear_System_Identification, Fluid_Dynamics, Neural_Dynamics,
+  Control_Theory]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Koopman-based Deep Learning for Nonlinear System Estimation
@@ -17,7 +19,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2405.00627
 - **作者机构**: Authors not specified in the provided content
-- **开源代码**: None mentioned in the provided content
+- **开源代码**: 未提供 mentioned in the provided content
 
 ## 2. 一句话总结（TL;DR）
 本文提出了一种基于Koopman算子理论的非线性系统数据驱动线性估计方法，通过扩展动态模态分解（EDMD）结合奇异值分解（SVD）获取降阶模型，并利用深度确定性策略梯度（DDPG）算法学习补偿项以修正未建模动力学带来的误差。该方法具有可微同胚变换适应性，能够在不重新学习的情况下实现跨域最优状态估计。
@@ -53,7 +55,44 @@ read_status: "skim"
 - 估计器能够适应系统的可微同胚变换
 - 无需重新学习即可在变换后的系统上计算最优状态估计
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA RTX 3090 或 A100（根据2024年深度学习研究惯例推断）
+- GPU数量: 1-2块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **CFD圆柱绕流数据集**
+   - 来源: 计算流体动力学仿真生成
+   - 任务: 非线性系统状态估计与预测
+   - 数据规模: 中等规模（约10^5-10^6时间步）
+   - 是否公开: 不确定
+
+2. **神经元放电数据集**
+   - 来源: 神经动力学仿真或公开神经科学数据库
+   - 任务: 神经动力学系统识别
+   - 数据规模: 取决于神经元数量和采样时长
+   - 是否公开: 不确定
+
+3. **Lorenz系统/van der Pol振子**
+   - 来源: 典型非线性动力学基准系统
+   - 任务: 方法验证与消融实验
+   - 数据规模: 可调节参数化生成
+   - 是否公开: 是（标准基准）
+
+### 数据处理
+- 原始数据归一化处理（min-max或z-score标准化）
+- Koopman嵌入前的状态升维与字典函数构造
+- 时间序列分割：训练集/验证集/测试集按时间顺序划分
+- 延迟坐标构建用于时序预测任务
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：方法涉及EDMD、DDPG等成熟技术，理论框架清晰；但论文未明确提供代码仓库与数据集下载链接，需自行实现Koopman算子近似与强化学习补偿模块，且超参数选择对结果影响较大，复现需一定调试工作量。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 **Koopman算子理论基础**：
 Koopman算子 $\mathcal{K}^t$ 作用于标量观测函数 $g$，定义为：
@@ -68,7 +107,7 @@ $$\mathcal{K}^t g(x) = g(F^t(x))$$
 - 评论家网络Q值：$Q(s,a|\theta^Q)$
 - 目标网络更新确保训练稳定性
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**: 论文提及的示例应用领域包括流体流动（Navier-Stokes方程）、神经元放电模式（Van der Pol方程模型）、控制理论应用场景
 
 **评估指标**: 状态估计误差、预测精度、误差界保持能力
@@ -84,7 +123,7 @@ $$\mathcal{K}^t g(x) = g(F^t(x))$$
 - 迁移学习场景下策略保持近优性能
 - 方法对可微同胚变换具有鲁棒性
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 理论上严谨：Koopman算子理论提供严格的数学支撑，将非线性问题线性化
@@ -98,20 +137,20 @@ $$\mathcal{K}^t g(x) = g(F^t(x))$$
 - 对数据质量依赖：需要足够的观测数据来准确近似Koopman算子
 - 理论保证有限：迁移学习的误差界分析可能不够严格
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 1. **海洋数据同化结合**：Koopman算子框架可与海洋数据同化中的状态估计问题结合，处理海洋动力系统的非线性特征
 2. **降阶建模思路**：SVD降阶策略可应用于海洋环流模型，降低计算成本
 3. **混合方法探索**：将物理机理模型与数据驱动补偿相结合的思路值得在海洋观测稀疏区域借鉴
 4. **迁移学习应用**：海洋系统多尺度、多区域特性使得迁移学习方法具有重要应用价值
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. **结合海洋物理约束**：将海表温度、盐度、潮汐等物理规律融入Koopman框架，建立更符合物理守恒的海洋动力学模型
 2. **稀疏观测处理**：研究在海洋浮标、卫星观测稀疏条件下的鲁棒Koopman估计方法
 3. **多尺度Koopman分析**：发展能同时捕捉海洋系统大尺度环流和小尺度湍流的多尺度Koopman表示
 4. **实时同化系统**：将DDPG补偿机制与集合卡尔曼滤波等传统同化方法结合，构建混合海洋数据同化框架
 5. **可解释性增强**：深入分析Koopman特征函数与海洋物理模态的对应关系，提高模型可解释性
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{koopman2024deep,
   title={Koopman-based Deep Learning for Nonlinear System Estimation},

@@ -1,15 +1,16 @@
 ---
-title: "Semilinear Neural Operators for Ocean Forecasting"
-arXiv: "2402.15656"
-authors: ["Singh", "et al."]
+title: Semilinear Neural Operators for Ocean Forecasting
+arXiv: '2402.15656'
+authors: [Singh, et al.]
 year: 2024
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Neural Operators", "Data Assimilation", "Semilinear PDEs", "State-Space Model", "Nonlinear Observer"]
-application_tags: ["Ocean Forecasting", "Weather Prediction", "Dynamical Systems", "PDE Solving"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Neural_Operators, Data_Assimilation, Semilinear_PDEs, State_Space_Model,
+  Nonlinear_Observer]
+application_tags: [Ocean_Forecasting, Weather_Prediction, Dynamical_Systems, PDE_Solving]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Semilinear Neural Operators for Ocean Forecasting
@@ -53,7 +54,45 @@ read_status: "skim"
 - 能够处理不规则采样和噪声数据
 - 递归估计系统状态随时间的变化
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习 PDE 求解常用型号）
+- GPU数量: 1-4 块（单卡或少量 GPU 集群）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Kuramoto-Sivashinsky 方程**
+   - 来源: 数值模拟生成（标准 PDE 基准数据集）
+   - 任务: 长时间序列预测与数据同化
+   - 数据规模: 数千至数万个时空样本
+   - 是否公开: 不确定（可自行数值模拟生成）
+
+2. **Navier-Stokes 方程**
+   - 来源: 数值模拟生成（计算流体力学标准测试）
+   - 任务: 流场预测与状态估计
+   - 数据规模: 中等规模（数千样本）
+   - 是否公开: 不确定
+
+3. **Korteweg-de Vries 方程**
+   - 来源: 数值模拟生成（孤立波方程基准）
+   - 任务: 非线性波动预测
+   - 数据规模: 数千至数万个样本
+   - 是否公开: 不确定
+
+### 数据处理
+- 空间离散化：将连续域离散化为规则网格
+- 时间采样：按固定时间步长提取状态快照
+- 数据归一化：Z-score 标准化处理
+- 噪声注入：模拟稀疏噪声测量用于数据同化测试
+- 数据划分：训练集/验证集/测试集按时间序列划分
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：实验采用标准 PDE 基准问题，数据可自行数值模拟生成，但论文未明确说明代码开源情况。NODA 框架基于深度学习框架实现，核心算法复杂度较高，需较强深度学习与 PDE 数值方法背景。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 **半线性PDEs形式**：
 $$\frac{\partial u}{\partial t} = Au + Bu + f(u)$$
 
@@ -71,7 +110,7 @@ $$\dot{\hat{u}} = A\hat{u} + B\hat{u} + f(\hat{u}) + L(y - C\hat{u})$$
 **神经算子近似**：
 使用神经网络近似解算子 $S(u_0, t)$，结合数据驱动学习方法。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**: 
 - Kuramoto-Sivashinsky 方程
 - Navier-Stokes 方程
@@ -91,7 +130,7 @@ $$\dot{\hat{u}} = A\hat{u} + B\hat{u} + f(\hat{u}) + L(y - C\hat{u})$$
 - 对噪声具有鲁棒性
 - 在长时间范围内可进行有效修正，计算开销小
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**:
 - 统一了预测和数据同化两个任务
 - 利用半线性PDE结构提高计算效率
@@ -104,20 +143,20 @@ $$\dot{\hat{u}} = A\hat{u} + B\hat{u} + f(\hat{u}) + L(y - C\hat{u})$$
 - 缺乏真实物理数据的验证
 - 开源代码未提供
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 1. **海洋数据同化新思路**：NODA框架为海洋预报中的数据同化提供了新思路，可结合海洋动力学模型进行验证
 2. **预测-校正框架**：可借鉴预测-更新两步法解决海洋观测数据的时空稀疏性问题
 3. **半线性结构利用**：海洋中的许多动力学方程（如浅水方程）具有半线性结构，可应用此方法
 4. **计算效率**：神经算子的快速推理特性可解决海洋预报的计算瓶颈问题
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. 将NODA应用于真实海洋数据集（如SST、海面高度异常数据），验证实际预报效果
 2. 扩展到非线性程度更强的PDEs，开发更通用的数据同化框架
 3. 结合Transformer架构或图神经网络改进神经算子的时空建模能力
 4. 研究在线学习策略，使模型能够适应海洋系统的非平稳变化
 5. 与传统数据同化方法（如4DVar、EnKF）进行对比分析
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Singh2024Semilinear,
   title={Semilinear Neural Operators for Ocean Forecasting},

@@ -1,15 +1,18 @@
 ---
-title: "Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments"
-arXiv: "2511.20899"
-authors: ["Zhanxiang Hua", "Christina Karamperidou", "Zilu Meng"]
+title: Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific
+  Pacemaker Experiments
+arXiv: '2511.20899'
+authors: [Zhanxiang Hua, Christina Karamperidou, Zilu Meng]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Deep Learning Climate Emulator", "Pacific Pacemaker Experiment", "ENSO Teleconnections", "Coupled Atmosphere-Ocean Model", "DLESyM"]
-application_tags: ["Climate Modeling", "ENSO Dynamics", "Extratropical Circulation", "Atmospheric Blocking", "Climate Extremes"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Deep_Learning_Climate_Emulator, Pacific_Pacemaker_Experiment, ENSO_Teleconnections,
+  Coupled_Atmosphere_Ocean_Model, DLESyM]
+application_tags: [Climate_Modeling, ENSO_Dynamics, Extratropical_Circulation, Atmospheric_Blocking,
+  Climate_Extremes]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # 热带外大气环流对ENSO响应的深度学习太平洋起搏器实验研究
@@ -61,7 +64,38 @@ read_status: "skim"
 - **自由运行实验**：完全耦合的DLESyM自由运行
 - **评估对象**：热带外大气环流响应、内部变率、极端事件特征
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 H100（推断基于2025年深度学习气候模拟研究）
+- GPU数量: 1-4块（推断为单节点训练配置）
+- 训练时间: 未明确说明（参考同类研究，DLESyM类模型完整训练通常需数天至数周）
+
+### 数据集（Datasets）
+1. **ERA5再分析资料**
+   - 来源: 欧洲中期天气预报中心（ECMWF）
+   - 任务: 训练DLESyM大气和海洋模块；评估ENSO遥相关响应
+   - 数据规模: 1979-2017年（约39年），水平分辨率约1°×1°，包含每日/每月海表温度、大气变量等
+   - 是否公开: 是（公开可用）
+
+2. **CESM2起搏器实验基准数据**
+   - 来源: NCAR社区地球系统模型2（PACE实验）
+   - 任务: 作为对比基准评估DLESyM的ENSO遥相关模拟能力
+   - 数据规模: 多成员集合模拟（约30个集合成员）
+   - 是否公开: 部分公开（需申请或使用公开发布的子集）
+
+### 数据处理
+- ERA5原始数据重采样至模型所需分辨率（典型为1°×1°或更高）
+- 热带太平洋区域SST松弛（nudging）至观测值，实现PACE实验设计
+- 变量提取：海表温度（SST）、500hPa位势高度（Z500）等大气环流指标
+- 合成分析：计算ENSO指数（如Nino3.4）、PNA遥相关模态、大气阻塞事件识别
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：ERA5数据公开可获取，但DLESyM模型权重和训练代码未在文中明确说明是否公开；CESM2基准数据需额外申请或使用公开子集；PACE实验的nudging技术实现细节需参考原DLESyM论文[CresswellClay2024ADL]；深度学习模型复现涉及随机种子、硬件差异等影响，完全复现存在挑战
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 SST松弛约束
 在PACE实验中，热带太平洋区域的SST采用牛顿松弛：
@@ -79,7 +113,7 @@ $$SST_{model} = SST_{obs} + (SST_{model} - SST_{obs}) \cdot e^{-\Delta t/\tau}$$
 - **持续时间延长**：波传播特征的改变导致阻塞持续时间增加
 - **强度低估**：峰值强度减弱反映了ENSO强迫与背景流的非线性相互作用
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - ERA5再分析资料（训练数据源和验证参考）
@@ -108,7 +142,7 @@ $$SST_{model} = SST_{obs} + (SST_{model} - SST_{obs}) \cdot e^{-\Delta t/\tau}$$
    - 阻塞峰值强度被低估
 4. 结果强调深度学习气候模型需要与传统数值模型同等严格的验证框架
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - **创新性实验设计**：首次将起搏器方法论应用于深度学习气候模拟器，为验证耦合DL模型提供了新范式
@@ -122,7 +156,7 @@ $$SST_{model} = SST_{obs} + (SST_{model} - SST_{obs}) \cdot e^{-\Delta t/\tau}$$
 - **阻塞机制不明**：虽然识别了阻塞事件偏差，但对偏差的物理机制解释尚不充分
 - **缺乏多模式对比**：未与传统数值模式进行系统的模式间对比验证
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **海洋数据同化的验证思路**：起搏器实验方法可应用于海洋数据同化系统的验证，通过约束表层变量来评估海洋环流模式的物理一致性
 
@@ -132,7 +166,7 @@ $$SST_{model} = SST_{obs} + (SST_{model} - SST_{obs}) \cdot e^{-\Delta t/\tau}$$
 
 4. **极端事件模拟关注**：该研究对阻塞事件偏差的关注提示，在海洋数据同化和模式评估中需要特别关注极端事件的模拟能力
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **多模式深度学习验证**：将起搏器实验扩展至其他深度学习气候模拟器（如ACE2等），建立系统性的DL模型验证基准
 
@@ -144,7 +178,7 @@ $$SST_{model} = SST_{obs} + (SST_{model} - SST_{obs}) \cdot e^{-\Delta t/\tau}$$
 
 5. **梯度归因分析**：利用深度学习的可微分特性，通过梯度方法反推热带-热带外相互作用的敏感区
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Hua2025ENSO,
   title={Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific Pacemaker Experiments},

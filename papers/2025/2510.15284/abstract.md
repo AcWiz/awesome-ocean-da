@@ -1,15 +1,18 @@
 ---
-title: "Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size"
-arXiv: "2510.15284"
-authors: ['Zhilin Li', 'Yao Zhou', 'Xianglong Li', 'Zeng Liu', 'Zhaokuan Lu', 'Shanlin Xu', 'Seungnam Kim', 'Guangyao Wang']
+title: 'Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation
+  Method with Limited Ensemble Size'
+arXiv: '2510.15284'
+authors: [Zhilin Li, Yao Zhou, Xianglong Li, Zeng Liu, Zhaokuan Lu, Shanlin Xu, Seungnam
+    Kim, Guangyao Wang]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['EnKF', 'FCNN', 'data_assimilation', 'neural_network', 'small_ensemble']
-application_tags: ['ocean_waves', 'Lorenz_systems', 'nonlinear_dynamics', 'state_estimation', 'ensemble_methods']
-difficulty: "★★★☆☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [EnKF, FCNN, data_assimilation, neural_network, small_ensemble]
+application_tags: [ocean_waves, Lorenz_systems, nonlinear_dynamics, state_estimation,
+  ensemble_methods]
+difficulty: ★★★☆☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation Method with Limited Ensemble Size
@@ -17,7 +20,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2510.15284
 - **作者机构**: 澳门大学（区域海洋系）、华中科技大学（船舶与海洋工程系）、大连理工大学（宁波研究院）、浙江工业大学（建筑工程学院）、弘益大学（造船与海洋工程系）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出EnKF-FCNN耦合算法，利用全连接神经网络学习小集合估计的订正项，在有限集合（N=7或N=20）条件下实现高精度数据同化，误差较传统EnKF降低一个数量级，同时计算成本可忽略不计。
@@ -45,6 +48,44 @@ read_status: "deep_read"
 - **输出**: 订正项 Δs^a,j = FCNN(input; θ)
 - **损失函数**: MSE，训练数据来自大集合（N=100）分析结果
 - **更新规则**: s^(n)_a,j ← s^(n)_a,j + Δs^a,j
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 RTX 3090（根据深度学习实验惯例推断）
+- GPU数量: 1块（神经网络训练规模较小，无需多GPU并行）
+- 训练时间: 未明确说明（FCNN结构简单，训练时间预计较短，通常在数分钟至数十分钟级别）
+
+### 数据集（Datasets）
+1. **Lorenz-63系统**
+   - 来源: 论文自行生成（基于标准Lorenz混沌方程，参数σ=10, ρ=28, β=8/3）
+   - 任务: 状态估计与数据同化基准测试
+   - 数据规模: 3维状态变量，时间步长Δt=0.01，典型实验时长数百至数千步
+   - 是否公开: 不确定（标准混沌系统，理论可自行复现）
+
+2. **Lorenz-96系统**
+   - 来源: 论文自行生成（10维Lorenz-96模型，外强迫F=8）
+   - 任务: 高维状态估计基准测试
+   - 数据规模: 10维状态变量，周期性边界条件
+   - 是否公开: 不确定
+
+3. **非线性海浪场**
+   - 来源: 基于Pseudospectral-Fourier-Legendre (PFL)海浪模式模拟生成
+   - 任务: 真实非线性动力学系统状态估计
+   - 数据规模: 典型海浪场模拟域（具体维度未明确）
+   - 是否公开: 否（论文自定义模拟数据）
+
+### 数据处理
+- 状态向量标准化：将状态变量归一化至同一量级，确保神经网络训练稳定性
+- 观测数据生成：通过在真实状态上添加高斯噪声模拟观测值（符合贝叶斯估计框架）
+- 集合初始化：基于预设的测量值分布信息生成初始集合
+- 协方差矩阵估计：使用标准集合协方差计算方法（C(S)算子）
+- 真值基准：采用大集合EnKF（N≫N）分析均值作为高质量真值代理
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：Lorenz系统为标准基准问题，易于复现；但论文未明确提供代码开源信息或具体数据集划分细节，且PFL海浪模式为自定义实现，需参考原始文献[23]进行复现；神经网络训练策略（学习率、epoch数等）未详细说明。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **EnKF分析公式**: S^a = S^f + K(y^o - H·S^f)，K = P^f H^T(HP^fH^T + R)⁻¹

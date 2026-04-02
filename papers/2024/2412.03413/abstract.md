@@ -1,15 +1,16 @@
 ---
-title: "Deep Learning for Sea Surface Temperature Reconstruction under Cloud Occlusion"
-arXiv: "2412.03413"
-authors: ['Andrea Aspertia', 'Ali Aydogdub', 'Angelo Grecoa', 'Fabio Merizzia', 'Pietro Miragliob', 'Beniamino Tartufolici', 'Alessandro Testaa', 'Nadia Pinardic', 'Paolo Oddob']
+title: Deep Learning for Sea Surface Temperature Reconstruction under Cloud Occlusion
+arXiv: '2412.03413'
+authors: [Andrea Aspertia, Ali Aydogdub, Angelo Grecoa, Fabio Merizzia, Pietro Miragliob,
+  Beniamino Tartufolici, Alessandro Testaa, Nadia Pinardic, Paolo Oddob]
 year: 2024
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['U-Net', 'Vision_Transformer', 'DINCAE', 'CNN']
-application_tags: ['SST_reconstruction', 'cloud_filling', 'satellite_Ocean', 'MODIS', 'oceanography']
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [U_Net, Vision_Transformer, DINCAE, CNN]
+application_tags: [SST_reconstruction, cloud_filling, satellite_Ocean, MODIS, oceanography]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Deep Learning for Sea Surface Temperature Reconstruction under Cloud Occlusion
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2412.03413
 - **作者机构**: 博洛尼亚大学、CMCC Foundation
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文利用U-Net和Vision Transformer等深度学习模型从卫星MODIS图像中重建被云遮挡的海表温度(SST)区域。与传统最优插值方法相比，提出的U-Net64模型在RMSE指标上降低了约50%，展现了深度学习方法在海洋卫星数据重建中的优势。
@@ -43,6 +44,44 @@ read_status: "deep_read"
 - **Vision Transformer**: 分块嵌入+自注意力建模全局依赖
 - **人工云生成器**: 在训练时模拟云遮挡进行数据增强
 - **训练策略**: AdamW优化器，学习率1e-4，early stopping patience=10
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习模型训练的常见选择）
+- GPU数量: 1-2块
+- 训练时间: 未明确说明具体训练时长，但基于21年MODIS数据和256×256图像规模，预计每次完整训练需数小时至数天
+
+### 数据集（Datasets）
+1. **MODIS Aqua L3 SST**
+   - 来源: NASA PODAAC (https://podaac.jpl.nasa.gov/dataset/MODIS_AQUA_L3_SST_THERMAL_DAILY_4K_NIGHTTIME_V2014.0)
+   - 任务: 海表温度重建与云遮挡区域填补
+   - 数据规模: 2002年7月至2023年12月的夜间每日数据，覆盖意大利海域256×256网格点（约1020×1020平方公里），空间分辨率4公里
+   - 是否公开: 是
+
+2. **MODIS Terra L3 SST**
+   - 来源: NASA PODAAC
+   - 任务: 作为验证数据集
+   - 数据规模: 与Aqua同期数据
+   - 是否公开: 是
+
+3. **Copernicus Marine Service L4产品**
+   - 来源: 哥白尼海洋服务中心
+   - 任务: 作为基准对比数据
+   - 是否公开: 是
+
+### 数据处理
+- **质量控制**: 仅使用质量标志为0、1、2的像素点（分别占比79%、21%、0.2%）
+- **数据筛选**: 剔除近岸异常值和云边界错误识别的数据
+- **季节气候学计算**: 基于21年数据计算日均气候学，并使用高斯模糊填补因云遮挡导致的气候学空缺
+- **异常值计算**: 从原始SST中减去季节气候学，得到SST异常作为模型输入
+- **人工云生成**: 采用人工生成的云遮挡模式进行数据增强
+- **训练测试划分**: 2002年7月至2021年6月用于训练，2021年7月至2023年12月用于测试
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：MODIS卫星数据和Copernicus L4产品均公开可获取，模型架构（U-Net、ViT）已公开，但论文未明确说明代码开源情况。数据预处理流程描述详细，但人工云生成的具体参数和完整训练超参数未完全公开，可能影响完全复现。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **数据预处理**: 减去气候学值获得距平

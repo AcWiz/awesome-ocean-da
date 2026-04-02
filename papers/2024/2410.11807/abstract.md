@@ -1,15 +1,18 @@
 ---
-title: "Regional Ocean Forecasting with Hierarchical Graph Neural Networks"
-arXiv: "2410.11807"
-authors: ['Daniel Holmberg', 'University of Helsinki', 'Emanuela Clementi', 'CMCC Foundation', 'Teemu Roos', 'University of Helsinki']
+title: Regional Ocean Forecasting with Hierarchical Graph Neural Networks
+arXiv: '2410.11807'
+authors: [Daniel Holmberg, University of Helsinki, Emanuela Clementi, CMCC Foundation,
+  Teemu Roos, University of Helsinki]
 year: 2024
-source: "arXiv"
-venue: "NeurIPS"
-method_tags: ['graph_neural_network', 'hierarchical_gnn', 'regional_ocean_model', 'neural_forecasting', 'mediterranean_sea']
-application_tags: ['ocean_forecasting', 'regional_ocean', 'mediterranean_sea', 'sst_forecasting', 'marine_dynamics']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "read"
+source: arXiv
+venue: NeurIPS
+method_tags: [graph_neural_network, hierarchical_gnn, regional_ocean_model, neural_forecasting,
+  mediterranean_sea]
+application_tags: [ocean_forecasting, regional_ocean, mediterranean_sea, sst_forecasting,
+  marine_dynamics]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: read
 ---
 
 # 📑 Regional Ocean Forecasting with Hierarchical Graph Neural Networks
@@ -55,6 +58,45 @@ read_status: "read"
 ### 5.4 滚动掩码
 - 内部海洋网格节点单独学习
 - 边界区域用真实值替换实现边界强迫
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: AMD MI250x
+- GPU数量: 32
+- 训练时间: 约2天
+
+### 数据集（Datasets）
+1. **Mediterranean Sea Physics (Med-PHY)**
+   - 来源: Copernicus Marine Service (CMEMS) 哥白尼海洋服务
+   - 任务: 区域海洋预报（温度、盐度、速度等变量预测）
+   - 数据规模: 训练集35年（1987-2024），空间分辨率1/24°，18个深度层（至200m），7个物理变量共75个特征通道
+   - 是否公开: 否（需订阅CMEMS服务）
+
+2. **ERA5大气再分析数据**
+   - 来源: ECMWF
+   - 任务: 大气强迫输入（风场、温度、气压等）
+   - 数据规模: 1/4°分辨率，日均数据
+   - 是否公开: 是
+
+3. **AIFS/ENS大气预报数据**
+   - 来源: ECMWF
+   - 任务: 测试阶段大气强迫
+   - 数据规模: 6小时数据，15天预报
+   - 是否公开: 部分公开
+
+### 数据处理
+- 输入归一化：将所有输入变量缩放至零均值、单位方差
+- 网格处理：构建适配不规则海岸线的层级图结构网格，过滤穿越陆地超过8个网格点的边
+- 大气强迫插值：双线性插值将1/4°大气数据插值至1/24°海洋网格
+- 深度采样：选取透光层（epipelagic zone）数据，每隔一个深度层采样至200m
+- 静态特征：纬度、经量纲归一化海底部深度、平均化处理动力地形
+- 季节特征：日期的正弦和余弦编码
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：1）代码未公开（论文仅提供arXiv链接），复现需自行实现层级图神经网络架构；2）核心数据集Med-PHY需商业订阅，ERA5虽公开但AIFS/ENS测试数据访问受限；3）方法涉及复杂的图构建、层级传播和 rollout masking机制，技术细节需深度理解；4）训练资源需求较高（32 GPU集群）
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

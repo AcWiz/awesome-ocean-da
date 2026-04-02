@@ -1,15 +1,15 @@
 ---
-title: "Super-resolution data assimilation"
-arXiv: "2109.08017"
-authors: ["Sébastien Barthélémy", "Julien Brajard", "Laurent Bertino", "François Counillon"]
-year: "2021"
-source: "arXiv"
-venue: "Ocean Dynamics"
-method_tags: ["neural-network", "ensemble-kalman-filter", "super-resolution", "deep-learning"]
-application_tags: ["ocean-modeling", "data-assimilation", "quasi-geostrophic-model", "forecasting"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "read"
+title: Super-resolution data assimilation
+arXiv: '2109.08017'
+authors: [Sébastien Barthélémy, Julien Brajard, Laurent Bertino, François Counillon]
+year: '2021'
+source: arXiv
+venue: Ocean Dynamics
+method_tags: [neural_network, ensemble_kalman_filter, super_resolution, deep_learning]
+application_tags: [ocean_modeling, data_assimilation, quasi_geostrophic_model, forecasting]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: read
 ---
 
 ## TL;DR
@@ -142,3 +142,61 @@ $$\mathcal{J}(\mathbf{x}) = (\mathbf{x} - \mathbf{x}^f)^T \mathbf{P}^f)^{-1} (\m
 
 ### 5.1 方法一
 ### 5.2 方法二
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或类似深度学习常用GPU
+- GPU数量: 未明确说明（推测为单卡或少量GPU）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **准地转模型（QG）模拟数据**
+   - 来源: 基于Sakov和Oke（2008）设置的1.5层简化重力准地转模型生成
+   - 任务: 超分辨率数据同化实验
+   - 数据规模: 120,000个时间步的HR模型模拟数据用于神经网络训练；HR网格129×129，LR网格65×65，ULR网格33×33
+   - 是否公开: 否
+
+### 数据处理
+- 使用1.5层准地转模型生成双 gyre 风强迫和双调和摩擦的流场模拟数据
+- 神经网络训练：对LR场进行超分辨率重建得到HR场，与真实HR场进行监督学习
+- 数据归一化处理（推测）
+- 对比方法包括三次样条插值作为基线
+
+### 复现难度
+- ★★★☆☆ 中等难度
+- 原因：论文提供了详细的模型设置和数据同化方法描述，但未公开代码和数据；QG模型为标准配置可自行实现；神经网络架构细节需进一步推断；实验涉及的数据同化系统配置（如观测误差、集合大小25人等）已给出，但仍需较多工程工作进行复现
+
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
+- **关键公式**: xxx
+- **物理意义 / 解释**: xxx
+
+
+## 📊 8. 实验分析（Experiments）
+- **对比方法**: xxx
+- **评估指标**: xxx
+- **主要结果**: xxx
+- **关键发现**: xxx
+
+## 🔍 9. 优缺点分析（Critical Review）
+**优点：** xxx
+**缺点：** xxx
+
+## 💡 10. 对我的启发（For My Research）
+- xxx
+
+## 🔮 11. Idea 扩展与下一步（Next Steps）
+1. xxx
+
+## 🧾 12. 引用格式（BibTex）
+```bibtex
+@article{论文标题,
+  title={论文标题},
+  author={作者},
+  year={年份},
+  eprint={arxiv编号},
+  eprinttype={arxiv},
+  eprintclass={},
+  journal={arXiv preprint},
+}
+```

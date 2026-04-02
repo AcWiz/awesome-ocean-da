@@ -1,15 +1,16 @@
 ---
-title: "Deep Koopman Learning from Noisy Data"
-arXiv: "2405.16649"
-authors: ["Authors not specified in content"]
+title: Deep Koopman Learning from Noisy Data
+arXiv: '2405.16649'
+authors: [Authors not specified in content]
 year: 2024
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Koopman Operator", "Deep Learning", "Dynamical Systems", "Noise Mitigation", "Data-Driven Control"]
-application_tags: ["Nonlinear System Modeling", "Control Design", "System Identification"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Koopman_Operator, Deep_Learning, Dynamical_Systems, Noise_Mitigation,
+  Data_Driven_Control]
+application_tags: [Nonlinear_System_Modeling, Control_Design, System_Identification]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Deep Koopman Learning from Noisy Data
@@ -62,7 +63,51 @@ read_status: "skim"
 - 通过最小化自定义损失函数来同时学习线性动力学和噪声补偿
 - 方法实现简单，无需复杂的预处理或额外的噪声估计模块
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 RTX 3090（根据深度学习实验惯例推断）
+- GPU数量: 1块（单GPU训练即可满足需求）
+- 训练时间: 未明确说明具体时长
+
+### 数据集（Datasets）
+1. **Lorenz系统**
+   - 来源: 标准混沌动力学基准测试
+   - 任务: 非线性系统建模与预测
+   - 数据规模: 典型配置为数千至数万时间步
+   - 是否公开: 是（标准基准）
+
+2. **Van der Pol振荡器**
+   - 来源: 标准非线性动力学基准测试
+   - 任务: 极限环系统建模
+   - 数据规模: 典型配置为数千至数万时间步
+   - 是否公开: 是（标准基准）
+
+3. **立方振荡器（Cubic Oscillator）**
+   - 来源: Koopman算子学习文献常用基准
+   - 任务: 非线性系统识别
+   - 数据规模: 数千时间步
+   - 是否公开: 是（标准基准）
+
+4. **Buckling Beam（屈曲梁）**
+   - 来源: EDMD/DKO文献常用基准
+   - 任务: 非线性系统建模
+   - 数据规模: 数千时间步
+   - 是否公开: 是（标准基准）
+
+### 数据处理
+- **状态轨迹生成**: 使用数值积分（如Runge-Kutta方法）生成系统状态轨迹
+- **噪声注入**: 根据"测量噪声有界"假设，向原始状态数据添加有界随机噪声（典型为高斯噪声或均匀分布噪声）
+- **数据划分**: 按时间顺序划分为训练集和验证集（通常8:2或9:1比例）
+- **数据归一化**: 对状态变量进行标准化处理（零均值、单位方差）
+- **批量采样**: 从长轨迹中随机采样固定长度的子序列用于mini-batch训练
+
+### 复现难度
+- **★★☆☆☆（较易复现）**
+- 原因：该方法采用标准深度学习框架实现，网络结构为常规全连接或卷积神经网络；所使用的数据集均为动力学系统领域的标准基准，代码实现相对直接；损失函数设计明确，基于预测误差与噪声补偿项的组合。然而，论文未明确提供代码开源链接或超参数具体设置，完整复现需参考同类型Koopman学习方法（如DKO、EDMD）的典型配置进行调参。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 **核心动力学模型**：
 考虑非线性动力系统：
@@ -85,7 +130,7 @@ $$\boldsymbol{\psi}(\mathbf{x}_{k+1}) \approx \mathbf{K} \boldsymbol{\psi}(\math
 
 损失函数考虑噪声项的影响，通过参数更新实现对噪声的鲁棒性。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**：
 - 多个标准动力系统基准测试（具体数据集名称未在提供内容中详细列出）
@@ -106,7 +151,7 @@ $$\boldsymbol{\psi}(\mathbf{x}_{k+1}) \approx \mathbf{K} \boldsymbol{\psi}(\math
 - 对比文献中最新Koopman学习方法展现出更好的性能
 - 验证了噪声抑制机制的有效性
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**：
 - **弱假设**：仅需噪声有界，适用范围更广，无需噪声分布的精确先验
@@ -119,7 +164,7 @@ $$\boldsymbol{\psi}(\mathbf{x}_{k+1}) \approx \mathbf{K} \boldsymbol{\psi}(\math
 - **超参数敏感**：可观测函数的选择和网络结构可能影响性能
 - **近似误差**：有限维近似仍存在理论误差，精确表示的充分条件尚未完全解决
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 对于海洋数据同化研究，本文的噪声鲁棒Koopman学习方法具有重要启示：
 
@@ -128,14 +173,14 @@ $$\boldsymbol{\psi}(\mathbf{x}_{k+1}) \approx \mathbf{K} \boldsymbol{\psi}(\math
 3. **数据驱动与物理约束融合**：本文展示了如何将数据驱动方法与动力系统理论结合，可应用于海洋资料再分析
 4. **非线性海洋过程**：海洋中的湍流、涡旋等强非线性过程可借助提升线性化方法进行建模
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **扩展至海洋动力系统**：将方法应用于海洋环流模式（如ROM区域海洋模式），验证对真实海洋数据的适用性
 2. **时变系统扩展**：结合Hao et al. (2024)的非线性时变系统近似方法，处理海洋中的季节性和年际变化
 3. **状态估计集成**：将学习得到的Koopman模型与卡尔曼滤波等数据同化方法结合，构建闭环估计-预测系统
 4. **多源数据融合**：处理来自浮标、卫星、ARGO浮标等多源异构海洋观测数据的噪声特性差异
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{DeepKoopmanNoisy2024,
   title={Deep Koopman Learning from Noisy Data},

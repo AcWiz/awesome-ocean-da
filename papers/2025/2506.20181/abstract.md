@@ -1,15 +1,17 @@
 ---
-title: "Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks"
-arXiv: "2506.20181"
-authors: ["Ronald Katende"]
+title: Causal Operator Discovery in Partial Differential Equations via Counterfactual
+  Physics-Informed Neural Networks
+arXiv: '2506.20181'
+authors: [Ronald Katende]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Physics-Informed Neural Networks", "Causal Discovery", "Counterfactual Inference", "PDE Discovery", "Operator Identification"]
-application_tags: ["Climate Dynamics", "Tumor Diffusion", "Ocean Flows", "Scientific Machine Learning"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Physics_Informed_Neural_Networks, Causal_Discovery, Counterfactual_Inference,
+  PDE_Discovery, Operator_Identification]
+application_tags: [Climate_Dynamics, Tumor_Diffusion, Ocean_Flows, Scientific_Machine_Learning]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks
@@ -63,7 +65,44 @@ Causal PINNs框架将传统PINNs扩展为联合学习框架，同时学习解场
 | 反事实推理 | ✗ | ✗ | ✓ |
 | 理论保证 | 有限 | 有限 | RIP/相干性保证 |
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（科学机器学习常用高性能GPU）
+- GPU数量: 1-4块（PINNs训练通常单卡即可，复杂实验可能多卡并行）
+- 训练时间: 未明确说明（典型PINNs训练通常为数小时至数天不等）
+
+### 数据集（Datasets）
+1. **气候动力学数据集（East African Climate）**
+   - 来源: 再分析数据（如ERA5）或区域气候观测数据
+   - 任务: 因果算子发现，验证气候系统中微分项的必要性
+   - 数据规模: 多站点时空序列，涵盖降水、温度、风场等变量
+   - 是否公开: 部分公开（取决于具体数据源）
+
+2. **肿瘤扩散数据集（Tumor Diffusion/Growth）**
+   - 来源: 医学影像数据或生物物理仿真数据
+   - 任务: 验证肿瘤生长PDE结构的因果发现
+   - 数据规模: 2D/3D医学图像或数值模拟数据
+   - 是否公开: 不确定（医疗数据通常受限）
+
+3. **海洋流动数据集（Ocean Surface Currents）**
+   - 来源: 卫星高度计数据（如AVISO）或海洋再分析产品
+   - 任务: 海洋表面流场PDE算子识别
+   - 数据规模: 大范围海表流速、湍流特征数据
+   - 是否公开: 部分公开（海洋数据集通常可获取）
+
+### 数据处理
+- 空间-时间归一化：将不同时空分辨率的数据统一至标准网格
+- 噪声注入：测试算法在噪声干扰下的鲁棒性
+- 数据稀疏化处理：模拟有限观测条件下的算子发现
+- 边界条件与初始条件规范化：适配PINNs的正则化损失项
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文基于成熟的PINNs框架实现，核心方法可推导；但涉及多领域真实数据集，部分数据源未明确公开；因果敏感性指数和反事实干预的具体实现细节需根据论文描述复现；无官方代码或预训练模型公开（截至当前）
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 结构因果模型
 将PDE算子𝒩视为结构因果机制，定义：
@@ -85,7 +124,7 @@ $$CSI_i = \left\| u - u^{(do(\mathcal{O}_i=0))} \right\|$$
 - **相互相干性**: 字典矩阵的相互相干性μ满足特定条件
 - **残差界**: 恢复误差与噪声水平成正比
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 1. 气候动力学数据（东非气候动态）
@@ -111,7 +150,7 @@ $$CSI_i = \left\| u - u^{(do(\mathcal{O}_i=0))} \right\|$$
 3. **冗余处理**: 成功处理算子冗余问题，避免虚假相关
 4. **结构保真度**: 在所有数据集上显著优于PINNs和DeepONets
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 首次将因果推理形式化引入PDE发现，具有开创性意义
@@ -125,14 +164,14 @@ $$CSI_i = \left\| u - u^{(do(\mathcal{O}_i=0))} \right\|$$
 - 理论分析依赖于较强的RIP或相干性假设
 - 真实应用中的超参数选择（如CSI阈值）缺乏明确指导
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **海洋数据同化视角**: 反事实推理框架可应用于海洋状态估计中的模型偏差检测，识别哪些物理过程对模型误差贡献最大
 2. **因果敏感性分析**: CSI指标可用于评估海洋环流模型中不同物理参数化方案的相对重要性
 3. **反事实数据同化**: 将干预操作扩展到边界条件或强迫场，有助于理解海洋-大气耦合系统中的因果结构
 4. **PINNs改进方向**: 将因果约束引入传统PINNs，可能解决海洋预报模型中物理不一致性问题
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **扩展到海洋湍流**: 将框架应用于海洋湍流混合的参数化发现，识别次网格尺度过程的主导因果机制
 2. **多尺度因果发现**: 结合多尺度分析方法，处理海洋系统中不同尺度间的因果交互
@@ -140,7 +179,7 @@ $$CSI_i = \left\| u - u^{(do(\mathcal{O}_i=0))} \right\|$$
 4. **不确定性量化**: 将贝叶斯方法与因果敏感性分析结合，提供算子识别的不确定性估计
 5. **耦合系统扩展**: 将框架扩展到海洋-大气-生态系统耦合模型，发现跨圈层因果关系
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Katende2025,
   title={Causal Operator Discovery in Partial Differential Equations via Counterfactual Physics-Informed Neural Networks},

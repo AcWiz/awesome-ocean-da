@@ -1,15 +1,18 @@
 ---
-title: "On the Choice of Training Data for Machine Learning of Geostrophic Mesoscale Turbulence"
-arXiv: "2307.00734"
-authors: ["F. E. Yan", "J. Mak", "Y. Wang"]
+title: On the Choice of Training Data for Machine Learning of Geostrophic Mesoscale
+  Turbulence
+arXiv: '2307.00734'
+authors: [F. E. Yan, J. Mak, Y. Wang]
 year: 2023
-source: "arXiv"
-venue: "Journal of Advances in Modeling Earth Systems (JAMES)"
-method_tags: ["CNN", "Eddy_Mean_Interaction", "Geostrophic_Turbulence", "Training_Data_Choice", "Robustness"]
-application_tags: ["Ocean_Mesoscale", "Eddy_Parameterization", "QG_Turbulence", "Ocean_Modeling", "Rotational_Fluxes"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: Journal of Advances in Modeling Earth Systems (JAMES)
+method_tags: [CNN, Eddy_Mean_Interaction, Geostrophic_Turbulence, Training_Data_Choice,
+  Robustness]
+application_tags: [Ocean_Mesoscale, Eddy_Parameterization, QG_Turbulence, Ocean_Modeling,
+  Rotational_Fluxes]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 On the Choice of Training Data for Machine Learning of Geostrophic Mesoscale Turbulence
@@ -17,7 +20,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2307.00734
 - **作者机构**: 香港科技大学海洋科学系、香港科技大学海洋研究所
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -50,6 +53,31 @@ read_status: "deep_read"
 - 参考Bolton和Zanna (2019)的实验程序
 - 卷积神经网络
 - 对比不同数据选择策略
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习训练常用型号）
+- GPU数量: 1-4块（典型配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **QG湍流模拟数据集**
+   - 来源: 基于准地转（Quasi-Geostrophic）方程的数值模拟生成，参考Bolton和Zanna (2019)的实验框架
+   - 任务: 涡旋-平均流相互作用建模、涡流通量预测
+   - 数据规模: 多时间步的二维流场数据，包含位势涡度（PV）和涡流通量场
+   - 是否公开: 不确定（原文未明确说明）
+
+### 数据处理
+- 对涡流通量数据进行Helmholtz分解，分离旋转分量和散度分量
+- 对位势涡度场进行归一化处理
+- 使用滑动窗口或patch方式提取训练样本
+- 涡力函数（eddy force function）通过过滤旋转分量获得，作为替代输入特征
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文参考了Bolton和Zanna (2019)的实验流程，但该数据集和代码未在原文中明确公开。QG模型数值模拟方法相对成熟，但具体的模型参数设置、分辨率和边界条件处理需进一步确认。机器学习模型（CNN）的架构和训练超参数在现有片段中未完整展示，复现需要一定的领域知识和调试工作。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

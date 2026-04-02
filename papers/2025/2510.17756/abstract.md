@@ -1,15 +1,17 @@
 ---
-title: "Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network"
-arXiv: "2510.17756"
-authors: ['Younghyun Koo', 'Maryam Rahnemoonfar']
+title: Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using
+  Physics-informed Neural Network
+arXiv: '2510.17756'
+authors: [Younghyun Koo, Maryam Rahnemoonfar]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['PINN', 'HIS-Unet', 'CNN', 'physics_informed', 'sea_ice']
-application_tags: ['Arctic_Ocean', 'sea_ice_velocity', 'sea_ice_concentration', 'remote_sensing', 'multi_task_learning']
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [PINN, HIS_Unet, CNN, physics_informed, sea_ice]
+application_tags: [Arctic_Ocean, sea_ice_velocity, sea_ice_concentration, remote_sensing,
+  multi_task_learning]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using Physics-informed Neural Network
@@ -48,6 +50,38 @@ read_status: "deep_read"
   - L_therm: 约束每日热力学海冰变化不超过1
 - **激活函数**: Sigmoid（浓度输出）确保物理有效范围
 - **训练配置**: 100%/50%/20%样本比例，λ_sat和λ_therm权重调节
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（推断）
+- GPU数量: 未明确说明，推测为单卡或双卡配置
+- 训练时间: 未明确说明具体时长
+
+### 数据集（Datasets）
+1. **北极海冰遥感数据集**
+   - 来源: 卫星遥感数据（可能包括NSIDC提供的AMSR2被动微波数据或SAR数据）；气象数据来源可能为ERA5再分析数据
+   - 任务: 海冰速度（SIV）和海冰密集度（SIC）的日预测
+   - 数据规模: 未明确说明具体规模，但论文强调在小样本训练条件下进行实验
+   - 是否公开: 不确定，原始卫星数据通常公开可用，但处理后的训练数据可能未公开
+
+2. **气象驱动数据**
+   - 来源: 大气再分析数据（如ERA5中的风场、温度等变量）
+   - 任务: 作为模型输入特征，驱动海冰动态预测
+   - 数据规模: 未明确说明
+   - 是否公开: 部分公开
+
+### 数据处理
+- 将北极海冰遥感数据重采样至统一空间分辨率
+- 对输入数据进行归一化处理
+- 采用滑动窗口或网格切片方式生成训练样本
+- 可能包含时间序列构造（将历史多日数据作为输入序列）
+- 使用数据增强（如随机翻转、旋转）提升模型泛化能力
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：arXiv论文未提供代码仓库链接，数据集来源和处理细节描述有限。虽然海冰遥感数据（NSIDC等）可公开获取，但具体的模型实现细节、物理约束的嵌入方式以及训练参数未完全披露。具备一定复现难度，需要根据论文描述自行实现HIS-Unet架构和物理信息损失函数。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **质量守恒方程**: ∂h/∂t + ∇·(uh) = S_h，∂A/∂t + ∇·(uA) = S_A

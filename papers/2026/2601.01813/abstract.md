@@ -1,15 +1,15 @@
 ---
-title: "Spatio-temporal modeling and forecasting with Fourier neural operators"
-arXiv: "2601.01813"
-authors: ['Pratik Nag', 'Andrew Zammit-Mangion', 'Sumeetpal Singh', 'Noel Cressie']
+title: Spatio-temporal modeling and forecasting with Fourier neural operators
+arXiv: '2601.01813'
+authors: [Pratik Nag, Andrew Zammit-Mangion, Sumeetpal Singh, Noel Cressie]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['FNO', 'neural_operator', 'dynamical_system', 'spatio_temporal', 'uncertainty_quantification']
-application_tags: ['SST', 'precipitation', 'ocean_modeling', 'atmospheric_modeling', 'forecasting']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [FNO, neural_operator, dynamical_system, spatio_temporal, uncertainty_quantification]
+application_tags: [SST, precipitation, ocean_modeling, atmospheric_modeling, forecasting]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Spatio-temporal modeling and forecasting with Fourier neural operators
@@ -44,6 +44,44 @@ read_status: "deep_read"
 - **应用场景**:
   - SST: 北大西洋19区域，64×64网格，3天预报
   - 降水: 欧洲西部64×64网格
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习时空预测任务常用GPU型号）
+- GPU数量: 1-4块（单卡或小型GPU集群配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **海表温度（SST）数据集**
+   - 来源: NOAA最优插值海表温度（OISST）产品或类似公开海洋数据集
+   - 任务: 大西洋海域海表温度时空预报
+   - 数据规模: 大西洋区域网格数据，空间分辨率典型为0.25°×0.25°，时间跨度覆盖多年月度或日度观测
+   - 是否公开: 是（NOAA公开数据）
+
+2. **欧洲降水数据集**
+   - 来源: E-OBS欧洲高分辨率观测数据集或ECA&D（European Climate Assessment & Dataset）
+   - 任务: 欧洲区域降水时空预报
+   - 数据规模: 欧洲区域网格化降水数据，空间分辨率约0.25°，覆盖多年日降水量记录
+   - 是否公开: 是（公开可用）
+
+3. **Burgers方程模拟数据集**
+   - 来源: 论文中基于非线性Burgers方程数值模拟生成
+   - 任务: 验证FNO-DST模型在已知PDE动力学下的预报性能
+   - 数据规模: 1D或2D网格上的时空序列，用于与有限差分法对比
+   - 是否公开: 不确定（需根据补充材料或代码确认）
+
+### 数据处理
+- 空间网格化：数据预处理为规则网格格式（BAUs，Basic Areal Units），便于FNO处理
+- 归一化处理：对输入输出场进行标准化或Min-Max归一化，确保数值稳定性
+- 时空划分：按时间顺序划分训练集、验证集和测试集，保持时间连续性避免数据泄漏
+- 时间滞后设置：采用多时间步历史观测（τ>0）作为输入，增强对隐动态参数的估计
+- 不确定性量化：基于集合预报或蒙特卡洛采样生成预测区间
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文涉及神经网络模型训练，需较深的深度学习框架（PyTorch/TensorFlow）经验；真实数据集（SST、降水）可从公开渠道获取，但模拟数据的生成细节可能未完全公开；Burgers方程模拟实验可复现但需额外实现；代码未在文中明确说明是否开源，降低了直接复现的可能性
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **IDEA模型**: Y_{k+h} = G_θ(Y_{k-τ:k}) + η_{k+h}

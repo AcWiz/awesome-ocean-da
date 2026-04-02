@@ -1,15 +1,16 @@
 ---
-title: "Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure"
-arXiv: "2510.09792"
-authors: ['Vahidreza Jahanmard', 'Ali Ramezani-Kebrya', 'Robinson Hordoir']
+title: 'Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure'
+arXiv: '2510.09792'
+authors: [Vahidreza Jahanmard, Ali Ramezani-Kebrya, Robinson Hordoir]
 year: 2025
-source: "arXiv"
-venue: "NeurIPS"
-method_tags: ['neural_operator', 'FNO', 'temporal_dispersion', 'ocean_modeling', 'physics_informed']
-application_tags: ['ocean_circulation', 'sea_level_prediction', 'Baltic_Sea', 'regional_ocean', 'wave_propagation']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: NeurIPS
+method_tags: [neural_operator, FNO, temporal_dispersion, ocean_modeling, physics_informed]
+application_tags: [ocean_circulation, sea_level_prediction, Baltic_Sea, regional_ocean,
+  wave_propagation]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Principled Operator Learning in Ocean Dynamics: The Role of Temporal Structure
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2510.09792
 - **作者机构**: 塔林理工大学（动力学组）、奥斯陆大学（Integreat中心）、海洋研究所（卑尔根）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出带时间色散的傅里叶神经算子（FNOtD），通过将时间和空间联合参数化的积分核来内化色散关系，在波罗的海海平面预测任务中实现了长期预测稳定性和物理一致性，推理速度比数值模式快数个数量级。
@@ -45,6 +46,22 @@ read_status: "deep_read"
 - **训练策略**: 低分辨率训练数据通过双线性插值获取，随机滑动窗口增强泛化性
 - **损失函数**: 相对L2误差，仅使用第一个超前时间步计算损失
 - **推理方式**: 自回归迭代预报
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- A100-80GB）
+
+### 数据集（Datasets）
+1. **数据集**
+   - ERA5
+   - SST
+
+### 数据处理
+- （论文未明确描述数据处理流程）
+
+### 复现难度
+- （论文未提供代码链接或复现说明）
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **浅水方程**: 势流假设，速度势满足Laplace方程

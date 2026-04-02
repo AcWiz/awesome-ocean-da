@@ -1,15 +1,19 @@
 ---
-title: "Application of Deep Learning to the Estimation of Normalization Coefficients in Diffusion-Based Covariance Models"
-arXiv: "2312.05068"
-authors: ["Folke Skrunes", "Mayeul Destouches", "Anthony T. Weaver", "Guillaume Coulaud", "Olivier Goux", "Corentin Lapeyre"]
+title: Application of Deep Learning to the Estimation of Normalization Coefficients
+  in Diffusion-Based Covariance Models
+arXiv: '2312.05068'
+authors: [Folke Skrunes, Mayeul Destouches, Anthony T. Weaver, Guillaume Coulaud,
+  Olivier Goux, Corentin Lapeyre]
 year: 2023
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["CNN", "Data_Assimilation", "Diffusion_Operator", "Normalization_Coefficients", "Covariance_Model"]
-application_tags: ["Ocean_Data_Assimilation", "Variational_DA", "Correlation_Operators", "NEMOVAR", "Ocean_Modeling"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [CNN, Data_Assimilation, Diffusion_Operator, Normalization_Coefficients,
+  Covariance_Model]
+application_tags: [Ocean_Data_Assimilation, Variational_DA, Correlation_Operators,
+  NEMOVAR, Ocean_Modeling]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Application of Deep Learning to the Estimation of Normalization Coefficients in Diffusion-Based Covariance Models
@@ -51,6 +55,42 @@ read_status: "deep_read"
 - 缩放扩散率场（α1, α2）
 - 网格单元面积（w）
 - 可选：距海岸线距离
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或类似高端GPU（基于2023年深度学习研究惯例）
+- GPU数量: 未明确说明（单GPU训练可能性较大，因2D海洋网格数据计算量适中）
+- 训练时间: 未明确说明具体时长，但论文提及网络结构相对简单（轻量级CNN），训练成本较低
+
+### 数据集（Datasets）
+1. **NEMO海洋模型全球网格数据**
+   - 来源: NEMO（核欧洲海洋模型）系统，源自NEMOVAR海洋数据同化框架
+   - 任务: 归一化系数估计
+   - 数据规模: 约1度水平分辨率的全球海洋网格（包含海岸线边界条件）
+   - 是否公开: 否（需通过NEMO/NEMOVAR系统获取）
+
+2. **训练标签数据**
+   - 来源: 通过暴力方法（brute-force）精确计算的归一化系数
+   - 任务: 作为CNN训练的真值标签
+   - 数据规模: 与全球海洋网格分辨率对应的网格点数量
+   - 是否公开: 否（需通过论文提供的代码框架自行生成）
+
+### 数据处理
+- **输入构建**: 将原始8个输入场（κ11, κ22, e1v, e2v, e1u, e2u, w, m）简化为3个通道（缩放后的扩散率场α1, α2和网格单元面积w）
+- **海岸线特征**: 添加到岸距离作为额外的输入通道以提升海岸线附近性能
+- **边界条件**: 采用Neumann边界条件（法向导数在海岸线处设为零）
+- **扩散步数**: M=10（模拟近似高斯相关函数）
+- **数据划分**: 按惯例划分为训练集、验证集和测试集（具体比例未明确说明）
+
+### 复现难度
+- ★★☆☆☆（较易复现）
+- **原因**: 
+  1. 代码已在GitHub公开（https://github.com/FolkeKS/DL-normalization/tree/core-features）
+  2. 网络结构为简单轻量级CNN，实现难度较低
+  3. 训练数据（归一化系数）可通过提供的代码框架自行生成
+  4. 扣一星因原始NEMO海洋模型网格数据需额外获取，且依赖NEMOVAR系统的具体配置
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

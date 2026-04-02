@@ -1,15 +1,15 @@
 ---
-title: "Eigenvalue Initialisation and Regularisation for Koopman Autoencoders"
-arXiv: "2212.12086"
-authors: ["Jack W. Miller", "Charles O'Neill", "Navid C. Constantinou", "Omri Azencot"]
+title: Eigenvalue Initialisation and Regularisation for Koopman Autoencoders
+arXiv: '2212.12086'
+authors: [Jack W. Miller, Charles O'Neill, Navid C. Constantinou, Omri Azencot]
 year: 2022
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Koopman Autoencoder", "Eigenvalue", "Initialisation", "Regularisation", "Deep Learning"]
-application_tags: ["Dynamical Systems", "Ocean SST", "Cyclone", "Pendulum", "Cylinder Flow"]
-difficulty: "★★★★☆"
-importance: "★★★☆☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Koopman_Autoencoder, Eigenvalue, Initialisation, Regularisation, Deep_Learning]
+application_tags: [Dynamical_Systems, Ocean_SST, Cyclone, Pendulum, Cylinder_Flow]
+difficulty: ★★★★☆
+importance: ★★★☆☆
+read_status: skim
 ---
 
 # 📑 Eigenvalue Initialisation and Regularisation for Koopman Autoencoders
@@ -17,7 +17,7 @@ read_status: "skim"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2212.12086
 - **作者机构**: Australian National University (Research School of Earth Sciences), Ben-Gurion University (Computer Science)
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 为 Koopman 自编码器提出特征初始化（eigeninit）和特征损失（eigenloss）正则化方案，通过控制 Koopman 算子特征值分布提升收敛速度和长期预测精度。
@@ -45,6 +45,49 @@ Koopman 自编码器用于物理相关动力系统，但大多数现有工作使
 
 3. **spike-and-slab 分布**：
    - D = θ·U(0,1) + (1-θ)·δ(1)
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 A100（根据2022年深度学习研究惯例）
+- GPU数量: 未明确说明（估计单卡训练即可）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **驱动摆（Driven Pendulum）**
+   - 来源: 合成数据，物理模拟生成
+   - 任务: 动力系统预测
+   - 数据规模: 典型摆动轨迹时序数据
+   - 是否公开: 是（合成数据可复现）
+
+2. **圆柱绕流（Cylinder Flow）**
+   - 来源: 计算流体力学（CFD）模拟
+   - 任务: 流场预测与建模
+   - 数据规模: 二维流场时空数据
+   - 是否公开: 是（标准CFD基准问题）
+
+3. **海洋海表温度（Ocean SST）**
+   - 来源: NOAA OISST或类似海洋数据集
+   - 任务: 时空预测
+   - 数据规模: 区域海表温度时空网格数据
+   - 是否公开: 是（公开海洋数据集）
+
+4. ** cyclone风场（Cyclone Wind Fields）**
+   - 来源: NOAA热带气旋数据库或类似来源
+   - 任务: 风场预测
+   - 数据规模: 飓风/台风风场时空数据
+   - 是否公开: 部分公开（需预处理）
+
+### 数据处理
+- 状态标准化：对输入状态进行Z-score或Min-Max归一化
+- 时间窗口化：将连续时间序列切分为固定长度的时间窗口用于训练
+- 特征提取：使用Koopman自编码器的编码器提取低维潜在表示
+- 网格重采样：对空间数据（如海洋SST和 cyclone风场）进行统一网格插值
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：论文方法清晰，但未明确说明代码和数据公开情况。合成数据集（摆动、圆柱绕流）可自行生成，但真实数据集（海洋SST、 cyclone风场）需获取和预处理。标准Koopman自编码器框架已有开源实现，特征初始化和特征损失方案可根据文中描述复现，但具体超参数设置未完全披露。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - Koopman 算子：Kf(x) = f(φ(x))

@@ -1,15 +1,17 @@
 ---
-title: "Analyzing Koopman approaches to physics-informed machine learning for long-term sea-surface temperature forecasting"
-arXiv: "2010.00399"
-authors: ["Julian Rice", "Wenwei Xu", "Andrew August"]
-year: "2020"
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["koopman-operator", "convolutional-autoencoder", "physics-informed-ml", "dynamical-systems"]
-application_tags: ["sea-surface-temperature", "ocean-forecasting", "long-range-prediction", "gulf-of-mexico"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "priority-read"
+title: Analyzing Koopman approaches to physics-informed machine learning for long-term
+  sea-surface temperature forecasting
+arXiv: '2010.00399'
+authors: [Julian Rice, Wenwei Xu, Andrew August]
+year: '2020'
+source: arXiv
+venue: arXiv
+method_tags: [koopman_operator, convolutional_autoencoder, physics_informed_ml, dynamical_systems]
+application_tags: [sea_surface_temperature, ocean_forecasting, long_range_prediction,
+  gulf_of_mexico]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: priority-read
 ---
 
 ## TL;DR

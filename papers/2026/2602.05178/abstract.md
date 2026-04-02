@@ -1,15 +1,16 @@
 ---
-title: "Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting"
-arXiv: "2602.05178"
-authors: ["Magesh Rajasekaran", "Md Saiful Sajol", "Chris Alvin", "Supratik Mukhopadhyay", "Yanda Ou", "Z. George Xue"]
+title: Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting
+arXiv: '2602.05178'
+authors: [Magesh Rajasekaran, Md Saiful Sajol, Chris Alvin, Supratik Mukhopadhyay,
+  Yanda Ou, Z. George Xue]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Deep Learning", "Sequence Classification", "Transformer", "BiLSTM", "TCN"]
-application_tags: ["Coastal Hypoxia Forecasting", "Ocean Modeling", "Environmental AI"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Deep_Learning, Sequence_Classification, Transformer, BiLSTM, TCN]
+application_tags: [Coastal_Hypoxia_Forecasting, Ocean_Modeling, Environmental_AI]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting
@@ -63,7 +64,32 @@ read_status: "skim"
 
 **验证策略**：使用2009-2020年数据训练，2020-2024年数据测试，采用统一的时间序列验证协议。
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 1-4块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **墨西哥湾北部沿海低氧预测数据集**
+   - 来源: 耦合水动力-生物地球化学模型（Warner et al., 2010）的日分辨率历史模拟数据
+   - 任务: 序列到单标签的每日低氧二分类预测
+   - 数据规模: 训练集2009-2020年（约12年日数据），测试集2020-2024年（约4年日数据）
+   - 是否公开: 不确定（原始模拟数据未明确说明公开性，代码已公开于GitHub）
+
+### 数据处理
+- 时间周期编码：采用日、季节等周期特征编码以捕获环境时间序列的周期性模式
+- 归一化处理：对输入特征进行标准化，确保模型训练的数值稳定性
+- 序列构建：将每日环境数据组织为固定长度的输入序列用于序列建模
+- 类别不平衡处理：采用过采样技术或加权损失函数平衡稀有的低氧事件与常态富氧事件之间的样本差异
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：代码已公开于GitHub仓库（https://github.com/rmagesh148/hypoxia-ai/），提供了模型架构和训练流程的可复现性基础；但原始耦合水动力-生物地球化学模拟数据未明确说明公开性，可能需要申请或自行获取相关海洋模型数据。此外，实验硬件配置（GPU型号、训练时长）未在文中详细说明，可能影响完全复现的难度。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 **物理背景**：
 - 低氧形成机制：密西西比河营养盐输入 → 富营养化 → 藻华 → 死亡分解 → 耗氧
@@ -80,7 +106,7 @@ read_status: "skim"
 - McNemar检验：用于比较两个分类器预测结果的显著差异
 - 检验统计量基于配对样本的得失表（2×2 contingency table）
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**：
 - 训练集：2009-2020年每日再分析数据（耦合水动力-生物地球化学模型输出）
@@ -106,7 +132,7 @@ read_status: "skim"
 
 ST-Transformer在所有测试周期和评估指标上均取得最高性能，AUC-ROC达到0.982-0.992。McNemar检验证实ST-Transformer与其它模型之间存在统计学显著差异。
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**：
 - 提供了统一的基准框架和可复现的实验设置，有利于后续研究对比
@@ -120,7 +146,7 @@ ST-Transformer在所有测试周期和评估指标上均取得最高性能，AUC
 - 仅关注分类任务，未涉及低氧严重程度或持续时间的预测
 - 缺乏对模型可解释性的深入分析
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **数据同化视角**：该研究采用的耦合水动力-生物地球化学模型输出可作为海洋数据同化系统的先验预报场，深度学习可进一步校正模型偏差。
 
@@ -130,7 +156,7 @@ ST-Transformer在所有测试周期和评估指标上均取得最高性能，AUC
 
 4. **类别不平衡处理**：海洋极端事件（如赤潮、酸化）普遍存在稀缺性，文中类别平衡策略可应用于类似场景。
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **多变量扩展**：将低氧预测扩展为多目标预测，同时预测溶解氧浓度值和空间分布，支持更精细的海洋管理决策。
 
@@ -140,7 +166,7 @@ ST-Transformer在所有测试周期和评估指标上均取得最高性能，AUC
 
 4. **迁移学习探索**：在墨西哥湾以外的其它低氧热点区域（如中国东海、波罗的海）验证模型迁移能力。
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Rajasekaran2026HypoxiaAI,
   title={Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting},

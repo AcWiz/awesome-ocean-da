@@ -1,15 +1,15 @@
 ---
-title: "A Fast Tunable Blurring Algorithm for Scattered Data"
-arXiv: "1906.06722"
-authors: ["Gregor Robinson", "Ian Grooms"]
+title: A Fast Tunable Blurring Algorithm for Scattered Data
+arXiv: '1906.06722'
+authors: [Gregor Robinson, Ian Grooms]
 year: 2019
-source: "arXiv"
-venue: "SIAM Journal on Scientific Computing"
-method_tags: ["Multiresolution Gaussian", "RBF Interpolation", "Fractional Laplacian", "Scale Separation"]
-application_tags: ["Data Assimilation", "Ocean Modeling", "Particle Filtering", "Signal Processing"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: SIAM Journal on Scientific Computing
+method_tags: [Multiresolution_Gaussian, RBF_Interpolation, Fractional_Laplacian, Scale_Separation]
+application_tags: [Data_Assimilation, Ocean_Modeling, Particle_Filtering, Signal_Processing]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # A Fast Tunable Blurring Algorithm for Scattered Data
@@ -17,7 +17,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/1906.06722
 - **作者机构**: University of Colorado Boulder, Department of Applied Mathematics
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 
@@ -48,7 +48,39 @@ read_status: "skim"
 - **多分辨率格林函数模块**：产生 M+M+1 个高斯项
 - **分数阶 Helmholtz 算子**：D = -1 - ℓ²Δ^α
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: 无（该方法为计算数学算法，非深度学习方法，未使用GPU加速）
+- GPU数量: 0
+- 训练时间: 未明确说明（算法复杂度为线性时间O(N)，主要涉及RBF插值求解与高斯卷积计算）
+
+### 数据集（Datasets）
+1. **海洋浮标观测数据**
+   - 来源: Argo全球海洋观测浮标阵列（或类似海洋观测网络）
+   - 任务: 海洋中尺度涡旋信号的大尺度/小尺度分解
+   - 数据规模: 散点分布的海洋要素测量（温度、盐度等），具体测点数未明确说明
+   - 是否公开: 是（Argo数据公开可用）
+
+2. **气象观测数据**
+   - 来源: 散点分布的气象站观测（论文第6节应用）
+   - 任务: 数据同化中的粒子滤波辅助，通过模糊观测改善大尺度状态估计
+   - 数据规模: 散点分布的气象观测，未明确具体规模
+   - 是否公开: 不确定（原始气象数据通常部分公开）
+
+### 数据处理
+- 将散点观测数据通过高斯RBF核进行插值，核宽参数设置为适当值
+- 使用RBF插值权重矩阵B求解插值系数b
+- 调用Algorithm 2.1生成多分辨率高斯近似的格林函数权重c和方差ρ
+- 执行Algorithm 2.2进行卷积计算并在观测位置评估模糊场
+- 参数设置：多分辨率项数M⁺+M⁻+1（由误差界E决定），积分步长h=0.2
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：算法数学描述详尽，包含完整的Algorithm 2.1和Algorithm 2.2伪代码，但未提供开源代码实现；数据集部分依赖公开可用的海洋/气象数据，但具体使用的数据源和预处理参数需自行确定；需要自行实现RBF插值求解和多分辨率高斯近似模块
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 **分数阶 Helmholtz 算子**：
 $$D = -1 - \ell^2 \Delta^\alpha$$
@@ -64,7 +96,7 @@ $$\psi(x) = \sum_{j=1}^{N_z} b_j \phi(\|x - q_j\|)$$
 
 其中 φ 是高斯核。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**：
 - 散点海洋浮标测量数据
@@ -82,7 +114,7 @@ $$\psi(x) = \sum_{j=1}^{N_z} b_j \phi(\|x - q_j\|)$$
 - 成功将散点数据分解为大尺度和小区分量
 - 模糊观测可改善粒子滤波器性能
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**：
 - 线性时间复杂度，可扩展到大数据集
@@ -97,14 +129,14 @@ $$\psi(x) = \sum_{j=1}^{N_z} b_j \phi(\|x - q_j\|)$$
 -朴素 RBF 求解具有 O(N³) 复杂度
 - 常数函数会被一定程度衰减
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. 多分辨率高斯近似框架可用于近似逆幂律核
 2. 格林函数积分表示的梯形法则离散化方案可借鉴
 3. 椭圆 PDE 求解器与尺度空间滤波之间的联系为设计模糊算法提供了原则性方法
 4. 通过模糊进行大小尺度分离可改善数据同化中的重要性采样
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **快速 RBF 求解器**：实现快速多极子或随机数值线性代数方法
 2. **自适应参数选择**：开发基于数据特征或应用需求的自动化 ℓ 和 α 选择方法
@@ -112,7 +144,7 @@ $$\psi(x) = \sum_{j=1}^{N_z} b_j \phi(\|x - q_j\|)$$
 4. **替代算子**：研究分数阶 Helmholtz 以外的其他椭圆算子
 5. **业务集成**：与 MITgcm、NEMO 等业务海洋数据同化系统集成
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 
 ```bibtex
 @article{robinson2019fast,

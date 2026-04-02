@@ -1,15 +1,18 @@
 ---
-title: "Neural Koopman Prior for Data Assimilation"
-arXiv: "2309.05317"
-authors: ["Anthony Frion", "Lucas Drumetz", "Mauro Dalla Mura", "Guillaume Tochon", "Abdeldjalil Aïssa El Bey"]
+title: Neural Koopman Prior for Data Assimilation
+arXiv: '2309.05317'
+authors: [Anthony Frion, Lucas Drumetz, Mauro Dalla Mura, Guillaume Tochon, Abdeldjalil
+    Aïssa El Bey]
 year: 2023
-source: "arXiv"
-venue: "IEEE Transactions on Signal Processing"
-method_tags: ["Koopman_Operator", "Autoencoder", "Data_Assimilation", "Dynamical_Systems", "Variational_Inference"]
-application_tags: ["Remote_Sensing", "Satellite_Imagery", "Time_Series_Forecasting", "Sentinel-2", "Signal_Processing"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: IEEE Transactions on Signal Processing
+method_tags: [Koopman_Operator, Autoencoder, Data_Assimilation, Dynamical_Systems,
+  Variational_Inference]
+application_tags: [Remote_Sensing, Satellite_Imagery, Time_Series_Forecasting, Sentinel_2,
+  Signal_Processing]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Neural Koopman Prior for Data Assimilation
@@ -17,7 +20,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2309.05317
 - **作者机构**: IMT Atlantique（法国）、格勒诺布尔大学（法国）、EPITA（法国）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -54,6 +57,32 @@ read_status: "deep_read"
 **数据同化应用**：
 - 将训练好的Koopman模型作为变分成本中的动力先验
 - 支持去噪、插值、预报等下游任务
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（高性能GPU，适用于深度学习训练）
+- GPU数量: 至少1块GPU（具体数量未明确说明）
+- 训练时间: 未明确说明具体训练时长
+
+### 数据集（Datasets）
+1. **Sentinel-2 卫星遥感数据**
+   - 来源: 欧洲航天局（ESA）Sentinel-2 任务
+   - 任务: 时间序列预测、数据插值、遥感图像重建
+   - 数据规模: 多时相卫星图像，覆盖不同地理区域
+   - 是否公开: 是（Sentinel-2 数据免费公开）
+
+### 数据处理
+- 遥感图像标准化预处理
+- 时间序列重采样（支持不规则时间间隔采样）
+- 像素值归一化处理
+- 空间裁剪或降采样以适应模型输入尺寸
+- 数据增强（如适用）
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文未提供具体代码仓库链接，但Sentinel-2数据公开可用。Koopman算子理论与自编码器架构为通用方法，关键超参数（如网络结构、训练策略）需根据经验设置。缺乏详细的训练配置说明会增加复现难度。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

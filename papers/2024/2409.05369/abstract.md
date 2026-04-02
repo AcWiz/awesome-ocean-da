@@ -1,15 +1,20 @@
 ---
-title: "CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL GLOBAL SEA SURFACE TEMPERATURE PREDICTION"
-arXiv: "2409.05369"
-authors: ['Longhao Wang', 'Chinese Academy of Sciences', 'Xuanze Zhang', 'Chinese Academy of Sciences', 'L. Ruby Leung', 'Pacific Northwest National Laboratory', 'Francis H.S. Chiew', 'CSIRO Environment', 'Amir AghaKouchak', 'University of California, Irvine', 'Kairan Ying', 'National Institute of Natural Hazards', 'Yongqiang Zhang', 'Chinese Academy of Sciences']
+title: 'CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL
+  GLOBAL SEA SURFACE TEMPERATURE PREDICTION'
+arXiv: '2409.05369'
+authors: [Longhao Wang, Chinese Academy of Sciences, Xuanze Zhang, Chinese Academy
+    of Sciences, L. Ruby Leung, Pacific Northwest National Laboratory, Francis H.S.
+    Chiew, CSIRO Environment, Amir AghaKouchak, 'University of California, Irvine',
+  Kairan Ying, National Institute of Natural Hazards, Yongqiang Zhang, Chinese Academy
+    of Sciences]
 year: 2024
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['transformer', 'swin_transformer', 'attention_mechanism', '3d_cnn', 'lstm']
-application_tags: ['sst_prediction', 's2s_forecasting', 'enso', 'ocean_modeling', 'climate_prediction']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "read"
+source: arXiv
+venue: arXiv
+method_tags: [transformer, swin_transformer, attention_mechanism, 3d_cnn, lstm]
+application_tags: [sst_prediction, s2s_forecasting, enso, ocean_modeling, climate_prediction]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: read
 ---
 
 # 📑 CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL
@@ -51,6 +56,49 @@ $$L_{fmse} = \frac{1}{T_{out}}\sum_{t=1}^{T_{out}}(X_{t,l} - \hat{X}_{t,l})^2$$
 
 2. **相关性损失**（保证长期预测可靠性）：
 $$L_{corr} = \frac{1}{T_{out}}\sum_{l=2}^{T_{out}} \max\{0, 0.5 - \frac{\sum_{t=1}^{T}(X_{t,l}-\bar{X}_l)(\hat{X}_{t,l}-\bar{\hat{X}}_l)}{\sqrt{\sum_{t=1}^{T}(X_{t,l}-\bar{X}_l)^2}\sqrt{\sum_{t=1}^{T}(\hat{X}_{t,l}-\bar{\hat{X}}_l)^2}}\}$$
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 未明确说明（推测为多GPU并行训练）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **ERA5再分析数据**
+   - 来源: 欧洲中期天气预报中心（ECMWF）
+   - 任务: 作为模型训练和验证的真值（ground truth）
+   - 数据规模: 51年（1959-2009）训练数据，验证期2009-2015，测试期2016-2022；包含8个关键海洋和大气变量
+   - 是否公开: 是
+
+2. **ECMWF S2S模式数据**
+   - 来源: ECMWF S2S项目
+   - 任务: 与物理数值模型进行对比评估
+   - 数据规模: 2015-2020年重叠时段
+   - 是否公开: 是
+
+3. **NMME多模式集合数据**
+   - 来源: 北美多模式集合（North American Multi-Model Ensemble）
+   - 任务: 与物理数值模型进行对比评估
+   - 数据规模: 22个先进数值天气预报模型集合
+   - 是否公开: 是
+
+4. **HadISST数据集**
+   - 来源: 英国气象局哈德利中心
+   - 任务: SST预测的独立验证对比
+   - 数据规模: 2015-2020年重叠时段
+   - 是否公开: 是
+
+### 数据处理
+- 数据归一化处理：采用标准化方法对SST及大气变量进行预处理
+- 时空特征编码：将时间维度作为额外维度融入3D Transformer架构
+- 空间重映射：将模型0.25°×0.25°分辨率重映射至1°×1°以匹配数值模型进行对比
+- 训练策略：采用滑动时间窗口方式构建训练样本，支持1-24个月不同预见期的预测任务
+
+### 复现难度
+- ★★★★☆（较高）
+- 原因：（1）论文未提供源代码公开；（2）虽使用公开数据集（ERA5等），但模型架构细节和训练超参数未完全披露；（3）需要高性能GPU资源（推荐A100）进行复现；（4）3D Swin-Transformer架构实现较为复杂；（5）作为2024年最新研究成果，部分技术细节可能需进一步联系作者获取
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

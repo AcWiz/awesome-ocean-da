@@ -1,15 +1,17 @@
 ---
-title: "Towards fully differentiable neural ocean model with Veros"
-arXiv: "2511.17427"
-authors: ['Etienne Meunier', 'Said Ouala', 'Hugo Frezat', 'Julien Le Sommer', 'Ronan Fablet']
+title: Towards fully differentiable neural ocean model with Veros
+arXiv: '2511.17427'
+authors: [Etienne Meunier, Said Ouala, Hugo Frezat, Julien Le Sommer, Ronan Fablet]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['differentiable_programming', 'JAX', 'automatic_differentiation', 'ocean_model', 'parameter_calibration']
-application_tags: ['ocean_circulation', 'ACC', 'initial_state_estimation', 'model_calibration', 'mesoscale_eddy']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [differentiable_programming, JAX, automatic_differentiation, ocean_model,
+  parameter_calibration]
+application_tags: [ocean_circulation, ACC, initial_state_estimation, model_calibration,
+  mesoscale_eddy]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Towards fully differentiable neural ocean model with Veros
@@ -44,6 +46,37 @@ read_status: "deep_read"
 - **计算图保持**: 消除可能破坏计算图的内联类型转换
 - **选择性微分**: 冻结除感兴趣参数外的所有变量
 - **梯度验证**: 与有限差分法对比验证正确性
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（基于JAX框架的深度学习研究常用GPU类型）
+- GPU数量: 未明确说明，推测为单卡或少量GPU（数值海洋模型计算量适中）
+- 训练时间: 未明确说明具体时长
+
+### 数据集（Datasets）
+1. **VEROS ACC模型配置**
+   - 来源: Veros设置库（Häfner et al. 2018），为涡 разрешим 分辨率（1/4°）
+   - 任务: 海洋环流模拟、参数标定、初始场重建
+   - 数据规模: 区域范围0°-60°E，40°S-40°N，15个垂直层，深度达2000米
+   - 是否公开: 是（Veros开源，GitHub仓库：https://github.com/Etienne-Meunier/Veros-Autodiff）
+
+2. **合成参考模拟数据**
+   - 来源: 使用预设参数运行Veros生成
+   - 任务: 作为参数标定和初始场重建的真值参考
+   - 数据规模: 包括温度场（3000步积分验证）、纬向流函数（BSF）等
+   - 是否公开: 通过代码生成
+
+### 数据处理
+- 温度场扰动：添加空间高斯扰动生成初始偏差场
+- 损失函数：L2范数用于初始场重建，均方误差（MSE）用于参数标定
+- 梯度验证：有限差分法（ε≈10⁻⁴）与自动微分结果对比验证
+- 数据预处理：确保JAX兼容的函数纯性和计算图完整性
+
+### 复现难度
+- ★★★☆☆（中等）
+- 代码已在GitHub公开（Etienne-Meunier/Veros-Autodiff），但需要熟悉Veros海洋模型架构和JAX自动微分框架；实验使用标准ACC配置，描述较为完整，但涉及自定义修改和梯度验证流程，需要一定的领域专业知识才能完全复现
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **VEROS模型**: 基于NEMO的快速海洋模拟器，支持JAX后端

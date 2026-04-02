@@ -1,13 +1,13 @@
 ---
-title: "Towards Optimally Weighted Physics-Informed Neural Networks in Ocean Modelling"
-arXiv: "2106.08747"
-authors: ["Taco de Wolff", "Hugo Carrillo", "Luis Martí", "Nayat Sánchez-Pi"]
-year: "2021"
-source: "arXiv"
-venue: "arXiv"
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "priority-read"
+title: Towards Optimally Weighted Physics-Informed Neural Networks in Ocean Modelling
+arXiv: '2106.08747'
+authors: [Taco de Wolff, Hugo Carrillo, Luis Martí, Nayat Sánchez-Pi]
+year: '2021'
+source: arXiv
+venue: arXiv
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: priority-read
 ---
 
 ## TL;DR

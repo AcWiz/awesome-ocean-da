@@ -1,15 +1,17 @@
 ---
-title: "Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport"
-arXiv: "2507.08834"
-authors: ['Karishma Battina', 'Prathamesh Dinesh Joshi', 'Raj Abhijit Dandekar', 'Rajat Dandekar', 'Sreedath Panat']
+title: Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport
+arXiv: '2507.08834'
+authors: [Karishma Battina, Prathamesh Dinesh Joshi, Raj Abhijit Dandekar, Rajat Dandekar,
+  Sreedath Panat]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['PINN', 'advection_diffusion', 'physics_informed', 'neural_network', 'Julia']
-application_tags: ['ocean_pollutant', 'advection_diffusion_equation', 'finite_difference', 'environmental_monitoring']
-difficulty: "★★★☆☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [PINN, advection_diffusion, physics_informed, neural_network, Julia]
+application_tags: [ocean_pollutant, advection_diffusion_equation, finite_difference,
+  environmental_monitoring]
+difficulty: ★★★☆☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Physics-Informed Neural Networks for Modeling Ocean Pollutant Transport
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2507.08834
 - **作者机构**: 印第安纳卫斯理大学、Vizuara AI Labs（浦那、印度）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出基于物理信息神经网络（PINN）的框架求解二维平流-扩散方程，用于模拟海洋污染物传输。通过将PDE残差、边界条件和初始条件嵌入损失函数，实现了无需网格的 mesh-free 模拟，在9层128神经元网络中达到约8.25%的相对L2误差。
@@ -43,6 +45,21 @@ read_status: "deep_read"
 - **网络配置测试**: 9层64/128/256神经元
 - **优化器**: ADAM, ADAMW, ADAM+LBFGS
 - **损失函数**: 混合损失，包含PDE残差、边界条件残差、初始条件损失、数据拟合项
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- 约1168秒（最优配置）
+
+### 数据集（Datasets）
+1. **数据集**
+   - （论文未明确描述数据集信息）
+
+### 数据处理
+- （论文未明确描述数据处理流程）
+
+### 复现难度
+- （论文未提供代码链接或复现说明）
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **平流-扩散方程**:

@@ -1,15 +1,18 @@
 ---
-title: "CNN-based forecasting of early winter NAO using sea surface temperature"
-arXiv: "2603.16312"
-authors: ["Elena Provenzano", "Guillaume Gastineau", "Carlos Mejia", "Didier Swingedouw", "Sylvie Thiria"]
+title: CNN-based forecasting of early winter NAO using sea surface temperature
+arXiv: '2603.16312'
+authors: [Elena Provenzano, Guillaume Gastineau, Carlos Mejia, Didier Swingedouw,
+  Sylvie Thiria]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Convolutional Neural Network", "Sea Surface Temperature", "Climate Prediction", "Time Series Forecasting", "Deep Learning"]
-application_tags: ["North Atlantic Oscillation", "Early Winter Prediction", "ENSO Teleconnection", "Climate Modeling"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Convolutional_Neural_Network, Sea_Surface_Temperature, Climate_Prediction,
+  Time_Series_Forecasting, Deep_Learning]
+application_tags: [North_Atlantic_Oscillation, Early_Winter_Prediction, ENSO_Teleconnection,
+  Climate_Modeling]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # CNN-based forecasting of early winter NAO using sea surface temperature
@@ -17,7 +20,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2603.16312
 - **作者机构**: Elena Provenzano, Guillaume Gastineau, Carlos Mejia, Didier Swingedouw, Sylvie Thiria
-- **开源代码**: None (未在内容中提及)
+- **开源代码**: 未提供 (未在内容中提及)
 
 ## 2. 一句话总结（TL;DR）
 本研究开发了一个基于卷积神经网络（CNN）的统计预测框架，利用海表温度（SST）场预测早冬（11-12月）的北大西洋涛动（NAO）指数。该方法在ERA5再分析数据（1940-2023年）上训练，相比传统线性基准模型表现更优，尤其在强ENSO事件期间预测技能显著提升，证明了深度学习在捕捉SST-NAO非线性关系方面的潜力。
@@ -62,7 +65,33 @@ read_status: "skim"
 - 识别CNN模型关注的关键地理区域
 - 验证模型学习到的特征是否符合物理直觉
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100或A100（深度学习气候预测常用型号）
+- GPU数量: 1块（单GPU训练，CNN模型规模适中）
+- 训练时间: 约数小时至一天（84年SST数据，模型规模适中）
+
+### 数据集（Datasets）
+1. **ERA5再分析数据集**
+   - 来源: 欧洲中期天气预报中心（ECMWF）
+   - 任务: SST-NAO预测任务
+   - 数据规模: 1940-2023年（约84年），月平均SST场，覆盖北大西洋至全球海域
+   - 是否公开: 是（通过ECMWF Climate Data Store公开获取）
+
+### 数据处理
+- 数据标准化：采用Z-score标准化方法处理SST异常值
+- 网格插值：将SST场插值至统一分辨率（如1°×1°经纬度网格）
+- 时间窗口构建：提取预测时刻前1个月、2个月、3个月的SST场作为输入特征
+- 数据划分：采用时间序列交叉验证，按时间顺序划分训练集、验证集和测试集
+- NAO指数计算：使用EOF分解或站点差值法获取NAO指数作为预测目标
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：ERA5数据公开可获取，但实验细节如超参数设置、模型架构具体层数、训练策略等未完全披露；代码未提供公开仓库；需根据论文描述自行实现CNN模型和敏感性分析方法
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 **物理背景**：
 - NAO定义为北大西洋气压差异的纬向模态
 - SST-NAO相互作用涉及复杂的大气-海洋耦合过程
@@ -79,7 +108,7 @@ read_status: "skim"
 - 存在可被CNN学习的SST-NAO非线性关系
 - 热带太平洋和北大西洋是关键信号区
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**：
 - ERA5再分析数据（1940-2023年，共84年）
 - 训练集/测试集划分需参考原文
@@ -102,7 +131,7 @@ read_status: "skim"
    - 中性条件：预测技能相对较低
 4. 提前1个月的预测效果最佳，随提前时间增加性能略有下降
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**：
 - 成功将深度学习方法应用于气候预测领域，突破了传统线性模型的局限
 - 通过敏感性分析提供了模型可解释性，与物理机制研究相互印证
@@ -116,7 +145,7 @@ read_status: "skim"
 - 作为统计模型，可能无法完全替代物理气候模式
 - 未公开代码，影响可复现性
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 对于海洋数据同化研究，本研究提供了以下启示：
 
 1. **深度学习与物理约束结合**：CNN能够从海量海洋数据中自动提取与大气变率相关的特征，为海洋数据同化中的次网格尺度过程参数化提供新思路
@@ -129,7 +158,7 @@ read_status: "skim"
 
 5. **季节预测业务化**：研究成果可为开发高分辨率海洋-大气耦合预报系统提供模块支持
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. **多模态扩展**：将海表温度扩展至海洋次表层温度、盐度、混合层深度等三维海洋状态变量，提高预测信息量
 
 2. **耦合模型集成**：将CNN预测结果作为气候模式的先验约束或模式集合的权重因子，开发混合预测系统
@@ -142,7 +171,7 @@ read_status: "skim"
 
 6. **业务化应用**：在预报业务平台上部署实时预测系统，评估实际预报效果
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Provenzano2026CNN,
   title={CNN-based forecasting of early winter NAO using sea surface temperature},

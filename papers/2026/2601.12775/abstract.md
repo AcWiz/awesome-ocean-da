@@ -1,15 +1,15 @@
 ---
-title: "Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks"
-arXiv: "2601.12775"
-authors: ['Yuta Hirabayashi', 'Daisuke Matsuoka', 'Konobu Kimura']
+title: Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks
+arXiv: '2601.12775'
+authors: [Yuta Hirabayashi, Daisuke Matsuoka, Konobu Kimura]
 year: 2026
-source: "arXiv"
-venue: "ICML"
-method_tags: ['GNN', 'graph_neural_network', 'multi_scale', 'spherical_mesh', 'eddy_resolving']
-application_tags: ['global_ocean', 'eddy', 'forecasting', 'ocean_circulation', 'ocean_state_prediction']
-difficulty: "★★★★★"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: ICML
+method_tags: [GNN, graph_neural_network, multi_scale, spherical_mesh, eddy_resolving]
+application_tags: [global_ocean, eddy, forecasting, ocean_circulation, ocean_state_prediction]
+difficulty: ★★★★★
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Eddy-Resolving Global Ocean Forecasting with Multi-Scale Graph Neural Networks
@@ -17,7 +17,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2601.12775
 - **作者机构**: 日本海洋科学技术研究所(JAMSTEC)、FURUNO ELECTRONIC CO. LTD.
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出多尺度图神经网络(Multi-Scale GNN)用于10天涡旋解析全球海洋预报。该方法使用两个不同分辨率的球面网格捕捉多尺度海洋动力学，结合大气强迫输入，在表面层和短期预报中展现出优于现有Swin Transformer基线模型的性能。
@@ -45,6 +45,22 @@ read_status: "deep_read"
 - **输入**: X_{t-1}, X_t（海洋状态）+ A_{t-1}, A_t, A_{t+1}（大气强迫）+ S（静态）
 - **输出**: X_{t+1}（一步预报），自回归执行10天
 - **训练数据**: GLORYS12V1 (1993-2017)，ERA5大气数据
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- A100 GPU）
+- 100
+
+### 数据集（Datasets）
+1. **数据集**
+   - ERA5
+
+### 数据处理
+- （论文未明确描述数据处理流程）
+
+### 复现难度
+- （论文未提供代码链接或复现说明）
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **图神经网络操作**:

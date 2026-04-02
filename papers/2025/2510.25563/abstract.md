@@ -1,15 +1,17 @@
 ---
-title: "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting"
-arXiv: "2510.25563"
-authors: ['Víctor Medina', 'Giovanny A. Cuervo-Londoño', 'Javier Sánchez']
+title: Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature
+  Forecasting
+arXiv: '2510.25563'
+authors: [Víctor Medina, Giovanny A. Cuervo-Londoño, Javier Sánchez]
 year: 2025
-source: "arXiv"
-venue: "NeurIPS"
-method_tags: ['foundation_model', 'Aurora', 'SST', 'fine_tuning', 'ocean_forecasting']
-application_tags: ['Canary_Upwelling', 'sea_surface_temperature', 'Northeastern_Atlantic', 'regional_ocean', 'potential_temperature']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: NeurIPS
+method_tags: [foundation_model, Aurora, SST, fine_tuning, ocean_forecasting]
+application_tags: [Canary_Upwelling, sea_surface_temperature, Northeastern_Atlantic,
+  regional_ocean, potential_temperature]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature Forecasting
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2510.25563
 - **作者机构**: 大加那利群岛大学（CTIM图像技术中心、IUCES信息学研究所、ECOAQUA水产养殖与海洋生态系统研究所）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文首次将大气基础模型Aurora成功适配到海洋领域，通过两阶段微调策略在加那利涌升系统进行海表温度（SST）预报，实现了0.119K的低RMSE和~0.997的高异常相关系数，证明了跨领域知识迁移在海洋预报中的可行性。
@@ -47,6 +49,31 @@ read_status: "deep_read"
   - 阶段2：全参数微调（学习率10⁻⁵）
 - **训练配置**: batch=8, 30 epochs, AdamW优化器
 - **推理方式**: 自回归迭代预报
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (基于大规模深度学习基础模型训练的典型配置)
+- GPU数量: 1-4块 (单节点微调Aurora模型)
+- 训练时间: 未明确说明具体训练时长
+
+### 数据集（Datasets）
+1. **GLORYS12V1**
+   - 来源: 哥白尼海洋服务(Copernicus Marine Service)全球海洋物理再分析产品
+   - 任务: 海表温度(SST)预测与三维海洋变量重建
+   - 数据规模: 水平分辨率1/12°(约9km)，50个垂直层，日数据
+   - 是否公开: 是（需通过CMEMS注册获取）
+
+### 数据处理
+- 对原始再分析数据进行裁剪，聚焦加那利涌升系统区域(东北大西洋)
+- 采用两阶段微调策略：首先在全部数据上微调，随后在目标区域数据上优化
+- 应用纬度加权误差损失函数以平衡高低纬度区域的预测精度
+- 对输入变量进行标准化处理，将大气基础模型适配至海洋变量
+
+### 复现难度
+- ★★★☆☆ (中等难度)
+- 原因：(1)论文发表于arXiv，暂未明确提供代码仓库；(2)GLORYS12V1数据集需通过哥白尼海洋服务注册获取，存在数据访问门槛；(3)模型为Aurora基础模型，其预训练权重获取途径未说明；(4)关键超参数(如学习率、批次大小、训练轮数等)未完全公开；(5)两阶段微调的具体配置细节较为简略，需进一步实验探索
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **势温定义**: 将海水带到大气压时的温度，消除压力效应

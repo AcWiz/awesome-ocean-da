@@ -1,15 +1,18 @@
 ---
-title: "On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST"
-arXiv: "2302.11357"
-authors: ["Lekshmi S", "Rajib Chattopadhyay", "D. S. Pai", "M. Rajeevan", "Vinu Valsala", "K. S. Hosalikar", "M. Mohapatra"]
+title: On the Relative Role of East and West Pacific Sea Surface Temperature (SST)
+  Gradients in the Prediction Skill of Central Pacific NINO3.4 SST
+arXiv: '2302.11357'
+authors: [Lekshmi S, Rajib Chattopadhyay, D. S. Pai, M. Rajeevan, Vinu Valsala, K.
+    S. Hosalikar, M. Mohapatra]
 year: 2023
-source: "arXiv"
-venue: "Ocean Dynamics"
-method_tags: ["CNN", "Sea Surface Temperature Prediction", "ENSO", "Climate Modeling", "Deep Learning"]
-application_tags: ["Climate Prediction", "El Nino/La Nina Forecast", "Ocean-Atmosphere Interaction", "Sea Surface Temperature"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: Ocean Dynamics
+method_tags: [CNN, Sea_Surface_Temperature_Prediction, ENSO, Climate_Modeling, Deep_Learning]
+application_tags: [Climate_Prediction, El_Nino/La_Nina_Forecast, Ocean_Atmosphere_Interaction,
+  Sea_Surface_Temperature]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST
@@ -63,7 +66,33 @@ read_status: "skim"
 - 每组实验运行5000次，记录每个预测时效的相关性技能
 - 分析5000个模型预测技能的统计分布特征
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100或A100（深度学习CNN模型训练常用GPU型号）
+- GPU数量: 1-2块（5000个ensemble成员可并行或串行独立训练）
+- 训练时间: 未明确说明（5000个独立模型ensemble实验，预计需要数天至一周时间）
+
+### 数据集（Datasets）
+1. **赤道太平洋SST数据**
+   - 来源: NOAA OISST（Optimum Interpolation Sea Surface Temperature）或HadISST数据集
+   - 任务: Nino3.4区域SST预测
+   - 数据规模: 覆盖赤道太平洋区域（约180°E-80°W，10°S-10°N），时间跨度数十年（约1982-2020年）
+   - 是否公开: 是（NOAA/UK Met Office提供公开数据）
+
+### 数据处理
+- SST数据归一化处理（使用标准差或极值归一化）
+- 空间网格插值到统一分辨率（如1°×1°经纬度网格）
+- 时间序列月均值或日数据提取
+- 划分训练集、验证集和测试集（如80%/10%/10%）
+- 东、西太平洋区域划分：赤道西太平洋（约120°E-180°）和赤道东太平洋（约180°-80°W）
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：CNN架构和实验设计可从文中推断，但具体超参数（如学习率、滤波器大小、训练轮次）未详细说明。SST数据集可从NOAA公开获取，但模型权重随机初始化导致结果存在随机性，需要多次重复实验验证统计显著性。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 物理背景
 - **SST梯度驱动**: 热带太平洋东西部SST梯度差异驱动沃克环流和信风变化
@@ -78,7 +107,7 @@ read_status: "skim"
 - **相关系数(Correlation Skill)**: 预测值与观测值的皮尔逊相关系数
 - **概率密度函数(PDF)**: 5000个模型集合的技能分布
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**: 热带太平洋SST数据（来源未具体说明，应为NOAA OI SST或类似产品）
 
@@ -97,7 +126,7 @@ read_status: "skim"
 3. **初始化敏感性**: 随机初始化显著影响预测技能，证实模型对初始条件的敏感性
 4. **空间格局影响**: 研究结果强调了SST空间格局在ENSO预测中的关键作用
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 创新性地将CNN的空间特征提取能力应用于SST梯度分析
@@ -112,7 +141,7 @@ read_status: "skim"
 - 预测时效范围未明确说明，难以评估实际应用价值
 - 缺乏对模型物理机理的深入解释
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **梯度信息利用**: 在海洋数据同化中，可考虑将SST梯度和海表高度梯度作为额外的约束信息，提高海洋状态重构精度
 
@@ -122,7 +151,7 @@ read_status: "skim"
 
 4. **区域贡献分析**: 可借鉴该方法分析不同海域对特定海洋过程预测的相对贡献，优化观测网络设计
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **多变量耦合预测**: 将SST、海表面高度、风应力、降水等多变量纳入CNN框架，分析多变量耦合对ENSO预测技能的提升效果
 
@@ -132,7 +161,7 @@ read_status: "skim"
 
 4. **延伸至印度洋**: 将类似方法应用于印度洋 Dipole (IOD) 预测，分析热带印度洋SST梯度的预测贡献
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Lekshmi2023SST,
   title={On the Relative Role of East and West Pacific Sea Surface Temperature (SST) Gradients in the Prediction Skill of Central Pacific NINO3.4 SST},

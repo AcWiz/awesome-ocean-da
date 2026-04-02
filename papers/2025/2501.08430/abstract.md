@@ -1,15 +1,17 @@
 ---
-title: "Physics-informed neural networks for phase-resolved data assimilation and prediction of nonlinear ocean waves"
-arXiv: "2501.08430"
-authors: ['Svenja Ehlers', 'Norbert Hoffmann', 'Tianning Tang', 'Adrian H. Callaghan', 'Rui Cao', 'Enrique M. Padilla', 'Yuxin Fang', 'Merten Stender']
+title: Physics-informed neural networks for phase-resolved data assimilation and prediction
+  of nonlinear ocean waves
+arXiv: '2501.08430'
+authors: [Svenja Ehlers, Norbert Hoffmann, Tianning Tang, Adrian H. Callaghan, Rui
+    Cao, Enrique M. Padilla, Yuxin Fang, Merten Stender]
 year: 2025
-source: "arXiv"
-venue: "Physics of Fluids"
-method_tags: ['PINN', 'potential_flow', 'wave_physics', 'phase_resolved', 'data_assimilation']
-application_tags: ['ocean_waves', 'wave_prediction', 'data_assimilation', 'wave_flume', 'nonlinear_waves']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: Physics of Fluids
+method_tags: [PINN, potential_flow, wave_physics, phase_resolved, data_assimilation]
+application_tags: [ocean_waves, wave_prediction, data_assimilation, wave_flume, nonlinear_waves]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Physics-informed neural networks for phase-resolved data assimilation and prediction of nonlinear ocean waves
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2501.08430
 - **作者机构**: 汉堡工业大学、牛津大学、帝国理工学院
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出了基于势流理论的物理信息神经网络(PFT-PINN)，用于相位分辨的海洋重力波数据同化和预报。该方法通过两个并行的神经网络同时估计水面高程和速度势，结合拉普拉斯方程和边界条件约束，在实验室波槽数据和解析解验证中展现了优异性能。
@@ -44,6 +46,37 @@ read_status: "deep_read"
   - μ(v) = [sin(2πFv); cos(2πFv); v]
 - **硬约束测量**: 通过预训练网络扩展测量数据
 - **损失函数**: 重构损失 + Laplace方程损失 + 边界条件损失
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习与PINN训练常用GPU型号）
+- GPU数量: 1块（单GPU训练足以完成本研究的网络规模）
+- 训练时间: 未明确说明（PINN训练通常需要数小时至数天，视网络复杂度和数据规模而定）
+
+### 数据集（Datasets）
+1. **MARATHON波槽实验数据**
+   - 来源: 伦敦帝国理工学院土木与环境工程系流体力学实验室的风波槽（2021年）
+   - 任务: 非线性海浪数据同化与预报验证
+   - 数据规模: 单向不规则海浪工况，包含水面高程时间序列测量（稀疏空间测点）
+   - 是否公开: 不确定（实验室专用数据集，通常不公开）
+
+2. **线性势流解析解**
+   - 来源: 基于线性波理论生成的合成数据
+   - 任务: PINN框架的理论验证
+   - 数据规模: 可调节的傅里叶分量数量（N个波分量）
+   - 是否公开: 理论解析解，可自行生成
+
+### 数据处理
+- 水面高程数据：滤波去噪处理，处理实验测量噪声
+- 稀疏测量插值：在时空域中稀疏分布的测点数据用于数据同化
+- 边界条件处理：动态自由表面边界条件 z=η(x,t) 的约束施加
+- 归一化处理：输入特征归一化以提高神经网络训练稳定性
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文提供了完整的PFT-PINN理论框架和势流方程约束，方法描述详尽；但未公开源代码和实验数据集，且神经网络具体架构（层数、神经元数量）及训练超参数（如学习率、迭代次数）未完全披露，需要一定的深度学习经验进行复现。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **势流理论**:

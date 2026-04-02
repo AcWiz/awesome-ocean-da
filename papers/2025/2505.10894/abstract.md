@@ -1,15 +1,16 @@
 ---
-title: "CTP: A hybrid CNN-Transformer-PINN model for ocean front"
-arXiv: "2505.10894"
-authors: ['Yishuo Wanga', 'Feng Zhoub', 'Muping Zhoub', 'Qicheng Mengb', 'Zhijun Huc', 'Yi Wangc', 'Shanghai Jiao', 'Satellite Ocean']
+title: 'CTP: A hybrid CNN-Transformer-PINN model for ocean front'
+arXiv: '2505.10894'
+authors: [Yishuo Wanga, Feng Zhoub, Muping Zhoub, Qicheng Mengb, Zhijun Huc, Yi Wangc,
+  Shanghai Jiao, Satellite Ocean]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['CNN', 'Transformer', 'PINN', 'Navier-Stokes', 'deep_learning']
-application_tags: ['ocean_front', 'SST', 'forecasting', 'classification', 'Kuroshio']
-difficulty: "★★★☆☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [CNN, Transformer, PINN, Navier_Stokes, deep_learning]
+application_tags: [ocean_front, SST, forecasting, classification, Kuroshio]
+difficulty: ★★★☆☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 CTP: A hybrid CNN-Transformer-PINN model for ocean front
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2505.10894
 - **作者机构**: 上海交通大学海洋研究院、中国科学院第二海洋研究所、中国地质大学(武汉)海洋科学学院
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 CTP是一个结合CNN、Transformer和物理信息神经网络(PINN)的混合深度学习框架，用于海洋锋面预测。该方法通过局部空间编码、长程时间注意力和物理约束 enforcement，在南海和黑潮区域实现了优于LSTM、ConvLSTM和AttentionConv等基线模型的单步和多步预测性能。
@@ -42,6 +43,38 @@ CTP是一个结合CNN、Transformer和物理信息神经网络(PINN)的混合深
 - **CNN解码器**: 2层转置卷积恢复空间分辨率
 - **损失函数**: 锋面分类交叉熵 + 速度回归MSE + 物理项（MSE of ∂v/∂t, (v·∇)v, νΔv）
 - **数据**: NOAA 5km SST + Copernicus 9km流场再分析（1993-2020）
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA Tesla P100
+- GPU数量: 1
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **南海（SCS）数据集**
+   - 来源: NOAA Coral Reef Watch v3.1（5km SST产品）、Copernicus海洋服务（GLOBAL MULTIYEAR PHY 001 030）
+   - 任务: 海洋锋面预测
+   - 数据规模: 空间范围100-125°E, 0-25°N，分辨率9km（300×300网格），时间跨度1993-2020年，共10220个样本
+   - 是否公开: 部分公开（数据源公开，但处理后数据集未明确说明）
+
+2. **黑潮（KUR）数据集**
+   - 来源: NOAA Coral Reef Watch v3.1（5km SST产品）、Copernicus海洋服务（GLOBAL MULTIYEAR PHY 001 030）
+   - 任务: 海洋锋面预测
+   - 数据规模: 空间范围120-145°E, 20-45°N，分辨率9km（300×300网格），时间跨度1993-2020年，共10220个样本
+   - 是否公开: 部分公开（数据源公开，但处理后数据集未明确说明）
+
+### 数据处理
+- 数据分辨率统一至9km（1/12°）
+- 输入格式：7×3×300×300（7天历史数据，3个通道：锋面区域概率、向东速度u、向北速度v）
+- 预测目标：1×3×300×300（未来1天的锋面区域及速度场）
+- 训练集与测试集划分比例：8:2（8176训练样本，2044测试样本）
+- 物理量计算：使用前向有限差分近似时间导数，空间对流项使用前向有限差分，扩散项使用中心差分
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：数据来源明确且公开（SST来自NOAA， velocity来自Copernicus），网络架构详细描述（2层CNN、2层Transformer），但超参数设置（如学习率衰减策略、具体训练时长）未完全披露，且arXiv论文未提供官方代码仓库，复现需要自行实现完整的CTP框架。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **Navier-Stokes动量守恒方程**:

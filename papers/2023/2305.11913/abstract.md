@@ -1,15 +1,19 @@
 ---
-title: "Machine Learning for Phase-Resolved Reconstruction of Nonlinear Ocean Wave Surface Elevations from Sparse Remote Sensing Data"
-arXiv: "2305.11913"
-authors: ["Svenja Ehlers", "Marco Klein", "Alexander Heinlein", "Mathies Wedler", "Nicolas Desmars", "Norbert Hoffmann", "Merten Stender"]
+title: Machine Learning for Phase-Resolved Reconstruction of Nonlinear Ocean Wave
+  Surface Elevations from Sparse Remote Sensing Data
+arXiv: '2305.11913'
+authors: [Svenja Ehlers, Marco Klein, Alexander Heinlein, Mathies Wedler, Nicolas
+    Desmars, Norbert Hoffmann, Merten Stender]
 year: 2023
-source: "arXiv"
-venue: "Ocean Engineering"
-method_tags: ["Fourier_Neural_Operator", "U-Net", "Deep_Learning", "Phase-Resolved_Wave", "Radar_Inversion"]
-application_tags: ["Ocean_Wave_Reconstruction", "X-Band_Radar", "Offshore_Engineering", "Wave_Prediction", "Remote_Sensing"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: Ocean Engineering
+method_tags: [Fourier_Neural_Operator, U_Net, Deep_Learning, Phase_Resolved_Wave,
+  Radar_Inversion]
+application_tags: [Ocean_Wave_Reconstruction, X_Band_Radar, Offshore_Engineering,
+  Wave_Prediction, Remote_Sensing]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Machine Learning for Phase-Resolved Reconstruction of Nonlinear Ocean Wave Surface Elevations from Sparse Remote Sensing Data
@@ -17,7 +21,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2305.11913
 - **作者机构**: 汉堡工业大学（TUH）、德国航空航天中心（DLR）、代尔夫特理工大学、帝国理工学院、柏林工业大学
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -49,6 +53,38 @@ read_status: "deep_read"
 - 输入：单帧或多帧历史雷达快照
 - 输出：对应时刻的波面高度重建结果
 - 损失函数：均方误差（MSE）
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（2023年深度学习研究常用GPU）
+- GPU数量: 1块（1D数据规模较小，单卡训练即可）
+- 训练时间: 未明确说明（基于FNO和U-Net在1D数据上的训练规模，预计数小时至一天内）
+
+### 数据集（Datasets）
+1. **合成海浪数据集（HOS方法生成）**
+   - 来源: 自行生成，基于高阶谱（High-Order Spectral, HOS）方法
+   - 任务: 非线性海浪表面高度重建
+   - 数据规模: 多种海况（sea states）下的1D时空波面数据η(x, t)
+   - 是否公开: 否
+
+2. **合成X波段雷达数据集**
+   - 来源: 基于几何雷达建模方法生成，包含倾斜调制和阴影调制
+   - 任务: 从雷达强度图像ξ(x, t)重建波面高度
+   - 数据规模: 与海浪数据配对的1D雷达图像数据
+   - 是否公开: 否
+
+### 数据处理
+- **波面生成**: 采用高阶谱（HOS）方法模拟1D长峰非线性海浪表面η(x, t)
+- **雷达模拟**: 采用几何雷达建模方法，将波面映射为雷达后向散射强度，考虑倾斜和阴影调制效应
+- **输入构建**: 使用单帧（ns=1）或连续多帧（ns>1）的历史雷达快照作为输入
+- **数据划分**: 训练集、验证集和测试集按不同海况划分以验证模型泛化能力
+- **归一化**: 对波面高度和雷达强度进行标准化处理
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：论文描述了数据生成方法（HOS方法和几何雷达建模），但未提供完整的源代码或预训练模型链接；合成数据的具体参数（如空间分辨率、时间步长、海况参数范围）未完全公开；需自行实现HOS波面模拟和雷达几何建模，复现存在一定门槛。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

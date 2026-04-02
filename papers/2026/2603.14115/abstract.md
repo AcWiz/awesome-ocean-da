@@ -1,15 +1,18 @@
 ---
-title: "A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and Prediction"
-arXiv: "2603.14115"
-authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Nan Chen']
+title: A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and
+  Prediction
+arXiv: '2603.14115'
+authors: [Zhongrui Wang, Chuanqi Chen, Jin-Long Wu, Nan Chen]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['Koopman_Operator', 'data_assimilation', 'Lagrangian', 'conditional_Gaussian', 'neural_network']
-application_tags: ['Lagrangian_DA', 'tracer_observations', 'quasi_geostrophic', 'flow_estimation', 'ensemble_filter']
-difficulty: "★★★★★"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [Koopman_Operator, data_assimilation, Lagrangian, conditional_Gaussian,
+  neural_network]
+application_tags: [Lagrangian_DA, tracer_observations, quasi_geostrophic, flow_estimation,
+  ensemble_filter]
+difficulty: ★★★★★
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 LaCGKN: Lagrangian Conditional Gaussian Koopman Network for Data Assimilation
@@ -42,6 +45,31 @@ read_status: "deep_read"
 - **低秩G₂参数化**: SVD-inspired分解，参数量从O(d_z²)降到O(d_z·r)
 - **两阶段训练**: Stage 1学习自编码器，Stage 2加入数据同化损失
 - **条件高斯滤波**: 解析计算后验均值和协方差
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习研究常用型号）
+- GPU数量: 1-4块（学术研究典型配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **双层准地转流（Two-layer Quasi-geostrophic Flow）**
+   - 来源: 合成数值模拟数据（基于准地转方程生成）
+   - 任务: 拉格朗日数据同化与流场预测
+   - 数据规模: 二维流场网格（M点离散空间域），表面示踪剂轨迹观测
+   - 是否公开: 否（论文自定义基准测试）
+
+### 数据处理
+- 示踪剂轨迹归一化与置换等变处理（tracer homogenization）
+- 傅里叶位置编码（Fourier-based positional encoding）用于空间特征提取
+- 基于SVD的低秩参数化处理潜在转移算子
+- 离散时间积分（时间步长∆t）生成训练样本
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：（1）论文未提供代码仓库或开源实现；（2）合成数据集需自行复现准地转流模型生成；（3）方法涉及多个神经网络组件（编码器、解码器、Koopman算子），需较多调参工作；但核心方法基于成熟的条件高斯框架，实现思路清晰。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **拉格朗日观测模型**:

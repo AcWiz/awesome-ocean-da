@@ -1,15 +1,16 @@
 ---
-title: "An Efficient Implementation of the Ensemble Kalman Filter Based on an Iterative Sherman-Morrison Formula"
-arXiv: "1302.3876"
-authors: ["Elias D. Nino-Ruiz", "Adrian Sandu", "Jeffrey Anderson"]
+title: An Efficient Implementation of the Ensemble Kalman Filter Based on an Iterative
+  Sherman-Morrison Formula
+arXiv: '1302.3876'
+authors: [Elias D. Nino-Ruiz, Adrian Sandu, Jeffrey Anderson]
 year: 2013
-source: "arXiv"
-venue: "Statistics and Computing"
-method_tags: ["EnKF", "Sherman-Morrison Formula", "Computational Efficiency", "Parallel Computing"]
-application_tags: ["Lorenz-96", "Quasi-Geostrophic Model", "Ocean Modeling"]
-difficulty: "★★★★★"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: Statistics and Computing
+method_tags: [EnKF, Sherman_Morrison_Formula, Computational_Efficiency, Parallel_Computing]
+application_tags: [Lorenz_96, Quasi_Geostrophic_Model, Ocean_Modeling]
+difficulty: ★★★★★
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 An Efficient Implementation of the Ensemble Kalman Filter Based on an Iterative Sherman-Morrison Formula
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/1302.3876
 - **作者机构**: Virginia Polytechnic Institute and State University (Virginia Tech); National Center for Atmospheric Research (NCAR)
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -86,6 +87,37 @@ $$(A + uv^T)^{-1} = A^{-1} - \frac{A^{-1} u v^T A^{-1}}{1 + v^T A^{-1} u}$$
 ### 选主元策略
 
 为防止舍入误差累积，采用基于对角优势的选主元策略：在每步迭代中，选择与当前$W(k)^{-1}$对角元最大值对应的$v_k$优先处理，确保数值稳定。
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: 未明确使用GPU（基于CPU的计算平台）
+- GPU数量: 不适用
+- 训练时间: 未明确说明具体训练时间，但报告了不同方法间的相对计算时间对比
+
+### 数据集（Datasets）
+1. **Lorenz-96模型**
+   - 来源: 经典混沌动力系统测试模型（Nino-Ruiz et al., 2014）
+   - 任务: 状态估计与数据同化
+   - 数据规模: 模型维度可变（文中测试了Nens ≈ Nobs的设置），典型配置为40维状态空间
+   - 是否公开: 是（标准测试模型）
+
+2. **准地转流模型（Quasi-Geostrophic Model）**
+   - 来源: 海洋环流数值模拟
+   - 任务: 海洋数据同化
+   - 数据规模: 典型网格配置用于模拟中尺度海洋动力学
+   - 是否公开: 是（数值模拟生成）
+
+### 数据处理
+- 观测数据通过加入高斯噪声生成扰动观测，模拟观测误差协方差矩阵R
+- 背景误差协方差通过集合成员偏离均值的外积构造
+- 实验中使用了集合成员数、观测数量、模型维度等参数的敏感性分析
+- 采用循环数据同化实验评估算法精度与计算效率
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文提供了详细的算法数学推导与伪代码，但未公开官方实现代码；Lorenz-96和准地转流模型均为标准测试模型，可自行实现或从开源库获取；算法核心基于Sherman-Morrison公式，实现难度中等；缺乏公开代码库增加了复现的技术门槛
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

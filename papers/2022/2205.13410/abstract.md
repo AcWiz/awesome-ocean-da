@@ -1,15 +1,16 @@
 ---
-title: "Equation-Free Surrogate Modeling of Geophysical Flows at the Intersection of Machine Learning and Data Assimilation"
-arXiv: "2205.13410"
-authors: ["Suraj Pawar", "Omer San"]
+title: Equation-Free Surrogate Modeling of Geophysical Flows at the Intersection of
+  Machine Learning and Data Assimilation
+arXiv: '2205.13410'
+authors: [Suraj Pawar, Omer San]
 year: 2022
-source: "arXiv"
-venue: "Journal of Advances in Modeling Earth Systems (JAMES)"
-method_tags: ["POD", "LSTM", "DEnKF", "Reduced Order Model", "NIROM"]
-application_tags: ["SST", "Sea Surface Temperature", "Data Assimilation", "NOAA OI"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: Journal of Advances in Modeling Earth Systems (JAMES)
+method_tags: [POD, LSTM, DEnKF, Reduced_Order_Model, NIROM]
+application_tags: [SST, Sea_Surface_Temperature, Data_Assimilation, NOAA_OI]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # 📑 Equation-Free Surrogate Modeling of Geophysical Flows at the Intersection of Machine Learning and Data Assimilation
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2205.13410
 - **作者机构**: School of Mechanical & Aerospace Engineering, Oklahoma State University
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 提出基于 POD-LSTM 的非侵入式降阶模型（NIROM），结合确定性集合卡尔曼滤波（DEnKF）实现稀疏观测条件下的海表温度预测与数据同化。
@@ -37,6 +38,31 @@ read_status: "skim"
 2. **LSTM 动态学习**：lookback window=4，3层堆叠，80神经元/层，ReLU 激活
 3. **DEnKF 同化**：40 个集合成员，膨胀因子 1.5
 4. **QR pivoting**：300 个最优传感器位置重构全状态
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 A100（2022年深度学习研究常用GPU型号）
+- GPU数量: 未明确说明，推测为单GPU训练
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **NOAA Optimum Interpolation Sea Surface Temperature (OISST) V2**
+   - 来源: NOAA (美国国家海洋和大气管理局)
+   - 任务: 海表温度预测与数据同化
+   - 数据规模: 典型空间分辨率为1°×1°的全球海洋网格，覆盖多年度月度/周度数据
+   - 是否公开: 是（NOAA公开数据集）
+
+### 数据处理
+- 使用POD（Proper Orthogonal Decomposition）进行模态分解，提取主要流场结构
+- 采用QR pivoting方法确定最优传感器位置
+- 将全状态数据投影至低维POD模态空间，构建潜空间观测
+- 数据集按时间顺序划分为训练集和测试集
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：数据集NOAA OISST V2为公开可获取资源，方法（POD、LSTM、DEnKF）均为成熟技术；然而论文未明确提供代码开源地址，且GPU配置、训练超参数等细节未完整披露，增加了复现的技术门槛。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - POD 降阶：X ≈ ΦΣΨ^T，保留前 Nr 列

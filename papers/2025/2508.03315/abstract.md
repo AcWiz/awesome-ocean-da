@@ -1,15 +1,17 @@
 ---
-title: "Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time"
-arXiv: "2508.03315"
-authors: ['Svenja Ehlers', 'Merten Stender', 'Norbert Hoffmann']
+title: 'Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators
+  for Nonlinear Wavefield Reconstruction in Real-Time'
+arXiv: '2508.03315'
+authors: [Svenja Ehlers, Merten Stender, Norbert Hoffmann]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['PINO', 'neural_operator', 'FNO', 'physics_informed', 'wave_reconstruction', 'HOSM']
-application_tags: ['ocean_waves', 'wave_prediction', 'buoy_measurements', 'X-band_radar', 'phase_resolved']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [PINO, neural_operator, FNO, physics_informed, wave_reconstruction, HOSM]
+application_tags: [ocean_waves, wave_prediction, buoy_measurements, X_band_radar,
+  phase_resolved]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators for Nonlinear Wavefield Reconstruction in Real-Time
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2508.03315
 - **作者机构**: 汉堡工业大学动力学组、柏林工业大学网络物理系统组、帝国理工学院机械工程系
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出物理信息神经算子（PINO）框架，通过将自由表面边界条件残差嵌入损失函数，从稀疏浮标或雷达测量中重建时空相位的非线性海浪场。训练无需真值数据，仅需约634个稀疏样本即可实现实时重建，SSP误差约0.10-0.13。
@@ -44,6 +46,47 @@ read_status: "deep_read"
 - **物理损失**: 嵌入Zakharov型自由表面边界条件残差
 - **正则化**: 标准差匹配，避免平凡解（零场）
 - **HOSM**: 使用高阶谱方法生成合成训练数据和验证真值
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（典型深度学习配置）
+- GPU数量: 未明确说明（推测为单卡或少量GPU，因模型为FNO架构，计算效率较高）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **合成海浪数据集（HOSM生成）**
+   - 来源: 基于高阶谱方法（HOSM）数值模拟生成，用于替代难以获取的真实海浪数据
+   - 任务: 海浪场重建与实时预测
+   - 数据规模: 约634个稀疏样本（ buoy或radar测量），时空分辨率为nx×nt网格
+   - 是否公开: 否
+
+2. **浮标测量数据（模拟）**
+   - 来源: 模拟单点时序测量
+   - 任务: 从稀疏时序数据重建空间波场
+   - 数据规模: 单点时间序列
+   - 是否公开: 否
+
+3. **X波段雷达测量数据（模拟）**
+   - 来源: 基于几何模型生成，包含倾斜调制和阴影效应
+   - 任务: 从雷达强度快照重建波面
+   - 数据规模: 雷达快照数据，空间覆盖数平方公里，分辨率约4-10米
+   - 是否公开: 否
+
+### 数据处理
+- **波场生成**: 使用HOSM（M=4阶非线性）生成时空波面η和表面速度势Φs作为参考真值
+- **雷达模拟**: 采用几何方法模拟雷达后向散射强度，包含倾斜调制T和阴影调制效应
+- **稀疏采样**: 从完整波场中提取稀疏的浮标点测量或雷达快照作为网络输入
+- **物理约束**: 将自由表面边界条件残差（FSBC）嵌入损失函数，无需ground truth监督
+
+### 复现难度
+- ★★★☆☆（中等）
+- **原因**: 
+  1. 论文提供了HOSM数值方法和雷达物理模型的具体公式，可自行实现数据生成
+  2. PINO/FNO架构在开源框架（如DeepXDE、PyTorch）中已有参考实现
+  3. 未提供预训练模型或代码开源链接，需从零复现
+  4. 合成数据集规模适中（634样本），但参数设置细节可能影响结果一致性
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **势流理论**: 假设无粘不可压缩流，速度势Φ满足Laplace方程

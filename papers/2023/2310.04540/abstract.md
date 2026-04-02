@@ -1,15 +1,18 @@
 ---
-title: "Multi-decadal Sea Level Prediction using Neural Networks and Spectral Clustering on Climate Model Large Ensembles and Satellite Altimeter Data"
-arXiv: "2310.04540"
-authors: ["Saumya Sinha", "John Fasullo", "R. Steven Nerem", "Claire Monteleoni"]
+title: Multi-decadal Sea Level Prediction using Neural Networks and Spectral Clustering
+  on Climate Model Large Ensembles and Satellite Altimeter Data
+arXiv: '2310.04540'
+authors: [Saumya Sinha, John Fasullo, R. Steven Nerem, Claire Monteleoni]
 year: 2023
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Neural_Network", "Spectral_Clustering", "Sea_Level_Prediction", "Climate_Modeling", "FCNN"]
-application_tags: ["Sea_Level_Rise", "Regional_Sea_Level", "Climate_Change", "Satellite_Altimetry", "Multi-decadal_Prediction"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [Neural_Network, Spectral_Clustering, Sea_Level_Prediction, Climate_Modeling,
+  FCNN]
+application_tags: [Sea_Level_Rise, Regional_Sea_Level, Climate_Change, Satellite_Altimetry,
+  Multi_decadal_Prediction]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Multi-decadal Sea Level Prediction using Neural Networks and Spectral Clustering on Climate Model Large Ensembles and Satellite Altimeter Data
@@ -17,7 +20,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2310.04540
 - **作者机构**: 科罗拉多大学博尔德分校、美国大气研究中心（NCAR）、INRIA巴黎
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -55,6 +58,39 @@ read_status: "deep_read"
 **分区策略对比**：
 - 谱聚类分区
 - 领域专家指定的分区（北大西洋、北太平洋等）
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 A100
+- GPU数量: 未明确说明，推测为单卡训练（FCNN模型规模较小）
+- 训练时间: 未明确说明具体时长
+
+### 数据集（Datasets）
+1. **卫星高度计海表面高度数据**
+   - 来源: 卫星高度计观测（1993-2022年月度数据）
+   - 任务: 海平面趋势预测
+   - 数据规模: 1/4度空间分辨率，约30年时长
+   - 是否公开: 是（公开可用的卫星观测数据集）
+
+2. **气候模式大集合模拟数据**
+   - 来源: CESM1, CESM2, GFDLESM2M, MPIGE, MPI-ESM1-2-HR, MPI-ESM1-2-LR六个气候模式大集合
+   - 任务: 提供气候模式预测趋势特征
+   - 数据规模: 1度分辨率，六个模式集合平均，约30年时长
+   - 是否公开: 是（气候模式模拟数据一般公开可用）
+
+### 数据处理
+- 空间平滑处理以减少小尺度海洋涡旋影响
+- 重网格化至2度分辨率（180×90经纬度网格）
+- 去除全球平均以保证不同数据源一致性
+- 对每个海洋格点计算1993-2022年的线性趋势
+- 使用余弦纬度加权均方误差损失函数进行模型训练
+- 5折交叉验证用于超参数选择
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文发表于arXiv预印本，未明确说明代码是否公开；数据集方面，卫星高度计数据公开可用，气候模式大集合数据也可从相关机构获取；但模型超参数、具体训练细节及权重初始化策略未完全披露，可能影响复现的完全一致性。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

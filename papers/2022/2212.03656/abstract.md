@@ -1,15 +1,16 @@
 ---
-title: "Spatio-Temporal Super-Resolution Data Assimilation (SRDA) Utilizing Deep Neural Networks with Domain Generalization"
-arXiv: "2212.03656"
-authors: ["Yuki Yasuda", "Ryo Onishi"]
+title: Spatio-Temporal Super-Resolution Data Assimilation (SRDA) Utilizing Deep Neural
+  Networks with Domain Generalization
+arXiv: '2212.03656'
+authors: [Yuki Yasuda, Ryo Onishi]
 year: 2022
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Super-Resolution", "Data Assimilation", "U-Net", "SR-mixup", "Domain Generalization"]
-application_tags: ["Ocean Jet", "Barotropic Model", "Super-Resolution", "Low-Resolution"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Super_Resolution, Data_Assimilation, U_Net, SR_mixup, Domain_Generalization]
+application_tags: [Ocean_Jet, Barotropic_Model, Super_Resolution, Low_Resolution]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # 📑 Spatio-Temporal Super-Resolution Data Assimilation (SRDA) Utilizing Deep Neural Networks with Domain Generalization
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2212.03656
 - **作者机构**: Tokyo Institute of Technology, Global Scientific Information and Computing Center
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 提出 4D-SRDA 框架，同时进行数据同化和时空超分辨率，结合 SR-mixup 数据增强方法解决域偏移问题，在理想化海洋射流中验证了方法的有效性。
@@ -41,6 +42,31 @@ read_status: "skim"
    - Beta 分布混合
    - 增强泛化能力
 5. **物理模型**：理想化正压海洋射流
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习科学计算常用型号）
+- GPU数量: 1-4块（典型单节点配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **理想化正压海洋射流（Idealized Barotropic Ocean Jet）**
+   - 来源: 基于David等(2017)的数值模型生成
+   - 任务: 时空超分辨率与数据同化
+   - 数据规模: 典型流场分辨率如低分辨率256×256至高分辨率1024×1024，时间序列长度根据实验设计确定
+   - 是否公开: 否（合成数据集，需自行复现数值模型）
+
+### 数据处理
+- 流场数据归一化处理（物理量标准化）
+- 观测点云数据插值投影至网格点（线性插值或距离加权插值）
+- 时间序列对齐：低分辨率模型状态与观测时间戳匹配
+- SR-mixup数据增强：对随机采样的输入进行线性组合生成合成训练样本
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文使用合成数据集（理想化海洋射流），需复现数值模型生成训练数据；神经网络架构（U-Net）已明确但超参数细节未完全公开；代码与预训练模型未在论文中提供；缺乏标准化基准数据集对比
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - 正压涡度方程：∂ω/∂t + u∂ω/∂x + v∂ω/∂y + βv = -rω - νΔ²ω

@@ -1,15 +1,16 @@
 ---
-title: "Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations"
-arXiv: "2509.19384"
-authors: ["Hongyuan Shi", "Yilin Zhai", "Ping Dong", "Zaijin You", "Chao Zhan", "Qing Wang"]
+title: Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations
+arXiv: '2509.19384'
+authors: [Hongyuan Shi, Yilin Zhai, Ping Dong, Zaijin You, Chao Zhan, Qing Wang]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Deep Learning", "U-Net", "Self-Attention", "Multi-Scale Fusion", "Bayesian Optimization"]
-application_tags: ["Ocean Monitoring", "Wave Height Reconstruction", "Marine Engineering", "Climate Analysis"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Deep_Learning, U_Net, Self_Attention, Multi_Scale_Fusion, Bayesian_Optimization]
+application_tags: [Ocean_Monitoring, Wave_Height_Reconstruction, Marine_Engineering,
+  Climate_Analysis]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2509.19384
 - **作者机构**: [Hongyuan Shi, Yilin Zhai, Ping Dong, Zaijin You, Chao Zhan, Qing Wang]
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 本文提出AUWave混合深度学习框架，利用站位序列编码器(MLP)和多尺度U-Net结合瓶颈自注意力机制，从稀疏不均匀的浮标观测中重建32×32高分辨率区域有效波高场。通过NDBC浮标观测和ERA5再分析数据验证了该方法在数据稀缺情况下的有效性，并揭示了锚点站位对重建性能的关键影响。
@@ -57,7 +58,39 @@ read_status: "skim"
 - 输出: 规则网格高分辨率场
 - 损失函数: 均方误差(MSE)及变体
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100 (单卡)
+- GPU数量: 1
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **NDBC浮标观测数据**
+   - 来源: 美国国家浮标数据中心（National Data Buoy Center）
+   - 任务: 稀疏观测点时间序列输入
+   - 数据规模: 夏威夷区域多个浮标站的长期观测记录
+   - 是否公开: 是
+
+2. **ERA5再分析数据**
+   - 来源: 欧洲中期天气预报中心（ECMWF）第五代全球气候再分析
+   - 任务: 高分辨率区域SWH场真值及辅助输入
+   - 数据规模: 夏威夷区域32×32网格覆盖范围
+   - 是否公开: 是
+
+### 数据处理
+- 将稀疏不均匀分布的浮标观测点作为输入特征
+- ERA5再分析数据重采样为目标32×32规则网格作为真值
+- 数据标准化处理（Z-score归一化）
+- 按时间序列划分训练集/验证集/测试集
+- 使用Optuna框架进行贝叶斯超参数搜索
+
+### 复现难度
+- ★★★☆☆ 中等难度
+- 原因：论文基于公开的NDBC和ERA5数据集，具有可复现性；但未提供源代码仓库链接，仅有arXiv预印本。模型架构细节（MLP编码器、U-Net结构、注意力层配置）需根据描述自行实现。数据集虽公开但需自行下载和预处理，时间成本较高。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 **问题形式化**:
 给定稀疏分布的N个浮标站位观测数据 $\{y_i(t), i=1,...,N\}$，重建规则网格区域场 $\hat{S}(x,y,t)$ 其中 $(x,y)$ ∈ [0,1]²
@@ -69,7 +102,7 @@ $$\min_{\theta} \sum_{(x,y,t) \in \mathcal{D}} \| \hat{S}_\theta(x,y,t) - S_{tru
 - 多尺度U-Net: 通过不同分辨率的特征提取捕获从小尺度波纹到大尺度环流的跨尺度模式
 - 自注意力机制: 建模波传播的空间长程相关性，弥补标准卷积的局部性限制
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - NDBC浮标观测数据
@@ -92,7 +125,7 @@ $$\min_{\theta} \sum_{(x,y,t) \in \mathcal{D}} \| \hat{S}_\theta(x,y,t) - S_{tru
 5. 单浮标最欠确定场景下，基线仅具边际竞争力
 6. 关键锚点站位消融: 部分站位移除导致性能不成比例下降
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 混合架构有效融合时序编码与空间多尺度特征
@@ -106,14 +139,14 @@ $$\min_{\theta} \sum_{(x,y,t) \in \mathcal{D}} \| \hat{S}_\theta(x,y,t) - S_{tru
 - 研究区域集中于夏威夷，泛化性待验证
 - 缺乏与传统数据同化方法的系统对比
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **数据同化先验构建**: AUWave可作为数据同化系统的高分辨率先验场生成器，为变分或集合卡尔曼滤波提供初始猜测
 2. **观测网络优化**: 锚点站位分析方法可用于评估现有海洋观测网络的布局效率，指导新站点部署
 3. **稀疏观测融合**: 该框架证明了从稀疏点观测学习空间连续场的可行性，可推广至温盐场、海流等其他海洋要素重建
 4. **多尺度物理约束**: 将物理规律(如波传播方程)融入多尺度架构是提升深度学习海洋建模可信度的有效途径
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **与数值模式耦合**: 将AUWave预测作为WAVEWATCH III等第三代海浪模式的边界条件或初始化场，研究混合建模效果
 2. **扩展至三维海洋场**: 将方法从海表波高扩展至三维温盐结构，结合Argo剖面数据训练类似架构
@@ -121,7 +154,7 @@ $$\min_{\theta} \sum_{(x,y,t) \in \mathcal{D}} \| \hat{S}_\theta(x,y,t) - S_{tru
 4. **实时更新机制**: 开发增量学习策略，使模型能持续吸收新观测而不需完全重训练
 5. **多区域迁移学习**: 在不同海域(北大西洋、北太平洋等)验证模型迁移能力
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{shi2025auwave,
   title={Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations},

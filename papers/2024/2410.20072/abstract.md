@@ -1,15 +1,15 @@
 ---
-title: "CGKN: Conditional Gaussian Koopman Network"
-arXiv: "2410.20072"
-authors: ["Chuanqi Chen", "et al."]
+title: 'CGKN: Conditional Gaussian Koopman Network'
+arXiv: '2410.20072'
+authors: [Chuanqi Chen, et al.]
 year: 2024
-source: "arXiv"
-venue: "Journal of Computational Physics"
-method_tags: ["Deep Learning", "Koopman Theory", "Data Assimilation", "Neural SDE", "Conditional Gaussian"]
-application_tags: ["Dynamical Systems", "Turbulence Modeling", "Climate Prediction", "Chaos Theory"]
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "skim"
+source: arXiv
+venue: Journal of Computational Physics
+method_tags: [Deep_Learning, Koopman_Theory, Data_Assimilation, Neural_SDE, Conditional_Gaussian]
+application_tags: [Dynamical_Systems, Turbulence_Modeling, Climate_Prediction, Chaos_Theory]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: skim
 ---
 
 # CGKN: Conditional Gaussian Koopman Network
@@ -62,7 +62,44 @@ CGKN（条件高斯Koopman网络）是一个将非线性动力系统转化为具
 - 通过提升维度捕获必要的非线性特征
 - 利用Koopman理论的思想，将线性算子作用于提升后的状态空间
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100
+- GPU数量: 1-4块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **投影随机Burgers-Sivashinsky方程**
+   - 来源: 直接数值模拟(DNS)生成的湍流数据
+   - 任务: 湍流系统预测与数据同化
+   - 数据规模: 未明确说明
+   - 是否公开: 不确定
+
+2. **Lorenz96系统**
+   - 来源: 基于确定性混沌方程合成的时序数据
+   - 任务: 混沌系统预测与状态估计
+   - 数据规模: 可调参数F=8，40维状态变量
+   - 是否公开: 是(经典基准问题)
+
+3. **厄尔尼诺-南方涛动(ENSO)**
+   - 来源: NOAA海表温度(SST)观测数据
+   - 任务: 气候预测与数据同化
+   - 数据规模: 多十年时间序列，涵盖热带太平洋区域
+   - 是否公开: 是(公开气候数据集)
+
+### 数据处理
+- 对原始时序数据进行标准化/归一化处理
+- 采用滑动窗口方法构建训练样本
+- 对于ENSO数据，进行海表温度空间插值与时间重采样
+- 按时间顺序划分训练集、验证集与测试集
+
+### 复现难度
+- ★★★☆☆ (中等难度)
+- 原因: 论文未提供代码仓库链接，实验细节如超参数设置、数据预处理具体参数等描述有限。三个基准数据集均为该领域经典问题，其中Lorenz96可完全复现，但湍流方程与ENSO数据需自行准备或获取相应来源数据，整体具有一定复现挑战性。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 **核心数学框架**:
 
@@ -97,7 +134,7 @@ $$
 p(\mathbf{x}_{k+1}|\mathbf{y}_{1:k+1}) \propto p(\mathbf{y}_{k+1}|\mathbf{x}_{k+1}) \cdot p(\mathbf{x}_{k+1}|\mathbf{y}_{1:k})
 $$
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 1. **投影随机Burgers-Sivashinsky方程**: 强非线性湍流系统
@@ -121,7 +158,7 @@ $$
 - 相比传统集成方法，显著降低了计算成本
 - 能够有效捕获极端事件和强非高斯特征
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - **理论支撑强**: 基于Koopman理论和条件高斯分布的数学基础，具有可解释性
@@ -136,7 +173,7 @@ $$
 - **超参数敏感**: 网络结构和训练策略可能需要针对不同系统调整
 - **长期预测**: 提升空间中的误差累积可能影响长期预测性能
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **海洋数据同化应用**: CGKN的条件高斯结构特别适合海洋动力系统，因为海洋过程常呈现非线性但条件高斯的特征
 2. **ENSO预测启示**: 该方法在ENSO上的成功表明可用于海洋-大气耦合系统的预测和同化
@@ -144,7 +181,7 @@ $$
 4. **不确定性量化**: 海洋观测稀疏且有噪声，CGKN的不确定性量化能力对决策支持至关重要
 5. **端到端学习**: 将预测和同化统一在单一框架中，可简化海洋预报系统架构
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **海洋混合层建模**: 将CGKN应用于海洋混合层动力学，建立高分辨率海洋预测模型
 2. **多源观测同化**: 扩展CGKN以同时处理卫星海表温度、叶绿素浓度、海面高度等多源海洋观测
@@ -152,7 +189,7 @@ $$
 4. **与海洋模式耦合**: 将CGKN作为海洋数值模式的观测算子或模式校正器
 5. **极端海洋事件预测**: 专门针对海洋极端事件（如海洋热浪、风暴潮）进行建模和预测
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 
 ```bibtex
 @article{Chen2024CGKN,

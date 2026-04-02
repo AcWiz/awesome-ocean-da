@@ -1,15 +1,17 @@
 ---
-title: "NeuralOM: Neural Ocean Model for S2S Simulation"
-arXiv: "2505.21020"
-authors: ["Gao", "et al."]
+title: 'NeuralOM: Neural Ocean Model for S2S Simulation'
+arXiv: '2505.21020'
+authors: [Gao, et al.]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Neural Operator", "Graph Neural Network", "Physics-Informed Learning", "Residual Correction", "Adaptive Messaging"]
-application_tags: ["Ocean Simulation", "Subseasonal-to-Seasonal Forecasting", "Climate Modeling", "S2S Prediction"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Neural_Operator, Graph_Neural_Network, Physics_Informed_Learning, Residual_Correction,
+  Adaptive_Messaging]
+application_tags: [Ocean_Simulation, Subseasonal_to_Seasonal_Forecasting, Climate_Modeling,
+  S2S_Prediction]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # NeuralOM: Neural Ocean Model for S2S Simulation
@@ -43,7 +45,32 @@ NeuralOM的核心架构由两个关键创新组件构成：
 
 两个组件协同工作：残差校正框架提供稳定的长期模拟框架，物理引导图网络确保每一步修正都符合物理规律，二者结合实现了稳定、高效且物理可知的长时间模拟。
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB)
+- GPU数量: 8 GPUs (分布式训练配置)
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **全球S2S海洋模拟基准数据集**
+   - 来源: 基于ECMWF S2S项目数据或类似海洋再分析产品（如ORAS5/SODA）
+   - 任务: 全球海洋状态预测（海表温度SST、海表高度SSH等）
+   - 数据规模: 覆盖全球海域，时间跨度涵盖多年训练/验证/测试划分
+   - 是否公开: 不确定（基准数据集通常公开，但模型特定数据集可能未公开）
+
+### 数据处理
+- 全局归一化处理（基于统计均值/标准差）
+- 空间插值至统一分辨率网格
+- 训练/验证/测试集按时间顺序划分
+- 多变量输入输出：海表温度、海表高度、海流速度等多物理量协同预测
+
+### 复现难度
+- ★★★☆☆（3/5颗星）
+- 原因：arXiv论文（2505.21020）未提供明确的代码仓库链接，方法描述较为完整但具体实现细节（如网络层数、消息传递机制参数）需自行摸索；深度学习海洋模拟领域已有多项开源工作（如WenHai、GraphCast等），可作为参考；但数据获取与预处理流程可能存在一定壁垒。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 论文涉及以下关键物理建模：
 
 **物理过程建模**：
@@ -59,7 +86,7 @@ NeuralOM的核心架构由两个关键创新组件构成：
 - 到小规模高能量的涡旋
 - 通过自适应聚合机制统一处理
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 **数据集**: 全球S2S海洋模拟基准数据集
 
 **评估指标**: 
@@ -74,7 +101,7 @@ NeuralOM的核心架构由两个关键创新组件构成：
 - 消融实验验证了两个核心组件的有效性：移除任一组件均导致性能显著下降
 - 引入气候学先验后ACC提升超过5倍，验证了每项设计选择的重要性
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**:
 - 渐进残差校正框架有效解决了长期预测中的误差累积问题
 - 物理引导图网络显式编码物理先验，增强了预测的物理一致性
@@ -87,20 +114,20 @@ NeuralOM的核心架构由两个关键创新组件构成：
 - 未提供开源代码，影响方法的复现性
 - 消融实验可进一步深入，如不同残差步数对性能的影响分析
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 这篇论文对海洋数据同化研究具有重要启发：
 1. **残差校正思想**可用于改进海洋数据同化中的预测模型，将背景场预测误差分解为多步修正
 2. **物理引导网络**的设计启示：可探索将物理约束（如地转平衡、热力学约束）融入图神经网络的消息传递机制
 3. **自适应尺度建模**对于海洋多尺度动力学的同化预报具有重要价值
 4. 论文验证了引入气候学先验的有效性，可应用于海洋再分析产品的约束优化
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. 将NeuralOM的渐进残差校正框架应用于海洋数据同化中的模式预测模块，探索与传统集合卡尔曼滤波或变分同化的结合
 2. 设计面向海洋动力学的物理引导图网络变体，显式编码地转平衡、科氏力等约束
 3. 探索将NeuralOM扩展到耦合海洋-大气系统的S2S预报，实现海洋与大气分量的双向耦合
 4. 研究模型的计算效率优化，推动在大规模海洋预报系统中的实际部署
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{NeuralOM2025,
   title={NeuralOM: Neural Ocean Model for S2S Simulation},

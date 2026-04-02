@@ -1,15 +1,15 @@
 ---
-title: "Optimal boundary conditions at the staircase-shaped coastlines"
-arXiv: "1402.7201"
-authors: ["Eugene Kazantsev"]
+title: Optimal boundary conditions at the staircase-shaped coastlines
+arXiv: '1402.7201'
+authors: [Eugene Kazantsev]
 year: 2014
-source: "ArXiv"
-venue: "Ocean Dynamics"
-method_tags: ["4D-Var", "数据同化", "NEMO模型", "边界条件优化", "海洋建模"]
-application_tags: ["海洋环流建模", "海岸线近似", "数值天气预报"]
-difficulty: "★★★★☆"
-importance: "★★★☆☆"
-read_status: "skim"
+source: ArXiv
+venue: Ocean Dynamics
+method_tags: [4D_Var, 数据同化, NEMO模型, 边界条件优化, 海洋建模]
+application_tags: [海洋环流建模, 海岸线近似, 数值天气预报]
+difficulty: ★★★★☆
+importance: ★★★☆☆
+read_status: skim
 ---
 
 # Optimal boundary conditions at the staircase-shaped coastlines
@@ -17,7 +17,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/1402.7201
 - **作者机构**: Eugene Kazantsev (机构信息未明确提供)
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 本文针对NEMO海洋模型中阶梯形海岸线的边界条件处理问题，应用4D-Var数据同化技术来识别最优的边界条件参数化方案。研究发现，在阶梯形海岸线近似下，传统边界条件的 formulation 会导致指数增长模态的出现，而最优边界条件可以有效修正由此产生的误差，为海岸线数值模拟中的边界处理提供了新的解决思路。
@@ -57,7 +57,32 @@ read_status: "skim"
 - 对比传统边界条件和优化后边界条件的表现
 - 评估指数增长模态的出现和抑制情况
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: CPU集群（HPC系统），GPU不适用于此类海洋数值模拟
+- GPU数量: 不适用
+- 训练时间: 未明确说明（以模拟运行时间衡量，而非传统深度学习的训练时间）
+
+### 数据集（Datasets）
+1. **合成观测数据（Synthetic Observations）**
+   - 来源: 矩形盒配置下的数值模式生成
+   - 任务: 4D-Var数据同化实验，评估边界条件参数优化效果
+   - 数据规模: 理想化设置，无实际物理尺度约束
+   - 是否公开: 不确定
+
+### 数据处理
+- 在矩形盒配置中生成四维（3D空间+时间）合成观测数据
+- 通过旋转模型网格模拟不同角度的阶梯形海岸线
+- 构建目标函数以最小化观测与模型输出之间的差异
+- 无需传统机器学习中的数据增强或归一化处理
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：NEMO海洋模型为开源软件，可从其官方仓库获取；但2014年arXiv论文未提供完整代码和实验配置细节；4D-Var框架的实现复杂度较高，需具备海洋数值模拟专业知识；特定边界条件优化方案的具体参数设置未详细披露，复现需大量摸索工作
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 控制方程
 模型基于NEMO的原始方程，包括：
@@ -86,7 +111,7 @@ $$J(\mathbf{u}) = \frac{1}{2}(\mathbf{u} - \mathbf{u}_b)^T\mathbf{B}^{-1}(\mathb
 $$\mathbf{u}(t) = \mathbf{u}_0 e^{\lambda t}$$
 其中 $\lambda > 0$ 表示不稳定增长。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**: 
 - NEMO模型矩形盒配置的数值模拟数据
@@ -107,7 +132,7 @@ $$\mathbf{u}(t) = \mathbf{u}_0 e^{\lambda t}$$
 3. 4D-Var方法能够自动识别修正阶梯近似的最优参数
 4. 旋转网格实验验证了方法的普适性
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 创新性地将数据同化技术应用于边界条件优化问题
@@ -119,7 +144,7 @@ $$\mathbf{u}(t) = \mathbf{u}_0 e^{\lambda t}$$
 - 计算成本较高，4D-Var优化需要迭代求解
 - 对观测数据质量和覆盖范围有一定依赖
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 作为从事海洋数据同化研究的学者，本文给了我以下启发：
 
@@ -131,7 +156,7 @@ $$\mathbf{u}(t) = \mathbf{u}_0 e^{\lambda t}$$
 
 4. **模型-观测协同优化**：将模型参数和边界条件联合优化是未来海洋数据同化的一个重要方向
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **复杂几何形状扩展**：将方法扩展到实际复杂海岸线（如中国沿海、欧洲沿海），验证在真实地形条件下的有效性
 
@@ -143,7 +168,7 @@ $$\mathbf{u}(t) = \mathbf{u}_0 e^{\lambda t}$$
 
 5. **敏感性分析**：系统研究边界条件对不同海洋过程（如锋面、内波、潮汐等）模拟的影响差异
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{kazantsev2014optimal,
   title={Optimal boundary conditions at the staircase-shaped coastlines},

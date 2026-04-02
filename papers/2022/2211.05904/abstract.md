@@ -1,15 +1,16 @@
 ---
-title: "4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for Nadir and Wide-Swath Satellite Altimetry"
-arXiv: "2211.05904"
-authors: ["Maxime Beauchamp", "Quentin Febvre", "Hugo Georgenthum", "Ronan Fablet"]
+title: '4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for
+  Nadir and Wide-Swath Satellite Altimetry'
+arXiv: '2211.05904'
+authors: [Maxime Beauchamp, Quentin Febvre, Hugo Georgenthum, Ronan Fablet]
 year: 2022
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["4DVarNet", "Deep Learning", "SSH", "Satellite Altimetry", "SWOT"]
-application_tags: ["Sea Surface Height", "Gulf Stream", "OSMOSIS", "NATL60", "DUACS"]
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [4DVarNet, Deep_Learning, SSH, Satellite_Altimetry, SWOT]
+application_tags: [Sea_Surface_Height, Gulf_Stream, OSMOSIS, NATL60, DUACS]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: skim
 ---
 
 # 📑 4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for Nadir and Wide-Swath Satellite Altimetry
@@ -38,6 +39,44 @@ read_status: "skim"
 3. **神经网络算子 F**：双线性单元残差架构
 4. **梯度迭代**：LSTM 元学习梯度下降
 5. **损失函数**：重建损失 + 梯度损失 + 一致性损失
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 A100（深度学习研究常用GPU型号）
+- GPU数量: 多GPU配置（论文明确提到支持multi-GPU配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **NATL60**
+   - 来源: 法国海洋开发研究院（IFREMER）/ BOOST-SWOT 2020数据挑战
+   - 任务: 海表面高度（SSH）重建与时空插值
+   - 数据规模: 1/60°分辨率的北大西洋模拟数据（~50-100km空间尺度，~10天时间尺度）
+   - 是否公开: 是（通过GitHub公开）
+
+2. **DUACS**
+   - 来源: 哥白尼海洋环境监测服务（CMEMS）
+   - 任务: 操作性最优插值（OI）基线产品
+   - 数据规模: 沿轨道卫星高度计数据
+   - 是否公开: 是
+
+3. **OSMOSIS**
+   - 来源: 北大西洋真实观测数据集
+   - 任务: 模型泛化能力验证
+   - 数据规模: 区域性子数据集
+   - 是否公开: 不确定
+
+### 数据处理
+- 卫星高度计沿轨数据预处理：去噪、重采样、地理坐标标准化
+- SWOT宽刈幅数据处理：二维海表面高度观测映射
+- 观测算子H的定义与训练：沿轨采样模拟、网格化插值
+- 数据划分：Gulf Stream流核心区域与开放海域两个案例研究区域
+- 归一化处理：SSH场标准化（均值、方差归一化）
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：代码已开源（GitHub），NATL60数据集可通过数据挑战获取；但需配置多GPU训练环境，且部分超参数细节（如学习率衰减策略、优化器选择）在摘要中未完全披露，需要参考源码才能完全复现。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - 变分成本：J(x) = λ₁||y - H(x)||²_W + λ₂||x - F(x)||²

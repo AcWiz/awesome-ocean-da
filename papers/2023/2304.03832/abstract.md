@@ -1,15 +1,16 @@
 ---
-title: "Deep Learning of Systematic Sea Ice Model Errors from Data Assimilation Increments"
-arXiv: "2304.03832"
-authors: ["William Gregory", "Mitchell Bushuk", "Alistair Adcroft", "Yongfei Zhang", "Laure Zanna"]
+title: Deep Learning of Systematic Sea Ice Model Errors from Data Assimilation Increments
+arXiv: '2304.03832'
+authors: [William Gregory, Mitchell Bushuk, Alistair Adcroft, Yongfei Zhang, Laure
+    Zanna]
 year: 2023
-source: "arXiv"
-venue: "Journal of Advances in Modeling Earth Systems (JAMES)"
-method_tags: ["CNN", "Data_Assimilation", "Sea_Ice", "Bias_Correction", "Model_Error_Learning"]
-application_tags: ["Sea_Ice_Modeling", "Climate_Modeling", "SPEAR", "Bias_Prediction", "GFDL"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: Journal of Advances in Modeling Earth Systems (JAMES)
+method_tags: [CNN, Data_Assimilation, Sea_Ice, Bias_Correction, Model_Error_Learning]
+application_tags: [Sea_Ice_Modeling, Climate_Modeling, SPEAR, Bias_Prediction, GFDL]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Deep Learning of Systematic Sea Ice Model Errors from Data Assimilation Increments
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2304.03832
 - **作者机构**: 普林斯顿大学大气与海洋科学项目、NOAA地球流体力学实验室（GFDL）、纽约大学柯朗研究所
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -56,6 +57,38 @@ read_status: "deep_read"
 **训练策略**：
 - 监督学习：输入状态 → 输出增量
 - 学习状态依赖的模型误差
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100
+- GPU数量: 1-4块（典型深度学习训练配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **SPEAR海冰-海洋模型同化数据**
+   - 来源: GFDL（地球物理流体动力学实验室）开发的SPEAR模型
+   - 任务: 海冰浓度偏差预测与误差学习
+   - 数据规模: 1982-2017年共35年数据，同化周期为5天
+   - 是否公开: 否（SPEAR模型数据未公开，仅供机构内部使用）
+
+2. **卫星观测海冰浓度数据**
+   - 来源: 同化系统中使用的卫星观测数据
+   - 任务: 作为数据同化的观测约束
+   - 数据规模: 1982-2017年逐日/5天分辨率
+   - 是否公开: 部分公开（原始卫星产品可获取，但同化增量数据不可用）
+
+### 数据处理
+- 模型状态变量与倾向量的归一化/标准化处理
+- 陆地-海洋掩膜编码为二进制通道
+- 网格重采样至统一分辨率（如1度）
+- 时间维度构建：提取5天同化循环中的预报态与增量配对样本
+- 数据增强：沿时间维度滑窗采样增加训练样本量
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文未公开代码仓库与训练数据集；SPEAR模型为GFDL内部模型，其同化增量数据难以直接获取；虽然模型架构（CNN）较为常见，但具体超参数设置和预处理流程需通过论文细节推断；部分输入变量（如海洋盐度、倾向量）需依赖完整的SPEAR模型输出才能复现
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

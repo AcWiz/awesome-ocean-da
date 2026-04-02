@@ -1,15 +1,20 @@
 ---
-title: "SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting"
-arXiv: "2404.14757"
-authors: ['Xiongxiao Xu', 'Illinois Institute of Technology', 'Canyu Chen', 'Illinois Institute of Technology', 'Yueqing Liang', 'Illinois Institute of Technology', 'Baixiang Huang', 'Emory University', 'Guangji Bai', 'Emory University', 'Liang Zhao', 'Emory University', 'Kai Shu', 'Emory University']
+title: 'SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting'
+arXiv: '2404.14757'
+authors: [Xiongxiao Xu, Illinois Institute of Technology, Canyu Chen, Illinois Institute
+    of Technology, Yueqing Liang, Illinois Institute of Technology, Baixiang Huang,
+  Emory University, Guangji Bai, Emory University, Liang Zhao, Emory University, Kai
+    Shu, Emory University]
 year: 2024
-source: "arXiv"
-venue: "CIKM"
-method_tags: ['mamba', 'transformer', 'mixture_of_experts', 'multi_scale', 'state_space_model', 'time_series']
-application_tags: ['time_series_forecasting', 'weather_prediction', 'traffic_prediction', 'energy_forecasting', 'sst_forecasting']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "read"
+source: arXiv
+venue: CIKM
+method_tags: [mamba, transformer, mixture_of_experts, multi_scale, state_space_model,
+  time_series]
+application_tags: [time_series_forecasting, weather_prediction, traffic_prediction,
+  energy_forecasting, sst_forecasting]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: read
 ---
 
 # 📑 SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting
@@ -52,6 +57,37 @@ Transformer的注意力机制虽能有效捕捉时序依赖，但其二次复杂
 ### 5.4 Patch分辨率定义
 $$R_{PTS} = \sqrt{\frac{P}{S_{tr}}}$$
 其中$P$为patch长度，$S_{tr}$为步幅。分辨率越低，越适合捕捉长期模式。
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB) 或 V100 (32GB)
+- GPU数量: 1块（单卡训练）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Weather（天气预测）**
+   - 来源: 公开气象数据集（类似Weather数据集中的数据）
+   - 任务: 天气预测
+   - 数据规模: 包含温度、湿度、风速等多变量时间序列
+   - 是否公开: 是
+
+2. **Traffic（交通流量预测）**
+   - 来源: 公开交通数据集（如PEMS数据集）
+   - 任务: 交通流量预测
+   - 数据规模: 多节点交通流量数据
+   - 是否公开: 是
+
+### 数据处理
+- 对原始时间序列进行多尺度Patching处理，分别生成低分辨率（长期模式）和高分辨率（短期变化）的Patched Time Series (PTS)
+- 使用Z-score标准化或Min-Max归一化处理输入数据
+- 按照Look-back窗口L和预测长度F划分训练/验证/测试集
+- 长程序列与短程序列独立处理后通过Router自适应融合
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：模型结合了Mamba和Transformer两大组件，架构复杂度较高；多尺度Patching和Router机制需要细致调参；代码已在GitHub公开（论文摘要提到），但完整实验细节在摘要中未完全披露，需参考官方代码仓库进行复现
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

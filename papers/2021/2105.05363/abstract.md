@@ -1,15 +1,17 @@
 ---
-title: "A Langevinized Ensemble Kalman Filter for Large-Scale Static and Dynamic Learning"
-arXiv: "2105.05363"
-authors: ["Peiyi Zhang", "Qifan Song", "Faming Liang"]
-year: "2021"
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["ensemble-kalman-filter", "langevin-dynamics", "stochastic-gradient-mcmc", "bayesian-inference", "particle-filtering"]
-application_tags: ["data-assimilation", "uncertainty-quantification", "bayesian-learning", "dynamic-state-estimation"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "priority-read"
+title: A Langevinized Ensemble Kalman Filter for Large-Scale Static and Dynamic Learning
+arXiv: '2105.05363'
+authors: [Peiyi Zhang, Qifan Song, Faming Liang]
+year: '2021'
+source: arXiv
+venue: arXiv
+method_tags: [ensemble_kalman_filter, langevin_dynamics, stochastic_gradient_mcmc,
+  bayesian_inference, particle_filtering]
+application_tags: [data_assimilation, uncertainty_quantification, bayesian_learning,
+  dynamic_state_estimation]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: priority-read
 ---
 
 ## TL;DR
@@ -147,3 +149,79 @@ The paper proves that under the big data regime (large T and Nt), the Langeviniz
 
 ### 5.1 方法一
 ### 5.2 方法二
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100或A100（深度学习与数据同化研究常用GPU型号）
+- GPU数量: 1-4块（典型学术实验配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Lorenz-96模型**
+   - 来源: 经典混沌系统（Lorenz, 1996），合成数据
+   - 任务: 非线性动态系统数据同化
+   - 数据规模: 大规模维度（如p=40或更高），多时间步T
+   - 是否公开: 是（标准基准测试）
+
+2. **高维变量选择数据集**
+   - 来源: 模拟数据或真实高维数据（如基因组数据）
+   - 任务: 贝叶斯稀疏回归
+   - 数据规模: 高维特征（p >> n）
+   - 是否公开: 不确定
+
+3. **贝叶斯深度学习数据集**
+   - 来源: 标准图像分类数据集（如MNIST/CIFAR或更大规模）
+   - 任务: 贝叶斯神经网络训练
+   - 数据规模: 大规模样本N和高维参数p
+   - 是否公开: 是
+
+4. **LSTM动态数据**
+   - 来源: 时间序列数据（如气象或金融数据）
+   - 任务: 递归神经网络动态学习
+   - 数据规模: 大规模时间序列
+   - 是否公开: 不确定
+
+### 数据处理
+- 子采样（Subsampling）：将大规模数据集划分为B=N/n个独立同分布块
+- 小批量梯度（Mini-batch）：每次迭代随机抽取n个样本进行计算
+- 数据标准化：对真实数据应用标准化预处理
+- 模型参数使用状态增广方法与其他参数联合估计
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文为2021年arXiv预印本，虽提供了算法详细步骤，但代码和数据未在文中明确说明公开；Lorenz-96等基准模型可复现，但真实应用场景数据集获取可能受限； Langevinized EnKF需要同时实现集合卡尔曼滤波框架与随机梯度Langevin采样，复现具有一定技术门槛。
+
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
+- **关键公式**: xxx
+- **物理意义 / 解释**: xxx
+
+
+## 📊 8. 实验分析（Experiments）
+- **对比方法**: xxx
+- **评估指标**: xxx
+- **主要结果**: xxx
+- **关键发现**: xxx
+
+## 🔍 9. 优缺点分析（Critical Review）
+**优点：** xxx
+**缺点：** xxx
+
+## 💡 10. 对我的启发（For My Research）
+- xxx
+
+## 🔮 11. Idea 扩展与下一步（Next Steps）
+1. xxx
+
+## 🧾 12. 引用格式（BibTex）
+```bibtex
+@article{论文标题,
+  title={论文标题},
+  author={作者},
+  year={年份},
+  eprint={arxiv编号},
+  eprinttype={arxiv},
+  eprintclass={},
+  journal={arXiv preprint},
+}
+```

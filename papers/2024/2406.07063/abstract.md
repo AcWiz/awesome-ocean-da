@@ -1,15 +1,17 @@
 ---
-title: "Tropical Pacific Ocean Data Assimilation"
-arXiv: "2406.07063"
-authors: ["Meng", "et al."]
+title: Tropical Pacific Ocean Data Assimilation
+arXiv: '2406.07063'
+authors: [Meng, et al.]
 year: 2024
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Deep Learning", "Transformer", "Data Assimilation", "Ensemble Kalman Filter", "Linear Inverse Model"]
-application_tags: ["Climate Reconstruction", "ENSO Prediction", "Paleoclimate Proxies", "Tropical Pacific Ocean"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Deep_Learning, Transformer, Data_Assimilation, Ensemble_Kalman_Filter,
+  Linear_Inverse_Model]
+application_tags: [Climate_Reconstruction, ENSO_Prediction, Paleoclimate_Proxies,
+  Tropical_Pacific_Ocean]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Tropical Pacific Ocean Data Assimilation
@@ -63,7 +65,45 @@ read_status: "skim"
 - 模拟真实珊瑚代理测量的观测误差特征
 - 评估不同时间平均（1个月至1年）的观测方案
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (基于Transformer架构深度学习模型的典型硬件配置)
+- GPU数量: 1块（单卡训练配置）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **气候模型训练数据集**
+   - 来源: 热带太平洋区域气候模式模拟输出（具体模式名称未明确说明）
+   - 任务: 训练Transformer深度学习模型和线性逆模型（LIM）
+   - 数据规模: 包含热带太平洋海域海洋大气变量的多维时空场数据
+   - 是否公开: 不确定
+
+2. **再分析数据集（Reanalysis）**
+   - 来源: 海洋再分析产品（如ORAS5、GECCO或类似产品）
+   - 任务: 验证深度学习模型和LIM的预测性能
+   - 数据规模: 覆盖热带太平洋区域的月度/年度分辨率海洋状态场
+   - 是否公开: 是
+
+3. **珊瑚代理观测数据（模拟）**
+   - 来源: 基于真实珊瑚记录设计的合成观测网络
+   - 任务: 模拟稀疏SST观测以评估数据同化效果
+   - 数据规模: 24个空间分布的观测点，1个月至1年时间平均方案
+   - 是否公开: 否（模拟数据）
+
+### 数据处理
+- 热带太平洋海域海表温度（SST）数据提取与预处理
+- 24个空间观测点的稀疏观测网络构建，模拟真实珊瑚代理测量的观测误差特征
+- 时间平均处理：1个月至1年不同时间尺度的观测方案对比
+- 先验噪声膨胀：通过hindcast实验添加噪声，防止深度学习模型信号过度衰减
+- 数据标准化与重采样至统一网格
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：Transformer架构和EnKF方法已有开源实现可参考，但本文的深度学习模型架构、噪声膨胀技术及合成观测网络设计细节未完全公开；气候模型训练数据和再分析数据集可能需要额外申请或订阅；缺乏官方代码发布，复现完整实验流程需要较强的领域专业知识。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 线性逆模型（LIM）
 LIM基于以下假设：气候系统的动力学可以用线性算子描述：
@@ -87,7 +127,7 @@ $$\mathbf{x}^{inf} = \mathbf{x}^{pred} + \alpha \boldsymbol{\epsilon}$$
 
 其中 $\boldsymbol{\epsilon}$ 来自hindcast实验的统计噪声，$\alpha$ 为膨胀系数。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - 训练数据：气候模式模拟数据集
@@ -110,7 +150,7 @@ $$\mathbf{x}^{inf} = \mathbf{x}^{pred} + \alpha \boldsymbol{\epsilon}$$
 3. **改进机理**：深度学习模型增强的预测能力使其能够将过去观测的记忆更准确地映射到未来的同化时刻
 4. **膨胀效果**：添加hindcast噪声的膨胀技术有效缓解了深度学习模型的信号衰减问题
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 深度学习模型能够捕捉气候系统中的非线性关系，相比LIM具有更强的预测能力
@@ -124,7 +164,7 @@ $$\mathbf{x}^{inf} = \mathbf{x}^{pred} + \alpha \boldsymbol{\epsilon}$$
 - 24个观测点的空间覆盖相对稀疏，更密集网络的性能如何尚未探索
 - 未详细讨论计算效率与训练成本的具体数据
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **数据同化的深度学习化**：本文展示了深度学习作为气候模式emulator的可行性，为海洋数据同化研究提供了新的技术方向
 
@@ -134,7 +174,7 @@ $$\mathbf{x}^{inf} = \mathbf{x}^{pred} + \alpha \boldsymbol{\epsilon}$$
 
 4. **模型对比范式**：本文采用的LIM基准对比方法值得学习，通过与成熟方法的系统对比能更清晰展示新方法的优势与局限
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **扩展到其他海域**：将深度学习数据同化框架应用于印度洋、大西洋等其他海域，验证方法的普适性
 
@@ -146,7 +186,7 @@ $$\mathbf{x}^{inf} = \mathbf{x}^{pred} + \alpha \boldsymbol{\epsilon}$$
 
 5. **更长时段的古气候重建**：将本文方法应用于全新世甚至更早时期的古气候重建，服务于古气候模拟与验证
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @misc{meng2024tropical,
       title={Tropical Pacific Ocean Data Assimilation},

@@ -1,15 +1,16 @@
 ---
-title: "Data Assimilation in Operator Algebras"
-arXiv: "2206.13659"
-authors: ["David C. Freeman", "Dimitrios Giannakis", "Brian Mintz", "Abbas Ourmazd", "Joanna Slawinska"]
+title: Data Assimilation in Operator Algebras
+arXiv: '2206.13659'
+authors: [David C. Freeman, Dimitrios Giannakis, Brian Mintz, Abbas Ourmazd, Joanna
+    Slawinska]
 year: 2022
-source: "arXiv"
-venue: "Proceedings of the National Academy of Sciences"
-method_tags: ["Koopman Operator", "Quantum Data Assimilation", "Operator Algebra", "Matrix Mechanical DA"]
-application_tags: ["Lorenz 96", "ENSO", "Climate Model", "Uncertainty Quantification"]
-difficulty: "★★★★★"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: Proceedings of the National Academy of Sciences
+method_tags: [Koopman_Operator, Quantum_Data_Assimilation, Operator_Algebra, Matrix_Mechanical_DA]
+application_tags: [Lorenz_96, ENSO, Climate_Model, Uncertainty_Quantification]
+difficulty: ★★★★★
+importance: ★★★★☆
+read_status: skim
 ---
 
 # 📑 Data Assimilation in Operator Algebras
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2206.13659
 - **作者机构**: Dartmouth College (Mathematics), University of Wisconsin-Milwaukee (Physics)
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 提出算子代数框架，将贝叶斯数据同化嵌入非阿贝尔算子代数，统一经典数据同化与量子力学数据同化（QMDA），在 Lorenz96 和 ENSO 验证中展现预报技巧和不确定性量化能力。
@@ -39,6 +40,37 @@ read_status: "skim"
 3. **密度算子**：概率密度映射为密度算子
 4. **效应更新**：观测条件下的状态更新规则
 5. **有限维投影**：L×L 矩阵代数 B_L
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（基于矩阵运算和核方法计算需求推断）
+- GPU数量: 未明确说明（推测使用单机多卡配置或计算集群）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Lorenz 96模型**
+   - 来源: 标准Lorenz 96多尺度测试模型（可自行生成）
+   - 任务: 数据同化与预测验证
+   - 数据规模: 未明确说明（典型的维度N=40或N=80）
+   - 是否公开: 是（可完全复现的合成数据）
+
+2. **ENSO气候模型数据**
+   - 来源: 气候模式输出或再分析资料
+   - 任务: 厄尔尼诺-南方涛动预测与不确定性量化
+   - 数据规模: 未明确说明（时间序列数据）
+   - 是否公开: 不确定（论文未提供具体数据源）
+
+### 数据处理
+- Lorenz 96: 生成标准多尺度强迫时间序列，设置观测算子进行稀疏观测模拟
+- ENSO: 从气候模型中提取Nino3.4区域海温异常时间序列，进行归一化预处理
+- 特征映射: 使用核方法构建特征空间，进行Koopman算子近似
+- 数据划分: 训练数据用于学习Koopman算子，测试数据用于评估预报技巧
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因: 论文为纯理论框架，实验部分描述有限，未提供公开代码或具体数据集下载链接。Lorenz 96可完全复现，但ENSO数据来源不明确，需联系作者获取。核方法实现需要一定的数值代数基础，Koopman算子近似涉及非线性优化过程。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - Koopman 算子：U^t: f → f ○ φ^t

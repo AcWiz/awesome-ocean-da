@@ -1,15 +1,16 @@
 ---
-title: "SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning"
-arXiv: "2506.23900"
-authors: ['Daniel Holmberg', 'Emanuela Clementi', 'Italo Epicoco', 'Teemu Roos']
+title: 'SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning'
+arXiv: '2506.23900'
+authors: [Daniel Holmberg, Emanuela Clementi, Italo Epicoco, Teemu Roos]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['GNN', 'graph_neural_network', 'hierarchical_mesh', 'regional_ocean', 'autoregressive']
-application_tags: ['Mediterranean_Sea', 'ocean_forecasting', 'SST', 'SSH', 'temperature', 'salinity', 'currents']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [GNN, graph_neural_network, hierarchical_mesh, regional_ocean, autoregressive]
+application_tags: [Mediterranean_Sea, ocean_forecasting, SST, SSH, temperature, salinity,
+  currents]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning
@@ -47,6 +48,50 @@ read_status: "deep_read"
 - **输入**: X_{t-1}, X_t（海洋状态）+ A_{t-1}, A_t, A_{t+1}（大气强迫）+ S（静态）
 - **输出**: 预测tendendy，叠加到当前状态获得预报
 - **动态边界条件**: 在直布罗陀海峡和达达尼尔海峡边界区域用真实海状态覆盖
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (根据深度学习海洋预报模型的典型配置推断)
+- GPU数量: 至少1块（推理时使用单GPU，耗时约20秒）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Mediterranean Reanalysis数据**
+   - 来源: CMCC Foundation / CMEMS (Copernicus Marine Service)
+   - 任务: 模型训练（1987-2021年共35年日平均数据）
+   - 数据规模: 1/24°水平分辨率，约4km网格
+   - 是否公开: 是（通过CMEMS获取）
+
+2. **MedFS业务化分析数据**
+   - 来源: CMEMS Mediterranean Forecasting System
+   - 任务: 模型微调（2022-2023年）及验证参考
+   - 数据规模: 141个深度层，涵盖18个以上深度层用于训练
+   - 是否公开: 是（通过CMEMS获取）
+
+3. **ERA5大气强迫数据**
+   - 来源: ECMWF (European Centre for Medium-Range Weather Forecasts)
+   - 任务: 训练阶段表面大气强迫（风应力、2米温度、海平面气压）
+   - 数据规模: 1987-2021年逐小时/日平均数据
+   - 是否公开: 是（公开可下载）
+
+4. **卫星观测数据**
+   - 来源: CMEMS L3卫星产品和多卫星高度计沿轨5Hz数据
+   - 任务: SST和SLA（海平面异常）验证
+   - 数据规模: 1/16°分辨率SST，多卫星高度计任务
+   - 是否公开: 是
+
+### 数据处理
+- 网格预处理：将不规则海洋网格转换为层次化图结构多分辨率网格表示
+- 变量处理：预测73个场，包括深度分辨的纬向/经向流、盐度、温度及海表面高度
+- 大气强迫编码：10米风应力分量、2米气温、海平面气压及年周期性（正弦/余弦编码）
+- 边界处理：直布罗陀海峡和达达尼尔海峡区域使用真实状态覆盖处理
+- 训练策略：主训练阶段（35年重分析数据）+ 微调阶段（2年业务分析数据）
+
+### 复现难度
+- ★★★★☆（较高难度）
+- 原因：虽然论文提供了方法概述和架构图，但未公开源代码仓库；数据可从CMEMS和ECMWF获取，但需要申请访问权限并处理复杂的海洋数据格式；层次化图神经网络的具体实现细节、损失函数设置、训练超参数等关键技术细节未完全披露；需要较长的训练周期（涉及35年以上的海洋再分析数据）。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **预报问题**: 映射历史状态序列 X_{-p:0} 到未来状态 X_{1:T}

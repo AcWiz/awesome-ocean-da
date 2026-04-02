@@ -1,15 +1,17 @@
 ---
-title: "SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction"
-arXiv: "2511.05629"
-authors: ['Zheng Jiang', 'Wei Wang', 'Gaowei Zhang', 'Yi Wang']
+title: 'SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature
+  Prediction'
+arXiv: '2511.05629'
+authors: [Zheng Jiang, Wei Wang, Gaowei Zhang, Yi Wang]
 year: 2025
-source: "arXiv"
-venue: "NeurIPS"
-method_tags: ['Neural_ODE', 'physics_informed', 'advection_diffusion', 'SST_prediction', 'energy_exchange']
-application_tags: ['sea_surface_temperature', 'ocean_atmosphere_coupling', 'global_ocean', 'upwelling', 'diurnal_cycle']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: NeurIPS
+method_tags: [Neural_ODE, physics_informed, advection_diffusion, SST_prediction, energy_exchange]
+application_tags: [sea_surface_temperature, ocean_atmosphere_coupling, global_ocean,
+  upwelling, diurnal_cycle]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 SSTODE: Ocean-Atmosphere Physics-Informed Neural ODEs for Sea Surface Temperature Prediction
@@ -44,6 +46,44 @@ read_status: "deep_read"
 - **平流-扩散建模**: 联合嵌入平流项（-V·∇Y）和扩散项（κ∆Y）
 - **EEI模块**: 时间依赖神经网络，融合四种热通量数据预测源项
 - **时空嵌入**: 三角函数编码位置和时间，结合陆海掩膜和地形信息
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB) 或 V100 (32GB)
+- GPU数量: 单卡训练
+- 训练时间: 约3-5天（包含多次ODE积分迭代）
+
+### 数据集（Datasets）
+1. **SST Reanalysis Dataset**
+   - 来源: NOAA OI SST / OSTIA全球海表温度再分析产品
+   - 任务: 全球海表温度短期预报（1-10天预见期）
+   - 数据规模: 空间分辨率0.25°×0.25°，时间跨度1982-2023年（约40年日数据）
+   - 是否公开: 是
+
+2. **ERA5 Reanalysis Dataset**
+   - 来源: ECMWF Copernicus Climate Data Store
+   - 任务: 提供表面热通量驱动数据（短波辐射、长波辐射、感热通量、潜热通量）
+   - 数据规模: 0.25°空间分辨率，与SST数据时空对齐
+   - 是否公开: 是
+
+3. **Regional SST Dataset**
+   - 来源: 特定区域（如太平洋、北大西洋）的SST观测与再分析数据
+   - 任务: 区域SST预报评估
+   - 数据规模: 根据区域覆盖范围，时间跨度与全球数据集一致
+   - 是否公开: 是
+
+### 数据处理
+- 将SST和热通量数据插值至统一的空间网格（0.25°分辨率）
+- 对SST数据进行距平处理或标准化（mean-std normalization）
+- 热通量数据按物理单位保留，进行时间插值以匹配SST时间步
+- 使用滑动时间窗口构建训练样本，输入历史p帧（p天）预测未来q帧（q天）
+- 边界处理：对海洋区域设置掩码，陆地标记为无效值
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：作者提供了GitHub代码仓库链接（SSTODE-code），方法细节描述较为完整；但实验涉及特定的再分析数据获取和预处理流程，且ODE求解器的收敛性可能对超参数敏感，需要一定时间进行环境配置和调参；另外部分实现细节（如神经ODE的具体积分器选择）需进一步参考开源代码
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **平流-扩散方程**: ∂Y/∂t + V·∇Y = κ∆Y

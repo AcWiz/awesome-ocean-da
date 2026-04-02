@@ -1,15 +1,16 @@
 ---
-title: "A Deep Learning Model for Forecasting Global Monthly Mean Sea Surface Temperature Anomalies"
-arXiv: "2202.09967"
-authors: ["John Taylor", "Ming Feng"]
+title: A Deep Learning Model for Forecasting Global Monthly Mean Sea Surface Temperature
+  Anomalies
+arXiv: '2202.09967'
+authors: [John Taylor, Ming Feng]
 year: 2022
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Unet-LSTM", "CNN", "LSTM", "ERA5", "Deep Learning"]
-application_tags: ["SST", "ENSO", "Marine Heatwaves", "Sea Surface Temperature"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Unet_LSTM, CNN, LSTM, ERA5, Deep_Learning]
+application_tags: [SST, ENSO, Marine_Heatwaves, Sea_Surface_Temperature]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # 📑 A Deep Learning Model for Forecasting Global Monthly Mean Sea Surface Temperature Anomalies
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2202.09967
 - **作者机构**: CSIRO Data61, Australian National University, Defence Science and Technology Group, CSIRO Oceans and Atmosphere
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 提出 Unet-LSTM 模型，利用 70 余年 ERA5 月平均 SST 和 2 米气温数据，实现全球 SST 月距平 24 个月预报，RMSE 低于 0.75°C。
@@ -34,6 +35,26 @@ read_status: "skim"
 
 ## 🏗️ 5. 方法详解（Methodology）
 模型采用 Unet-LSTM 架构，结合卷积编码器-解码器与 2D 卷积 LSTM 层。输入为 12 个月 SST 和 2 米气温数据（64×128 格点），输出为未来 2 个月预报。采用自回归方法扩展至 24 个月预报。使用 Adam 优化器，学习率 0.003，batch size 4，在 4 块 NVIDIA V100 GPU 上训练。
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- V100 GPU 上训练。
+- 100
+
+### 数据集（Datasets）
+1. **数据集**
+   - 1950年1月-2013年4月（760个时间步）
+   - 2013年5月-2021年（97个时间步）
+   - ERA5
+   - SST
+   - Sea Surface Temperature
+
+### 数据处理
+- （论文未明确描述数据处理流程）
+
+### 复现难度
+- （论文未提供代码链接或复现说明）
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - 海表温度距平：SST' = SST - SST_climatology（1981-2010 气候平均）

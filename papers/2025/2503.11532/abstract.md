@@ -1,15 +1,19 @@
 ---
-title: "Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters"
-arXiv: "2503.11532"
-authors: ["Clément Dorffer", "Frédéric Jourdin", "Thi Thuy Nga Nguyen", "Rodolphe Devillers", "David Mouillot", "Ronan Fablet"]
+title: Observation-only learning of neural mapping schemes for gappy satellite-derived
+  ocean colour parameters
+arXiv: '2503.11532'
+authors: [Clément Dorffer, Frédéric Jourdin, Thi Thuy Nga Nguyen, Rodolphe Devillers,
+  David Mouillot, Ronan Fablet]
 year: 2025
-source: "arXiv"
-venue: "IEEE Transactions on Geoscience and Remote Sensing"
-method_tags: ["Neural Data Assimilation", "4DVarNet", "Gap-filling", "Variational Inference", "Deep Learning", "Ocean Color Remote Sensing"]
-application_tags: ["Ocean Color", "Marine Ecology", "Coastal Monitoring", "Carbon Cycle", "Biogeochemistry"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: IEEE Transactions on Geoscience and Remote Sensing
+method_tags: [Neural_Data_Assimilation, 4DVarNet, Gap_filling, Variational_Inference,
+  Deep_Learning, Ocean_Color_Remote_Sensing]
+application_tags: [Ocean_Color, Marine_Ecology, Coastal_Monitoring, Carbon_Cycle,
+  Biogeochemistry]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters
@@ -75,7 +79,31 @@ read_status: "skim"
 4. **质量控制**：标识并处理异常值
 5. **缺失填充**：应用训练好的模型
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习神经映射方案的常用GPU）
+- GPU数量: 1-4块（单GPU训练或小型GPU集群）
+- 训练时间: 未明确说明具体训练时长
+
+### 数据集（Datasets）
+1. **CMEMS地中海多传感器海洋光学产品**
+   - 来源: 哥白尼海洋环境监测服务（CMEMS）
+   - 任务: 海表颗粒后向散射系数（BBP443）重建与Gap filling
+   - 数据规模: 地中海区域，多年卫星观测数据（MODIS、VIIRS、SeaWiFS、OLCI传感器），空间分辨率300m-1km，数据缺失率30%-70%
+   - 是否公开: 是（CMEMS提供免费公开访问）
+
+### 数据处理
+- **预处理流程**: 大气校正得到Level-2产品 → 多传感器数据融合（整合MODIS/VIIRS/SeaWiFS/OLCI）→ 网格化统一空间分辨率 → 质量控制标识异常值
+- **训练策略**: Patch-based重采样方法，从原始gappy数据中随机提取固定大小patch，对每个patch应用随机掩膜模拟不同缺失模式，输入4DVarNet学习从masked输入到完整输出的映射
+- **数据划分**: 训练集/验证集/测试集按时间或空间区域划分
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：数据集可通过CMEMS公开获取，但作者未在提供内容中说明具体代码实现细节、patch大小、超参数设置及训练策略的完整配置；神经映射方案（4DVarNet）的具体架构变体（CNN vs UNet）需参考原始论文或开源仓库；缺乏明确的训练时间、batch size、学习率等超参数信息会增加精确复现的难度。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 物理背景
 海表光学参数与水中颗粒物质的散射特性直接相关：
@@ -105,7 +133,7 @@ $$\mathcal{L}_{recon} = \|\mathbf{M} \odot (\hat{\mathbf{x}} - \mathbf{x}_{true}
 
 由于无法获得完整真值，实际训练时使用patch内观测数据作为局部参照
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - CMEMS地中海多传感器海表海洋颜色产品
@@ -139,7 +167,7 @@ $$\mathcal{L}_{recon} = \|\mathbf{M} \odot (\hat{\mathbf{x}} - \mathbf{x}_{true}
 - 多传感器融合比单一传感器提供更完整的数据覆盖
 - 即使在高度缺失区域（>50%缺失），仍能保持较高重建精度
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 创新性地解决了海洋遥感中"无完整真值"场景下的深度学习训练难题
@@ -153,14 +181,14 @@ $$\mathcal{L}_{recon} = \|\mathbf{M} \odot (\hat{\mathbf{x}} - \mathbf{x}_{true}
 - 训练策略对patch大小和重采样比例敏感，最优参数选择缺乏理论指导
 - 对Case-2 waters（沿海复杂水域）的处理效果未单独评估
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **观测驱动学习的范式**：patch重采样思想可用于解决其他海洋数据同化任务中真值缺失的问题
 2. **神经网络与数据同化融合**：4DVarNet展示了将物理约束嵌入深度学习框架的有效途径
 3. **多源数据融合**：多传感器协同方法可应用于海洋Argo浮标、高光谱影像等多源数据的整合
 4. **迁移学习潜力**：基于地中海训练的模型可尝试迁移至其他边缘海或海岸带区域
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **扩展研究区域**：将方法应用于南中国海、黑海等其他海域，验证泛化能力
 2. **多参数联合重建**：同时重建BBP443、叶绿素浓度、浊度等多个海洋参数
@@ -168,7 +196,7 @@ $$\mathcal{L}_{recon} = \|\mathbf{M} \odot (\hat{\mathbf{x}} - \mathbf{x}_{true}
 4. **实时更新系统**：结合在线学习机制，实现对不断获取的新数据的动态更新
 5. **与物理模式结合**：将重建结果作为海洋生物地球化学模型的输入，进行双向耦合
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{dorffer2025observation,
   title={Observation-only learning of neural mapping schemes for gappy satellite-derived ocean colour parameters},

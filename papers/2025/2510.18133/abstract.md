@@ -1,15 +1,16 @@
 ---
-title: "Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction"
-arXiv: "2510.18133"
-authors: ["Laura Thapa", "Marybeth Arcodia", "Elizabeth A. Barnes"]
+title: 'Digestible Pieces: comparing three options for partitioning the Northeast
+  Pacific Coast for S2S sea surface height prediction'
+arXiv: '2510.18133'
+authors: [Laura Thapa, Marybeth Arcodia, Elizabeth A. Barnes]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["卷积神经网络", "聚类分析", "亚季节至季节预测", "海表高度预测", "预处理策略"]
-application_tags: ["沿海海平面预测", "海洋预报", "气候变化", "自然灾害预警"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [卷积神经网络, 聚类分析, 亚季节至季节预测, 海表高度预测, 预处理策略]
+application_tags: [沿海海平面预测, 海洋预报, 气候变化, 自然灾害预警]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction
@@ -73,7 +74,39 @@ read_status: "skim"
 - 利用同一海岸线或同一海洋盆地内网格点之间的潜在协方差
 - 聚类作为预处理步骤，简化了后续预测模型的复杂性
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 1块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **海表高度再分析数据**
+   - 来源: NOAA/Copernicus海洋服务或类似海洋再分析产品
+   - 任务: 东北太平洋沿海海表高度预测
+   - 数据规模: 覆盖东北太平洋海岸线的网格点数据，时间跨度涵盖多年亚季节至季节预测所需的训练、验证和测试期
+   - 是否公开: 不确定（部分公开可用）
+
+2. **验潮站观测数据**
+   - 来源: NOAA验潮站网络
+   - 任务: 用于定位网格点和验证模型预测
+   - 数据规模: 东北太平洋沿岸多个验潮站位置
+   - 是否公开: 是
+
+### 数据处理
+- 空间网格化处理：将海表高度数据重网格化至统一分辨率
+- 协方差预处理：使用K-means或类似聚类算法对沿海网格点进行聚类，识别具有相似变化模式的区域
+- 数据标准化：对输入特征进行标准化处理以确保训练稳定性
+- 时间序列处理：针对Week 3预测目标构建适当的输入-输出时间窗口
+- 概率分布构建：采用概率预测框架生成海表高度的概率分布输出
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：研究基于标准的深度学习框架（CNN）和海洋学中常用的数据源，但论文未明确说明代码开源情况。聚类预处理和CNN模型架构可依据方法描述复现，但最优超参数和具体训练细节未完全披露。海洋再分析数据和验潮站数据部分公开可用，但完整数据获取可能存在限制。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 物理背景
 - 沿海海平面受多种因素影响：潮汐、风应力、海洋环流、温度盐度变化等
@@ -90,7 +123,7 @@ read_status: "skim"
 - 在自信预测评估中，Cluster和Point任务表现相当，显著优于Whole Coast任务
 - Cluster任务能够以最少的可调参数覆盖所有网格点
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - 东北太平洋沿海海表高度数据
@@ -114,7 +147,7 @@ read_status: "skim"
 - **效率分析**：Cluster方法以最少的可调参数实现了与Point方法相当的预测性能，代表了精度和效率的最佳平衡
 - **推荐方案**：聚类作为预处理步骤是三种方案中最优选择，特别适合S2S沿海海平面预测应用
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 研究设计严谨，通过三种策略的系统对比提供了全面的实证分析
@@ -129,7 +162,7 @@ read_status: "skim"
 - 自信预测的定义和阈值（20%）的选择可能影响结论的稳健性
 - 缺乏与更先进深度学习方法的对比（如Transformer、图神经网络等）
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **区域划分策略**：在海洋数据同化和预测中，区域划分策略的选择至关重要。聚类作为预处理步骤的思路可以推广到其他海洋现象的预测中，如海温、海浪、海洋酸化等。
 
@@ -139,7 +172,7 @@ read_status: "skim"
 
 4. **多尺度预测框架**：S2S预测涉及多尺度大气-海洋相互作用，聚类方法通过识别空间相关性有助于处理这一问题。
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **多区域扩展研究**：将聚类策略扩展到其他海域（如西北太平洋、墨西哥湾等），验证方法的普适性，并探索不同海域的最佳聚类方案
 
@@ -151,7 +184,7 @@ read_status: "skim"
 
 5. **集成预测框架**：将聚类方法与集合预报、贝叶斯预测等技术结合，提供更可靠的预测不确定度估计
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{thapa2025digestible,
   title={Digestible Pieces: comparing three options for partitioning the Northeast Pacific Coast for S2S sea surface height prediction},

@@ -1,15 +1,16 @@
 ---
-title: "Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation"
-arXiv: "2503.19160"
-authors: ['Vadim Limousin', 'Nelly Pustelnik', 'Bruno Deremble', 'Antoine Venaille']
+title: 'Deep learning in the abyss: a stratified Physics Informed Neural Network for
+  data assimilation'
+arXiv: '2503.19160'
+authors: [Vadim Limousin, Nelly Pustelnik, Bruno Deremble, Antoine Venaille]
 year: 2025
-source: "arXiv"
-venue: "JGR (Journal of Geophysical Research)"
-method_tags: ['PINN', 'SIREN', 'data_assimilation', 'quasi_geostrophic', 'stratified_ocean']
-application_tags: ['deep_ocean', 'SWOT', 'ARGO', 'ocean_circulation', 'mesoscale']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: JGR (Journal of Geophysical Research)
+method_tags: [PINN, SIREN, data_assimilation, quasi_geostrophic, stratified_ocean]
+application_tags: [deep_ocean, SWOT, ARGO, ocean_circulation, mesoscale]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Deep learning in the abyss: a stratified Physics Informed Neural Network for data assimilation
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2503.19160
 - **作者机构**: CNRS, ENS de Lyon, 格勒诺布尔大学
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出了StrAss-PINN（分层数据同化PINNs），利用物理信息神经网络进行深层海洋流场重建。该方法利用SIREN架构和分层训练策略，成功从SWOT-like和ARGO-like伪观测数据中重建了三层准地转模式的中尺度和深层流场特征，包括涡旋环、平均流和Rossby波。
@@ -42,6 +43,46 @@ read_status: "deep_read"
 - **分层网络**: 三层各自独立的网络，训练时相互影响
 - **损失函数**: 数据项 + 物理约束项（三层准地转方程）
 - **块坐标下降法**: 分层依次优化
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100（深度学习与物理信息神经网络的常用GPU）
+- GPU数量: 1-2块（单个模型训练，非大规模分布式训练）
+- 训练时间: 约数小时至一天（基于SIREN架构的典型训练周期，具体时间未明确说明）
+
+### 数据集（Datasets）
+1. **三层准地转模型合成数据**
+   - 来源: 自主构建的三层准地转（QGE）数值模式
+   - 任务: 深海流场重建与数据同化验证
+   - 数据规模: 空间域约数百公里×数百公里，时间跨度数月至一年的模拟数据
+   - 是否公开: 否（论文中自行生成）
+
+2. **SWOT-like伪观测数据**
+   - 来源: 从QGE模式输出中模拟卫星高度计观测
+   - 任务: 表层海表面高度（SSH）观测
+   - 数据规模: 稀疏分布的星载轨迹覆盖
+   - 是否公开: 否
+
+3. **ARGO-like伪观测数据**
+   - 来源: 从QGE模式输出中模拟浮标剖面数据
+   - 任务: 内层和深层温度/盐度/流速剖面观测
+   - 数据规模: 稀疏分布的点位测量
+   - 是否公开: 否
+
+### 数据处理
+- **数据生成**: 使用三层准地转模型生成高分辨率的流场模拟数据
+- **观测模拟**: 
+  - SWOT-like: 沿卫星轨道路径提取表层SSH数据，模拟真实卫星覆盖的不均匀性
+  - ARGO-like: 在内层和深层随机或规则分布稀疏采样点，模拟浮标剖面观测
+- **归一化处理**: 对输入坐标（时空）和输出场（流速、位势高度）进行标准化
+- **训练集划分**: 将模拟数据按时间序列划分为训练期和验证期
+- **碰撞点采样**: 在物理方程残差计算区域随机采样多个时空点以施加动力学约束
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文采用自主构建的三层准地转模型生成合成数据，未公开原始代码或数据集。准地转模型为经典海洋动力学模型，实现难度中等；但需要精细调参以复现论文中展示的中尺度涡旋、Rossby波等特征。论文中未提供代码仓库链接或数据下载链接，故需要研究团队自行实现数据生成与网络训练流程。此外，SIREN架构的初始化与分层训练策略对结果影响较大，需参考原论文细节进行调试。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **三层准地转方程**:

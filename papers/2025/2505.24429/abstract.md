@@ -1,15 +1,15 @@
 ---
-title: "Deep Learning for Canary Current Upwelling: A Case Study"
-arXiv: "2505.24429"
-authors: ['Giovanny A. Cuervo']
+title: 'Deep Learning for Canary Current Upwelling: A Case Study'
+arXiv: '2505.24429'
+authors: [Giovanny A. Cuervo]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['neural_operator', 'FNO', 'graph_network', 'data_driven', 'ocean_modeling']
-application_tags: ['canary_current', 'upwelling', 'ocean_forecasting', 'regional_ocean', 'marine_ecosystem']
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [neural_operator, FNO, graph_network, data_driven, ocean_modeling]
+application_tags: [canary_current, upwelling, ocean_forecasting, regional_ocean, marine_ecosystem]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Deep Learning for Canary Current Upwelling: A Case Study
@@ -17,7 +17,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2505.24429
 - **作者机构**: 大加那利群岛大学（Las Palmas, Gran Canaria）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文研究了数据驱动的深度学习方法在加那利洋流上升流系统预报中的应用。通过对比神经网络算子（Neural Operator）、图网络和传统数值模式的性能，证明了深度学习方法在高分辨率区域海洋预报中的可行性，为海洋渔业和生态系统管理提供了新的技术支撑。
@@ -44,6 +44,44 @@ read_status: "deep_read"
   - 传统数值模式（ROMS/MITgcm）
   - 神经网络算子（Neural Operator）
   - 图神经网络（Graph Network）
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 未明确说明（推测为单卡或少量GPU）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **Copernicus Marine Service L4 SST**
+   - 来源: 哥白尼海洋服务平台（Copernicus Marine Service）
+   - 任务: 海表温度（SST）预测
+   - 数据规模: 1982-2020年共39年的每日数据，覆盖加那利洋流上升流系统区域
+   - 是否公开: 是
+
+2. **GLORYS12V1**
+   - 来源: NEMO模型重分析产品
+   - 任务: 海洋状态参考基准对比
+   - 数据规模: 区域海洋再分析数据
+   - 是否公开: 是
+
+3. **PSY4V3R1**
+   - 来源: 海洋预报系统PSY4V3R1
+   - 任务: 业务化海洋预测对比
+   - 数据规模: 业务化预报数据
+   - 是否公开: 是
+
+### 数据处理
+- 使用卫星观测的L4 SST产品（间隙填充后的日均海表温度场）
+- 对研究区域（加那利洋流上升流系统）进行空间裁剪
+- 采用空间掩膜损失函数处理陆地区域的数据不连续性问题
+- 对数据进行标准化/归一化处理以适配神经网络输入
+- 按时间顺序划分为训练集、验证集和测试集
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：虽然数据集（Copernicus SST和GLORYS）可通过官方渠道获取，但论文未提供具体模型代码和训练超参数细节，且GraphCast等基础模型的完整实现较复杂。此外，陆地掩膜和空间处理等特定操作缺乏明确说明，增加了完全复现的难度。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **上升流动力学**:

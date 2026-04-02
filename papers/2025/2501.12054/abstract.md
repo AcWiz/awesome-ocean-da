@@ -1,15 +1,15 @@
 ---
-title: "ORCAst: Operational High-Resolution Current Forecasts"
-arXiv: "2501.12054"
-authors: ["Garcia", "et al."]
+title: 'ORCAst: Operational High-Resolution Current Forecasts'
+arXiv: '2501.12054'
+authors: [Garcia, et al.]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["深度学习", "多阶段学习", "多分支编码器-解码器", "海洋遥感", "时序预测"]
-application_tags: ["海洋表面流预测", "海表面高度", "地转流估计", "卫星高度计", "漂流浮标数据同化"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [深度学习, 多阶段学习, 多分支编码器_解码器, 海洋遥感, 时序预测]
+application_tags: [海洋表面流预测, 海表面高度, 地转流估计, 卫星高度计, 漂流浮标数据同化]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # ORCAst: Operational High-Resolution Current Forecasts
@@ -61,7 +61,58 @@ ORCAst采用**多分支（multi-arm）编码器-解码器**架构，包含两个
 - 利用地转流平衡约束（科里奥利力与压力梯度力平衡）
 - 考虑海表面温度（SST）和叶绿素-a（CHL）等被动示踪剂的平流输运关系
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 1-4块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **SWOT卫星高度计数据**
+   - 来源: NASA/CNES SWOT卫星任务
+   - 任务: 海表面高度（SSH）预测、地转流估计
+   - 数据规模: 高分辨率SSH观测（亚公里级），120km swath覆盖
+   - 是否公开: 是（需申请获取）
+
+2. **Nadir卫星高度计数据**
+   - 来源: Jason系列、Sentinel-6等任务，通过AVISO/DUACS处理
+   - 任务: SSH和地转流预测
+   - 数据规模: 沿轨稀疏采样数据，全球覆盖
+   - 是否公开: 是（AVISO官网可获取）
+
+3. **漂流浮标数据（Drifters）**
+   - 来源: Global Drifter Programme (GDP)，由NOAA/Ifremer维护
+   - 任务: 海洋表面流预测的真值、微调训练
+   - 数据规模: 全球约1500-2000个漂流浮标，稀疏分布
+   - 是否公开: 是（GDP官网可下载）
+
+4. **SST海表面温度数据**
+   - 来源: MODIS等多光谱光学卫星
+   - 任务: 被动示踪剂平流输运特征输入
+   - 数据规模: 高分辨率（300m-1km），受云层遮挡影响
+   - 是否公开: 是（NASA PO.DAAC可获取）
+
+5. **叶绿素-a（CHL）数据**
+   - 来源: 多光谱光学卫星
+   - 任务: 被动示踪剂平流输运特征输入
+   - 数据规模: 高分辨率（300m-1km）
+   - 是否公开: 是
+
+### 数据处理
+- **时空插值**: 对稀疏的沿轨高度计数据进行网格化插值，生成规则时空分辨率的SSH场
+- **坐标系统**: 采用经纬度网格或Mercator投影
+- **数据归一化**: 对SSH、SST、CHL等物理量进行标准化处理
+- **缺失值处理**: 对云遮挡导致的SST/CHL缺失区域进行处理
+- **时间序列构建**: 将历史观测数据构建为时间序列样本，用于时序预测任务
+- **地理分域划分**: 根据研究区域进行数据划分，支持分区域训练
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：漂流浮标数据和主流卫星高度计数据（AVISO DUACS）可公开获取，SWOT数据需申请；多阶段多分支深度学习模型架构复杂，需较多调参经验；论文未提供具体代码实现和超参数细节；但核心方法描述较为完整，提供了模型架构图和技术路线
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 地转流平衡
 在远离赤道的区域，地转流是海洋表面流的主要分量。地转流平衡可表示为：
@@ -79,7 +130,7 @@ SST和CHL作为被动标量，被海洋流场输运：
 $$\frac{\partial S}{\partial t} + \vec{u} \cdot \nabla S = 0$$
 其中 $S$ 为SST或CHL浓度。
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - Nadir卫星高度计数据
@@ -99,7 +150,7 @@ $$\frac{\partial S}{\partial t} + \vec{u} \cdot \nabla S = 0$$
 - ORCAst在即时预报（nowcast）和预报（forecast）任务上均优于各种最先进方法
 - 分区域训练策略有效提升了特定区域的预测性能
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 完全基于真实数据训练，避免了模拟数据到真实数据的迁移问题
@@ -113,21 +164,21 @@ $$\frac{\partial S}{\partial t} + \vec{u} \cdot \nabla S = 0$$
 - 分区域训练可能限制模型的全局泛化能力
 - 对赤道区域地转流平衡失效的情况处理不明确
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **多阶段学习策略**：对于海洋数据同化任务，可以采用类似的渐进式学习策略，先利用数据丰富的变量学习，再迁移到稀疏变量
 2. **物理约束融入**：在地学深度学习模型中显式嵌入物理规律（如地转流平衡）可提升预测的物理一致性
 3. **多源数据融合**：有效整合卫星遥感和现场观测数据是提升海洋状态估计的关键
 4. **分区域建模**：针对不同海洋动力学特征区域进行专门建模可能提升局部预测精度
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **结合数值模式**：将ORCAst的预测结果作为数值海洋模式的初始化或边界条件，探索混合建模方法
 2. **扩展到其他海洋变量**：将多阶段学习框架扩展到温度、盐度等其他海洋状态变量的预测
 3. **引入注意力机制**：在多分支编码器-解码器中加入时空注意力机制，提升对多尺度海洋过程的建模能力
 4. **不确定性量化**：开发预测不确定性的估计模块，为业务化应用提供置信区间
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Garcia2025ORCAst,
   title={ORCAst: Operational High-Resolution Current Forecasts},

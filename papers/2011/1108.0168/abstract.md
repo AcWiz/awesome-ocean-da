@@ -1,15 +1,16 @@
 ---
-title: "Particle Kalman Filtering: A Nonlinear Bayesian Framework for Ensemble Kalman Filters"
-arXiv: "1108.0168"
-authors: ["Ibrahim Hoteit", "Xiaodong Luo", "Dinh-Tuan Pham"]
+title: 'Particle Kalman Filtering: A Nonlinear Bayesian Framework for Ensemble Kalman
+  Filters'
+arXiv: '1108.0168'
+authors: [Ibrahim Hoteit, Xiaodong Luo, Dinh-Tuan Pham]
 year: 2011
-source: "arXiv"
-venue: "Monthly Weather Review"
-method_tags: ["EnKF", "Particle Filter", "Gaussian Mixture", "Data Assimilation"]
-application_tags: ["Atmospheric Assimilation", "Oceanic Assimilation", "Lorenz-96"]
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: Monthly Weather Review
+method_tags: [EnKF, Particle_Filter, Gaussian_Mixture, Data_Assimilation]
+application_tags: [Atmospheric_Assimilation, Oceanic_Assimilation, Lorenz_96]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Particle Kalman Filtering: A Nonlinear Bayesian Framework for Ensemble Kalman Filters
@@ -17,7 +18,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/1108.0168
 - **作者机构**: King Abdullah University of Sciences and Technology (KAUST); Centre National de la Recherche Scientifique (CNRS), France
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 
@@ -57,6 +58,33 @@ $$p_k^s(x_k|y_{1:k}) = \sum_{i=1}^{N} w_k^i N(x_k; \hat{x}_k^{s,i}, \hat{P}_k^{s
 - c→0：趋向粒子滤波器的蒙特卡洛近似
 - c→1：趋向标准EnKF的单高斯近似
 - 0<c<1：在两者之间插值
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: 未使用GPU（2011年数据同化研究主要基于CPU计算）
+- GPU数量: 不适用
+- 训练时间: 未明确说明具体时间（取决于模型维度和集合成员数量）
+
+### 数据集（Datasets）
+1. **Lorenz-96模型**
+   - 来源: 经典混沌动力系统模型（Lorenz, 1996）
+   - 任务: 非线性数据同化基准测试
+   - 数据规模: 典型设置为40维状态空间，观测维度为40，实验时长为数千个时间步
+   - 是否公开: 是（标准测试模型）
+
+### 数据处理
+- Lorenz-96模型通过四阶Runge-Kutta方法进行数值积分
+- 状态向量维度：40个变量
+- 观测算子：直接观测全部状态变量（完整观测）
+- 观测噪声协方差：R = I（单位矩阵）
+- 模型噪声协方差：Q（根据实验设置调整）
+- 集合成员数：N = 20~100（根据实验配置）
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：Lorenz-96模型为公开的标准测试模型，算法原理在论文中有详细描述；但2011年论文未提供开源代码实现，部分实验参数（如具体的时间步长、噪声水平）需参考原文或根据经验设定；缺乏标准化的评估基准和对比实现。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

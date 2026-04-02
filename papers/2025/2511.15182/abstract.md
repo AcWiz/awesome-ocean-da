@@ -1,15 +1,18 @@
 ---
-title: "SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing"
-arXiv: "2511.15182"
-authors: ["Subhashis Hazarika", "Leonard Lupin-Jimenez", "Rohit Vuppala", "Ashesh Chattopadhyay", "Hon Yung Wong"]
+title: 'SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather
+  Routing'
+arXiv: '2511.15182'
+authors: [Subhashis Hazarika, Leonard Lupin-Jimenez, Rohit Vuppala, Ashesh Chattopadhyay,
+  Hon Yung Wong]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ["Fourier Neural Operator", "Physics-informed Neural Network", "Visual Analytics", "Weather Routing"]
-application_tags: ["Maritime Transport", "Wave Forecasting", "Emissions Analytics", "Decision Support System"]
-difficulty: "★★★☆☆"
-importance: "★★★★☆"
-read_status: "skim"
+source: arXiv
+venue: arXiv
+method_tags: [Fourier_Neural_Operator, Physics_informed_Neural_Network, Visual_Analytics,
+  Weather_Routing]
+application_tags: [Maritime_Transport, Wave_Forecasting, Emissions_Analytics, Decision_Support_System]
+difficulty: ★★★☆☆
+importance: ★★★★☆
+read_status: skim
 ---
 
 # SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing
@@ -17,7 +20,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2511.15182
 - **作者机构**: [Subhashis Hazarika, Leonard Lupin-Jimenez, Rohit Vuppala, Ashesh Chattopadhyay, Hon Yung Wong] (机构信息未在文中明确列出)
-- **开源代码**: None（文中未提及开源代码仓库）
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 SWR-Viz是一个结合物理信息神经网络波高预报模型与船舶航线优化的AI辅助交互式可视化分析框架，能够从当前海况快速生成数小时预报，支持数据同化与"数字预演"式的航线情景分析，在日本沿海和墨西哥湾航线的评估中表现出良好的预报稳定性和实际应用价值。
@@ -64,7 +67,45 @@ SWR-Viz框架主要由三个核心组件构成：
 - **人类在环操作**：设计为人类决策支持系统，而非完全自动化
 - **分辨率无关性**：FNO固有的分辨率和网格无关性，可跨任意空间分辨率泛化
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 1-2块（单GPU训练）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **ERA5海浪再分析数据**
+   - 来源: 欧洲中期天气预报中心（ECMWF）
+   - 任务: 波高预报模型训练与验证
+   - 数据规模: 日本沿海与墨西哥湾区域，覆盖数年历史数据
+   - 是否公开: 是
+
+2. **SIMROUTE航线数据**
+   - 来源: SIMROUTE开源航线引擎
+   - 任务: 航线优化基准
+   - 数据规模: 多条跨洋航线
+   - 是否公开: 是（开源）
+
+3. **稀疏观测数据**
+   - 来源: 海上浮标与卫星高度计
+   - 任务: 数据同化与模型校正
+   - 数据规模: 有限数量的时空稀疏点
+   - 是否公开: 部分公开
+
+### 数据处理
+- 对ERA5再分析波高数据进行时空切片，提取海表波高、有效波高等物理量
+- 采用线性插值与重网格化处理，统一不同来源数据的空间分辨率
+- 实施稀疏观测数据同化，通过最优插值方法融合站点观测数据
+- 对气象强迫场（风场、气压场）进行归一化预处理
+- 利用硬约束与软约束机制确保预报结果符合物理守恒定律
+
+### 复现难度
+- ★★★☆☆（3星）
+- 原因：论文基于FNO的波高预报模型和SIMROUTE开源航线引擎具有较强的可复现性，ERA5数据集可公开获取。然而，文中未提供代码仓库链接，核心的SWR-Viz交互式可视化框架实现细节缺失，且实验中的航线案例未完全公开，复现完整框架存在一定难度。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 ### 6.1 Fourier Neural Operator (FNO)
 FNO是一种用于学习偏微分方程解算子的深度学习架构：
@@ -91,7 +132,7 @@ FNO是一种用于学习偏微分方程解算子的深度学习架构：
 - 浮标网络数据
 - 利用FNO的网格无关性处理不规则采样
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**:
 - 日本沿海（Japan Coast）航线
@@ -115,7 +156,7 @@ FNO是一种用于学习偏微分方程解算子的深度学习架构：
 4. 成功识别高减排潜力航段
 5. 数字预演功能在实际航线分析中展现价值
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**:
 - 轻量级AI推理支持船上快速决策
@@ -131,7 +172,7 @@ FNO是一种用于学习偏微分方程解算子的深度学习架构：
 - 专家用户评估的样本量和多样性可能有限
 - 对于极端海况的鲁棒性未充分讨论
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. **物理约束的融合方式**：硬约束和软约束结合的方法为海洋数据同化中的模型-观测融合提供了新思路
 2. **分辨率无关性设计**：FNO的网格无关性可应用于海洋数据的多尺度融合问题
@@ -139,7 +180,7 @@ FNO是一种用于学习偏微分方程解算子的深度学习架构：
 4. **决策支持而非替代**：该框架定位为决策支持工具，这一定位对于复杂的海洋应用场景具有普遍参考价值
 5. **轻量化部署思路**：将复杂模型轻量化部署到边缘设备的方法值得借鉴
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. **扩展到多物理场耦合**：将FNO预报扩展到包括海流、盐度、温度等多海洋变量，实现更全面的海洋状态感知
 2. **结合海洋数据同化系统**：与现有海洋同化系统（如HYCOM、ROMS）集成，提高长期预报精度
@@ -147,7 +188,7 @@ FNO是一种用于学习偏微分方程解算子的深度学习架构：
 4. **极端事件预警**：针对台风、风暴等极端海况开发专门模块，提高航运安全性
 5. **多目标优化扩展**：将航线优化扩展到更多目标（如振动舒适度、货物保护），同时考虑经济和环境影响
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{Hazarika2025SWViz,
   title={SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather Routing},

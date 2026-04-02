@@ -1,15 +1,17 @@
 ---
-title: "Efficient Data Assimilation with Time Conditional Gaussian Koopman Network for Partially Observed Nonlinear Dynamical Systems"
-arXiv: "2507.08749"
-authors: ['Zhongrui Wang', 'Chuanqi Chen', 'Jin-Long Wu', 'Long Wu', 'Nan Chen']
+title: Efficient Data Assimilation with Time Conditional Gaussian Koopman Network
+  for Partially Observed Nonlinear Dynamical Systems
+arXiv: '2507.08749'
+authors: [Zhongrui Wang, Chuanqi Chen, Jin-Long Wu, Long Wu, Nan Chen]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['Koopman_Operator', 'conditional_Gaussian', 'neural_network', 'data_assimilation', 'state_forecast']
-application_tags: ['Lorenz96', 'QG_model', 'ocean_dynamics', 'turbulence', 'chaotic_systems']
-difficulty: "★★★★☆"
-importance: "★★★★☆"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [Koopman_Operator, conditional_Gaussian, neural_network, data_assimilation,
+  state_forecast]
+application_tags: [Lorenz96, QG_model, ocean_dynamics, turbulence, chaotic_systems]
+difficulty: ★★★★☆
+importance: ★★★★☆
+read_status: deep_read
 ---
 
 # 📑 Efficient Data Assimilation with Time Conditional Gaussian Koopman Network for Partially Observed Nonlinear Dynamical Systems
@@ -17,7 +19,7 @@ read_status: "deep_read"
 ## 📌 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/2507.08749
 - **作者机构**: 威斯康星大学麦迪逊分校（数学系、机械系）
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 🧠 2. 一句话总结（TL;DR）
 本文提出时间条件高斯Koopman网络（TC-GKN），通过条件高斯结构在低维潜在空间实现解析后验更新，无需集合预报即可高效完成部分观测非线性动力系统的状态估计和预报，同时捕捉系统的高维非线性动力学。
@@ -42,6 +44,44 @@ read_status: "deep_read"
 - **两阶段训练**: Stage 1学习自编码器，Stage 2加入数据同化损失
 - **解析滤波**: 条件高斯滤波公式提供闭式后验均值和协方差
 - **低秩参数化**: SVD分解减少参数量
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100
+- GPU数量: 未明确说明（推测使用单卡或少量GPU即可完成训练）
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **粘性Burgers方程**
+   - 来源: 通过数值模拟生成（使用高分辨率数值格式求解PDE）
+   - 任务: 状态预测与数据同化
+   - 数据规模: 高维空间离散化（如256或512个空间网格点）
+   - 是否公开: 否（需自行数值模拟生成）
+
+2. **Kuramoto-Sivashinsky方程**
+   - 来源: 通过数值模拟生成
+   - 任务: 混沌系统状态预测与数据同化
+   - 数据规模: 典型空间离散化（如L=16π或L=22的网格）
+   - 是否公开: 否
+
+3. **二维Navier-Stokes方程**
+   - 来源: 通过直接数值模拟（DNS）生成
+   - 任务: 湍流系统的状态估计与预测
+   - 数据规模: 雷诺数Re=1000至Re=10000，高分辨率网格（如128×128或256×256）
+   - 是否公开: 否
+
+### 数据处理
+- 空间离散化：使用有限差分或谱方法对PDE进行空间离散化
+- 时间离散化：采用粗时间步长Δt（远大于数值积分步长δt）进行数据采样
+- 部分观测处理：仅观测系统状态的子集（子空间），用于测试数据同化性能
+- Koopman嵌入：通过神经网络学习观测函数的潜在表示，实现条件线性化
+- 数据标准化：未明确说明，通常进行归一化处理
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：论文未明确提供代码开源链接或数据集下载链接；涉及的PDE数值模拟数据集需自行生成或需熟悉相关领域标准生成流程；但作为arXiv论文（2507.08749），通常作者会在后续公开代码实现，复现难度相对可控。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **Koopman算子**: 潜在空间线性演化 z_{n+1} = K z_n

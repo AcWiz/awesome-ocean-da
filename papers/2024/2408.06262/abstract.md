@@ -1,15 +1,19 @@
 ---
-title: "DUNE: A MACHINE LEARNING DEEPUNET++BASED ENSEMBLE APPROACH TO MONTHLY, SEASONAL AND ANNUAL CLIMATE FORECASTING"
-arXiv: "2408.06262"
-authors: ['Pratik Shukla', 'University of Maryland Baltimore County', 'Milton Halem', 'University of Maryland Baltimore County']
+title: 'DUNE: A MACHINE LEARNING DEEPUNET++BASED ENSEMBLE APPROACH TO MONTHLY, SEASONAL
+  AND ANNUAL CLIMATE FORECASTING'
+arXiv: '2408.06262'
+authors: [Pratik Shukla, University of Maryland Baltimore County, Milton Halem, University
+    of Maryland Baltimore County]
 year: 2024
-source: "arXiv"
-venue: "ICML"
-method_tags: ['unet', 'unetpp', 'ensemble', 'convolutional_neural_network', 'residual_block', 'moving_window']
-application_tags: ['sst_prediction', 't2m_prediction', 's2s_forecasting', 'climate_forecasting', 'seasonal_prediction']
-difficulty: "★★★☆☆"
-importance: "★★★★★"
-read_status: "read"
+source: arXiv
+venue: ICML
+method_tags: [unet, unetpp, ensemble, convolutional_neural_network, residual_block,
+  moving_window]
+application_tags: [sst_prediction, t2m_prediction, s2s_forecasting, climate_forecasting,
+  seasonal_prediction]
+difficulty: ★★★☆☆
+importance: ★★★★★
+read_status: read
 ---
 
 # 📑 DUNE: A MACHINE LEARNING DEEPUNET++BASED ENSEMBLE APPROACH
@@ -59,6 +63,23 @@ read_status: "read"
 - **批大小**：4
 - **训练时长**：500 epochs（早停：100 epochs无改善）
 - **计算资源**：8×Tesla A100-40GB GPUs
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- A100-40GB GPUs
+
+### 数据集（Datasets）
+1. **数据集**
+   - ERA5
+   - NOAA
+   - SST
+
+### 数据处理
+- （论文未明确描述数据处理流程）
+
+### 复现难度
+- （论文未提供代码链接或复现说明）
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 

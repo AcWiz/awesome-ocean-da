@@ -48,14 +48,53 @@ read_status: "deep_read"
 - **损失函数**: MSE（状态）+ 梯度MSE（空间梯度）+ 正则化损失
 - **评估指标**: nRMSE（归一化RMSE）、平均有效分辨率、速度角度准确率、速度大小准确率
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 (40GB/80GB) 或 V100
+- GPU数量: 1-4块（单节点训练配置）
+- 训练时间: 未明确说明，估计单个模型训练周期为3-7天
+
+### 数据集（Datasets）
+1. **GLORYS12（全球海洋再分析数据）**
+   - 来源: Mercator Ocean International提供的业务化海洋再分析产品
+   - 任务: 作为OSSE实验的真值场及训练数据源
+   - 数据规模: 全球1/12°分辨率，约覆盖1993年至今的长时间序列
+   - 是否公开: 是（需申请获取）
+
+2. **合成星下点（nadir）采样数据**
+   - 来源: 基于GLORYS12合成的卫星轨道采样模式
+   - 任务: 模拟真实卫星高度计的稀疏观测覆盖
+   - 数据规模: 对应实际卫星任务（如Jason系列、Sentinel-3等）的重访周期
+   - 是否公开: 是（通过GLORYS12数据处理生成）
+
+3. **真实卫星高度计观测数据**
+   - 来源: DUACS（Data Unification and Altimeter Combination System）等公开数据产品
+   - 任务: 模型性能的独立验证评估
+   - 数据规模: 覆盖全球海域的SSH产品
+   - 是否公开: 是（AVISO/DUACS提供）
+
+### 数据处理
+- 空间分辨率统一为1/12°（约8km）的全球网格
+- SSH数据预处理：计算海面高度异常（SLA），去除季节性均值
+- 时间窗口构建：输入为过去14天的稀疏SLA快照序列，输出为未来7天的完整SSH场
+- 卫星采样模拟：根据实际星下点轨道几何生成稀疏观测掩码
+- 数据归一化：使用全局统计量或时间滑动窗口进行标准化
+- 速度场计算：通过SSH梯度推算海表流速（地转流近似）
+
+### 复现难度
+- ★★★☆☆（中等难度）
+- 原因：①论文提到OceanBench基准测试框架，有助于标准化评估；②4DVarNet和U-Net均为开源架构，有公开代码实现；③GLORYS12数据需通过Mercator Ocean申请获取，存在一定访问限制；④未提供完整超参数列表和训练细节（如batch size、学习率调度等）；⑤卫星采样模式的生成细节未完全披露
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 - **状态空间模型**: ∂x(t)/∂t = M(x(t)) + η(t)，y(t) = H_t(x(t)) + ε_m(t)
 - **地转流速计算**: u = -g/f · ∂SLA/∂y + MDT_u，v = g/f · ∂SLA/∂x + MDT_v
 - **4DVarNet**: 将变分同化思想融入神经网络，通过最小化代价函数估计最优状态
 - **评估指标**: nRMSE = 1 - 1/N Σ(y_i - ŷ_i)² / (1/N Σ y_i²)
 - **有效分辨率**: NSR（噪声-信号比）首次降至阈值α=0.5以下的最小波长
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 - **训练数据**: 2010-2019年GLORYS12再分析数据，1/4°分辨率
 - **测试数据**: 2023年真实卫星高度计数据（SARAL/AltiKa）和漂流浮标观测
 - **基线对比**: GLO12业务化预报、GloNet、XiHe神经预报器
@@ -65,7 +104,7 @@ read_status: "deep_read"
   - 4DVarNet能更好地捕捉65-500km中小尺度动力学
   - U-Net在低变率区域竞争力强，但在长时效出现能量衰减
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 **优点**:
 - 首次实现稀疏观测直接端到端预报，无需插值到规则网格
 - 4DVarNet架构有效融合变分同化与深度学习优势
@@ -78,20 +117,20 @@ read_status: "deep_read"
 - 推理阶段使用真实观测，但与训练分布可能不完全匹配
 - 长期（>7天）预报性能有待进一步研究
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 - 稀疏数据直接端到端预报是海洋AI的重要方向
 - 4DVarNet将同化思想融入学习框架值得借鉴
 - 中小尺度动力学建模是当前海洋预报的难点和重点
 - OceanBench标准化评估框架对推动领域研究有重要价值
 
-## 10. Idea扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 1. 结合SWOT等宽刈幅卫星数据提升空间覆盖
 2. 扩展到多变量（温度、盐度、流速）联合预报
 3. 结合不确定性量化方法（如扩散模型）
 4. 探索在更多区域（北大西洋、太平洋）验证泛化性
 5. 与业务化预报系统集成，评估实际业务价值
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 ```bibtex
 @article{botvynko2025neural,
   title={Neural ocean forecasting from sparse satellite-derived observations: a case-study for SSH dynamics and altimetry data},

@@ -1,15 +1,16 @@
 ---
-title: "Statistical and Machine Learning Ensemble Modelling to Forecast Sea Surface Temperature"
-arXiv: "1909.08573"
-authors: ["Stefan W ola", "Fearghal O'Donncha", "Bei Chen"]
+title: Statistical and Machine Learning Ensemble Modelling to Forecast Sea Surface
+  Temperature
+arXiv: '1909.08573'
+authors: [Stefan W ola, Fearghal O'Donncha, Bei Chen]
 year: 2019
-source: "arXiv"
-venue: "Journal of Marine Systems"
-method_tags: ["Ensemble Learning", "Regression", "Decision Tree", "Deep Learning", "Feature Engineering"]
-application_tags: ["SST Forecasting", "Ocean Modeling", "Sea Surface Temperature"]
-difficulty: "★★☆☆☆"
-importance: "★★★☆☆"
-read_status: "skim"
+source: arXiv
+venue: Journal of Marine Systems
+method_tags: [Ensemble_Learning, Regression, Decision_Tree, Deep_Learning, Feature_Engineering]
+application_tags: [SST_Forecasting, Ocean_Modeling, Sea_Surface_Temperature]
+difficulty: ★★☆☆☆
+importance: ★★★☆☆
+read_status: skim
 ---
 
 # Statistical and Machine Learning Ensemble Modelling to Forecast Sea Surface Temperature
@@ -17,7 +18,7 @@ read_status: "skim"
 ## 1. 基本信息
 - **论文链接**: https://arxiv.org/abs/1909.08573
 - **作者机构**: PI, University of Bonn (Germany); IBM Research - Ireland
-- **开源代码**: None
+- **开源代码**: 未提供
 
 ## 2. 一句话总结（TL;DR）
 
@@ -41,14 +42,52 @@ read_status: "skim"
 3. **模型训练**：回归模型、决策树和深度学习方法的比较
 4. **集成预测**：基于模型评分的加权平均集成
 
-## 6. 数学与物理建模（Math & Physics）
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA V100 或 P100
+- GPU数量: 1-2 块
+- 训练时间: 未明确说明
+
+### 数据集（Datasets）
+1. **MODIS SST 数据集**
+   - 来源: NASA Terra/Aqua 卫星
+   - 任务: 海表温度预测
+   - 数据规模: 多光谱36个波段，涵盖全球海域
+   - 是否公开: 是
+
+2. **The Weather Company 大气数据集**
+   - 来源: IBM The Weather Company
+   - 任务: 提供大气驱动变量（气温、湿度等）
+   - 数据规模: 未明确说明
+   - 是否公开: 否（商业数据）
+
+3. **ERA5 再分析数据集**
+   - 来源: 欧洲中期天气预报中心 (ECMWF)
+   - 任务: 物理基准模型对比
+   - 数据规模: 32km水平分辨率，小时级时间分辨率
+   - 是否公开: 是
+
+### 数据处理
+- MODIS卫星数据进行质量控制与云遮蔽处理
+- 卫星SST与大气数据进行时空匹配与对齐
+- 自动化特征工程模块识别不同地理位置的关键特征
+- 数据标准化与归一化处理
+- 按时间序列划分训练集、验证集与测试集
+
+### 复现难度
+- ★★★☆☆ 中等难度
+- 原因：MODIS和ERA5数据集公开可获取，但The Weather Company大气数据为商业数据不可获取；论文未明确说明代码是否开源；实验细节（超参数设置、特征选择等）描述有限，增加了完整复现的难度。
+
+
+## 📐 7. 数学与物理建模（Math & Physics）
 
 研究基于海表温度与大气强迫之间的物理关系：
 - SST 是海洋-大气相互作用的关键指标
 - 季节性模式识别
 - 短期变化由大气强迫驱动
 
-## 7. 实验分析（Experiments）
+## 📊 8. 实验分析（Experiments）
 
 **数据集**：
 - 卫星衍生的 SST 数据
@@ -66,7 +105,7 @@ read_status: "skim"
 - 模型成功捕捉了数据中的季节性模式
 - 推理计算成本低，适合边缘计算设备部署
 
-## 8. 优缺点分析（Critical Review）
+## 🔍 9. 优缺点分析（Critical Review）
 
 **优点**：
 - 数据驱动特性自然集成到自动部署框架
@@ -77,19 +116,19 @@ read_status: "skim"
 - 依赖高质量卫星数据
 - 深度学习模型的可解释性有限
 
-## 9. 对我的启发（For My Research）
+## 💡 10. 对我的启发（For My Research）
 
 1. 自动化特征工程对于构建可迁移的海洋预测模型至关重要
 2. 集成学习方法可以提高预测稳定性
 3. 边缘计算为海洋原位预测提供了新思路
 
-## 10. Idea 扩展与下一步（Next Steps）
+## 🔮 11. Idea 扩展与下一步（Next Steps）
 
 1. 将集成方法应用于更高分辨率的海洋数据
 2. 结合物理约束到机器学习模型中
 3. 开发针对特定海洋现象（如涡旋、上升流）的专用特征工程
 
-## 11. 引用格式（BibTex）
+## 🧾 12. 引用格式（BibTex）
 
 ```bibtex
 @article{wola2019statistical,

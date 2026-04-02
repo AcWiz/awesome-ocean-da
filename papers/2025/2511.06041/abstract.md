@@ -1,15 +1,18 @@
 ---
-title: "Advancing Ocean State Estimation with efficient and scalable AI"
-arXiv: "2511.06041"
-authors: ['Yanfei Xiang', 'Yuan Gao', 'Hao Wu', 'Quan Zhang', 'Ruiqi Shu', 'Xiao Zhou', 'Xiaomeng Huang']
+title: Advancing Ocean State Estimation with efficient and scalable AI
+arXiv: '2511.06041'
+authors: [Yanfei Xiang, Yuan Gao, Hao Wu, Quan Zhang, Ruiqi Shu, Xiao Zhou, Xiaomeng
+    Huang]
 year: 2025
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['neural_process', 'encoder_decoder', 'data_assimilation', 'super_resolution', 'multi_source']
-application_tags: ['ocean_state_estimation', 'global_ocean', 'satellite_altimetry', 'in_situ', 'forecast_skill']
-difficulty: "★★★★★"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [neural_process, encoder_decoder, data_assimilation, super_resolution,
+  multi_source]
+application_tags: [ocean_state_estimation, global_ocean, satellite_altimetry, in_situ,
+  forecast_skill]
+difficulty: ★★★★★
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Advancing Ocean State Estimation with efficient and scalable AI
@@ -44,6 +47,51 @@ read_status: "deep_read"
 - **位置编码**: 三角函数编码经纬度，考虑周期性
 - **解码器**: 基于查询坐标和融合潜特征输出分析增量
 - **超分辨率**: 通过在精细网格查询实现，无需增加模型复杂度
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: NVIDIA A100 或 V100 (推断基于28M参数深度学习模型训练需求)
+- GPU数量: 1-4块 (推断)
+- 训练时间: 未明确说明 (基于类似规模深度学习海洋模型推测约数天至一周)
+
+### 数据集（Datasets）
+1. **GLORYS12再分析数据**
+   - 来源: 哥白尼海洋服务(CMEMS, Copernicus Marine Service)
+   - 任务: 作为数据同化的目标场(Ground Truth)
+   - 数据规模: 全球0.25°分辨率海洋再分析数据
+   - 是否公开: 是
+
+2. **卫星高度计数据**
+   - 来源: 多源卫星任务(Jason系列, Sentinel-3等)
+   - 任务: 海表面高度(SLA)、海表面温度(SST)、海表面盐度(SSS)、海表面波高(SSW)等观测
+   - 数据规模: 高分辨率卫星条带数据(最高4km)
+   - 是否公开: 部分公开
+
+3. **Argo浮标原位数据**
+   - 来源: 全球Argo浮标观测网络
+   - 任务: 温度、盐度等垂向剖面观测
+   - 数据规模: 稀疏分布的现场测量点
+   - 是否公开: 是
+
+4. **Triton预报场**
+   - 来源: 深度学习海洋预报模型输出
+   - 任务: 作为数据同化的背景场
+   - 数据规模: 全球1°分辨率
+   - 是否公开: 不确定
+
+### 数据处理
+- 直接使用原始异源异尺度观测数据，无需插值或数据稀疏化处理
+- 6种观测类型(卫星和原位)保持原始空间分辨率输入模型
+- 训练集: 2018年数据
+- 验证集: 2019年数据  
+- 测试集: 2020年数据
+- 同化周期: 每日
+
+### 复现难度
+- ★★★☆☆ (中等难度)
+- 原因: 模型架构和框架设计已在文中详细描述，但完整训练代码和全部原始观测数据未在文中明确说明可用性。GLORYS等再分析数据可公开获取，但多源卫星观测的完整获取可能存在限制。28M参数模型规模适中，但完整复现需要获取与文中一致的观测数据集。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **目标函数**: ya = F(xa | O, B)，从观测O和背景场B预测分析场ya

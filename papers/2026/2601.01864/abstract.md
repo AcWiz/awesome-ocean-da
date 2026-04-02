@@ -1,15 +1,17 @@
 ---
-title: "Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes"
-arXiv: "2601.01864"
-authors: ['Rameshan Kallummal']
+title: Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal
+  and PDO Modes
+arXiv: '2601.01864'
+authors: [Rameshan Kallummal]
 year: 2026
-source: "arXiv"
-venue: "arXiv"
-method_tags: ['SVD', 'linear_regression', 'PDO', 'seasonal_decomposition', 'multivariate_analysis']
-application_tags: ['SST', 'Pacific_Decadal_Oscillation', 'North_Pacific', 'sea_surface_temperature', 'climate_prediction']
-difficulty: "★★★★☆"
-importance: "★★★★★"
-read_status: "deep_read"
+source: arXiv
+venue: arXiv
+method_tags: [SVD, linear_regression, PDO, seasonal_decomposition, multivariate_analysis]
+application_tags: [SST, Pacific_Decadal_Oscillation, North_Pacific, sea_surface_temperature,
+  climate_prediction]
+difficulty: ★★★★☆
+importance: ★★★★★
+read_status: deep_read
 ---
 
 # 📑 Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal and PDO Modes
@@ -42,6 +44,38 @@ read_status: "deep_read"
 - **区域指数**: 从每个变量的四个模态中选择四个高方差区域，共16个预报因子
 - **线性回归**: x_j(t) = Σ p_i(l)x_i(t-l) + e_j(t)
 - **数据**: 1948-2025年月度数据（NOAA ERSSTv5, NCEP/NCAR）
+
+
+## ⚙️ 6. 实验配置（Experimental Setup）
+### 硬件配置
+- GPU: 不需要专用GPU（线性回归计算使用CPU即可满足）
+- GPU数量: 0（基于CPU计算）
+- 训练时间: 未明确说明（线性回归计算量较小，训练时间预计在分钟级别）
+
+### 数据集（Datasets）
+1. **NOAA Extended Reconstructed SST version 5 (ERSSTv5)**
+   - 来源: NOAA（引用Huang et al. 2017）
+   - 任务: 海表温度预测
+   - 数据规模: 1948-2025年月度数据，空间覆盖北太平洋（20°N至60°N，100°E至90°W）
+   - 是否公开: 是
+
+2. **NCEP/NCAR Reanalysis**
+   - 来源: NCEP/NCAR（引用Kalnay et al. 2018）
+   - 任务: 提供风场和气压场协变量
+   - 数据规模: 1948-2025年月度数据，包含u风分量、v风分量和海平面气压
+   - 是否公开: 是
+
+### 数据处理
+- 使用SVD分解从原始数据中提取四个主要季节模态
+- 对16个区域指数（每个变量4个）进行3个月滑动平均平滑处理以抑制次季节噪声
+- 通过去除各模态的长期季节循环计算年际振幅异常
+- 训练期：1948-2000年（53年）；验证期：2001年1月至2023年12月；独立预报期：2024年1月至2025年11月
+- 使用numpy.linalg.lstsq进行最小二乘回归系数估计
+
+### 复现难度
+- ★★★☆☆（中等）
+- 原因：该研究使用公开可获取的再分析数据集，方法为标准SVD分解和多元线性回归，技术实现难度较低；但论文未提供代码实现细节，且涉及特定的区域指数定义和最优滞后阶数选择（如未在文中明确说明），需通过尝试确定最佳配置。
+
 
 ## 📐 6. 数学与物理建模（Math & Physics）
 - **SVD分解**: Ψ = LΣR^τ, 分解原始数据矩阵
