@@ -31,6 +31,9 @@ jobs:
       - name: Generate hierarchy pages
         run: python scripts/site_generation/generate_hierarchy_pages.py
 
+      - name: Generate tag pages
+        run: python scripts/site_generation/generate_tag_pages_from_json.py
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:

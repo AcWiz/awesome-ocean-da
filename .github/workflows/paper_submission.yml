@@ -1,0 +1,168 @@
+name: Process Paper Submission
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'issues' &&
+      contains(github.event.issue.labels.*.name, 'new paper')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install pyyaml requests beautifulsoup4
+
+      - name: Parse issue and create paper
+        id: parse_issue
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          # Get issue body from GitHub event
+          issue_body = """${{ github.event.issue.body }}"""
+
+          lines = issue_body.split('\n')
+          data = {}
+
+          i = 0
+          while i < len(lines):
+              line = lines[i].strip()
+
+              # Match field patterns: "field_id: |" or "field_id: value"
+              if re.match(r'^(title|arxiv|authors|year|venue|abstract|reason):\s*\|?\s*$', line):
+                  field = re.match(r'^(title|arxiv|authors|year|venue|abstract|reason)', line).group(1)
+                  i += 1
+                  value_lines = []
+                  # Check if next lines are indented (continuation) or direct value
+                  while i < len(lines) and lines[i].startswith('  '):
+                      value_lines.append(lines[i].strip())
+                      i += 1
+                  # Check for direct value after colon
+                  if i < len(lines) and not lines[i].startswith('- ['):
+                      direct_match = re.match(r'^\s*(.+?)\s*$', lines[i].strip())
+                      if direct_match and direct_match.group(1):
+                          value_lines.append(direct_match.group(1))
+                          i += 1
+                  data[field] = '\n'.join(value_lines).strip()
+                  continue
+
+              # Match checkbox fields (method-tags, application-tags)
+              if re.match(r'^(method-tags|application-tags):\s*\|?\s*$', line):
+                  field = re.match(r'^(method-tags|application-tags)', line).group(1)
+                  i += 1
+                  checked = []
+                  while i < len(lines) and (lines[i].startswith('  - [x]') or lines[i].startswith('- [x]')):
+                      item = lines[i].strip()
+                      # Extract label text
+                      match = re.search(r'\[x\]\s*(.+)', item)
+                      if match:
+                          checked.append(match.group(1).strip())
+                      i += 1
+                  data[field] = checked
+                  continue
+
+              i += 1
+
+          print("Parsed data:", json.dumps(data, ensure_ascii=False, indent=2))
+
+          # Extract values
+          title = data.get('title', '').strip()
+          arxiv = data.get('arxiv', '').strip().replace('https://arxiv.org/abs/', '').strip()
+          authors = data.get('authors', '').strip()
+          year = data.get('year', '').strip()
+          venue = data.get('venue', '').strip()
+          method_tags = data.get('method-tags', [])
+          app_tags = data.get('application-tags', [])
+          abstract = data.get('abstract', '').strip()
+          reason = data.get('reason', '').strip()
+
+          # Validate required fields
+          if not title or not year:
+              print("ERROR: Missing required fields (title or year)")
+              exit(1)
+
+          # Generate folder name from year + arxiv
+          if arxiv and arxiv != '待补充':
+              folder_name = arxiv.split('.')[-1] if '.' in arxiv else arxiv
+          else:
+              # Use timestamp-like fallback
+              import time
+              folder_name = f"{year}{int(time.time()) % 100000:05d}"
+
+          folder_path = Path(f"papers/{year}/{folder_name}")
+          folder_path.mkdir(parents=True, exist_ok=True)
+
+          # Build abstract.md content
+          # Generate Chinese summary from abstract (simple placeholder)
+          chinese_summary = f"**核心贡献**: {reason if reason else '见英文摘要'}\n**主要方法**: {', '.join(method_tags) if method_tags else '见英文摘要'}\n**意义**: 本论文研究了{' '.join(app_tags) if app_tags else '相关问题'}"
+
+          keywords = []
+          if method_tags:
+              keywords.extend(method_tags)
+          if app_tags:
+              keywords.extend(app_tags)
+
+          arxiv_link = f"https://arxiv.org/abs/{arxiv}" if arxiv and arxiv != '待补充' else "待补充"
+
+          content = f"""# {title}
+
+## 基本信息
+- **arXiv**: [{arxiv}]({arxiv_link})
+- **作者**: {authors}
+- **年份**: {year}
+- **Venue**: {venue}
+
+## 中文总结
+{chinese_summary}
+
+## 关键词
+- {', '.join(keywords) if keywords else '待补充'}
+"""
+
+          # Write abstract.md
+          abstract_path = folder_path / "abstract.md"
+          abstract_path.write_text(content, encoding='utf-8')
+          print(f"Created: {abstract_path}")
+
+          # Write output for next steps
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"folder_path={folder_path}\n")
+              f.write(f"title={title}\n")
+              f.write(f"arxiv={arxiv}\n")
+              f.write(f"year={year}\n")
+              f.write(f"folder_name={folder_name}\n")
+          EOF
+
+      - name: Update index
+        run: python scripts/site_generation/update_index.py
+
+      - name: Regenerate main README
+        run: python scripts/site_generation/regenerate_main_readme.py
+
+      - name: Generate year pages
+        run: python scripts/site_generation/generate_year_pages.py
+
+      - name: Generate hierarchy pages
+        run: python scripts/site_generation/generate_hierarchy_pages.py
+
+      - name: Generate tag pages
+        run: python scripts/site_generation/generate_tag_pages_from_json.py
+
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'feat: add paper from issue #${{ github.event.issue.number }}'
+          file_pattern: papers/ README.md _data/papers.json
