@@ -8,6 +8,8 @@ venue: arXiv
 difficulty: ★★★☆☆
 importance: ★★★★☆
 read_status: priority-read
+method_tags: [pinn]
+application_tags: [ocean-modeling]
 ---
 
 ## TL;DR

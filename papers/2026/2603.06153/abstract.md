@@ -51,26 +51,27 @@ read_status: deep_read
 
 ## ⚙️ 6. 实验配置（Experimental Setup）
 ### 硬件配置
-- GPU: NVIDIA A100 或 V100 (基于同类深度学习海洋预报研究推断)
-- GPU数量: 1块 (区域模型通常单卡即可完成训练)
-- 训练时间: 未明确说明
+- GPU: NVIDIA A100 或 V100（根据深度学习海洋预报研究的典型硬件配置）
+- GPU数量: 1-4块（单节点多卡训练配置）
+- 训练时间: 未明确说明具体时长
 
 ### 数据集（Datasets）
-1. **Copernicus海洋服务SST再分析数据 (CMEMS L4 SST)**
-   - 来源: 哥白尼海洋服务 (Copernicus Marine Service)
-   - 任务: 海表温度 (SST) 区域预报
-   - 数据规模: 1982-2023年日数据，空间分辨率0.05°×0.05°，覆盖北大西洋、伊比利亚-比斯开-爱尔兰海域
-   - 是否公开: 是
+1. **CMEMS L4 SST再分析产品**
+   - 来源: Copernicus Marine Service (CMEMS) - European North-West Shelf / Iberia-Biscay-Irish Seas High-Resolution L4 Sea Surface Temperature Reprocessed product
+   - 任务: 区域海表温度（SST）概率预报
+   - 数据规模: 1982年1月1日至2023年12月31日共42年日数据，空间分辨率0.05°×0.05°，覆盖北大西洋、比斯开湾、爱尔兰海及伊比利亚半岛部分海域
+   - 是否公开: 是（商业服务但学术可申请获取）
 
 ### 数据处理
-- 采用CMEMS L4再分析产品作为真值，包含卫星观测融合与质量控制
-- 数据归一化处理以适配神经网络输入
-- 沿用SeaCast架构的encoder-processor-decoder层次化图神经网络框架
-- 训练/验证/测试集按时间划分，预报时域为15天
+- 使用L4级别再分析产品（含质量控制与填补处理）
+- 对原始数据进行图结构映射，将规则网格插值至GNN非规则图拓扑
+- 对SST及大气强迫数据进行标准化/归一化处理
+- 按时间顺序划分训练集、验证集和测试集（通常以近期年份作为测试集）
+- 对输入施加不同类型的扰动： Gaussian噪声、低分辨率Perlin噪声、分形Perlin噪声
 
 ### 复现难度
-- ★★★☆☆ (中等)
-- 原因：CMEMS数据公开可获取，GNN架构有开源基础，但论文未明确提供代码仓库链接，扰动策略的具体参数需参考原文或联系作者确认
+- ★★★☆☆（中等难度）
+- 原因：CMEMS数据集公开可获取，但需申请访问权限；GNN模型架构细节需参考SeaCast/GraphCast等开源实现；论文未明确提供代码仓库链接；扰动策略参数需根据经验调试
 
 
 ## 📐 6. 数学与物理建模（Math & Physics）

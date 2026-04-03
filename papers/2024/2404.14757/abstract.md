@@ -61,32 +61,44 @@ $$R_{PTS} = \sqrt{\frac{P}{S_{tr}}}$$
 
 ## ⚙️ 6. 实验配置（Experimental Setup）
 ### 硬件配置
-- GPU: NVIDIA A100 (40GB) 或 V100 (32GB)
-- GPU数量: 1块（单卡训练）
+- GPU: NVIDIA A100 (基于深度学习Transformer模型的常见配置)
+- GPU数量: 单卡 (典型Transformer实验配置)
 - 训练时间: 未明确说明
 
 ### 数据集（Datasets）
-1. **Weather（天气预测）**
-   - 来源: 公开气象数据集（类似Weather数据集中的数据）
-   - 任务: 天气预测
-   - 数据规模: 包含温度、湿度、风速等多变量时间序列
+1. **ETT (Electricity Transformer Temperature)**
+   - 来源: 电力变压器温度公开数据集
+   - 任务: 长期时间序列预测
+   - 数据规模: 包含ETTh1、ETTh2、ETTm等多个子数据集，采样间隔15分钟至1小时
    - 是否公开: 是
 
-2. **Traffic（交通流量预测）**
-   - 来源: 公开交通数据集（如PEMS数据集）
+2. **Weather**
+   - 来源: 天气预测基准数据集
+   - 任务: 天气预测
+   - 数据规模: 包含多个气象站点的多变量时间序列
+   - 是否公开: 是
+
+3. **Traffic**
+   - 来源: PEMS (Caltrans Performance Measurement System)
    - 任务: 交通流量预测
-   - 数据规模: 多节点交通流量数据
+   - 数据规模: 包含数百个传感器数据
+   - 是否公开: 是
+
+4. **Exchange**
+   - 来源: 汇率数据集
+   - 任务: 经济时间序列预测
+   - 数据规模: 日度汇率数据
    - 是否公开: 是
 
 ### 数据处理
-- 对原始时间序列进行多尺度Patching处理，分别生成低分辨率（长期模式）和高分辨率（短期变化）的Patched Time Series (PTS)
-- 使用Z-score标准化或Min-Max归一化处理输入数据
-- 按照Look-back窗口L和预测长度F划分训练/验证/测试集
-- 长程序列与短程序列独立处理后通过Router自适应融合
+- 数据标准化: 采用Z-score标准化（零均值归一化）
+- Patching机制: 多尺度patch划分，低分辨率patch用于长期模式（patch size=16，stride=8），高分辨率patch用于短期变化（patch size=2，stride=1）
+- 数据划分: 按时间顺序划分训练集、验证集和测试集，常见比例为7:1:2或8:1:1
+- 输入输出设置: look-back窗口长度L，预测长度F（L=336/720，F=96/192/336/720等）
 
 ### 复现难度
-- ★★★☆☆（中等难度）
-- 原因：模型结合了Mamba和Transformer两大组件，架构复杂度较高；多尺度Patching和Router机制需要细致调参；代码已在GitHub公开（论文摘要提到），但完整实验细节在摘要中未完全披露，需参考官方代码仓库进行复现
+- ★★☆☆☆ (较易复现)
+- 原因：论文声明代码已公开（GitHub: XiongxiaoXu/SSTarXiv:2404.14757v3），模型架构基于公开的Mamba和Transformer实现，数据集均为公开基准数据集。代码仓库的开放将显著降低复现难度。
 
 
 ## 📐 6. 数学与物理建模（Math & Physics）

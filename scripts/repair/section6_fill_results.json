@@ -1,0 +1,475 @@
+{
+  "timestamp": "2026-04-02T20:44:17.440373",
+  "total": 93,
+  "success": 93,
+  "failed": 0,
+  "skipped": 0,
+  "rate_limit": 5.0,
+  "results": [
+    {
+      "success": true,
+      "paper_title": "Particle Kalman Filtering: A Nonlinear Bayesian Framework for Ensemble Kalman",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2011/1108.0168/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "An Efficient Implementation of the Ensemble Kalman Filter Based on an Iterative",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2013/1302.3876/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Optimal boundary conditions at the staircase-shaped coastlines",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2014/1402.7201/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A framework for interpreting regularized state estimation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2015/1511.04790/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Data-driven discovery of Koopman eigenfunctions for control",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2017/1707.01146/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A Fast Tunable Blurring Algorithm for Scattered Data",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2019/1906.06722/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Statistical and Machine Learning Ensemble Modelling to Forecast Sea Surface",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2019/1909.08573/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Filtering Internal Tides from Wide-Swath Altimeter Data Using Convolutional",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2020/2005.01090/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Using Machine Learning at Scale in HPC Simulations with SmartSim: An Application",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2021/2104.09355/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "PCE-PINNs: Physics-Informed Neural Networks for Uncertainty Propagation in",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2021/2105.02939/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A Langevinized Ensemble Kalman Filter for Large-Scale Static and Dynamic Learning",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2021/2105.05363/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Super-resolution data assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2021/2109.08017/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "GNN-Surrogate: A Hierarchical and Adaptive Graph Neural Network for Parameter",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2202.08956/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Equation-Free Surrogate Modeling of Geophysical Flows at the Intersection of",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2205.13410/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A Deep-Learning Usability Expansion Model of Ocean Observations",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2206.01599/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Deep Learning Enhanced Ensemble-based Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2206.04811/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Modeling Oceanic Variables with Dynamic Graph Neural Networks",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2206.12746/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Data Assimilation in Operator Algebras",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2206.13659/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Physics-Informed Deep Neural Operator Networks",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2207.05748/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Ensemble Kalman Methods: A Mean Field Perspective",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2209.11371/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "4DVarNet-SSH: End-to-End Learning of Variational Interpolation Schemes for",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2211.05904/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Spatio-Temporal Super-Resolution Data Assimilation (SRDA) Utilizing Deep Neural",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2212.03656/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Eigenvalue Initialisation and Regularisation for Koopman Autoencoders",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2022/2212.12086/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "On the Relative Role of East and West Pacific Sea Surface Temperature (SST)",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2302.11357/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Echo State Network for Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2304.00198/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Deep Learning of Systematic Sea Ice Model Errors from Data Assimilation Increments",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2304.03832/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Graph-Based Deep Learning for Sea Surface Temperature Forecasts",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2305.09468/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Machine Learning for Phase-Resolved Reconstruction of Nonlinear Ocean Wave",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2305.11913/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "On the Choice of Training Data for Machine Learning of Geostrophic Mesoscale",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2307.00734/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "AI-GOMS: Large AI-Driven Global Ocean Modeling System",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2308.03152/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Neural Koopman Prior for Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2309.05317/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "OceanNet: A Principled Neural Operator-Based Digital Twin for Regional Oceans",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2310.00813/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Robust Ocean Subgrid-Scale Parameterizations Using Fourier Neural Operators",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2310.02691/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Multi-decadal Sea Level Prediction using Neural Networks and Spectral Clustering",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2310.04540/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Enhancing Solutions for Complex PDEs: Introducing Complementary Convolution",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2311.12902/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A Deep-learning Real-time Bias Correction Method for Significant Wave Height",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2311.15001/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Application of Deep Learning to the Estimation of Normalization Coefficients",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2023/2312.05068/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Semilinear Neural Operators for Ocean Forecasting",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2402.15656/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A Neural Network-Based Submesoscale Vertical Heat Flux Parameterization and",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2403.05028/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "FuXi-DA: A Generalized Deep Learning Data Assimilation Framework",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2404.08522/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "SST: Multi-Scale Hybrid Mamba-Transformer Experts for Time Series Forecasting",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2404.14757/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Using Deep Learning to Identify Initial Error Sensitivity for Interpretable",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2404.15419/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Validating Deep Learning Weather Forecast Models",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2404.17652/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Koopman-based Deep Learning for Nonlinear System Estimation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2405.00627/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Deep Koopman Learning from Noisy Data",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2405.16649/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "OceanCastNet: Wave Forecasting Network",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2406.03848/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Tropical Pacific Ocean Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2406.07063/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Randomized Physics-Informed Neural Networks for Bayesian Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2407.04617/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Parameter Analysis in Continuous Data Assimilation for Various Turbulence Models",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2409.03042/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "CAS-C ANGLONG: A SKILLFUL 3D TRANSFORMER MODEL FOR SUB-SEASONAL TO SEASONAL",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2409.05369/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Conditional Gaussian Ensemble Kalman Filtering",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2409.14300/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "KODA: A Data-Driven Recursive Model for Time Series Forecasting and data assimilation using koopman operators",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2409.19518/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Machine Learning for Inverse Problems and Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2410.10523/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "CGKN: Conditional Gaussian Koopman Network",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2410.20072/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Deep Learning for Sea Surface Temperature Reconstruction under Cloud Occlusion",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2024/2412.03413/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Physics-informed neural networks for phase-resolved data assimilation and prediction",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2501.08430/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "ORCAst: Operational High-Resolution Current Forecasts",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2501.12054/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Tensor-Var: Efficient Four-Dimensional Variational Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2501.13312/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Observation-only learning of neural mapping schemes for gappy satellite-derived",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2503.11532/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Deep learning in the abyss: a stratified Physics Informed Neural Network for",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2503.19160/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "LanTu: Dynamics-Enhanced Deep Learning for Eddy-Resolving Ocean Forecasting",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2505.10191/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "CTP: A hybrid CNN-Transformer-PINN model for ocean front",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2505.10894/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "NeuralOM: Neural Ocean Model for S2S Simulation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2505.21020/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Deep Learning for Canary Current Upwelling: A Case Study",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2505.24429/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Causal Operator Discovery in Partial Differential Equations via Counterfactual",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2506.20181/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "SeaCast: Accurate Mediterranean Sea Forecasting via Graph-Based Deep Learning",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2506.23900/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Generative Lagrangian Data Assimilation for Ocean Dynamics under Extreme Sparsity",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2507.06479/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Efficient Data Assimilation with Time Conditional Gaussian Koopman Network",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2507.08749/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Bridging Ocean Wave Physics and Deep Learning: Physics-Informed Neural Operators",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2508.03315/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "GTS_Forecaster: a novel deep learning based geodetic time series forecasting",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2509.10560/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "SamudrACE: Fast and Accurate Coupled Climate Modeling with 3D Ocean and Atmosphere",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2509.12490/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Data-Driven Reconstruction of Significant Wave Heights from Sparse Observations",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2509.19384/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Small Ensemble-based Data Assimilation: A Machine Learning-Enhanced Data Assimilation",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2510.15284/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Prediction of Sea Ice Velocity and Concentration in the Arctic Ocean using",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2510.17756/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Digestible Pieces: comparing three options for partitioning the Northeast",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2510.18133/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Leveraging an Atmospheric Foundational Model for Subregional Sea Surface Temperature",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2510.25563/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Advancing Ocean State Estimation with efficient and scalable AI",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2511.06041/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "SWR-Viz: AI-assisted Interactive Visual Analytics Framework for Ship Weather",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2511.15182/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Towards fully differentiable neural ocean model with Veros",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2511.17427/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Extratropical Atmospheric Circulation Response to ENSO in Deep Learning Pacific",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2511.20899/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "NeuralOGCM: Differentiable Ocean Modeling with Learnable Physics",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2512.11525/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Neural ocean forecasting from sparse satellite-derived observations: a case-study for SSH dynamics and altimetry data",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2025/2512.22152/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Spatio-temporal modeling and forecasting with Fourier neural operators",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2601.01813/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Extending SST Anomaly Forecasts Through Simultaneous Decomposition of Seasonal",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2601.01864/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Explore the Ideology of Deep Learning in ENSO Forecasts",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2601.02050/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "HybridOM: Hybrid Physics-Based and Data-Driven Global Ocean Modeling with",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2602.00598/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Data Driven Air Entrainment Velocity Parameterization by Breaking Waves",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2602.04067/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Large-Ensemble Simulations Reveal Links Between Atmospheric Blocking Frequency",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2602.05083/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Benchmarking Artificial Intelligence Models for Daily Coastal Hypoxia Forecasting",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2602.05178/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Reduced-Order Surrogates for Forced Flexible Mesh Coastal-Ocean Models",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2602.05416/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Two Localization Strategies for Sequential MCMC Data Assimilation with Applications",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2603.05817/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "Ensemble Graph Neural Networks for Probabilistic Sea Surface Temperature Forecasting",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2603.06153/abstract.md"
+    },
+    {
+      "success": true,
+      "paper_title": "A Lagrangian Conditional Gaussian Koopman Network for Data Assimilation and",
+      "file": "/sharefiles1/fenglonghan/projects/ai-data-assimilation-papers/papers/2026/2603.14115/abstract.md"
+    }
+  ]
+}
