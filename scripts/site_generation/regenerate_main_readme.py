@@ -149,9 +149,9 @@ def generate_paper_row(paper):
     else:
         title_link = title
 
-    # 构建总结链接（指向 summary.md）
+    # 构建总结链接（指向 abstract.md）
     if arxiv:
-        summary_link = f"[总结](./papers/{folder}/summary.md)"
+        summary_link = f"[总结](./papers/{folder}/abstract.md)"
     else:
         summary_link = "-"
 

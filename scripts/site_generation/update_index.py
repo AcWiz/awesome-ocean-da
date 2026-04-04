@@ -51,7 +51,7 @@ def parse_abstract_md(file_path: Path) -> dict:
 def _extract_preview(body: str) -> str:
     """从论文摘要/总结内容中提取预览文本。
 
-    优先提取 TL;DR 部分（迁移后 summary.md 的第2节），否则取前200字。
+    优先提取 TL;DR 部分（abstract.md 的第2节），否则取前200字。
     """
     import re
     lines = body.split('\n')

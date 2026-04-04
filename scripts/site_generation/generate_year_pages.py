@@ -61,7 +61,7 @@ def generate_paper_row(paper):
 
     # 构建总结链接（相对于年份 index 页）
     if arxiv:
-        summary_link = f"[总结](./{folder_name}/summary.md)"
+        summary_link = f"[总结](./{folder_name}/abstract.md)"
     else:
         summary_link = "-"
 

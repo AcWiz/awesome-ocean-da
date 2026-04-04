@@ -70,10 +70,10 @@ def generate_paper_row(paper):
     else:
         arxiv_link = "ID 待查"
 
-    # 构建总结链接（指向 summary.md）
+    # 构建总结链接（指向 abstract.md）
     # folder 格式是 "2022/2211.05904"，直接使用即可
     if arxiv:
-        summary_link = f"[总结](./{folder}/summary.md)"
+        summary_link = f"[总结](./{folder}/abstract.md)"
     else:
         summary_link = "-"
 

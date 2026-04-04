@@ -6,8 +6,8 @@
 
 | 年份 | 论文 | arXiv | Venue | 方法标签 | 应用 | 总结 |
 |------|------|-------|-------|----------|------|------|
-| 2026 | [Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models](https://arxiv.org/abs/2603.05817) | [2603.05817](https://arxiv.org/abs/2603.05817) | arXiv | Sequential-MCMC, Localization, Data-Assimilation, Markov-Chain-Monte-Carlo, Ensemble-Methods | Geophysical-Models, Ocean-Data-Assimilation, Shallow-Water-Equations, SWOT, Ocean-Drifters | [总结](2026/2603.05817/abstract.md) |
-| 2023 | [Application of Deep Learning to the Estimation of Normalization Coefficients in Diffusion-Based Covariance Models](https://arxiv.org/abs/2312.05068) | [2312.05068](https://arxiv.org/abs/2312.05068) | arXiv | CNN, Data-Assimilation, Diffusion-Operator, Normalization-Coefficients, Covariance-Model | Ocean-Data-Assimilation, Variational-DA, Correlation-Operators, NEMOVAR, Ocean-Modeling | [总结](2023/2312.05068/abstract.md) |
+| 2026 | [Two Localization Strategies for Sequential MCMC Data Assimilation with Applications to Nonlinear Non-Gaussian Geophysical Models](https://arxiv.org/abs/2603.05817) | [2603.05817](https://arxiv.org/abs/2603.05817) | arXiv | Sequential-MCMC, Localization, Data-Assimilation, Markov-Chain-Monte-Carlo, Ensemble-Methods | Geophysical-Models, Ocean-Data-Assimilation, Shallow-Water-Equations, SWOT, Ocean-Drifters | [总结](./2026/2603.05817/abstract.md) |
+| 2023 | [Application of Deep Learning to the Estimation of Normalization Coefficients in Diffusion-Based Covariance Models](https://arxiv.org/abs/2312.05068) | [2312.05068](https://arxiv.org/abs/2312.05068) | arXiv | CNN, Data-Assimilation, Diffusion-Operator, Normalization-Coefficients, Covariance-Model | Ocean-Data-Assimilation, Variational-DA, Correlation-Operators, NEMOVAR, Ocean-Modeling | [总结](./2023/2312.05068/abstract.md) |
 
 ---
 
