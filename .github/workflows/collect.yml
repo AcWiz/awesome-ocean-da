@@ -8,6 +8,8 @@ on:
 jobs:
   collect:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for create-pull-request action
     steps:
       - uses: actions/checkout@v4
 
