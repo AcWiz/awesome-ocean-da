@@ -21,12 +21,12 @@ jobs:
           pip install arxiv pyyaml requests beautifulsoup4
 
       - name: Collect papers from arXiv
-        run: python scripts/collect_papers.py
+        run: python scripts/collection/collect_papers.py
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update index
-        run: python scripts/update_index.py
+        run: python scripts/site_generation/update_index.py
 
       - name: Regenerate main README
         run: python scripts/site_generation/regenerate_main_readme.py
